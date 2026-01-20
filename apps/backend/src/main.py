@@ -1036,7 +1036,7 @@ except ImportError as e:
 try:
     from routers.v1.stripe import router as stripe_router
 
-    app.include_router(stripe_router, prefix="/api/stripe", tags=["payments"])
+    app.include_router(stripe_router, prefix="/api/v1/stripe", tags=["stripe"])
 
     # Also register customer endpoints at /api/v1 for frontend compatibility
     # Create a sub-router for customer endpoints only
@@ -1052,14 +1052,16 @@ try:
     # This creates aliases at /api/v1/customers/* that point to /api/stripe/v1/customers/*
     @customer_compat_router.get("/v1/customers/dashboard")
     async def customer_dashboard_compat(
-        customer_id: str,
-        request: Request,
-        db: _AsyncSession = _Depends(_get_db),
+        customer_id: str = None,
+        email: str = None,
+        request: Request = None,
     ):
-        """Compatibility endpoint - redirects to stripe router"""
-        from routers.v1.stripe import get_customer_dashboard
+        """Compatibility endpoint - uses Stripe customer_id or email"""
+        from routers.v1.stripe import get_customer_dashboard_by_stripe_id
 
-        return await get_customer_dashboard(customer_id=customer_id, db=db)
+        return await get_customer_dashboard_by_stripe_id(
+            customer_id=customer_id, email=email
+        )
 
     app.include_router(customer_compat_router, prefix="/api")
     logger.info(

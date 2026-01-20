@@ -67,10 +67,17 @@ class Permission:
     # CUSTOMER_SUPPORT: View ALL (main job), Create/Update directly, Delete WITH approval
     # STATION_MANAGER: View their station's bookings + changes (created, updated, deleted, canceled)
     # CHEF: View own assigned events only (with payment info for collection)
-    BOOKING_VIEW_ALL = [UserRole.SUPER_ADMIN, UserRole.CUSTOMER_SUPPORT]  # CS sees ALL bookings
+    BOOKING_VIEW_ALL = [
+        UserRole.SUPER_ADMIN,
+        UserRole.CUSTOMER_SUPPORT,
+    ]  # CS sees ALL bookings
     BOOKING_VIEW_ASSIGNED = [UserRole.ADMIN]  # Assigned stations only
-    BOOKING_VIEW_STATION = [UserRole.STATION_MANAGER]  # Station-scoped (all changes visible)
-    BOOKING_VIEW_ASSIGNED_EVENT = [UserRole.CHEF]  # Chef sees only their assigned events
+    BOOKING_VIEW_STATION = [
+        UserRole.STATION_MANAGER
+    ]  # Station-scoped (all changes visible)
+    BOOKING_VIEW_ASSIGNED_EVENT = [
+        UserRole.CHEF
+    ]  # Chef sees only their assigned events
     BOOKING_CREATE = [
         UserRole.SUPER_ADMIN,
         UserRole.ADMIN,
@@ -85,7 +92,9 @@ class Permission:
         UserRole.SUPER_ADMIN,
         UserRole.ADMIN,
     ]  # Direct delete (no approval)
-    BOOKING_DELETE_WITH_APPROVAL = [UserRole.CUSTOMER_SUPPORT]  # CS needs approval for delete only
+    BOOKING_DELETE_WITH_APPROVAL = [
+        UserRole.CUSTOMER_SUPPORT
+    ]  # CS needs approval for delete only
     BOOKING_LEAVE_NOTE = [
         UserRole.CUSTOMER_SUPPORT,  # CS can leave notes for station manager
     ]
@@ -264,6 +273,15 @@ class Permission:
     FINANCIAL_VIEW_ASSIGNED = [UserRole.ADMIN]  # Assigned stations only
     FINANCIAL_REFUND = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
     FINANCIAL_REPORTS = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+
+    # ========== PAYMENT PERMISSIONS ==========
+    # For Stripe payment management (invoices, refunds, analytics)
+    MANAGE_PAYMENTS = [UserRole.SUPER_ADMIN, UserRole.ADMIN]  # Full payment management
+    VIEW_PAYMENTS = [
+        UserRole.SUPER_ADMIN,
+        UserRole.ADMIN,
+        UserRole.CUSTOMER_SUPPORT,
+    ]  # View payment info
 
     # ========== AUDIT PERMISSIONS ==========
     AUDIT_VIEW_ALL = [UserRole.SUPER_ADMIN]

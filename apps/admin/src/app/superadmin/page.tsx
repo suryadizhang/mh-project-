@@ -151,7 +151,7 @@ function DashboardTab() {
     setLoading(true);
     try {
       // Fetch all users to calculate stats
-      const response = await apiFetch('/api/admin/users');
+      const response = await apiFetch('/admin/users');
       if (response.success) {
         const data = response.data as Record<string, unknown>;
         const users = (data?.users || data || []) as AdminUser[];
@@ -311,7 +311,7 @@ function UsersTab() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const response = await apiFetch('/api/admin/users');
+      const response = await apiFetch('/admin/users');
       if (response.success) {
         const data = response.data as Record<string, unknown>;
         setUsers((data?.users || data || []) as AdminUser[]);
@@ -326,7 +326,7 @@ function UsersTab() {
 
   const loadRoles = async () => {
     try {
-      const response = await apiFetch('/api/admin/roles');
+      const response = await apiFetch('/admin/roles');
       if (response.success) {
         const data = response.data as Record<string, unknown>;
         setRoles((data?.roles || data || []) as Role[]);
@@ -344,7 +344,7 @@ function UsersTab() {
 
     setSubmitting(true);
     try {
-      const response = await apiFetch('/api/admin/users', {
+      const response = await apiFetch('/admin/users', {
         method: 'POST',
         body: JSON.stringify({
           email: newUserEmail,
@@ -381,7 +381,7 @@ function UsersTab() {
     setSubmitting(true);
     try {
       const response = await apiFetch(
-        `/api/admin/users/${selectedUser.id}/force-reset-password`,
+        `/admin/users/${selectedUser.id}/force-reset-password`,
         {
           method: 'POST',
         }
@@ -406,7 +406,7 @@ function UsersTab() {
 
   const handleApproveUser = async (userId: string) => {
     try {
-      const response = await apiFetch(`/api/admin/users/${userId}/approve`, {
+      const response = await apiFetch(`/admin/users/${userId}/approve`, {
         method: 'POST',
       });
 
@@ -426,7 +426,7 @@ function UsersTab() {
 
   const handleRejectUser = async (userId: string) => {
     try {
-      const response = await apiFetch(`/api/admin/users/${userId}/reject`, {
+      const response = await apiFetch(`/admin/users/${userId}/reject`, {
         method: 'POST',
       });
 
@@ -446,7 +446,7 @@ function UsersTab() {
 
   const handleSuspendUser = async (userId: string) => {
     try {
-      const response = await apiFetch(`/api/admin/users/${userId}/suspend`, {
+      const response = await apiFetch(`/admin/users/${userId}/suspend`, {
         method: 'POST',
       });
 
@@ -469,7 +469,7 @@ function UsersTab() {
 
     setSubmitting(true);
     try {
-      const response = await apiFetch(`/api/admin/users/${selectedUser.id}`, {
+      const response = await apiFetch(`/admin/users/${selectedUser.id}`, {
         method: 'DELETE',
       });
 
@@ -874,7 +874,7 @@ function EditRolesDialog({
     setLoading(true);
     try {
       const response = await apiFetch(
-        `/api/admin/roles/users/${user.id}/permissions`
+        `/admin/roles/users/${user.id}/permissions`
       );
       if (response.success) {
         const data = response.data as Record<string, unknown>;
@@ -891,13 +891,10 @@ function EditRolesDialog({
     if (!user) return;
     setSubmitting(true);
     try {
-      const response = await apiFetch(
-        `/api/admin/roles/users/${user.id}/roles`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ role_id: roleId }),
-        }
-      );
+      const response = await apiFetch(`/admin/roles/users/${user.id}/roles`, {
+        method: 'POST',
+        body: JSON.stringify({ role_id: roleId }),
+      });
 
       if (response.success) {
         toast.success('Role added successfully');
@@ -918,7 +915,7 @@ function EditRolesDialog({
     setSubmitting(true);
     try {
       const response = await apiFetch(
-        `/api/admin/roles/users/${user.id}/roles/${roleId}`,
+        `/admin/roles/users/${user.id}/roles/${roleId}`,
         {
           method: 'DELETE',
         }
@@ -1027,7 +1024,7 @@ function RolesTab() {
   const loadRoles = async () => {
     setLoading(true);
     try {
-      const response = await apiFetch('/api/admin/roles');
+      const response = await apiFetch('/admin/roles');
       if (response.success) {
         const data = response.data as Record<string, unknown>;
         setRoles((data?.roles || data || []) as Role[]);
@@ -1041,7 +1038,7 @@ function RolesTab() {
 
   const loadPermissions = async () => {
     try {
-      const response = await apiFetch('/api/admin/roles/permissions/all');
+      const response = await apiFetch('/admin/roles/permissions/all');
       if (response.success) {
         const data = response.data as Record<string, unknown>;
         setPermissions((data?.permissions || data || []) as string[]);
@@ -1296,7 +1293,10 @@ function AuditLogsTab() {
                     </TableCell>
                     <TableCell>
                       {log.target_type && log.target_id
-                        ? `${log.target_type}: ${log.target_id.substring(0, 8)}...`
+                        ? `${log.target_type}: ${log.target_id.substring(
+                            0,
+                            8
+                          )}...`
                         : '-'}
                     </TableCell>
                     <TableCell className="text-muted-foreground">

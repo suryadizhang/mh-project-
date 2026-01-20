@@ -51,8 +51,10 @@ export default function UserManagementPage() {
       const token = tokenManager.getToken();
       const endpoint =
         filter === 'pending'
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/pending`
-          : `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users?status=${filter !== 'all' ? filter : ''}`;
+          ? `${process.env.NEXT_PUBLIC_API_URL}/admin/users/pending`
+          : `${process.env.NEXT_PUBLIC_API_URL}/admin/users?status=${
+              filter !== 'all' ? filter : ''
+            }`;
 
       const response = await fetch(endpoint, {
         headers: {
@@ -78,7 +80,7 @@ export default function UserManagementPage() {
     try {
       const token = tokenManager.getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}/approve`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/approve`,
         {
           method: 'POST',
           headers: {
@@ -113,7 +115,7 @@ export default function UserManagementPage() {
     try {
       const token = tokenManager.getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}/reject`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/reject`,
         {
           method: 'POST',
           headers: {
@@ -144,7 +146,7 @@ export default function UserManagementPage() {
     try {
       const token = tokenManager.getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}/suspend`,
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/suspend`,
         {
           method: 'POST',
           headers: {

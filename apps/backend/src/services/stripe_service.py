@@ -464,9 +464,9 @@ class StripeService:
             customer_record.total_spent += amount
             customer_record.total_bookings += 1
 
-            # Calculate Zelle savings (8% of Stripe payments)
+            # Calculate Zelle savings (3% of Stripe payments - Stripe charges ~2.9% + $0.30)
             if payment_intent.get("payment_method_types", ["card"])[0] == "card":
-                customer_record.zelle_savings += amount * Decimal("0.08")
+                customer_record.zelle_savings += amount * Decimal("0.03")
 
             # Update loyalty tier
             if customer_record.total_spent >= 5000:

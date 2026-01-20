@@ -88,17 +88,25 @@ export function generateBookingId(): string {
 
 /**
  * Calculate expected totals with fees
+ *
+ * Fee Structure (2025):
+ * - Stripe (card): 3% processing fee
+ * - Venmo: 3% processing fee
+ * - Zelle: FREE (0%)
  */
-export function calculateTotal(subtotal: number, paymentMethod: 'stripe' | 'venmo' | 'zelle') {
+export function calculateTotal(
+  subtotal: number,
+  paymentMethod: 'stripe' | 'venmo' | 'zelle'
+) {
   const fees = {
-    stripe: 0.08, // 8%
-    venmo: 0.03,  // 3%
-    zelle: 0,     // 0%
+    stripe: 0.03, // 3% - enterprise-grade Stripe fee
+    venmo: 0.03, // 3%
+    zelle: 0, // 0% - FREE
   };
-  
+
   const fee = subtotal * fees[paymentMethod];
   const total = subtotal + fee;
-  
+
   return {
     subtotal,
     fee: Math.round(fee * 100) / 100,
