@@ -10,7 +10,7 @@ A comprehensive payment processing system that integrates with Stripe for credit
 
 - **Stripe Integration**: Full credit card processing with 2FA and PIN verification
 - **Alternative Methods**: Zelle and Venmo payment options (no processing fees)
-- **8% Processing Fee**: Automatically calculated for Stripe payments only
+- **3% Processing Fee**: Automatically calculated for Stripe payments only
 - **PCI Compliance**: All card data handled securely by Stripe
 
 ### 💰 **Flexible Payment Options**
@@ -64,7 +64,7 @@ src/app/api/v1/payments/
 
 ### 1. **Credit Card (Stripe)**
 
-- **Processing Fee**: 8% automatically added
+- **Processing Fee**: 3% automatically added
 - **Security**: 256-bit SSL encryption + 2FA
 - **Features**: Apple Pay, Google Pay, traditional cards
 - **Verification**: PIN verification for enhanced security
@@ -154,7 +154,7 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
 # Payment Settings
-PAYMENT_PROCESSING_FEE=0.08
+PAYMENT_PROCESSING_FEE=0.03
 DEPOSIT_AMOUNT=100.00
 ZELLE_EMAIL=payments@myhibachi.com
 VENMO_USERNAME=@MyHibachi-Catering
@@ -173,20 +173,20 @@ const paymentIntent = await stripe.paymentIntents.create({
     paymentType,
     tipAmount,
     customerName,
-    customerEmail
-  }
-})
+    customerEmail,
+  },
+});
 ```
 
 ### Fee Calculation
 
 ```typescript
-// Only Stripe payments include 8% fee
-const baseAmount = deposit || balance || customAmount
-const tipValue = parseFloat(tipAmount) || 0
-const subtotal = baseAmount + tipValue
-const processingFee = paymentMethod === 'stripe' ? subtotal * 0.08 : 0
-const totalAmount = subtotal + processingFee
+// Only Stripe payments include 3% fee
+const baseAmount = deposit || balance || customAmount;
+const tipValue = parseFloat(tipAmount) || 0;
+const subtotal = baseAmount + tipValue;
+const processingFee = paymentMethod === 'stripe' ? subtotal * 0.03 : 0;
+const totalAmount = subtotal + processingFee;
 ```
 
 ## 📱 User Interface
@@ -320,7 +320,7 @@ Zelle/Venmo Testing:
 
 The My Hibachi Payment System is now fully implemented with:
 
-- ✅ Stripe credit card processing with 8% fee
+- ✅ Stripe credit card processing with 3% fee
 - ✅ Zelle and Venmo alternative options (no fees)
 - ✅ Booking integration and customer lookup
 - ✅ Deposit ($100) and balance payment options

@@ -60,9 +60,9 @@ test.describe('Payment Processing', () => {
     await expect(page.locator('text=myhibachichef@gmail.com')).toBeVisible();
     await expect(page.locator('text=0% processing fee')).toBeVisible();
 
-    // Verify savings indicator
+    // Verify savings indicator (Zelle saves the 3% Stripe fee on $100)
     const savings = await page.textContent('[data-testid="savings-amount"]');
-    expect(savings).toContain('$8'); // 8% of $100
+    expect(savings).toContain('$3'); // 3% of $100 = $3 savings vs Stripe
   });
 
   test('shows Venmo payment instructions @payment', async ({ page }) => {

@@ -2,35 +2,35 @@ import { z } from 'zod';
 
 /**
  * Customer Response Schemas
- * 
+ *
  * ✅ CORRECTED TO MATCH ACTUAL BACKEND RESPONSES
  * Backend: apps/backend/src/api/app/routers/stripe.py
- * 
+ *
  * All schemas validated against actual customer dashboard integration.
  */
 
 /**
  * Schema for GET /api/v1/customers/dashboard
  * Returns comprehensive dashboard data for authenticated customer
- * 
+ *
  * ✅ ACTUAL RESPONSE FORMAT (apps/backend/src/api/app/routers/stripe.py line 566-604)
  * Backend returns:
  * {
  *   customer: { id, email, name, phone },
  *   analytics: { totalSpent, totalBookings, zelleAdoptionRate, totalSavingsFromZelle, ... },
- *   savingsInsights: { 
- *     totalSavingsFromZelle, 
- *     potentialSavingsIfAllZelle, 
+ *   savingsInsights: {
+ *     totalSavingsFromZelle,
+ *     potentialSavingsIfAllZelle,
  *     zelleAdoptionRate,
  *     recommendedAction,
  *     nextBookingPotentialSavings: { smallEvent, mediumEvent, largeEvent }
  *   },
  *   loyaltyStatus: { tier, benefits, nextTierProgress, ... }
  * }
- * 
+ *
  * Used by:
  * - apps/customer/src/components/CustomerSavingsDisplay.tsx (line 85)
- * 
+ *
  * @example
  * {
  *   customer: {
@@ -64,67 +64,79 @@ import { z } from 'zod';
  * }
  */
 export const CustomerDashboardResponseSchema = z.object({
-  customer: z.object({
-    id: z
-      .string()
-      .startsWith('cus_')
-      .describe('Stripe customer ID (starts with "cus_")'),
-    email: z.string().email().describe('Customer email address'),
-    name: z.string().nullable().describe('Customer full name'),
-    phone: z.string().nullable().describe('Customer phone number'),
-  }).describe('Customer profile information'),
-  analytics: z.object({
-    totalSpent: z
-      .number()
-      .nonnegative()
-      .describe('Total amount spent (in dollars)'),
-    totalBookings: z
-      .number()
-      .int()
-      .nonnegative()
-      .describe('Total number of bookings'),
-    zelleAdoptionRate: z
-      .number()
-      .min(0)
-      .max(100)
-      .describe('Percentage of payments made via Zelle (0-100)'),
-    totalSavingsFromZelle: z
-      .number()
-      .nonnegative()
-      .describe('Total savings from using Zelle instead of Stripe (in dollars)'),
-  }).describe('Customer analytics'),
-  savingsInsights: z.object({
-    totalSavingsFromZelle: z
-      .number()
-      .nonnegative()
-      .describe('Total savings from Zelle (8% fee savings)'),
-    potentialSavingsIfAllZelle: z
-      .number()
-      .nonnegative()
-      .describe('Potential savings if all payments were Zelle (8% of total spent)'),
-    zelleAdoptionRate: z
-      .number()
-      .min(0)
-      .max(100)
-      .describe('Percentage of Zelle usage'),
-    recommendedAction: z
-      .string()
-      .describe('Personalized recommendation based on Zelle adoption'),
-    nextBookingPotentialSavings: z.object({
-      smallEvent: z.object({
-        amount: z.number().describe('Small event amount ($500)'),
-        savings: z.number().describe('Potential savings (8% of amount)'),
-      }),
-      mediumEvent: z.object({
-        amount: z.number().describe('Medium event amount ($1000)'),
-        savings: z.number().describe('Potential savings (8% of amount)'),
-      }),
-      largeEvent: z.object({
-        amount: z.number().describe('Large event amount ($2000)'),
-        savings: z.number().describe('Potential savings (8% of amount)'),
-      }),
-    }).describe('Potential savings for different event sizes'),
-  }).describe('Savings insights and recommendations'),
+  customer: z
+    .object({
+      id: z
+        .string()
+        .startsWith('cus_')
+        .describe('Stripe customer ID (starts with "cus_")'),
+      email: z.string().email().describe('Customer email address'),
+      name: z.string().nullable().describe('Customer full name'),
+      phone: z.string().nullable().describe('Customer phone number'),
+    })
+    .describe('Customer profile information'),
+  analytics: z
+    .object({
+      totalSpent: z
+        .number()
+        .nonnegative()
+        .describe('Total amount spent (in dollars)'),
+      totalBookings: z
+        .number()
+        .int()
+        .nonnegative()
+        .describe('Total number of bookings'),
+      zelleAdoptionRate: z
+        .number()
+        .min(0)
+        .max(100)
+        .describe('Percentage of payments made via Zelle (0-100)'),
+      totalSavingsFromZelle: z
+        .number()
+        .nonnegative()
+        .describe(
+          'Total savings from using Zelle instead of Stripe (in dollars)'
+        ),
+    })
+    .describe('Customer analytics'),
+  savingsInsights: z
+    .object({
+      totalSavingsFromZelle: z
+        .number()
+        .nonnegative()
+        .describe('Total savings from Zelle (3% fee savings)'),
+      potentialSavingsIfAllZelle: z
+        .number()
+        .nonnegative()
+        .describe(
+          'Potential savings if all payments were Zelle (3% of total spent)'
+        ),
+      zelleAdoptionRate: z
+        .number()
+        .min(0)
+        .max(100)
+        .describe('Percentage of Zelle usage'),
+      recommendedAction: z
+        .string()
+        .describe('Personalized recommendation based on Zelle adoption'),
+      nextBookingPotentialSavings: z
+        .object({
+          smallEvent: z.object({
+            amount: z.number().describe('Small event amount ($500)'),
+            savings: z.number().describe('Potential savings (3% of amount)'),
+          }),
+          mediumEvent: z.object({
+            amount: z.number().describe('Medium event amount ($1000)'),
+            savings: z.number().describe('Potential savings (3% of amount)'),
+          }),
+          largeEvent: z.object({
+            amount: z.number().describe('Large event amount ($2000)'),
+            savings: z.number().describe('Potential savings (3% of amount)'),
+          }),
+        })
+        .describe('Potential savings for different event sizes'),
+    })
+    .describe('Savings insights and recommendations'),
   loyaltyStatus: z
     .object({
       tier: z
@@ -138,10 +150,7 @@ export const CustomerDashboardResponseSchema = z.object({
         .min(0)
         .max(100)
         .describe('Progress towards next tier (0-100%)'),
-      nextTier: z
-        .string()
-        .optional()
-        .describe('Name of next tier'),
+      nextTier: z.string().optional().describe('Name of next tier'),
       requiredForNextTier: z
         .string()
         .optional()
@@ -150,7 +159,9 @@ export const CustomerDashboardResponseSchema = z.object({
     .describe('Customer loyalty status'),
 });
 
-export type CustomerDashboardResponse = z.infer<typeof CustomerDashboardResponseSchema>;
+export type CustomerDashboardResponse = z.infer<
+  typeof CustomerDashboardResponseSchema
+>;
 
 /**
  * Export all schemas for easy import

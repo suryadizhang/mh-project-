@@ -2,13 +2,15 @@
 
 ## Complete Environment Setup for Manual Testing & Development
 
-This guide provides everything you need to run the full MyHibachi stack locally for testing and development.
+This guide provides everything you need to run the full MyHibachi
+stack locally for testing and development.
 
 ---
 
 ## 📋 **Prerequisites**
 
 ### System Requirements
+
 - **Node.js**: >= 20.0.0
 - **Python**: >= 3.11.0
 - **npm**: >= 10.0.0
@@ -16,6 +18,7 @@ This guide provides everything you need to run the full MyHibachi stack locally 
 - **Git**: Latest
 
 ### Verify Prerequisites
+
 ```bash
 # Check versions
 node --version    # Should be 20+
@@ -29,6 +32,7 @@ docker --version  # Latest
 ## 🗄️ **Database Setup**
 
 ### Option 1: Docker (Recommended)
+
 ```bash
 # Start PostgreSQL and Redis with Docker
 docker-compose --profile development up -d postgres redis
@@ -38,6 +42,7 @@ docker ps  # Should show postgres and redis running
 ```
 
 ### Option 2: Local Installation
+
 ```bash
 # Install PostgreSQL and Redis locally
 # PostgreSQL: Create database 'myhibachi'
@@ -49,7 +54,9 @@ docker ps  # Should show postgres and redis running
 ## 🔧 **Environment Variables Setup**
 
 ### 1. Customer Frontend (.env.local)
+
 Create `apps/customer/.env.local`:
+
 ```bash
 # === CUSTOMER FRONTEND ENVIRONMENT ===
 
@@ -68,14 +75,16 @@ NEXT_PUBLIC_BUSINESS_NAME=My Hibachi LLC
 NEXT_PUBLIC_WEBSITE_URL=https://myhibachichef.com
 
 # Payment Settings
-NEXT_PUBLIC_PAYMENT_PROCESSING_FEE=0.08
+NEXT_PUBLIC_PAYMENT_PROCESSING_FEE=0.03
 NEXT_PUBLIC_DEPOSIT_AMOUNT=100.00
 NEXT_PUBLIC_ZELLE_EMAIL=myhibachichef@gmail.com
 NEXT_PUBLIC_VENMO_USERNAME=@myhibachichef
 ```
 
 ### 2. Admin Frontend (.env.local)
+
 Create `apps/admin/.env.local`:
+
 ```bash
 # === ADMIN FRONTEND ENVIRONMENT ===
 
@@ -90,7 +99,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3001
 ```
 
 ### 3. Main API Backend (.env)
+
 Create `apps/api/.env`:
+
 ```bash
 # === MAIN API BACKEND ENVIRONMENT ===
 
@@ -171,7 +182,9 @@ RATE_LIMIT_GENERAL=100/minute
 ```
 
 ### 4. AI API Backend (.env)
+
 Create `apps/ai-api/.env`:
+
 ```bash
 # === AI API BACKEND ENVIRONMENT ===
 
@@ -205,24 +218,31 @@ ENABLE_MENU_RECOMMENDATIONS=true
 ## 🔑 **Required External API Keys**
 
 ### 🟡 **Critical for Payment Testing**
-1. **Stripe Test Keys** (Get from [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys))
-   - `STRIPE_SECRET_KEY`: sk_test_...
-   - `STRIPE_PUBLISHABLE_KEY`: pk_test_...
-   - `STRIPE_WEBHOOK_SECRET`: whsec_... (from webhooks section)
+
+1. **Stripe Test Keys** (Get from
+   [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys))
+   - `STRIPE_SECRET_KEY`: sk*test*...
+   - `STRIPE_PUBLISHABLE_KEY`: pk*test*...
+   - `STRIPE_WEBHOOK_SECRET`: whsec\_... (from webhooks section)
 
 ### 🟡 **Critical for AI Features**
-2. **OpenAI API Key** (Get from [OpenAI Platform](https://platform.openai.com/api-keys))
+
+2. **OpenAI API Key** (Get from
+   [OpenAI Platform](https://platform.openai.com/api-keys))
    - `OPENAI_API_KEY`: sk-...
 
 ### 🟠 **Important for Email Features**
+
 3. **Gmail SMTP** (For email notifications)
    - Enable 2FA on Gmail account
    - Generate App Password in Google Account settings
    - Use App Password as `SMTP_PASSWORD`
 
 ### 🔵 **Optional for SMS Features**
+
 4. **RingCentral** (For SMS notifications)
-   - Create developer account at [RingCentral Developers](https://developers.ringcentral.com/)
+   - Create developer account at
+     [RingCentral Developers](https://developers.ringcentral.com/)
    - Get sandbox credentials
 
 ---
@@ -230,6 +250,7 @@ ENABLE_MENU_RECOMMENDATIONS=true
 ## 🚀 **Installation & Startup**
 
 ### 1. Install Dependencies
+
 ```bash
 # Clone and navigate to project
 cd "path/to/MH webapps"
@@ -248,6 +269,7 @@ cd apps/admin && npm install && cd ../..
 ### 2. Start Services
 
 #### Option A: Automated Script (Recommended)
+
 ```bash
 # Make script executable (Linux/Mac)
 chmod +x scripts/start-local.sh
@@ -257,12 +279,13 @@ chmod +x scripts/start-local.sh
 ```
 
 #### Option B: Manual Start
+
 ```bash
 # Terminal 1: Start API Backend
 cd apps/api
 python -m uvicorn app.main:app --reload --port 8000
 
-# Terminal 2: Start AI API Backend  
+# Terminal 2: Start AI API Backend
 cd apps/ai-api
 python main.py
 
@@ -281,26 +304,28 @@ npm run dev -- --port 3001
 
 Once everything is running:
 
-| Service | URL | Purpose |
-|---------|-----|---------|
-| **Customer Frontend** | http://localhost:3000 | Main customer-facing website |
-| **Admin Dashboard** | http://localhost:3001 | Admin management interface |
-| **Main API** | http://localhost:8000 | Core backend API |
-| **AI API** | http://localhost:8002 | AI chat and recommendations |
-| **API Docs** | http://localhost:8000/docs | Interactive API documentation |
-| **Health Check** | http://localhost:8000/health | System health status |
+| Service               | URL                          | Purpose                       |
+| --------------------- | ---------------------------- | ----------------------------- |
+| **Customer Frontend** | http://localhost:3000        | Main customer-facing website  |
+| **Admin Dashboard**   | http://localhost:3001        | Admin management interface    |
+| **Main API**          | http://localhost:8000        | Core backend API              |
+| **AI API**            | http://localhost:8002        | AI chat and recommendations   |
+| **API Docs**          | http://localhost:8000/docs   | Interactive API documentation |
+| **Health Check**      | http://localhost:8000/health | System health status          |
 
 ---
 
 ## 🗃️ **Database Setup**
 
 ### Run Migrations
+
 ```bash
 cd apps/api
 alembic upgrade head
 ```
 
 ### Create Test Data (Optional)
+
 ```bash
 # Create admin user
 cd apps/api
@@ -316,6 +341,7 @@ print('Admin user created')
 ## 🧪 **Testing Your Setup**
 
 ### 1. Basic Health Checks
+
 ```bash
 # Test API health
 curl http://localhost:8000/health
@@ -329,12 +355,14 @@ curl http://localhost:3001
 ```
 
 ### 2. Stripe Payment Testing
+
 1. Visit: http://localhost:3000/BookUs
 2. Fill out booking form
 3. Use Stripe test card: `4242 4242 4242 4242`
 4. Any future expiry date, any CVC
 
 ### 3. AI Chat Testing
+
 1. Visit: http://localhost:3000
 2. Look for chat widget
 3. Test AI responses (requires OPENAI_API_KEY)
@@ -346,6 +374,7 @@ curl http://localhost:3001
 ### Common Issues
 
 **Port Already in Use**
+
 ```bash
 # Find and kill process on port
 lsof -ti:3000 | xargs kill -9  # For port 3000
@@ -353,6 +382,7 @@ lsof -ti:8000 | xargs kill -9  # For port 8000
 ```
 
 **Database Connection Failed**
+
 ```bash
 # Check PostgreSQL is running
 docker ps | grep postgres
@@ -362,6 +392,7 @@ docker-compose up -d postgres
 ```
 
 **Node.js Version Issues**
+
 ```bash
 # Use Node Version Manager
 nvm install 20
@@ -369,6 +400,7 @@ nvm use 20
 ```
 
 **Python Issues**
+
 ```bash
 # Create virtual environment
 python -m venv .venv
@@ -384,17 +416,20 @@ pip install -r requirements.txt
 ## 📝 **Development Workflow**
 
 ### Daily Development
+
 1. Start database: `docker-compose up -d postgres redis`
 2. Start all services: `./scripts/start-local.sh`
 3. Develop and test
 4. Stop services: `./scripts/stop-local.sh`
 
 ### Making Changes
+
 - **Frontend**: Changes auto-reload (hot reload enabled)
 - **Backend**: Changes auto-reload (--reload flag enabled)
 - **Database**: Use Alembic migrations for schema changes
 
 ### Logs & Debugging
+
 - **API Logs**: `logs/api.log`
 - **Customer Logs**: `logs/customer.log`
 - **Admin Logs**: `logs/admin.log`
@@ -404,9 +439,9 @@ pip install -r requirements.txt
 
 ## 🔒 **Security Notes**
 
-⚠️ **NEVER commit .env files with real API keys**
-⚠️ **Use TEST keys only for local development**
-⚠️ **Keep production keys separate and secure**
+⚠️ **NEVER commit .env files with real API keys** ⚠️ **Use TEST keys
+only for local development** ⚠️ **Keep production keys separate and
+secure**
 
 ---
 
@@ -415,10 +450,12 @@ pip install -r requirements.txt
 - [ ] Install prerequisites (Node.js 20+, Python 3.11+, Docker)
 - [ ] Start PostgreSQL & Redis (`docker-compose up -d postgres redis`)
 - [ ] Create all .env files with your API keys
-- [ ] Install dependencies (`npm install` + `pip install -r requirements.txt`)
+- [ ] Install dependencies (`npm install` +
+      `pip install -r requirements.txt`)
 - [ ] Run database migrations (`cd apps/api && alembic upgrade head`)
 - [ ] Start all services (`./scripts/start-local.sh`)
-- [ ] Test URLs: http://localhost:3000, http://localhost:3001, http://localhost:8000
+- [ ] Test URLs: http://localhost:3000, http://localhost:3001,
+      http://localhost:8000
 - [ ] Test payment flow with Stripe test card
 - [ ] Test AI chat (if OpenAI key configured)
 

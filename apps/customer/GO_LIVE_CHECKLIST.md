@@ -194,7 +194,7 @@ RESEND_API_KEY=your_resend_api_key
 ### **Stripe Fees (Standard Rates):**
 
 - **Credit Cards**: 2.9% + $0.30 per transaction
-- **Your 8% Fee**: Applied on top of Stripe's fees
+- **Your 3% Fee**: Applied on top of Stripe's fees
 - **ACH/Bank Transfers**: 0.8% (if you add this later)
 
 ---
