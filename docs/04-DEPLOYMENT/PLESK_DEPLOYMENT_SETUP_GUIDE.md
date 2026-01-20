@@ -9,7 +9,7 @@ This guide will help you set up your My Hibachi backend on a Plesk-managed VPS f
 ## Prerequisites
 
 - ✅ VPS with Plesk Panel installed
-- ✅ Domain configured (e.g., `api.myhibachi.com`)
+- ✅ Domain configured (e.g., `mhapi.mysticdatanode.net`)
 - ✅ SSH access to VPS
 - ✅ PostgreSQL database created
 - ✅ Redis installed (optional, for rate limiting)
@@ -24,7 +24,7 @@ This guide will help you set up your My Hibachi backend on a Plesk-managed VPS f
 1. **Login to Plesk** → `Websites & Domains`
 2. **Click** "Add Domain" or "Add Subdomain"
 3. **Configure**:
-   - Domain: `api.myhibachi.com`
+   - Domain: `mhapi.mysticdatanode.net`
    - Document root: `/httpdocs/backend`
    - Enable SSL/TLS (Let's Encrypt)
 
@@ -47,7 +47,7 @@ This guide will help you set up your My Hibachi backend on a Plesk-managed VPS f
 
 ### Step 4: Configure Application
 
-1. **Go to** `Hosting Settings` for `api.myhibachi.com`
+1. **Go to** `Hosting Settings` for `mhapi.mysticdatanode.net`
 2. **Set** Application Root: `/httpdocs/backend`
 3. **Enable** "Python application"
 4. **Configure**:
@@ -55,7 +55,7 @@ This guide will help you set up your My Hibachi backend on a Plesk-managed VPS f
    Python version: 3.11
    Application startup file: run_backend.py
    Application root: /httpdocs/backend
-   Application URL: https://api.myhibachi.com
+   Application URL: https://mhapi.mysticdatanode.net
    ```
 
 ### Step 5: Install Redis (Optional but Recommended)
@@ -187,10 +187,10 @@ DEBUG=false
 
 # API Settings
 API_VERSION=1.0.0
-API_BASE_URL=https://api.myhibachi.com
+API_BASE_URL=https://mhapi.mysticdatanode.net
 
 # CORS Origins
-CORS_ORIGINS=https://myhibachi.com,https://www.myhibachi.com,https://admin.myhibachi.com
+CORS_ORIGINS=https://myhibachichef.com,https://www.myhibachichef.com,https://admin.mysticdatanode.net
 
 # Twilio
 TWILIO_ACCOUNT_SID=your-twilio-account-sid
@@ -282,7 +282,7 @@ sudo supervisorctl status myhibachi-backend
 Plesk uses Nginx by default. Configure it to proxy to your FastAPI app.
 
 **Via Plesk Panel**:
-1. Go to `Websites & Domains` → `api.myhibachi.com`
+1. Go to `Websites & Domains` → `mhapi.mysticdatanode.net`
 2. Click `Apache & nginx Settings`
 3. **Add to "Additional nginx directives"**:
 ```nginx
@@ -326,7 +326,7 @@ curl http://localhost:8000/health
 
 **Test externally**:
 ```bash
-curl https://api.myhibachi.com/health
+curl https://mhapi.mysticdatanode.net/health
 ```
 
 **Expected response**:
@@ -472,7 +472,7 @@ sudo nano /etc/logrotate.d/myhibachi-backend
 **Create health check cron**:
 ```bash
 # Add to crontab (every 5 minutes)
-*/5 * * * * curl -f https://api.myhibachi.com/health || echo "Backend health check failed" | mail -s "My Hibachi Backend Alert" your-email@example.com
+*/5 * * * * curl -f https://mhapi.mysticdatanode.net/health || echo "Backend health check failed" | mail -s "My Hibachi Backend Alert" your-email@example.com
 ```
 
 ---
@@ -512,7 +512,7 @@ curl http://localhost:8000/health
 
 ### Option 1: Let's Encrypt via Plesk (Recommended)
 
-1. **Go to** `Websites & Domains` → `api.myhibachi.com`
+1. **Go to** `Websites & Domains` → `mhapi.mysticdatanode.net`
 2. **Click** `SSL/TLS Certificates`
 3. **Click** "Get it free" (Let's Encrypt)
 4. **Enable** auto-renewal
@@ -525,7 +525,7 @@ curl http://localhost:8000/health
 sudo apt install certbot
 
 # Get certificate
-sudo certbot certonly --standalone -d api.myhibachi.com
+sudo certbot certonly --standalone -d mhapi.mysticdatanode.net
 
 # Configure Plesk to use the certificate
 # (See Plesk documentation for manual certificate import)
@@ -641,7 +641,7 @@ alembic upgrade head
 /usr/local/bin/backup-myhibachi.sh
 
 # Test health endpoint
-curl https://api.myhibachi.com/health
+curl https://mhapi.mysticdatanode.net/health
 
 # Test from VPS
 curl http://localhost:8000/health

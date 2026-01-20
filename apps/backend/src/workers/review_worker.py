@@ -25,7 +25,7 @@ class ReviewRequestWorker:
     """Worker for sending automated review requests."""
 
     def __init__(self):
-        self.base_url = settings.customer_app_url or "https://myhibachi.com"
+        self.base_url = settings.customer_app_url or "https://myhibachichef.com"
 
         # Lazy-loaded services
         self._review_service = None

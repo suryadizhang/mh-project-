@@ -10,7 +10,7 @@ structure and relationships
 | Component         | Service            | Domain/Location          |
 | ----------------- | ------------------ | ------------------------ |
 | **Customer Site** | Vercel             | myhibachichef.com        |
-| **Admin Panel**   | Vercel             | admin.myhibachichef.com  |
+| **Admin Panel**   | Vercel             | admin.mysticdatanode.net |
 | **Backend API**   | Plesk VPS          | mhapi.mysticdatanode.net |
 | **Database**      | PostgreSQL (Plesk) | localhost:5432 on VPS    |
 | **Cache**         | Redis (Plesk)      | localhost:6379 on VPS    |

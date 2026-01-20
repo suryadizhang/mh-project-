@@ -324,7 +324,7 @@ Name: {customer_name}
 Phone: {customer_phone}
 Email: {customer_email}
 
-🔗 View Booking: https://admin.myhibachichef.com/bookings/{booking.id}
+🔗 View Booking: https://admin.mysticdatanode.net/bookings/{booking.id}
 
 ---
 This event was automatically created when chef was assigned.

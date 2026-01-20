@@ -163,7 +163,7 @@ npm run build -- --profile
 npx @next/bundle-analyzer
 
 # API load test (install: npm i -g autocannon)
-autocannon -c 100 -d 30 https://api.myhibachichef.com/api/v1/health
+autocannon -c 100 -d 30 https://mhapi.mysticdatanode.net/api/v1/health
 
 # Database query analysis
 EXPLAIN ANALYZE SELECT * FROM bookings WHERE ...;
@@ -687,8 +687,8 @@ View Dashboard: {dashboard_url}
             status=alert["status"],
             trend=alert["trend"],
             recommendation=alert["recommendation"],
-            guide_url=f"https://admin.myhibachi.com/scaling/guides/{alert['action']}",
-            dashboard_url="https://admin.myhibachi.com/scaling"
+            guide_url=f"https://admin.mysticdatanode.net/scaling/guides/{alert['action']}",
+            dashboard_url="https://admin.mysticdatanode.net/scaling"
         )
 
         for number in admin_numbers:
@@ -8827,7 +8827,7 @@ docker-compose down
 docker-compose up -d
 
 # Verify rollback successful
-curl https://api.myhibachi.com/health
+curl https://mhapi.mysticdatanode.net/health
 
 # Notify team
 # Post to #deployments Slack channel

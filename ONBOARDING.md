@@ -188,7 +188,7 @@ git push origin dev
 # Auto-deploys to:
 # - Customer: customer-staging.vercel.app
 # - Admin: admin-staging.vercel.app
-# - Backend: staging-api.myhibachi.com
+# - Backend: staging-api.mysticdatanode.net (or VPS staging port 8002)
 ```
 
 ### Production Deployment
@@ -199,9 +199,9 @@ git merge dev
 git push origin main
 
 # Auto-deploys to:
-# - Customer: myhibachi.com
-# - Admin: admin.myhibachi.com
-# - Backend: api.myhibachi.com
+# - Customer: myhibachichef.com
+# - Admin: admin.mysticdatanode.net
+# - Backend: mhapi.mysticdatanode.net
 ```
 
 **See** `DEPLOYMENT_QUICK_REFERENCE.md` for deployment commands and `PRODUCTION_DEPLOYMENT_GUIDE.md` for production checklist.

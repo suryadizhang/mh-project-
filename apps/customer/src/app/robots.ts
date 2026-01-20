@@ -14,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/api/', '/private/']
       }
     ],
-    sitemap: 'https://myhibachi.com/sitemap.xml',
-    host: 'https://myhibachi.com'
+    sitemap: 'https://myhibachichef.com/sitemap.xml',
+    host: 'https://myhibachichef.com'
   }
 }

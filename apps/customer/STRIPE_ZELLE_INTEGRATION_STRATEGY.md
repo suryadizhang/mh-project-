@@ -182,7 +182,7 @@ export async function createCustomerPortalSession(customerId: string) {
   // Create Stripe portal session (FREE feature)
   const session = await stripe.billingPortal.sessions.create({
     customer: customer.stripeCustomerId,
-    return_url: 'https://myhibachi.com/account',
+    return_url: 'https://myhibachichef.com/account',
   });
 
   return session.url;

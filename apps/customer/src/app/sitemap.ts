@@ -4,7 +4,7 @@ import type { BlogPost } from '@my-hibachi/blog-types';
 import { blogService } from '@/lib/blog/blogService';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://myhibachi.com';
+  const baseUrl = 'https://myhibachichef.com';
 
   // Static pages
   const staticPages = [

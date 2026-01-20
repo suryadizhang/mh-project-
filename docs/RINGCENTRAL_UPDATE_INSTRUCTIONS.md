@@ -99,8 +99,8 @@ Reply STOP to opt-out."
 #### 6. Technical Details
 
 ```
-Webhook URL: https://api.myhibachichef.com/webhooks/ringcentral
-OAuth Redirect URI: https://api.myhibachichef.com/auth/ringcentral/callback
+Webhook URL: https://mhapi.mysticdatanode.net/webhooks/ringcentral
+OAuth Redirect URI: https://mhapi.mysticdatanode.net/auth/ringcentral/callback
 ```
 
 #### 7. Compliance Verification Checklist

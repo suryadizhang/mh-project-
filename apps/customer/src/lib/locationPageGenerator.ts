@@ -79,7 +79,7 @@ export function generateLocationPage(city: string): LocationPage {
       '@context': 'https://schema.org',
       '@type': 'LocalBusiness',
       name: `MyHibachi ${city}`,
-      image: 'https://myhibachi.com/logo.png',
+      image: 'https://myhibachichef.com/logo.png',
       description: `Professional hibachi catering service in ${city}, California. Private chefs bring authentic Japanese hibachi entertainment to your location.`,
       address: {
         '@type': 'PostalAddress',
@@ -88,7 +88,7 @@ export function generateLocationPage(city: string): LocationPage {
         addressCountry: 'US'
       },
       telephone: '+1-555-HIBACHI',
-      url: `https://myhibachi.com/locations/${city.toLowerCase().replace(/\s+/g, '-')}`,
+      url: `https://myhibachichef.com/locations/${city.toLowerCase().replace(/\s+/g, '-')}`,
       servesCuisine: 'Japanese',
       priceRange: '$$-$$$',
       serviceArea: {

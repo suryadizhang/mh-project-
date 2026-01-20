@@ -237,7 +237,7 @@ upstream backend {
 
 server {
     listen 80;
-    server_name api.myhibachi.com;
+    server_name mhapi.mysticdatanode.net;
     
     # Rate limiting (prevent abuse)
     limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;

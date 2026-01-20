@@ -934,7 +934,7 @@ function generateLocalBusinessSchema(location: string, eventType: string): Recor
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: 'MyHibachi',
-    image: 'https://myhibachi.com/logo.png',
+    image: 'https://myhibachichef.com/logo.png',
     address: {
       '@type': 'PostalAddress',
       addressLocality: location,
@@ -942,7 +942,7 @@ function generateLocalBusinessSchema(location: string, eventType: string): Recor
       addressCountry: 'US'
     },
     telephone: '+1-555-HIBACHI',
-    url: 'https://myhibachi.com',
+    url: 'https://myhibachichef.com',
     description: `Professional hibachi catering service in ${location} specializing in ${eventType.toLowerCase()} events`,
     servesCuisine: 'Japanese',
     priceRange: '$$-$$$',

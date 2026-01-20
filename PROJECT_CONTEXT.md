@@ -45,26 +45,26 @@ main (production) ← Only deploy-ready code
 
 ### Frontend (Vercel)
 
-| App      | Vercel Project | Root Directory  | Production URL      |
-| -------- | -------------- | --------------- | ------------------- |
-| Customer | `mh-customer`  | `apps/customer` | myhibachi.com       |
-| Admin    | `mh-admin`     | `apps/admin`    | admin.myhibachi.com |
+| App      | Vercel Project | Root Directory  | Production URL         |
+| -------- | -------------- | --------------- | ---------------------- |
+| Customer | `mh-customer`  | `apps/customer` | myhibachichef.com      |
+| Admin    | `mh-admin`     | `apps/admin`    | admin.mysticdatanode.net |
 
 **Environment Variables (Vercel):**
 
 ```
-NEXT_PUBLIC_API_URL=https://api.myhibachichef.com
+NEXT_PUBLIC_API_URL=https://mhapi.mysticdatanode.net
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
-NEXT_PUBLIC_APP_URL=https://myhibachi.com
+NEXT_PUBLIC_APP_URL=https://myhibachichef.com
 ```
 
 ### Backend (VPS/Plesk)
 
-| Component | Domain                | Server          |
-| --------- | --------------------- | --------------- |
-| API       | api.myhibachichef.com | VPS with Plesk  |
-| Database  | PostgreSQL            | Supabase or VPS |
-| Cache     | Redis                 | VPS             |
+| Component | Domain                   | Server          |
+| --------- | ------------------------ | --------------- |
+| API       | mhapi.mysticdatanode.net | VPS with Plesk  |
+| Database  | PostgreSQL               | Supabase or VPS |
+| Cache     | Redis                    | VPS             |
 
 ---
 

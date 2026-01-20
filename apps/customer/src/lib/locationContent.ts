@@ -286,7 +286,7 @@ function generateLocationSchema(location: string, locationData: LocationData) {
     provider: {
       '@type': 'Organization',
       name: 'My Hibachi',
-      url: 'https://myhibachi.com'
+      url: 'https://myhibachichef.com'
     },
     areaServed: {
       '@type': 'City',
@@ -296,7 +296,7 @@ function generateLocationSchema(location: string, locationData: LocationData) {
     priceRange: locationData.priceRange,
     availableChannel: {
       '@type': 'ServiceChannel',
-      url: `https://myhibachi.com/locations/${location.toLowerCase().replace(' ', '-')}`
+      url: `https://myhibachichef.com/locations/${location.toLowerCase().replace(' ', '-')}`
     }
   }
 }

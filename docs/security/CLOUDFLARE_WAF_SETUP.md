@@ -50,8 +50,8 @@ Cloudflare will scan your existing DNS records. Verify:
 Expected DNS Records:
   - myhibachichef.com → A record → Your server IP
   - www.myhibachichef.com → CNAME → myhibachichef.com
-  - admin.myhibachichef.com → A record → Your server IP
-  - api.myhibachichef.com → A record → Your server IP (if separate)
+  - admin.mysticdatanode.net → A record → Your server IP
+  - mhapi.mysticdatanode.net → A record → Your server IP (if separate)
 ```
 
 **⚠️ IMPORTANT:**
@@ -63,8 +63,8 @@ Expected DNS Records:
 
 - ✅ `myhibachichef.com`
 - ✅ `www.myhibachichef.com`
-- ✅ `admin.myhibachichef.com`
-- ✅ `api.myhibachichef.com`
+- ✅ `admin.mysticdatanode.net`
+- ✅ `mhapi.mysticdatanode.net`
 
 ### 1.4 Update Nameservers
 
@@ -149,7 +149,7 @@ months
 ```yaml
 Rule Name: Admin IP Challenge
 If:
-  - Hostname equals "admin.myhibachichef.com"
+  - Hostname equals "admin.mysticdatanode.net"
   - IP Address is not in [YOUR_OFFICE_IPS]
 
 Then:
@@ -186,7 +186,7 @@ ip.src in {
 ```yaml
 Rule Name: Admin Login Protection
 If:
-  - Hostname equals "admin.myhibachichef.com"
+  - Hostname equals "admin.mysticdatanode.net"
   - URI Path contains "/api/auth/login"
 
 Then:
@@ -200,7 +200,7 @@ Then:
 ```yaml
 Rule Name: Admin API General Rate Limit
 If:
-  - Hostname equals "admin.myhibachichef.com"
+  - Hostname equals "admin.mysticdatanode.net"
   - URI Path starts with "/api/"
 
 Then:
@@ -224,7 +224,7 @@ Then:
 ```yaml
 Rule Name: Admin SQL Injection Block
 If:
-  - Hostname equals "admin.myhibachichef.com"
+  - Hostname equals "admin.mysticdatanode.net"
   - URI Query String contains "' OR '1'='1"
   - OR URI Query String contains "UNION SELECT"
   - OR URI Query String contains "DROP TABLE"
@@ -244,7 +244,7 @@ Then:
 ```yaml
 Rule Name: Admin XSS Protection
 If:
-  - Hostname equals "admin.myhibachichef.com"
+  - Hostname equals "admin.mysticdatanode.net"
   - URI contains "<script"
   - OR URI contains "javascript:"
   - OR URI contains "onerror="
@@ -508,7 +508,7 @@ Email: admin@myhibachichef.com, team@myhibachichef.com
 ```bash
 # Access admin panel from unknown IP (use VPN or mobile data)
 # Expected: Cloudflare CAPTCHA challenge
-curl https://admin.myhibachichef.com/
+curl https://admin.mysticdatanode.net/
 ```
 
 **Test 2: Rate Limiting**
@@ -516,7 +516,7 @@ curl https://admin.myhibachichef.com/
 ```bash
 # Attempt 10 login requests in 1 minute
 for ($i=0; $i -lt 10; $i++) {
-  curl -X POST https://admin.myhibachichef.com/api/auth/login -d '{"email":"test@test.com","password":"test"}'
+  curl -X POST https://admin.mysticdatanode.net/api/auth/login -d '{"email":"test@test.com","password":"test"}'
 }
 
 # Expected: First 5 succeed, next 5 blocked (429 Too Many Requests)
@@ -526,7 +526,7 @@ for ($i=0; $i -lt 10; $i++) {
 
 ```bash
 # Attempt SQL injection
-curl "https://admin.myhibachichef.com/api/users?id=1' OR '1'='1"
+curl "https://admin.mysticdatanode.net/api/users?id=1' OR '1'='1"
 
 # Expected: 403 Forbidden (blocked by WAF)
 ```
@@ -613,7 +613,7 @@ curl https://myhibachichef.com/api/menu
 
 DNS Records:
 - myhibachichef.com → A → YOUR_SERVER_IP (Proxied)
-- admin.myhibachichef.com → A → YOUR_SERVER_IP (Proxied)
+- admin.mysticdatanode.net → A → YOUR_SERVER_IP (Proxied)
 - www.myhibachichef.com → CNAME → myhibachichef.com (Proxied)
 
 Nameservers:
