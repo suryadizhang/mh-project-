@@ -144,7 +144,7 @@ curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/relea
 sudo dpkg -i cloudflared.deb
 cloudflared tunnel login
 cloudflared tunnel create myhibachi
-cloudflared tunnel route dns myhibachi api.myhibachi.com
+cloudflared tunnel route dns myhibachi mhapi.mysticdatanode.net
 # Create /etc/cloudflared/config.yml with tunnel config
 sudo cloudflared service install
 ```
@@ -260,9 +260,9 @@ Test coverage:
 3. Select: Performance, Accessibility, Best Practices, SEO
 4. Device: Mobile
 5. Run on these pages:
-   - https://myhibachi.com/ (Homepage)
-   - https://myhibachi.com/BookUs (Booking)
-   - https://myhibachi.com/quote (Quote)
+   - https://myhibachichef.com/ (Homepage)
+   - https://myhibachichef.com/BookUs (Booking)
+   - https://myhibachichef.com/quote (Quote)
 6. Target scores: All >90
 7. Save reports to /docs/05-OPERATIONS/lighthouse/
 ```

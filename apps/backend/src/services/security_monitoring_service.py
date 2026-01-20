@@ -457,7 +457,7 @@ class SecurityMonitoringService:
                     </p>
                 </div>
                 <div style="padding: 15px; text-align: center; background: #343a40; color: white;">
-                    <a href="https://admin.myhibachichef.com/security/alerts"
+                    <a href="https://admin.mysticdatanode.net/security/alerts"
                        style="color: #17a2b8; text-decoration: none;">
                         View in Dashboard →
                     </a>
@@ -474,7 +474,7 @@ class SecurityMonitoringService:
 
 ---
 Time: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}
-View in Dashboard: https://admin.myhibachichef.com/security/alerts
+View in Dashboard: https://admin.mysticdatanode.net/security/alerts
             """
 
             # Send to all admins
@@ -538,7 +538,7 @@ Severity: {severity.value.upper()}
 {message}
 
 Time: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}
-Dashboard: admin.myhibachichef.com/security
+Dashboard: admin.mysticdatanode.net/security
             """.strip()
 
             # Send to all admin phones

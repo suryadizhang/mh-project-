@@ -1,9 +1,12 @@
 # MyHibachi API Documentation
 
-**Last Updated:** October 25, 2025  
+**Last Updated:** January 30, 2025  
 **API Version:** 1.0.0  
-**Base URL (Production):** `https://api.myhibachi.com:8003`  
+**Base URL (Production):** `https://mhapi.mysticdatanode.net`  
+**Base URL (Staging):** `https://staging-api.mysticdatanode.net` (or `http://127.0.0.1:8002` via SSH tunnel)  
 **Base URL (Development):** `http://localhost:8000`
+
+> **Note:** Port 8000 is used for production backend, port 8002 for staging. The old `api.myhibachi.com:8003` URL is deprecated.
 
 ---
 
@@ -985,13 +988,13 @@ data: {"type":"done","metadata":{"tokens_used":150}}
 
 ### Real-time Chat
 
-**Endpoint:** `wss://api.myhibachi.com:8003/ws/chat/{thread_id}`  
+**Endpoint:** `wss://mhapi.mysticdatanode.net/ws/chat/{thread_id}`  
 **Authentication:** Optional (include `?token=jwt_token`)  
 **Protocol:** WebSocket
 
 **Connect:**
 ```javascript
-const ws = new WebSocket('wss://api.myhibachi.com:8003/ws/chat/thread_abc123?token=jwt_token');
+const ws = new WebSocket('wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?token=jwt_token');
 ```
 
 **Send Message:**
@@ -1117,7 +1120,7 @@ const ws = new WebSocket('wss://api.myhibachi.com:8003/ws/chat/thread_abc123?tok
 **Authentication:**
 ```typescript
 async function login(email: string, password: string) {
-  const response = await fetch('https://api.myhibachi.com:8003/api/v1/auth/login', {
+  const response = await fetch('https://mhapi.mysticdatanode.net/api/v1/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -1140,7 +1143,7 @@ async function login(email: string, password: string) {
 async function getBookings() {
   const token = localStorage.getItem('access_token');
   
-  const response = await fetch('https://api.myhibachi.com:8003/api/v1/bookings?page=1&limit=20', {
+  const response = await fetch('https://mhapi.mysticdatanode.net/api/v1/bookings?page=1&limit=20', {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
@@ -1168,7 +1171,7 @@ import requests
 
 def login(email: str, password: str) -> dict:
     response = requests.post(
-        'https://api.myhibachi.com:8003/api/v1/auth/login',
+        'https://mhapi.mysticdatanode.net/api/v1/auth/login',
         json={'email': email, 'password': password}
     )
     response.raise_for_status()
@@ -1189,7 +1192,7 @@ def get_bookings(access_token: str, page: int = 1, limit: int = 20):
     params = {'page': page, 'limit': limit}
     
     response = requests.get(
-        'https://api.myhibachi.com:8003/api/v1/bookings',
+        'https://mhapi.mysticdatanode.net/api/v1/bookings',
         headers=headers,
         params=params
     )
@@ -1203,20 +1206,20 @@ def get_bookings(access_token: str, page: int = 1, limit: int = 20):
 
 **Login:**
 ```bash
-curl -X POST https://api.myhibachi.com:8003/api/v1/auth/login \
+curl -X POST https://mhapi.mysticdatanode.net/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@myhibachi.com","password":"password"}'
 ```
 
 **Get Bookings:**
 ```bash
-curl -X GET "https://api.myhibachi.com:8003/api/v1/bookings?page=1&limit=20" \
+curl -X GET "https://mhapi.mysticdatanode.net/api/v1/bookings?page=1&limit=20" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 **Create Lead:**
 ```bash
-curl -X POST https://api.myhibachi.com:8003/api/v1/public/leads \
+curl -X POST https://mhapi.mysticdatanode.net/api/v1/public/leads \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -1269,7 +1272,7 @@ curl -X POST https://api.myhibachi.com:8003/api/v1/public/leads \
 
 ### OpenAPI/Swagger
 
-**URL:** `https://api.myhibachi.com:8003/docs`
+**URL:** `https://mhapi.mysticdatanode.net/docs`
 
 Features:
 - Interactive API explorer
@@ -1279,7 +1282,7 @@ Features:
 
 ### ReDoc
 
-**URL:** `https://api.myhibachi.com:8003/redoc`
+**URL:** `https://mhapi.mysticdatanode.net/redoc`
 
 Features:
 - Clean, readable documentation
@@ -1330,7 +1333,7 @@ Contact admin for rate limit increase requests. Provide:
 ---
 
 **Document Version:** 1.0  
-**Last Updated:** October 25, 2025  
+**Last Updated:** January 30, 2025  
 **Maintained By:** Development Team  
 
 ---

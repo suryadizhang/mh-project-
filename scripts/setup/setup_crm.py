@@ -68,7 +68,7 @@ async def setup_enhanced_crm():
 
                 # Setup webhook if configured
                 webhook_url = (
-                    "https://api.myhibachi.com/api/webhooks/ringcentral/sms"
+                    "https://mhapi.mysticdatanode.net/api/webhooks/ringcentral/sms"
                 )
                 webhook_success = await sms_service.setup_webhook(webhook_url)
                 if webhook_success:

@@ -11,7 +11,7 @@ export default function BlogStructuredData({ post }: BlogStructuredDataProps) {
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.metaDescription,
-    image: 'https://myhibachi.com/images/myhibachi-logo-small.webp', // Optimized logo
+    image: 'https://myhibachichef.com/images/myhibachi-logo-small.webp', // Optimized logo
     author: {
       '@type': 'Person',
       name: post.author,
@@ -21,14 +21,14 @@ export default function BlogStructuredData({ post }: BlogStructuredDataProps) {
       name: 'My Hibachi',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://myhibachi.com/images/myhibachi-logo-small.webp',
+        url: 'https://myhibachichef.com/images/myhibachi-logo-small.webp',
       },
     },
     datePublished: new Date(post.date).toISOString(),
     dateModified: new Date(post.date).toISOString(),
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://myhibachi.com/blog/${post.slug}`,
+      '@id': `https://myhibachichef.com/blog/${post.slug}`,
     },
     keywords: post.keywords.join(', '),
     articleSection: post.category,

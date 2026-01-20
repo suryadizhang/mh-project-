@@ -134,9 +134,9 @@ ORDER BY idx_scan DESC;
 
 **Production Domains:**
 
-- `myhibachi.com` - Customer-facing booking site
-- `admin.myhibachi.com` - Admin panel (this codebase)
-- `api.myhibachi.com` - Backend API (can be same as admin or separate)
+- `myhibachichef.com` - Customer-facing booking site
+- `admin.mysticdatanode.net` - Admin panel (this codebase)
+- `mhapi.mysticdatanode.net` - Backend API
 
 **Architecture Benefits:**
 
@@ -151,8 +151,8 @@ ORDER BY idx_scan DESC;
 # apps/backend/src/main.py
 origins = [
     "http://localhost:3000",  # Local development
-    "https://admin.myhibachi.com",  # Production admin
-    "https://myhibachi.com",  # Production public (if needed)
+    "https://admin.mysticdatanode.net",  # Production admin
+    "https://myhibachichef.com",  # Production public (if needed)
 ]
 
 app.add_middleware(
@@ -169,8 +169,8 @@ app.add_middleware(
 **Option 1: Single Server (Current)**
 
 - Admin + API on same Plesk server
-- `admin.myhibachi.com` → Next.js app
-- `admin.myhibachi.com/api` → FastAPI backend
+- `admin.mysticdatanode.net` → Next.js app
+- `admin.mysticdatanode.net/api` → FastAPI backend
 
 **Option 2: Separate Servers (Scalable)**
 
@@ -364,7 +364,7 @@ npm start  # or deploy to Vercel
 
 ```bash
 # Health check
-curl https://admin.myhibachi.com/api/health
+curl https://admin.mysticdatanode.net/api/health
 
 # Expected response:
 {

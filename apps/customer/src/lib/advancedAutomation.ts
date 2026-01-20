@@ -339,7 +339,7 @@ export class CitationBuilder {
       businessName: `My Hibachi - ${location}`,
       address: this.getLocationAddress(location),
       phone: this.getLocationPhone(location),
-      website: 'https://myhibachi.com',
+      website: 'https://myhibachichef.com',
       location,
       source: 'automated',
       status: 'pending',

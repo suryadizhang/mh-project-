@@ -268,7 +268,7 @@ Note what works and what needs fixes
 Once all webhooks are tested and working:
 
 1. ✅ Deploy backend to production server
-2. ✅ Get production domain (e.g., `api.myhibachichef.com`)
+2. ✅ Get production domain (e.g., `mhapi.mysticdatanode.net`)
 3. ✅ Update all webhook URLs to production
 4. ✅ Re-test in production
 5. ✅ Monitor for errors

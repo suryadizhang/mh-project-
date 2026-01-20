@@ -124,7 +124,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           location={post.serviceArea}
           eventType={post.eventType}
           description={post.metaDescription}
-          url={`https://myhibachi.com/blog/${post.slug}`}
+          url={`https://myhibachichef.com/blog/${post.slug}`}
         />
       )}
 

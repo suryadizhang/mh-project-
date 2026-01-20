@@ -35,7 +35,7 @@ This document provides step-by-step instructions for configuring webhooks in pro
 Your production webhook URL will be:
 https://yourdomain.com/api/v1/webhooks/stripe
 
-Example: https://api.myhibachi.com/api/v1/webhooks/stripe
+Example: https://mhapi.mysticdatanode.net/api/v1/webhooks/stripe
 ```
 
 #### Step 2: Configure in Stripe Dashboard
@@ -108,7 +108,7 @@ Function: stripe_webhook()
 Your production webhook URL will be:
 https://yourdomain.com/api/v1/webhooks/meta
 
-Example: https://api.myhibachi.com/api/v1/webhooks/meta
+Example: https://mhapi.mysticdatanode.net/api/v1/webhooks/meta
 ```
 
 #### Step 2: Configure in Meta Developer Console

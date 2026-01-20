@@ -353,7 +353,7 @@
 
 **Setup UptimeRobot** (5 minutes):
 1. Sign up at https://uptimerobot.com
-2. Add monitor: `https://api.myhibachi.com/health`
+2. Add monitor: `https://mhapi.mysticdatanode.net/health`
 3. Set check interval: 5 minutes
 4. Add email alert
 

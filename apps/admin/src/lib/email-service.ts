@@ -108,7 +108,7 @@ class MyHibachiEmailService {
     const appleUrl = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
-URL:https://myhibachi.com
+URL:https://myhibachichef.com
 DTSTART:${googleStartTime}
 DTEND:${googleEndTime}
 SUMMARY:${title}
@@ -244,7 +244,7 @@ END:VCALENDAR`
 
         <div class="footer">
             <p>Thank you for choosing MyHibachi!<br>
-            <a href="https://myhibachi.com">myhibachi.com</a> | Follow us on social media @MyHibachi</p>
+            <a href="https://myhibachichef.com">myhibachichef.com</a> | Follow us on social media @MyHibachi</p>
         </div>
     </div>
 </body>
@@ -330,14 +330,14 @@ myhibachi.com`
 
             <p>Your honest review helps us improve and lets other families know what to expect. We truly appreciate your time!</p>
 
-            <p><strong>Planning another event?</strong> We'd love to cook for you again! Visit <a href="https://myhibachi.com">myhibachi.com</a> to book your next experience.</p>
+            <p><strong>Planning another event?</strong> We'd love to cook for you again! Visit <a href="https://myhibachichef.com">myhibachichef.com</a> to book your next experience.</p>
 
             <p>With gratitude,<br><strong>The MyHibachi Team</strong></p>
         </div>
 
         <div class="footer">
             <p>MyHibachi - Bringing Authentic Hibachi to You<br>
-            <a href="https://myhibachi.com">myhibachi.com</a> | (123) 456-7890</p>
+            <a href="https://myhibachichef.com">myhibachichef.com</a> | (123) 456-7890</p>
         </div>
     </div>
 </body>
@@ -416,7 +416,7 @@ myhibachi.com | (123) 456-7890`
             </div>
 
             <div style="text-align: center;">
-                <a href="https://myhibachi.com/book?promo=${promoCode}" class="cta-button">🎉 Book Now & Save 10%</a>
+                <a href="https://myhibachichef.com/book?promo=${promoCode}" class="cta-button">🎉 Book Now & Save 10%</a>
             </div>
 
             <div class="occasions">
@@ -438,7 +438,7 @@ myhibachi.com | (123) 456-7890`
 
         <div class="footer">
             <p>MyHibachi - Premium Hibachi Experiences<br>
-            <a href="https://myhibachi.com">myhibachi.com</a> | (123) 456-7890</p>
+            <a href="https://myhibachichef.com">myhibachichef.com</a> | (123) 456-7890</p>
             <p style="font-size: 12px; margin-top: 10px;">
                 <a href="mailto:unsubscribe@myhibachi.com">Unsubscribe</a> from promotional emails
             </p>
@@ -457,7 +457,7 @@ Ready for another unforgettable hibachi evening? We're offering you an exclusive
 Your promo code: ${promoCode}
 Valid for 30 days
 
-Book now: https://myhibachi.com/book?promo=${promoCode}
+Book now: https://myhibachichef.com/book?promo=${promoCode}
 
 Perfect occasions for hibachi:
 - Birthday celebrations

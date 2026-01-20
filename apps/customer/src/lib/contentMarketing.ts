@@ -8,7 +8,7 @@ export const generateSocialMediaContent = (postId: number) => {
   const post = blogPosts.find((p: BlogPost) => p.id === postId)
   if (!post) return null
 
-  const baseUrl = 'https://myhibachi.com'
+  const baseUrl = 'https://myhibachichef.com'
 
   return {
     twitter: {
@@ -74,7 +74,7 @@ export const generateNewsletterContent = (featured: number[] = [], seasonal: num
     featured: featuredPosts,
     seasonal: seasonalPosts,
     ctaText: 'Book Your Hibachi Event',
-    ctaUrl: 'https://myhibachi.com/booking'
+    ctaUrl: 'https://myhibachichef.com/booking'
   }
 }
 
@@ -106,8 +106,8 @@ export const generateBusinessListings = () => {
     ],
     keywords:
       'hibachi catering, mobile hibachi chef, Japanese catering, interactive dining, live cooking show, party catering, corporate catering, wedding catering',
-    website: 'https://myhibachi.com',
-    blog: 'https://myhibachi.com/blog'
+    website: 'https://myhibachichef.com',
+    blog: 'https://myhibachichef.com/blog'
   }
 
   return {

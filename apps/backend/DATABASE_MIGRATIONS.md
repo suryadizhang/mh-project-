@@ -258,7 +258,7 @@ less production_migration_*.sql
 alembic upgrade head
 
 # 7. Verify application still works
-curl https://api.myhibachi.com/health
+curl https://mhapi.mysticdatanode.net/health
 ```
 
 ---
@@ -310,7 +310,7 @@ systemctl start myhibachi-api
 
 # 4. Verify
 systemctl status myhibachi-api
-curl https://api.myhibachi.com/health
+curl https://mhapi.mysticdatanode.net/health
 ```
 
 ---
@@ -597,8 +597,8 @@ alembic upgrade head
 
 - [ ] **Health check**
   ```bash
-  curl https://api.myhibachi.com/health
-  curl https://api.myhibachi.com/api/bookings  # Test endpoint
+  curl https://mhapi.mysticdatanode.net/health
+  curl https://mhapi.mysticdatanode.net/api/bookings  # Test endpoint
   ```
 
 ### **Post-Deployment**
