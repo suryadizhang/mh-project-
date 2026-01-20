@@ -62,17 +62,18 @@ Modularization Notes (Batch 1 - 2025-01-30):
     Each module follows single responsibility principle.
 """
 
-# Password utilities
-from .password import (
-    hash_password,
-    verify_password,
-    generate_secure_password,
-)
-
-# Token utilities
-from .tokens import (
-    create_access_token,
-    decode_access_token,
+# RBAC decorators
+from .decorators import (
+    admin_required,
+    get_admin_user,
+    require_admin,
+    require_any_admin,
+    require_customer_support,
+    require_permissions,
+    require_role,
+    require_station_manager,
+    require_super_admin,
+    superadmin_required,
 )
 
 # FastAPI dependencies
@@ -81,40 +82,33 @@ from .dependencies import (
     get_current_user_oauth,
     get_optional_user,
     get_user_db,
-    security,
     oauth2_scheme,
+    security,
 )
 
-# Role definitions
-from .roles import (
-    UserRole,
-    get_role_hierarchy_level,
-    normalize_role,
-    LEGACY_ROLE_MAPPING,
-)
+# Password utilities
+from .password import generate_secure_password, hash_password, verify_password
 
 # Permission definitions
 from .permissions import Permission
 
-# RBAC decorators
-from .decorators import (
-    superadmin_required,
-    admin_required,
-    get_admin_user,
-    require_role,
-    require_super_admin,
-    require_admin,
-    require_customer_support,
-    require_station_manager,
-    require_any_admin,
+# Role definitions
+from .roles import (
+    LEGACY_ROLE_MAPPING,
+    UserRole,
+    get_role_hierarchy_level,
+    normalize_role,
 )
+
+# Token utilities
+from .tokens import create_access_token, decode_access_token
 
 # Utility functions
 from .utils import (
-    has_permission,
     can_access_station,
-    can_modify_booking,
     can_manage_user_account,
+    can_modify_booking,
+    has_permission,
 )
 
 __all__ = [
@@ -149,6 +143,7 @@ __all__ = [
     "require_customer_support",
     "require_station_manager",
     "require_any_admin",
+    "require_permissions",
     # Utilities
     "has_permission",
     "can_access_station",

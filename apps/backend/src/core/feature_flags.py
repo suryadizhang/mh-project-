@@ -5,6 +5,7 @@ Enable flags in dev/staging immediately, gradual rollout in production
 """
 
 from enum import Enum
+
 from pydantic_settings import BaseSettings
 
 
@@ -110,9 +111,6 @@ class FeatureFlag(str, Enum):
     PAYMENT_HISTORY = "payment_history"  # P1 - Payment history
     PAYMENT_REPORTS = "payment_reports"  # P1 - Payment reports
 
-    # Plaid Integration (1 feature)
-    PLAID_INTEGRATION = "plaid_integration"  # P2 - Plaid bank account integration
-
     # Payment Disputes & Reconciliation (3 features)
     PAYMENT_DISPUTES = "payment_disputes"  # P2 - Stripe dispute handling
     PAYMENT_RECONCILIATION = "payment_reconciliation"  # P2 - Payment reconciliation
@@ -139,7 +137,9 @@ class FeatureFlag(str, Enum):
 
     # Advanced Communication Features (4 features)
     COMMUNICATION_SCHEDULING = "communication_scheduling"  # P2 - Schedule messages
-    COMMUNICATION_PERSONALIZATION = "communication_personalization"  # P2 - Dynamic personalization
+    COMMUNICATION_PERSONALIZATION = (
+        "communication_personalization"  # P2 - Dynamic personalization
+    )
     COMMUNICATION_AB_TESTING = "communication_ab_testing"  # P2 - A/B testing
     COMMUNICATION_ANALYTICS = "communication_analytics"  # P2 - Advanced analytics
 
@@ -264,13 +264,13 @@ feature_flags = FeatureFlagConfig()
 def is_feature_enabled(flag: FeatureFlag) -> bool:
     """
     Check if a feature flag is enabled
-    
+
     Args:
         flag: FeatureFlag enum value
-        
+
     Returns:
         bool: True if feature is enabled, False otherwise
-        
+
     Example:
         if is_feature_enabled(FeatureFlag.BOOKING_REMINDERS):
             # Use new reminder system
@@ -284,10 +284,10 @@ def is_feature_enabled(flag: FeatureFlag) -> bool:
 def get_enabled_features() -> dict[str, bool]:
     """
     Get all feature flags and their current status
-    
+
     Returns:
         dict: Dictionary of all feature flags and their enabled state
-        
+
     Example:
         {
             "BOOKING_REMINDERS": False,
@@ -295,20 +295,17 @@ def get_enabled_features() -> dict[str, bool]:
             ...
         }
     """
-    return {
-        flag.value: is_feature_enabled(flag)
-        for flag in FeatureFlag
-    }
+    return {flag.value: is_feature_enabled(flag) for flag in FeatureFlag}
 
 
 def require_feature(flag: FeatureFlag):
     """
     Decorator to require a feature flag to be enabled
     Raises HTTP 501 Not Implemented if flag is disabled
-    
+
     Args:
         flag: FeatureFlag enum value
-        
+
     Example:
         @router.post("/reminders")
         @require_feature(FeatureFlag.BOOKING_REMINDERS)
@@ -316,6 +313,7 @@ def require_feature(flag: FeatureFlag):
             # This endpoint only works if BOOKING_REMINDERS flag is ON
     """
     from functools import wraps
+
     from fastapi import HTTPException, status
 
     def decorator(func):

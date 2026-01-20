@@ -13,10 +13,10 @@ As per user requirement:
 or other complex stuff that too long or cant be done through text"
 """
 
-from decimal import Decimal
-from enum import Enum
 import logging
 import os
+from decimal import Decimal
+from enum import Enum
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -97,7 +97,10 @@ class PaymentInstructionsService:
 
         try:
             # Send SMS if phone available
-            if customer_phone and channel in [InstructionChannel.SMS, InstructionChannel.BOTH]:
+            if customer_phone and channel in [
+                InstructionChannel.SMS,
+                InstructionChannel.BOTH,
+            ]:
                 sms_result = await self._send_sms_instructions(
                     phone=customer_phone,
                     name=customer_name,
@@ -110,7 +113,10 @@ class PaymentInstructionsService:
                     result["error"] = sms_result.get("error")
 
             # Send Email if needed
-            if customer_email and channel in [InstructionChannel.EMAIL, InstructionChannel.BOTH]:
+            if customer_email and channel in [
+                InstructionChannel.EMAIL,
+                InstructionChannel.BOTH,
+            ]:
                 email_result = await self._send_email_instructions(
                     email=customer_email,
                     name=customer_name,
@@ -173,9 +179,7 @@ class PaymentInstructionsService:
         """Send quick payment instructions via SMS"""
         try:
             # Import SMS service
-            from services.whatsapp_notification_service import (
-                get_whatsapp_service,
-            )
+            from services.whatsapp_notification_service import get_whatsapp_service
 
             # Build concise SMS message
             message = self._build_sms_message(name, booking_id, amount, payment_methods)
@@ -191,7 +195,11 @@ class PaymentInstructionsService:
             return {"success": False, "error": str(e)}
 
     def _build_sms_message(
-        self, name: str, booking_id: int | None, amount: Decimal | None, payment_methods: list[str]
+        self,
+        name: str,
+        booking_id: int | None,
+        amount: Decimal | None,
+        payment_methods: list[str],
     ) -> str:
         """Build SMS payment instructions (max 160 chars per segment)"""
 
@@ -219,7 +227,9 @@ class PaymentInstructionsService:
         if "venmo" in payment_methods:
             lines.append(f"💙 Venmo: {self.venmo_username}")
 
-        lines.extend(["", f"Questions? Call {self.business_phone}", "", "- My Hibachi Chef Team"])
+        lines.extend(
+            ["", f"Questions? Call {self.business_phone}", "", "- My Hibachi Chef Team"]
+        )
 
         return "\n".join(lines)
 
@@ -288,7 +298,7 @@ class PaymentInstructionsService:
                     Pay with Card
                 </a>
                 <p style="font-size: 12px; color: #666; margin: 10px 0 0 0;">
-                    Processing fee: 8% (included in total)
+                    Processing fee: ~3% (included in total)
                 </p>
             </div>
             """

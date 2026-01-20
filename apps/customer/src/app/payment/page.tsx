@@ -14,7 +14,7 @@ import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
 // Infer type from schema for type-safe responses
-type PaymentIntentResponse = z.infer<typeof PaymentIntentResponseSchema>;
+type PaymentIntentResponse = z.infer;
 
 // Initialize Stripe
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -32,7 +32,7 @@ interface BookingData {
   depositPaid: boolean;
   depositAmount: number;
   remainingBalance: number;
-  services: Array<{ name: string; price: number }>;
+  services: Array;
 }
 
 export default function PaymentPage() {
@@ -57,7 +57,7 @@ export default function PaymentPage() {
 
   // Add processing fees based on payment method
   const processingFee =
-    paymentMethod === 'stripe' ? subtotal * 0.08 : paymentMethod === 'venmo' ? subtotal * 0.03 : 0;
+    paymentMethod === 'stripe' ? subtotal * 0.03 : paymentMethod === 'venmo' ? subtotal * 0.03 : 0;
   const totalAmount = subtotal + processingFee;
 
   // Create payment intent when amount changes and using Stripe
@@ -328,7 +328,7 @@ export default function PaymentPage() {
                 >
                   <CreditCard className="mx-auto mb-2 h-6 w-6 text-blue-600" />
                   <div className="text-sm font-medium">Credit Card</div>
-                  <div className="text-xs text-gray-600">+8% processing fee</div>
+                  <div className="text-xs text-gray-600">+3% processing fee</div>
                 </button>
                 <button
                   onClick={() => setPaymentMethod('zelle')}
@@ -420,7 +420,7 @@ export default function PaymentPage() {
                 </div>
                 {paymentMethod === 'stripe' && processingFee > 0 && (
                   <div className="flex justify-between text-orange-600">
-                    <span>Processing Fee (8%):</span>
+                    <span>Processing Fee (3%):</span>
                     <span>${processingFee.toFixed(2)}</span>
                   </div>
                 )}

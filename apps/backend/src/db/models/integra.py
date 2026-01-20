@@ -19,6 +19,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import (
     ARRAY,
     TIMESTAMP,
+    Boolean,
     CheckConstraint,
     Enum,
     ForeignKey,
@@ -27,14 +28,13 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
-    Boolean,
     text,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..base_class import Base
-
 
 # ==========================================
 # ENUMS (Type-Safe Constants)
@@ -44,31 +44,25 @@ from ..base_class import Base
 class PaymentProvider(str, PyEnum):
     """Payment provider sources.
 
-    - stripe: Stripe payments (credit card, ACH)
-    - plaid: Plaid ACH transfers
-    - manual: Manual entry (cash, check, Venmo, Zelle)
+    - stripe: Stripe payments (credit card)
+    - manual: Manual entry (Venmo, Zelle)
     """
+
     STRIPE = "stripe"
-    PLAID = "plaid"
     MANUAL = "manual"
 
 
 class PaymentMethod(str, PyEnum):
     """Payment methods.
 
-    - card: Credit/debit card
-    - ach: ACH bank transfer
+    - card: Credit/debit card (via Stripe)
     - venmo: Venmo payment
-    - zelle: Zelle payment
-    - cash: Cash payment
-    - check: Check payment
+    - zelle: Zelle payment (FREE - no fees!)
     """
+
     CARD = "card"
-    ACH = "ach"
     VENMO = "venmo"
     ZELLE = "zelle"
-    CASH = "cash"
-    CHECK = "check"
 
 
 class MatchStatus(str, PyEnum):
@@ -78,6 +72,7 @@ class MatchStatus(str, PyEnum):
     - manual: Manually matched by admin
     - ignored: Marked as irrelevant/duplicate
     """
+
     AUTO = "auto"
     MANUAL = "manual"
     IGNORED = "ignored"
@@ -89,6 +84,7 @@ class CallDirection(str, PyEnum):
     - inbound: Customer called us
     - outbound: We called customer
     """
+
     INBOUND = "inbound"
     OUTBOUND = "outbound"
 
@@ -103,6 +99,7 @@ class SocialPlatform(str, PyEnum):
     - tiktok: TikTok
     - twitter: Twitter/X
     """
+
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"
     GOOGLE_BUSINESS = "google_business"
@@ -138,7 +135,12 @@ class PaymentEvent(Base):
     __tablename__ = "payment_events"
     __table_args__ = (
         CheckConstraint("amount_cents > 0", name="check_payment_amount_positive"),
-        Index("ix_integra_payment_events_provider_id", "provider", "provider_id", unique=True),
+        Index(
+            "ix_integra_payment_events_provider_id",
+            "provider",
+            "provider_id",
+            unique=True,
+        ),
         Index("ix_integra_payment_events_occurred", "occurred_at"),
         {"schema": "integra"},
     )
@@ -148,61 +150,54 @@ class PaymentEvent(Base):
         PG_UUID(as_uuid=True),
         primary_key=True,
         server_default=text("gen_random_uuid()"),
-        comment="UUID primary key"
+        comment="UUID primary key",
     )
 
     # Payment metadata
     provider: Mapped[PaymentProvider] = mapped_column(
         Enum(PaymentProvider, schema="integra", create_type=False),
         nullable=False,
-        comment="Payment provider (stripe, plaid, manual)"
+        comment="Payment provider (stripe, plaid, manual)",
     )
 
     provider_id: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
-        comment="Provider's unique ID (e.g., Stripe charge ID, Plaid transaction ID)"
+        comment="Provider's unique ID (e.g., Stripe charge ID, Plaid transaction ID)",
     )
 
     method: Mapped[PaymentMethod] = mapped_column(
         Enum(PaymentMethod, schema="integra", create_type=False),
         nullable=False,
-        comment="Payment method (card, ach, venmo, zelle, cash, check)"
+        comment="Payment method (card, ach, venmo, zelle, cash, check)",
     )
 
     # Amount
     amount_cents: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        comment="Payment amount in cents (e.g., 5000 = $50.00)"
+        Integer, nullable=False, comment="Payment amount in cents (e.g., 5000 = $50.00)"
     )
 
     currency: Mapped[str] = mapped_column(
-        String(3),
-        nullable=False,
-        default="USD",
-        comment="Currency code (ISO 4217)"
+        String(3), nullable=False, default="USD", comment="Currency code (ISO 4217)"
     )
 
     # Timing
     occurred_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True),
         nullable=False,
-        comment="When the payment occurred (provider timestamp)"
+        comment="When the payment occurred (provider timestamp)",
     )
 
     # Optional fields
     memo: Mapped[Optional[str]] = mapped_column(
         Text,
         nullable=True,
-        comment="Optional notes (e.g., check number, Venmo reference)"
+        comment="Optional notes (e.g., check number, Venmo reference)",
     )
 
     # Raw webhook data
     raw_data: Mapped[dict] = mapped_column(
-        JSONB,
-        nullable=False,
-        comment="Complete webhook payload from provider (JSON)"
+        JSONB, nullable=False, comment="Complete webhook payload from provider (JSON)"
     )
 
     # Audit
@@ -210,7 +205,7 @@ class PaymentEvent(Base):
         TIMESTAMP(timezone=True),
         nullable=False,
         server_default="NOW()",
-        comment="When this record was created in our system"
+        comment="When this record was created in our system",
     )
 
     # Relationships
@@ -218,7 +213,7 @@ class PaymentEvent(Base):
         "PaymentMatch",
         back_populates="payment_event",
         cascade="all, delete-orphan",
-        doc="Payment-to-booking matches (can match multiple bookings if split payment)"
+        doc="Payment-to-booking matches (can match multiple bookings if split payment)",
     )
 
 
@@ -244,8 +239,12 @@ class PaymentMatch(Base):
 
     __tablename__ = "payment_matches"
     __table_args__ = (
-        CheckConstraint("confidence >= 0 AND confidence <= 1", name="check_confidence_range"),
-        CheckConstraint("status IN ('auto', 'manual', 'ignored')", name="check_match_status"),
+        CheckConstraint(
+            "confidence >= 0 AND confidence <= 1", name="check_confidence_range"
+        ),
+        CheckConstraint(
+            "status IN ('auto', 'manual', 'ignored')", name="check_match_status"
+        ),
         {"schema": "integra"},
     )
 
@@ -254,7 +253,7 @@ class PaymentMatch(Base):
         PG_UUID(as_uuid=True),
         primary_key=True,
         server_default=text("gen_random_uuid()"),
-        comment="UUID primary key"
+        comment="UUID primary key",
     )
 
     # Foreign keys
@@ -262,47 +261,45 @@ class PaymentMatch(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("integra.payment_events.id", ondelete="CASCADE"),
         nullable=False,
-        comment="Reference to payment_events table"
+        comment="Reference to payment_events table",
     )
 
     booking_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey("core.bookings.id", ondelete="CASCADE"),
         nullable=False,
-        comment="Reference to core.bookings table"
+        comment="Reference to core.bookings table",
     )
 
     # Match quality
     confidence: Mapped[Decimal] = mapped_column(
         Numeric(3, 2),
         nullable=False,
-        comment="Match confidence (0.00 to 1.00, e.g., 0.95 = 95% confident)"
+        comment="Match confidence (0.00 to 1.00, e.g., 0.95 = 95% confident)",
     )
 
     match_method: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        comment="How the match was found (e.g., 'amount+email', 'amount+phone', 'memo_reference')"
+        comment="How the match was found (e.g., 'amount+email', 'amount+phone', 'memo_reference')",
     )
 
     status: Mapped[MatchStatus] = mapped_column(
         String(20),
         nullable=False,
         default="auto",
-        comment="Match status (auto, manual, ignored)"
+        comment="Match status (auto, manual, ignored)",
     )
 
     # Manual review
     reviewed_by: Mapped[Optional[UUID]] = mapped_column(
         PG_UUID(as_uuid=True),
         nullable=True,
-        comment="User ID who reviewed this match (if status=manual)"
+        comment="User ID who reviewed this match (if status=manual)",
     )
 
     notes: Mapped[Optional[str]] = mapped_column(
-        Text,
-        nullable=True,
-        comment="Admin notes about this match"
+        Text, nullable=True, comment="Admin notes about this match"
     )
 
     # Audit
@@ -310,14 +307,12 @@ class PaymentMatch(Base):
         TIMESTAMP(timezone=True),
         nullable=False,
         server_default="NOW()",
-        comment="When this match was created"
+        comment="When this match was created",
     )
 
     # Relationships
     payment_event: Mapped["PaymentEvent"] = relationship(
-        "PaymentEvent",
-        back_populates="matches",
-        doc="Source payment transaction"
+        "PaymentEvent", back_populates="matches", doc="Source payment transaction"
     )
 
     # Note: Booking relationship defined in core.py (avoids circular import)
@@ -346,7 +341,9 @@ class CallSession(Base):
 
     __tablename__ = "call_sessions"
     __table_args__ = (
-        CheckConstraint("direction IN ('inbound', 'outbound')", name="check_call_direction"),
+        CheckConstraint(
+            "direction IN ('inbound', 'outbound')", name="check_call_direction"
+        ),
         {"schema": "integra"},
     )
 
@@ -355,7 +352,7 @@ class CallSession(Base):
         PG_UUID(as_uuid=True),
         primary_key=True,
         server_default=text("gen_random_uuid()"),
-        comment="UUID primary key"
+        comment="UUID primary key",
     )
 
     # Foreign keys (nullable - call may not link to booking/customer)
@@ -363,59 +360,51 @@ class CallSession(Base):
         PG_UUID(as_uuid=True),
         ForeignKey("core.bookings.id", ondelete="SET NULL"),
         nullable=True,
-        comment="Reference to core.bookings (if call related to a booking)"
+        comment="Reference to core.bookings (if call related to a booking)",
     )
 
     customer_id: Mapped[Optional[UUID]] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey("core.customers.id", ondelete="SET NULL"),
         nullable=True,
-        comment="Reference to core.customers (if we identified the caller)"
+        comment="Reference to core.customers (if we identified the caller)",
     )
 
     # Call metadata
     direction: Mapped[CallDirection] = mapped_column(
-        String(10),
-        nullable=False,
-        comment="Call direction (inbound or outbound)"
+        String(10), nullable=False, comment="Call direction (inbound or outbound)"
     )
 
     phone_number: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
-        comment="Customer's phone number (E.164 format, e.g., +14155551234)"
+        comment="Customer's phone number (E.164 format, e.g., +14155551234)",
     )
 
     # Call details
     duration_seconds: Mapped[Optional[int]] = mapped_column(
         Integer,
         nullable=True,
-        comment="Call duration in seconds (null if not answered)"
+        comment="Call duration in seconds (null if not answered)",
     )
 
     transcript: Mapped[Optional[str]] = mapped_column(
-        Text,
-        nullable=True,
-        comment="AI-generated transcript from recording (optional)"
+        Text, nullable=True, comment="AI-generated transcript from recording (optional)"
     )
 
     outcome: Mapped[Optional[str]] = mapped_column(
         String(50),
         nullable=True,
-        comment="Call outcome (e.g., 'booked', 'rescheduled', 'no_answer', 'voicemail')"
+        comment="Call outcome (e.g., 'booked', 'rescheduled', 'no_answer', 'voicemail')",
     )
 
     recording_url: Mapped[Optional[str]] = mapped_column(
-        String(500),
-        nullable=True,
-        comment="URL to call recording (S3 or RingCentral)"
+        String(500), nullable=True, comment="URL to call recording (S3 or RingCentral)"
     )
 
     # RingCentral metadata
     ringcentral_call_id: Mapped[Optional[str]] = mapped_column(
-        String(255),
-        nullable=True,
-        comment="RingCentral's unique call ID"
+        String(255), nullable=True, comment="RingCentral's unique call ID"
     )
 
     # Timing
@@ -423,13 +412,11 @@ class CallSession(Base):
         TIMESTAMP(timezone=True),
         nullable=False,
         server_default="NOW()",
-        comment="When the call started"
+        comment="When the call started",
     )
 
     ended_at: Mapped[Optional[datetime]] = mapped_column(
-        TIMESTAMP(timezone=True),
-        nullable=True,
-        comment="When the call ended"
+        TIMESTAMP(timezone=True), nullable=True, comment="When the call ended"
     )
 
     # Note: Relationships to Booking/Customer defined in core.py (avoids circular import)
@@ -473,34 +460,34 @@ class SocialInbox(Base):
     signature: Mapped[str] = mapped_column(
         String(255),
         primary_key=True,
-        comment="Webhook signature for idempotency (e.g., X-Hub-Signature, X-Webhook-Signature)"
+        comment="Webhook signature for idempotency (e.g., X-Hub-Signature, X-Webhook-Signature)",
     )
 
     # Webhook metadata
     platform: Mapped[SocialPlatform] = mapped_column(
         Enum(SocialPlatform, schema="integra", create_type=False),
         nullable=False,
-        comment="Social media platform (instagram, facebook, google_business, yelp, tiktok, twitter)"
+        comment="Social media platform (instagram, facebook, google_business, yelp, tiktok, twitter)",
     )
 
     webhook_type: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
-        comment="Type of webhook event (e.g., 'messages', 'comments', 'mentions', 'reviews')"
+        comment="Type of webhook event (e.g., 'messages', 'comments', 'mentions', 'reviews')",
     )
 
     # Account linkage
     account_id: Mapped[Optional[UUID]] = mapped_column(
         PG_UUID(as_uuid=True),
         nullable=True,
-        comment="Reference to core.social_accounts (which business page)"
+        comment="Reference to core.social_accounts (which business page)",
     )
 
     # Deduplication
     payload_hash: Mapped[str] = mapped_column(
         String(64),
         nullable=False,
-        comment="SHA256 hash of payload (for detecting duplicate webhooks)"
+        comment="SHA256 hash of payload (for detecting duplicate webhooks)",
     )
 
     # Processing status
@@ -508,20 +495,18 @@ class SocialInbox(Base):
         Boolean,
         nullable=False,
         default=False,
-        comment="Whether webhook has been successfully processed"
+        comment="Whether webhook has been successfully processed",
     )
 
     processing_attempts: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
         default=0,
-        comment="Number of processing attempts (max 3)"
+        comment="Number of processing attempts (max 3)",
     )
 
     last_error: Mapped[Optional[str]] = mapped_column(
-        Text,
-        nullable=True,
-        comment="Last error message (if processing failed)"
+        Text, nullable=True, comment="Last error message (if processing failed)"
     )
 
     # Timing
@@ -529,13 +514,13 @@ class SocialInbox(Base):
         TIMESTAMP(timezone=True),
         nullable=False,
         server_default="NOW()",
-        comment="When webhook was received"
+        comment="When webhook was received",
     )
 
     processed_at: Mapped[Optional[datetime]] = mapped_column(
         TIMESTAMP(timezone=True),
         nullable=True,
-        comment="When webhook was successfully processed"
+        comment="When webhook was successfully processed",
     )
 
     # Note: Relationship to SocialAccount defined in core.py (avoids circular import)

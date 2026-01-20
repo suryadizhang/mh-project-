@@ -212,7 +212,7 @@ function PaymentFormComponent({
               <span className="text-lg font-bold">${amount.toFixed(2)}</span>
             </div>
             <div className="mt-2 text-xs text-blue-600">
-              * Includes 8% processing fee for card payments
+              * Includes 3% processing fee for card payments
             </div>
           </div>
         </div>

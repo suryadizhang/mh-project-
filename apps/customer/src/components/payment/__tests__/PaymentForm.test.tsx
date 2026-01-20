@@ -148,7 +148,7 @@ describe('PaymentForm', () => {
 
     it('should show processing fee notice', () => {
       renderWithStripe();
-      expect(screen.getByText(/8% processing fee/i)).toBeInTheDocument();
+      expect(screen.getByText(/3% processing fee/i)).toBeInTheDocument();
     });
   });
 

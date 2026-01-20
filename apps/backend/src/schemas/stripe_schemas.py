@@ -10,7 +10,6 @@ class PaymentMethod(str, Enum):
     STRIPE = "stripe"
     ZELLE = "zelle"
     VENMO = "venmo"
-    PLAID = "plaid"  # RTP via Plaid (1% fee)
 
 
 class PaymentStatus(str, Enum):
@@ -36,8 +35,8 @@ class CustomerBase(BaseModel):
     name: str | None = None
     phone: str | None = None
     preferred_payment_method: PaymentMethod = (
-        PaymentMethod.PLAID
-    )  # Default to Plaid RTP (lowest fees)
+        PaymentMethod.ZELLE
+    )  # Default to Zelle (FREE - no fees!)
 
 
 class CustomerCreate(CustomerBase):
@@ -255,12 +254,15 @@ class WebhookResponse(BaseModel):
 # Analytics schemas
 class PaymentAnalytics(BaseModel):
     """Payment analytics response - powered by Stripe's native APIs."""
+
     total_payments: int
     total_amount: Decimal
     avg_payment: Decimal
     payment_methods: dict[str, int]
     monthly_revenue: list[dict[str, Any]]
-    stripe_dashboard_url: str | None = None  # Direct link to Stripe Dashboard for advanced analytics
+    stripe_dashboard_url: str | None = (
+        None  # Direct link to Stripe Dashboard for advanced analytics
+    )
 
 
 class CustomerAnalytics(BaseModel):

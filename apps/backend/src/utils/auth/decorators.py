@@ -5,11 +5,15 @@ Provides FastAPI dependencies for enforcing role requirements.
 """
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from fastapi import Depends, HTTPException, status
 
 from .dependencies import get_current_user, get_current_user_oauth
 from .roles import UserRole, normalize_role
+
+if TYPE_CHECKING:
+    from .permissions import Permission
 
 
 def superadmin_required(user=Depends(get_current_user_oauth)):
@@ -108,7 +112,9 @@ def require_admin() -> Callable:
 
 def require_customer_support() -> Callable:
     """Require CUSTOMER_SUPPORT, ADMIN, or SUPER_ADMIN role (customer-facing operations)."""
-    return require_role([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT])
+    return require_role(
+        [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    )
 
 
 def require_station_manager() -> Callable:
@@ -126,3 +132,29 @@ def require_any_admin() -> Callable:
             UserRole.STATION_MANAGER,
         ]
     )
+
+
+def require_permissions(allowed_roles: list[UserRole]) -> Callable:
+    """
+    Dependency factory to require specific permissions.
+
+    This is a wrapper around require_role that accepts Permission class attributes
+    (which are lists of UserRole).
+
+    Usage:
+        from utils.auth import Permission, require_permissions
+
+        @router.get("/payments")
+        async def get_payments(
+            current_user: dict = Depends(require_permissions(Permission.MANAGE_PAYMENTS))
+        ):
+            # Only users with MANAGE_PAYMENTS permission can access
+            ...
+
+    Args:
+        allowed_roles: Permission class attribute (list of roles that can access)
+
+    Returns:
+        Dependency function that validates user has required permission
+    """
+    return require_role(allowed_roles)
