@@ -75,7 +75,7 @@ class PasswordResetService:
         self.db = db
         self.token_expiry_minutes = getattr(settings, "PASSWORD_RESET_EXPIRE_MINUTES", 60)
         self.max_attempts = getattr(settings, "PASSWORD_RESET_MAX_ATTEMPTS", 30)  # 30 per minute
-        self.frontend_url = getattr(settings, "FRONTEND_URL", "https://admin.myhibachichef.com")
+        self.frontend_url = getattr(settings, "FRONTEND_URL", "https://admin.mysticdatanode.net")
 
     async def request_reset(self, email: str) -> bool:
         """

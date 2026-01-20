@@ -186,7 +186,7 @@ class ReferralService(BaseService, EventTrackingMixin, NotificationMixin):
                 "reward_amount": reward_amount,
                 "status": ReferralStatus.PENDING,
                 "expires_at": referral["expires_at"].isoformat(),
-                "referral_link": f"https://myhibachi.com/book?ref={referral_code}",
+                "referral_link": f"https://myhibachichef.com/book?ref={referral_code}",
             }
 
         except Exception as e:

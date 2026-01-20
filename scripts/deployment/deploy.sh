@@ -53,22 +53,22 @@ backup_current() {
     if [ -d "$API_DIR" ]; then
         BACKUP_DIR="/var/backups/myhibachi-api-$(date +%Y%m%d-%H%M%S)"
         mkdir -p "$BACKUP_DIR"
-        
+
         # Backup application files
         if [ -d "$API_DIR/src" ]; then
             cp -r "$API_DIR/src" "$BACKUP_DIR/"
         fi
-        
+
         # Backup environment file
         if [ -f "$API_DIR/.env" ]; then
             cp "$API_DIR/.env" "$BACKUP_DIR/"
         fi
-        
+
         # Backup logs
         if [ -d "$API_DIR/logs" ]; then
             cp -r "$API_DIR/logs" "$BACKUP_DIR/"
         fi
-        
+
         success "Backup created at $BACKUP_DIR"
     else
         warning "No existing deployment found to backup"
@@ -78,24 +78,24 @@ backup_current() {
 # Setup directory structure
 setup_directories() {
     log "Setting up directory structure..."
-    
+
     # Create main directory
     mkdir -p "$API_DIR"
     mkdir -p "$API_DIR/logs"
     mkdir -p "$API_DIR/uploads"
-    
+
     # Set ownership
     chown -R www-data:www-data "$API_DIR"
-    
+
     success "Directory structure created"
 }
 
 # Clone or update repository
 update_code() {
     log "Updating application code..."
-    
+
     cd "$API_DIR"
-    
+
     if [ -d ".git" ]; then
         log "Updating existing repository..."
         sudo -u www-data git pull origin main
@@ -105,24 +105,24 @@ update_code() {
         rm -rf ./*
         sudo -u www-data git clone https://github.com/suryadizhang/mh-project- .
     fi
-    
+
     success "Code updated successfully"
 }
 
 # Setup Python virtual environment
 setup_venv() {
     log "Setting up Python virtual environment..."
-    
+
     cd "$API_DIR"
-    
+
     # Create virtual environment if it doesn't exist
     if [ ! -d "$VENV_DIR" ]; then
         sudo -u www-data python3.11 -m venv "$VENV_DIR"
     fi
-    
+
     # Activate and upgrade pip
     sudo -u www-data "$VENV_DIR/bin/pip" install --upgrade pip
-    
+
     # Install requirements
     if [ -f "apps/backend/requirements.txt" ]; then
         sudo -u www-data "$VENV_DIR/bin/pip" install -r apps/backend/requirements.txt
@@ -130,14 +130,14 @@ setup_venv() {
         error "Requirements file not found at apps/backend/requirements.txt"
         exit 1
     fi
-    
+
     success "Virtual environment configured"
 }
 
 # Setup environment variables
 setup_environment() {
     log "Setting up environment variables..."
-    
+
     if [ ! -f "$API_DIR/.env" ]; then
         if [ -f "config/environments/.env.production.template" ]; then
             cp "config/environments/.env.production.template" "$API_DIR/.env"
@@ -150,20 +150,20 @@ setup_environment() {
     else
         log "Environment file already exists, skipping template copy"
     fi
-    
+
     # Set proper permissions
     chmod 600 "$API_DIR/.env"
     chown www-data:www-data "$API_DIR/.env"
-    
+
     success "Environment configuration ready"
 }
 
 # Run database migrations
 run_migrations() {
     log "Running database migrations..."
-    
+
     cd "$API_DIR/apps/backend/src"
-    
+
     # Check if alembic is configured
     if [ -f "../alembic.ini" ]; then
         sudo -u www-data "$VENV_DIR/bin/alembic" upgrade head
@@ -176,7 +176,7 @@ run_migrations() {
 # Install systemd service
 install_service() {
     log "Installing systemd service..."
-    
+
     if [ -f "$SYSTEMD_SERVICE_SOURCE" ]; then
         cp "$SYSTEMD_SERVICE_SOURCE" "/etc/systemd/system/$SERVICE_NAME.service"
         systemctl daemon-reload
@@ -191,14 +191,14 @@ install_service() {
 # Configure Nginx
 configure_nginx() {
     log "Configuring Nginx..."
-    
+
     if [ -f "$NGINX_CONF_SOURCE" ]; then
         # For Plesk, copy to the domain's conf directory
         PLESK_CONF_DIR="/var/www/vhosts/api.myhibachichef.com/conf"
-        
+
         if [ -d "$PLESK_CONF_DIR" ]; then
             cp "$NGINX_CONF_SOURCE" "$PLESK_CONF_DIR/nginx.conf"
-            
+
             # Test nginx configuration
             nginx -t
             if [ $? -eq 0 ]; then
@@ -220,13 +220,13 @@ configure_nginx() {
 # Start services
 start_services() {
     log "Starting services..."
-    
+
     # Start the API service
     systemctl restart "$SERVICE_NAME"
-    
+
     # Wait a moment for startup
     sleep 5
-    
+
     # Check service status
     if systemctl is-active --quiet "$SERVICE_NAME"; then
         success "API service started successfully"
@@ -240,16 +240,16 @@ start_services() {
 # Health check
 health_check() {
     log "Performing health check..."
-    
+
     # Wait a bit more for the service to fully start
     sleep 10
-    
+
     # Test the health endpoint
     if curl -f -s http://127.0.0.1:8000/health > /dev/null; then
         success "Health check passed - API is responding"
-        
+
         # Test the public endpoint
-        if curl -f -s https://api.myhibachichef.com/health > /dev/null; then
+        if curl -f -s https://mhapi.mysticdatanode.net/health > /dev/null; then
             success "Public endpoint health check passed"
         else
             warning "Public endpoint health check failed - check DNS/SSL"
@@ -273,12 +273,12 @@ show_deployment_info() {
     echo "Virtual Environment: $VENV_DIR"
     echo ""
     echo "Endpoints:"
-    echo "- Health: https://api.myhibachichef.com/health"
-    echo "- API Docs: https://api.myhibachichef.com/docs"
-    echo "- Operational: https://api.myhibachichef.com/v1/"
-    echo "- AI: https://api.myhibachichef.com/v1/ai/"
-    echo "- Webhooks: https://api.myhibachichef.com/webhooks/"
-    echo "- WebSockets: wss://api.myhibachichef.com/ws/"
+    echo "- Health: https://mhapi.mysticdatanode.net/health"
+    echo "- API Docs: https://mhapi.mysticdatanode.net/docs"
+    echo "- Operational: https://mhapi.mysticdatanode.net/v1/"
+    echo "- AI: https://mhapi.mysticdatanode.net/v1/ai/"
+    echo "- Webhooks: https://mhapi.mysticdatanode.net/webhooks/"
+    echo "- WebSockets: wss://mhapi.mysticdatanode.net/ws/"
     echo ""
     echo "Rate Limits:"
     echo "- Public: 20 req/min, 1000 req/hour"
@@ -296,16 +296,16 @@ show_deployment_info() {
 main() {
     log "Starting My Hibachi Chef CRM Unified API Deployment"
     log "=================================================="
-    
+
     # Pre-deployment checks
     check_permissions
-    
+
     # Stop service if running
     if systemctl is-active --quiet "$SERVICE_NAME"; then
         log "Stopping existing service..."
         systemctl stop "$SERVICE_NAME"
     fi
-    
+
     # Deployment steps
     backup_current
     setup_directories
@@ -317,12 +317,12 @@ main() {
     configure_nginx
     start_services
     health_check
-    
+
     # Success message
     success "🎉 Deployment completed successfully!"
     show_deployment_info
-    
-    log "Unified API deployment complete. All operational and AI endpoints are now available at api.myhibachichef.com"
+
+    log "Unified API deployment complete. All operational and AI endpoints are now available at mhapi.mysticdatanode.net"
 }
 
 # Help function

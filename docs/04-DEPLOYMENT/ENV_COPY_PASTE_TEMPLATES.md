@@ -407,7 +407,7 @@ SECRET_KEY=<64-random-characters>
 ENCRYPTION_KEY=<64-random-characters>
 
 # Update to production URLs
-CORS_ORIGINS=https://myhibachichef.com,https://admin.myhibachichef.com
+CORS_ORIGINS=https://myhibachichef.com,https://admin.mysticdatanode.net
 CUSTOMER_APP_URL=https://myhibachichef.com
 
 # Set production environment
@@ -422,7 +422,7 @@ STRIPE_WEBHOOK_SECRET=whsec_YOUR_LIVE_WEBHOOK_SECRET
 
 ### Customer Frontend
 ```bash
-NEXT_PUBLIC_API_URL=https://api.myhibachichef.com
+NEXT_PUBLIC_API_URL=https://mhapi.mysticdatanode.net
 NEXT_PUBLIC_APP_URL=https://myhibachichef.com
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_YOUR_LIVE_KEY_HERE
 NODE_ENV=production
@@ -430,7 +430,7 @@ NODE_ENV=production
 
 ### Admin Frontend
 ```bash
-NEXT_PUBLIC_API_URL=https://api.myhibachichef.com
+NEXT_PUBLIC_API_URL=https://mhapi.mysticdatanode.net
 NEXT_PUBLIC_AI_API_URL=https://ai.myhibachichef.com
 NODE_ENV=production
 ```

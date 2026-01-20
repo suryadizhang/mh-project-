@@ -102,7 +102,7 @@ SECRET_KEY=<64-random-characters>  # Generate with: openssl rand -hex 32
 ENCRYPTION_KEY=<64-random-characters>
 DEBUG=False
 ENVIRONMENT=production
-CORS_ORIGINS=https://myhibachichef.com,https://admin.myhibachichef.com
+CORS_ORIGINS=https://myhibachichef.com,https://admin.mysticdatanode.net
 
 # Stripe - Use LIVE keys
 STRIPE_SECRET_KEY=sk_live_...

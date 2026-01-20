@@ -183,7 +183,7 @@ function Test-AdminPanel {
 function Test-BackendApi {
     Write-Info "🔧 Monitoring Backend API (FastAPI)"
     
-    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://api.myhibachichef.com" }
+    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://mhapi.mysticdatanode.net" }
     
     if (!(Test-ApiHealth $backendUrl "Backend API")) {
         return $false
@@ -210,7 +210,7 @@ function Test-BackendApi {
 function Test-Database {
     Write-Info "🗄️ Monitoring Database Connectivity"
     
-    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://api.myhibachichef.com" }
+    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://mhapi.mysticdatanode.net" }
     
     try {
         $response = Invoke-RestMethod -Uri "$backendUrl/health/dependencies" -TimeoutSec 10 -ErrorAction Stop
@@ -232,7 +232,7 @@ function Test-Database {
 function Test-Redis {
     Write-Info "📦 Monitoring Redis Connectivity"
     
-    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://api.myhibachichef.com" }
+    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://mhapi.mysticdatanode.net" }
     
     try {
         $response = Invoke-RestMethod -Uri "$backendUrl/health/dependencies" -TimeoutSec 10 -ErrorAction Stop
@@ -254,7 +254,7 @@ function Test-Redis {
 function Test-ExternalApis {
     Write-Info "🌐 Monitoring External API Dependencies"
     
-    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://api.myhibachichef.com" }
+    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://mhapi.mysticdatanode.net" }
     
     try {
         $response = Invoke-RestMethod -Uri "$backendUrl/health/dependencies" -TimeoutSec 15 -ErrorAction Stop
@@ -283,7 +283,7 @@ function Test-ExternalApis {
 function Test-GsmIntegration {
     Write-Info "🔐 Monitoring GSM Secret Management"
     
-    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://api.myhibachichef.com" }
+    $backendUrl = if ($env:BACKEND_URL) { $env:BACKEND_URL } else { "https://mhapi.mysticdatanode.net" }
     
     try {
         $response = Invoke-RestMethod -Uri "$backendUrl/health/config" -TimeoutSec 10 -ErrorAction Stop

@@ -22,7 +22,7 @@ EMAIL_FROM_ADDRESS=cs@myhibachichef.com
 EMAIL_FROM_NAME=MyHibachi Chef Team
 
 # Frontend URL for email links
-FRONTEND_URL=https://admin.myhibachichef.com
+FRONTEND_URL=https://admin.mysticdatanode.net
 
 # ==================== IONOS SMTP (Customer Emails) ====================
 # For customer-facing communications (approvals, welcome, etc.)

@@ -115,7 +115,7 @@ switch ($choice) {
     "4" {
         Write-Host "`n🌐 Running Production Tests..." -ForegroundColor Cyan
         
-        $prodUrl = Read-Host "Enter production URL (e.g., https://myhibachi.com)"
+        $prodUrl = Read-Host "Enter production URL (e.g., https://myhibachichef.com)"
         
         if ([string]::IsNullOrWhiteSpace($prodUrl)) {
             Write-Host "❌ No URL provided" -ForegroundColor Red

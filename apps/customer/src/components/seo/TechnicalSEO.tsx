@@ -28,7 +28,7 @@ function generateEnhancedMetadata({
   openGraph,
   location,
 }: TechnicalSEOProps): Metadata {
-  const baseUrl = 'https://myhibachi.com';
+  const baseUrl = 'https://myhibachichef.com';
   const fullCanonicalUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
 
   return {
@@ -135,10 +135,10 @@ function LocalBusinessSchema({
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': `${url || 'https://myhibachi.com'}#LocalBusiness`,
+    '@id': `${url || 'https://myhibachichef.com'}#LocalBusiness`,
     name: businessName,
     description: description || `Professional hibachi catering service in ${location}`,
-    url: url || 'https://myhibachi.com',
+    url: url || 'https://myhibachichef.com',
     telephone: '+1-555-HIBACHI',
     email: 'info@myhibachi.com',
 
@@ -266,7 +266,7 @@ function BreadcrumbSchema({ items }: { items: Array<{ name: string; url: string 
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: `https://myhibachi.com${item.url}`,
+      item: `https://myhibachichef.com${item.url}`,
     })),
   };
 
@@ -320,12 +320,12 @@ function EventSchema({
     organizer: {
       '@type': 'Organization',
       name: organizer,
-      url: 'https://myhibachi.com',
+      url: 'https://myhibachichef.com',
     },
 
     offers: {
       '@type': 'Offer',
-      url: 'https://myhibachi.com/booking',
+      url: 'https://myhibachichef.com/booking',
       price: 'Contact for pricing',
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',

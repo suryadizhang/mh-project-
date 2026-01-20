@@ -11,17 +11,17 @@ export const generateBlogListingStructuredData = () => {
     name: 'My Hibachi Blog',
     description:
       'Complete hibachi catering guides for every event: birthdays, weddings, corporate events, pool parties, and more. Expert tips for Bay Area, Sacramento, San Jose celebrations.',
-    url: 'https://myhibachi.com/blog',
+    url: 'https://myhibachichef.com/blog',
     publisher: {
       '@type': 'Organization',
       name: 'My Hibachi',
-      url: 'https://myhibachi.com'
+      url: 'https://myhibachichef.com'
     },
     blogPost: blogPosts.map((post: BlogPost) => ({
       '@type': 'BlogPosting',
       headline: post.title,
       description: post.excerpt,
-      url: `https://myhibachi.com/blog/${post.slug}`,
+      url: `https://myhibachichef.com/blog/${post.slug}`,
       datePublished: new Date(post.date).toISOString(),
       author: {
         '@type': 'Person',
@@ -293,14 +293,14 @@ export const getRelatedContentSuggestions = (currentPost: BlogPost) => {
 export const getBlogPostsWithSEO = () => {
   return blogPosts.map((post: BlogPost) => ({
     ...post,
-    fullUrl: `https://myhibachi.com/blog/${post.slug}`,
+    fullUrl: `https://myhibachichef.com/blog/${post.slug}`,
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'BlogPosting',
       headline: post.title,
       description: post.excerpt,
-      image: 'https://myhibachi.com/images/hibachi-og.jpg', // Add your OG image
-      url: `https://myhibachi.com/blog/${post.slug}`,
+      image: 'https://myhibachichef.com/images/hibachi-og.jpg', // Add your OG image
+      url: `https://myhibachichef.com/blog/${post.slug}`,
       datePublished: new Date(post.date).toISOString(),
       dateModified: new Date(post.date).toISOString(),
       author: {
@@ -310,7 +310,7 @@ export const getBlogPostsWithSEO = () => {
       publisher: {
         '@type': 'Organization',
         name: 'My Hibachi',
-        url: 'https://myhibachi.com'
+        url: 'https://myhibachichef.com'
       },
       keywords: post.keywords.join(', '),
       articleSection: post.category,

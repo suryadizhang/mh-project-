@@ -1,8 +1,19 @@
 """
 Create Admin User Script for MyHibachi Production
 Run this on the server to create a test admin user.
+
+Usage:
+    ADMIN_PASSWORD=YourSecurePassword python create_admin_user.py
+
+Environment Variables:
+    ADMIN_EMAIL     - Admin email (default: admin@myhibachichef.com)
+    ADMIN_PASSWORD  - Admin password (REQUIRED - must be set via env var)
+    ADMIN_FIRST_NAME - First name (default: Admin)
+    ADMIN_LAST_NAME  - Last name (default: MyHibachi)
 """
 
+import os
+import sys
 from uuid import uuid4
 
 from passlib.context import CryptContext
@@ -12,11 +23,17 @@ pwd_context = CryptContext(
     schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12
 )
 
-# Admin user details
-ADMIN_EMAIL = "admin@myhibachichef.com"
-ADMIN_PASSWORD = "Admin2025!Secure"  # Will be hashed
-ADMIN_FIRST_NAME = "Admin"
-ADMIN_LAST_NAME = "MyHibachi"
+# Admin user details from environment variables
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@myhibachichef.com")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_FIRST_NAME = os.getenv("ADMIN_FIRST_NAME", "Admin")
+ADMIN_LAST_NAME = os.getenv("ADMIN_LAST_NAME", "MyHibachi")
+
+# Validate password is provided
+if not ADMIN_PASSWORD:
+    print("ERROR: ADMIN_PASSWORD environment variable is required!")
+    print("Usage: ADMIN_PASSWORD=YourSecurePassword python create_admin_user.py")
+    sys.exit(1)
 
 # Hash the password
 password_hash = pwd_context.hash(ADMIN_PASSWORD)
@@ -133,4 +150,6 @@ with open("/tmp/create_admin_user.sql", "w") as f:
 print("\nSQL saved to /tmp/create_admin_user.sql")
 print("\nCredentials:")
 print(f"  Email: {ADMIN_EMAIL}")
-print(f"  Password: {ADMIN_PASSWORD}")
+print(f"  Password: (set via ADMIN_PASSWORD environment variable)")
+print("\nTo run the SQL:")
+print("  psql -d myhibachi_production -f /tmp/create_admin_user.sql")

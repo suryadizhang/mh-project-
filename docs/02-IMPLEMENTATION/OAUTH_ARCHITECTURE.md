@@ -245,7 +245,7 @@ Add to `.env` and GSM:
 ```env
 {PROVIDER}_CLIENT_ID=your_client_id
 {PROVIDER}_CLIENT_SECRET=your_client_secret
-{PROVIDER}_REDIRECT_URI=https://api.myhibachichef.com/auth/{provider}/callback
+{PROVIDER}_REDIRECT_URI=https://mhapi.mysticdatanode.net/auth/{provider}/callback
 ```
 
 ---
@@ -359,12 +359,12 @@ OAuth users can optionally enable MFA as additional security layer.
 
 ### Staging
 
-- Callbacks use: `https://staging-api.myhibachichef.com/...`
+- Callbacks use: `https://staging.mhapi.mysticdatanode.net/...`
 - Separate OAuth app credentials for staging
 
 ### Production
 
-- Callbacks use: `https://api.myhibachichef.com/...`
+- Callbacks use: `https://mhapi.mysticdatanode.net/...`
 - Production OAuth app credentials in GSM
 
 ---

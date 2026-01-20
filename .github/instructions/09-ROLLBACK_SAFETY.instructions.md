@@ -121,7 +121,7 @@ git log -1 --format="%H %s"
 git push origin main
 
 # 4. Verify health
-curl https://api.myhibachi.com/health
+curl https://mhapi.mysticdatanode.net/health
 
 # 5. Monitor for 30 minutes
 # Watch logs, error rates, response times
@@ -188,7 +188,7 @@ curl https://api.myhibachi.com/health
 
 ```bash
 # Backend health
-curl https://api.myhibachi.com/health
+curl https://mhapi.mysticdatanode.net/health
 
 # Database connections
 psql -c "SELECT count(*) FROM pg_stat_activity;"

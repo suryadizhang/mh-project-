@@ -518,7 +518,7 @@ async def login(request: Request):
 ```python
 # Only allow specific origins
 origins = [
-    "https://admin.myhibachi.com",
+    "https://admin.mysticdatanode.net",
     "http://localhost:3000"  # Development only
 ]
 ```

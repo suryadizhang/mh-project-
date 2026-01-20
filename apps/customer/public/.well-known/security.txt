@@ -1,9 +1,9 @@
 Contact: mailto:security@myhibachi.com
 Expires: 2026-09-01T00:00:00.000Z
-Encryption: https://myhibachi.com/.well-known/pgp-key.txt
-Acknowledgments: https://myhibachi.com/security/acknowledgments
-Policy: https://myhibachi.com/security/policy
-Hiring: https://myhibachi.com/careers
+Encryption: https://myhibachichef.com/.well-known/pgp-key.txt
+Acknowledgments: https://myhibachichef.com/security/acknowledgments
+Policy: https://myhibachichef.com/security/policy
+Hiring: https://myhibachichef.com/careers
 
 # Security Policy
 

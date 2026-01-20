@@ -479,10 +479,10 @@ psql -d myhibachi_staging -c "\d bookings"
 psql -d myhibachi_staging -c "SELECT COUNT(*) FROM bookings"
 
 # Verify application health
-curl https://staging-api.myhibachi.com/health
+curl https://staging.mhapi.mysticdatanode.net/health
 
 # Run integration tests against staging
-pytest tests/integration/ --base-url=https://staging-api.myhibachi.com
+pytest tests/integration/ --base-url=https://staging.mhapi.mysticdatanode.net
 ```
 
 ---

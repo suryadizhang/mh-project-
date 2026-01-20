@@ -113,14 +113,14 @@ curl http://127.0.0.1:8003/health
 
 ```bash
 # Should return HTTP 200
-curl https://myhibachi.com/health
+curl https://myhibachichef.com/health
 
 # Check which backend served request
-curl -I https://myhibachi.com/health | grep X-Backend-Server
+curl -I https://myhibachichef.com/health | grep X-Backend-Server
 
 # Make 30 requests and verify distribution
 for i in {1..30}; do
-  curl -s -I https://myhibachi.com/health | grep X-Backend-Server
+  curl -s -I https://myhibachichef.com/health | grep X-Backend-Server
 done | sort | uniq -c
 ```
 
@@ -128,10 +128,10 @@ done | sort | uniq -c
 
 ```bash
 # Should show Let's Encrypt certificate
-curl -vI https://myhibachi.com 2>&1 | grep -A 10 "SSL certificate"
+curl -vI https://myhibachichef.com 2>&1 | grep -A 10 "SSL certificate"
 
 # Or use online tool:
-# https://www.ssllabs.com/ssltest/analyze.html?d=myhibachi.com
+# https://www.ssllabs.com/ssltest/analyze.html?d=myhibachichef.com
 ```
 
 ### **4. Check Systemd Services**

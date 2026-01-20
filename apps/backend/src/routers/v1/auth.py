@@ -959,7 +959,7 @@ class PasswordResetRequest(BaseModel):
 
     ## Reset Link Format:
     ```
-    https://myhibachi.com/reset-password?token=<reset_token>
+    https://myhibachichef.com/reset-password?token=<reset_token>
     ```
 
     ## Request Body:

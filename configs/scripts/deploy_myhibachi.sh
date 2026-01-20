@@ -1,19 +1,19 @@
 #!/bin/bash
 # MyHibachi Zero-Downtime Deployment Script
 # Location: /usr/local/bin/deploy_myhibachi.sh
-# 
+#
 # This script performs a rolling deployment across all backend instances,
 # ensuring zero downtime by restarting one instance at a time and verifying
 # health before proceeding to the next.
-# 
+#
 # Usage:
 #   sudo /usr/local/bin/deploy_myhibachi.sh
-# 
+#
 # Prerequisites:
 #   - Git repository configured in backend directory
 #   - Python virtual environment at .venv/
 #   - Systemd services: myhibachi-backend@1, @2, @3
-# 
+#
 # Exit codes:
 #   0 - Success
 #   1 - Deployment failed (instance didn't start)
@@ -103,34 +103,34 @@ log "Starting rolling restart of backend instances..."
 
 for instance in "${INSTANCES[@]}"; do
     log "Restarting instance $instance..."
-    
+
     # Restart the service
     systemctl restart "myhibachi-backend@$instance.service"
-    
+
     # Wait for instance to be healthy
     log "Waiting for instance $instance to be healthy..."
-    
+
     healthy=false
     for attempt in $(seq 1 $HEALTH_CHECK_ATTEMPTS); do
         sleep $HEALTH_CHECK_DELAY
-        
+
         response=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:800$instance/health" || echo "000")
-        
+
         if [ "$response" == "200" ]; then
             log "Instance $instance is healthy (HTTP 200)"
             healthy=true
             break
         fi
-        
+
         warn "Instance $instance not ready yet (attempt $attempt/$HEALTH_CHECK_ATTEMPTS, HTTP $response)"
     done
-    
+
     if [ "$healthy" = false ]; then
         error "Instance $instance failed to start after $HEALTH_CHECK_ATTEMPTS attempts!"
         error "Check logs: journalctl -u myhibachi-backend@$instance.service -n 50"
         exit 1
     fi
-    
+
     # Wait additional time before next instance (allows stabilization)
     if [ "$instance" != "${INSTANCES[-1]}" ]; then
         log "Waiting 10 seconds before restarting next instance..."
@@ -160,7 +160,7 @@ fi
 # Step 6: Final health check via load balancer
 log "Testing load balancer health..."
 
-lb_response=$(curl -s -o /dev/null -w "%{http_code}" "https://myhibachi.com/health" || echo "000")
+lb_response=$(curl -s -o /dev/null -w "%{http_code}" "https://myhibachichef.com/health" || echo "000")
 
 if [ "$lb_response" == "200" ]; then
     log "Load balancer health check: OK (HTTP 200) ✓"
@@ -178,7 +178,7 @@ log ""
 log "Next steps:"
 log "  - Monitor logs: journalctl -u myhibachi-backend@*.service -f"
 log "  - Check Nginx access logs: tail -f /var/www/vhosts/myhibachi.com/logs/access_ssl_log"
-log "  - Verify load distribution: curl -I https://myhibachi.com/health | grep X-Backend-Server"
+log "  - Verify load distribution: curl -I https://myhibachichef.com/health | grep X-Backend-Server"
 echo ""
 
 exit 0

@@ -32,13 +32,12 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 ### Scope
 
 **Covered Services:**
-- ✅ FastAPI Backend (api.myhibachi.com:8003)
-- ✅ AI Backend (ai-api.myhibachi.com:8002)
-- ✅ Customer Frontend (myhibachi.com) - Vercel
-- ✅ Admin Frontend (admin.myhibachi.com) - Vercel
+- ✅ FastAPI Backend (mhapi.mysticdatanode.net)
+- ✅ Customer Frontend (myhibachichef.com) - Vercel
+- ✅ Admin Frontend (admin.mysticdatanode.net) - Vercel
 - ✅ PostgreSQL Database
 - ✅ Redis Cache
-- ✅ Load Balancer (Nginx)
+- ✅ Load Balancer (Apache httpd)
 
 **Infrastructure:**
 - VPS Plesk (Backend services)
@@ -93,7 +92,7 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 
 #### Frontend Services (Vercel)
 
-**Customer App** (`https://myhibachi.com`)
+**Customer App** (`https://myhibachichef.com`)
 - **Framework:** Next.js 15.5.4 (App Router)
 - **Deployment:** Automatic on `main` branch push
 - **Build Time:** ~2-3 minutes
@@ -101,7 +100,7 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 - **Environment:** Production
 - **SSL:** Auto-managed by Vercel
 
-**Admin App** (`https://admin.myhibachi.com`)
+**Admin App** (`https://admin.mysticdatanode.net`)
 - **Framework:** Next.js 15.5.4 (App Router)
 - **Deployment:** Automatic on `main` branch push
 - **Build Time:** ~1-2 minutes
@@ -111,23 +110,17 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 
 #### Backend Services (VPS Plesk)
 
-**Main API** (`https://api.myhibachi.com:8003`)
-- **Framework:** FastAPI 0.104.1
+**Main API** (`https://mhapi.mysticdatanode.net`)
+- **Framework:** FastAPI 0.109+
 - **Runtime:** Python 3.11.0
 - **WSGI:** Gunicorn (4 workers)
-- **Dependencies:** 53 packages
+- **Dependencies:** 53+ packages
 - **Database:** PostgreSQL (asyncpg)
 - **Cache:** Redis
 - **Health Check:** `/health`
 - **Metrics:** `/metrics`
-
-**AI API** (`https://ai-api.myhibachi.com:8002`)
-- **Framework:** FastAPI 0.104.1
-- **Runtime:** Python 3.11.0
-- **WSGI:** Gunicorn (2 workers)
-- **Dependencies:** 29 packages
-- **AI Provider:** OpenAI GPT-4
-- **Health Check:** `/health`
+- **Note:** AI endpoints integrated into main API (no separate AI service)
+- **Port:** 8000 (reverse proxied via Apache httpd)
 - **Rate Limit:** 60 req/min
 
 #### Database Services
@@ -269,10 +262,9 @@ docker compose -f docker-compose.prod.yml logs -f --tail=100
 sleep 30
 
 # Check Main API
-curl -f https://api.myhibachi.com:8003/health || echo "FAILED"
+curl -f https://mhapi.mysticdatanode.net/health || echo "FAILED"
 
-# Check AI API
-curl -f https://ai-api.myhibachi.com:8002/health || echo "FAILED"
+# NOTE: AI endpoints are integrated into main API, no separate AI service
 
 # Check database connection
 docker compose -f docker-compose.prod.yml exec fastapi-backend python -c "
@@ -288,14 +280,14 @@ with engine.connect() as conn:
 
 ```bash
 # Test critical endpoints
-curl -X POST https://api.myhibachi.com:8003/api/v1/public/leads \
+curl -X POST https://mhapi.mysticdatanode.net/api/v1/public/leads \
   -H "Content-Type: application/json" \
   -d '{"name":"Test User","phone":"5551234567","email":"test@example.com","source":"test"}'
 
 # Expected: {"success": true, ...}
 
-# Test AI endpoint
-curl -X POST https://ai-api.myhibachi.com:8002/api/chat \
+# Test AI endpoint (integrated into main API)
+curl -X POST https://mhapi.mysticdatanode.net/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"Hello","agent":"customer"}'
 
@@ -324,11 +316,11 @@ vercel --prod
 
 ```bash
 # Check customer app
-curl -I https://myhibachi.com
+curl -I https://myhibachichef.com
 # Expected: HTTP/2 200
 
 # Check admin app
-curl -I https://admin.myhibachi.com
+curl -I https://admin.mysticdatanode.net
 # Expected: HTTP/2 200
 
 # Check build status
@@ -340,8 +332,8 @@ vercel ls --scope=myhibachi
 **1. Health Check Dashboard**
 
 Visit internal monitoring dashboard:
-- Backend: https://api.myhibachi.com:8003/metrics
-- AI: https://ai-api.myhibachi.com:8002/metrics
+- Backend: https://mhapi.mysticdatanode.net/metrics
+- NOTE: AI endpoints are integrated into main backend (no separate AI service)
 
 **2. Functional Tests (5 minutes)**
 
@@ -501,7 +493,7 @@ service_response_time (gauge)
 **Backend Health Check:**
 
 ```bash
-GET https://api.myhibachi.com:8003/health
+GET https://mhapi.mysticdatanode.net/health
 
 Response (200 OK):
 {
@@ -514,25 +506,12 @@ Response (200 OK):
 }
 ```
 
-**AI Backend Health Check:**
-
-```bash
-GET https://ai-api.myhibachi.com:8002/health
-
-Response (200 OK):
-{
-  "status": "healthy",
-  "version": "1.1.0",
-  "openai_status": "available",
-  "rate_limit_remaining": 55,
-  "timestamp": "2025-10-25T10:30:00Z"
-}
-```
+**NOTE:** AI endpoints are integrated into main API. No separate AI backend service.
 
 **Frontend Health Check:**
 
 ```bash
-GET https://myhibachi.com/api/health
+GET https://myhibachichef.com/api/health
 
 Response (200 OK):
 {
@@ -545,8 +524,7 @@ Response (200 OK):
 ### Monitoring Dashboard URLs
 
 **Internal Dashboards:**
-- **API Metrics:** https://api.myhibachi.com:8003/metrics
-- **AI Metrics:** https://ai-api.myhibachi.com:8002/metrics
+- **API Metrics:** https://mhapi.mysticdatanode.net/metrics
 - **System Health:** Run `/opt/myhibachi/app/ops/system_health_monitor.py`
 
 **External Services:**
@@ -588,7 +566,7 @@ Response (200 OK):
 
 ```bash
 # SSH into VPS
-ssh myhibachi@vps.myhibachi.com
+ssh root@108.175.12.154
 
 # Check service status
 cd /opt/myhibachi/app
@@ -602,9 +580,8 @@ htop
 df -h
 free -m
 
-# Check health endpoints
-curl https://api.myhibachi.com:8003/health
-curl https://ai-api.myhibachi.com:8002/health
+# Check health endpoint
+curl https://mhapi.mysticdatanode.net/health
 ```
 
 **Determine Severity:**
@@ -653,7 +630,7 @@ docker compose -f docker-compose.prod.yml restart [service]
 
 # Wait and verify
 sleep 30
-curl https://api.myhibachi.com:8003/health
+curl https://mhapi.mysticdatanode.net/health
 ```
 
 **Database Issues:**
@@ -892,7 +869,7 @@ LIMIT 20;
 docker compose exec redis redis-cli INFO stats | grep hit_rate
 
 # Check network latency
-ping api.myhibachi.com
+ping mhapi.mysticdatanode.net
 ```
 
 **Resolution:**
@@ -920,7 +897,7 @@ ping api.myhibachi.com
 **Investigation:**
 ```bash
 # Check certificate expiry
-echo | openssl s_client -connect api.myhibachi.com:443 2>/dev/null | openssl x509 -noout -dates
+echo | openssl s_client -connect mhapi.mysticdatanode.net:443 2>/dev/null | openssl x509 -noout -dates
 
 # Check Let's Encrypt renewal
 sudo certbot certificates
@@ -935,7 +912,7 @@ sudo certbot renew
 sudo systemctl reload nginx
 
 # Verify
-curl -I https://api.myhibachi.com
+curl -I https://mhapi.mysticdatanode.net
 ```
 
 **Prevention:**
@@ -1021,7 +998,7 @@ docker compose logs -f --tail=100
 
 ```bash
 # Health checks
-curl https://api.myhibachi.com:8003/health
+curl https://mhapi.mysticdatanode.net/health
 
 # Smoke tests
 pytest tests/test_smoke.py -v
@@ -1107,8 +1084,7 @@ cd /opt/myhibachi/app
 python3 ops/system_health_monitor.py --once
 
 # Expected output:
-# ✅ Backend API: Healthy
-# ✅ AI API: Healthy
+# ✅ Backend API: Healthy (includes integrated AI)
 # ✅ Database: Connected
 # ✅ Redis: Connected
 # ✅ Disk Space: 45% used
@@ -1122,19 +1098,18 @@ python3 ops/system_health_monitor.py --once
 
 ```bash
 # 1. Check service status
-ssh myhibachi@vps.myhibachi.com
+ssh root@108.175.12.154
 cd /opt/myhibachi/app
 docker compose -f docker-compose.prod.yml ps
 
 # All services should show "Up"
 
-# 2. Check health endpoints
-curl https://api.myhibachi.com:8003/health
-curl https://ai-api.myhibachi.com:8002/health
+# 2. Check health endpoint
+curl https://mhapi.mysticdatanode.net/health
 
 # 3. Check frontend
-curl -I https://myhibachi.com
-curl -I https://admin.myhibachi.com
+curl -I https://myhibachichef.com
+curl -I https://admin.mysticdatanode.net
 
 # 4. Check error logs (last hour)
 docker compose logs --since 1h | grep "ERROR"
@@ -1146,7 +1121,7 @@ docker compose logs --since 1h | grep "ERROR"
 # Visit https://uptimerobot.com dashboard
 
 # 7. Review metrics
-curl https://api.myhibachi.com:8003/metrics | grep "error"
+curl https://mhapi.mysticdatanode.net/metrics | grep "error"
 ```
 
 **Weekly Health Check (30 minutes):**
@@ -1454,7 +1429,7 @@ docker compose restart
 **Investigation:**
 ```bash
 # Check certificate
-echo | openssl s_client -connect api.myhibachi.com:443 2>/dev/null | openssl x509 -noout -dates
+echo | openssl s_client -connect mhapi.mysticdatanode.net:443 2>/dev/null | openssl x509 -noout -dates
 
 # Check Nginx config
 sudo nginx -t
@@ -1665,7 +1640,7 @@ SELECT count(*) FROM customers;
 docker compose -f docker-compose.prod.yml start fastapi-backend
 
 # Verify service
-curl https://api.myhibachi.com:8003/health
+curl https://mhapi.mysticdatanode.net/health
 ```
 
 **Point-in-Time Restore:**
@@ -1693,7 +1668,7 @@ git checkout [commit-hash]
 docker compose -f docker-compose.prod.yml up -d --build
 
 # Verify
-curl https://api.myhibachi.com:8003/health
+curl https://mhapi.mysticdatanode.net/health
 ```
 
 ### Disaster Scenarios
@@ -1883,7 +1858,7 @@ JWT_ALGORITHM=HS256
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 # CORS
-CORS_ORIGINS=["https://myhibachi.com","https://admin.myhibachi.com"]
+CORS_ORIGINS=["https://myhibachichef.com","https://admin.mysticdatanode.net"]
 
 # External APIs
 STRIPE_PUBLISHABLE_KEY=pk_live_...
@@ -1941,7 +1916,7 @@ docker compose -f docker-compose.prod.yml restart [service]
 docker compose -f docker-compose.prod.yml logs -f [service]
 
 # Health checks
-curl https://api.myhibachi.com:8003/health
+curl https://mhapi.mysticdatanode.net/health
 ./ops/system_health_monitor.py --once
 
 # Database

@@ -240,7 +240,7 @@ All endpoints require authentication via Bearer token:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     https://api.myhibachi.com/stations
+     https://mhapi.mysticdatanode.net/stations
 ```
 
 **Permissions Required**:

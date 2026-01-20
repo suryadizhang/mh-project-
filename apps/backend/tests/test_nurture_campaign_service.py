@@ -177,7 +177,7 @@ class TestNurtureCampaignService:
         """Test handling link click in campaign."""
         # Arrange
         lead_id = test_lead.id
-        response_data = {"link": "https://myhibachi.com/menu", "timestamp": datetime.utcnow().isoformat()}
+        response_data = {"link": "https://myhibachichef.com/menu", "timestamp": datetime.utcnow().isoformat()}
 
         # Act
         result = await mock_campaign_service.handle_response(

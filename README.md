@@ -520,7 +520,7 @@ Service files are provided in `systemd/` directory for VPS deployment.
 
 - **Email**: myhibachichef@gmail.com
 - **Phone**: (916) 740-8768
-- **Website**: [myhibachi.com](https://myhibachi.com)
+- **Website**: [myhibachichef.com](https://myhibachichef.com)
 
 ## 📄 License
 
