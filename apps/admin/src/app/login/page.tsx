@@ -335,15 +335,6 @@ function LoginContent() {
         </div>
       </div>
 
-      <div className="flex items-center justify-end">
-        <Link
-          href="/forgot-password"
-          className="text-sm font-medium text-blue-600 hover:text-blue-500"
-        >
-          Forgot your password?
-        </Link>
-      </div>
-
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
           {error}
@@ -387,12 +378,6 @@ function LoginContent() {
         <GoogleSignInButton />
       </GoogleOAuthProvider>
 
-      <div className="text-center">
-        <p className="text-sm text-gray-600">Demo credentials:</p>
-        <p className="text-xs text-gray-500 mt-1">
-          Email: admin@myhibachi.com | Password: admin123
-        </p>
-      </div>
     </form>
   );
 
