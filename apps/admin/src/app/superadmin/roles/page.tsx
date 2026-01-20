@@ -82,13 +82,13 @@ export default function RoleManagementPage() {
 
       // Load roles, permissions, and users in parallel
       const [rolesRes, permsRes, usersRes] = await Promise.all([
-        fetch(`${apiUrl}/admin/roles`, {
+        fetch(`${apiUrl}/api/admin/roles`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${apiUrl}/admin/roles/permissions/all`, {
+        fetch(`${apiUrl}/api/admin/roles/permissions/all`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${apiUrl}/admin/users`, {
+        fetch(`${apiUrl}/api/admin/users`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -117,7 +117,7 @@ export default function RoleManagementPage() {
     try {
       const token = tokenManager.getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/roles/users/${userId}/permissions`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/roles/users/${userId}/permissions`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -144,7 +144,7 @@ export default function RoleManagementPage() {
       setAssigningRole(true);
       const token = tokenManager.getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/roles/users/${selectedUser.id}/roles`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/roles/users/${selectedUser.id}/roles`,
         {
           method: 'POST',
           headers: {
@@ -181,7 +181,7 @@ export default function RoleManagementPage() {
     try {
       const token = tokenManager.getToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/roles/users/${selectedUser.id}/roles/${roleId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/roles/users/${selectedUser.id}/roles/${roleId}`,
         {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
