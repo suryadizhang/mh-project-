@@ -359,7 +359,7 @@ OAuth users can optionally enable MFA as additional security layer.
 
 ### Staging
 
-- Callbacks use: `https://staging.mhapi.mysticdatanode.net/...`
+- Callbacks use: `https://staging-api.mysticdatanode.net/...`
 - Separate OAuth app credentials for staging
 
 ### Production

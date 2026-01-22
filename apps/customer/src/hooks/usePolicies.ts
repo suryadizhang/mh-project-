@@ -86,7 +86,7 @@ export interface UsePoliciesReturn {
   /** Has data been loaded successfully */
   hasData: boolean;
   /** Refetch policies from API */
-  refetch: () => Promise<void>;
+  refetch: () => Promise;
 
   // Convenience accessors - undefined if not loaded
   depositText?: string;
