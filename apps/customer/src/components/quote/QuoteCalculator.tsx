@@ -113,7 +113,7 @@ interface FormInputProps {
   icon?: React.ReactNode;
   min?: number;
   max?: number;
-  ref?: React.RefObject;
+  ref?: React.RefObject<HTMLInputElement>;
   autoComplete?: string;
 }
 
