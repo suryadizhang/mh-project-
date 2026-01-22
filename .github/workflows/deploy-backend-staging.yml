@@ -180,7 +180,7 @@ jobs:
 
           # Test staging health endpoint (if publicly accessible)
           # Adjust URL to your staging domain
-          # response=$(curl -s -o /dev/null -w "%{http_code}" https://staging.mhapi.mysticdatanode.net/api/health)
+          # response=$(curl -s -o /dev/null -w "%{http_code}" https://staging-api.mysticdatanode.net/api/health)
           # if [ "$response" = "200" ]; then
           #   echo "✅ Staging health check passed (HTTP $response)"
           # else
