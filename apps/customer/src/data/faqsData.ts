@@ -11,6 +11,11 @@
  * - {{PARTY_MINIMUM}} - Minimum party total
  * - {{FREE_TRAVEL_MILES}} - Free travel radius
  * - {{COST_PER_MILE}} - Cost per mile after free radius
+ * - {{DEPOSIT_AMOUNT}} - Deposit amount in dollars (e.g., 100)
+ * - {{DEPOSIT_REFUNDABLE_DAYS}} - Days before event for deposit refund (e.g., 4)
+ * - {{GUEST_COUNT_FINALIZE_HOURS}} - Hours before event to finalize guest count (e.g., 24)
+ * - {{MENU_CHANGE_CUTOFF_HOURS}} - Hours before event when menu changes not allowed (e.g., 12)
+ * - {{FREE_RESCHEDULE_HOURS}} - Hours before event for free reschedule (e.g., 24)
  */
 
 export type FaqItem = {
@@ -140,7 +145,7 @@ export const faqs: FaqItem[] = [
     id: 'how-to-book',
     question: 'How do I book My Hibachi Chef?',
     answer:
-      'Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and $100 refundable deposit (refundable if canceled 48+ hours before event).',
+      'Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and ${{DEPOSIT_AMOUNT}} refundable deposit (refundable if canceled {{DEPOSIT_REFUNDABLE_DAYS}}+ days before event).',
     category: 'Booking & Payments',
     subcategory: 'How to Book',
     tags: ['booking', 'online', 'text', '48 hours', '$100 deposit', 'refundable'],
@@ -151,7 +156,7 @@ export const faqs: FaqItem[] = [
     id: 'deposit-policy',
     question: "What's the deposit policy?",
     answer:
-      '$100 refundable deposit secures your date and is deducted from final bill. Deposit is refundable if canceled 48+ hours before event, non-refundable within 48 hours. Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
+      '${{DEPOSIT_AMOUNT}} refundable deposit secures your date and is deducted from final bill. Deposit is refundable if canceled {{DEPOSIT_REFUNDABLE_DAYS}}+ days before event, non-refundable within {{DEPOSIT_REFUNDABLE_DAYS}} days. Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
     category: 'Booking & Payments',
     subcategory: 'Deposits & Balance',
     tags: ['$100 deposit', 'refundable', '48 hours', 'deducted', 'final bill'],
@@ -432,10 +437,10 @@ export const faqs: FaqItem[] = [
     id: 'menu-change-deadline',
     question: 'Can I change my menu close to the event date?',
     answer:
-      'Menu changes are NOT allowed within 12 hours of your event. We prepare fresh ingredients specifically for your party based on your menu selections. Please finalize your menu at least 12 hours before your event date to ensure we have proper ingredients prepared.',
+      'Menu changes are NOT allowed within {{MENU_CHANGE_CUTOFF_HOURS}} hours of your event. We prepare fresh ingredients specifically for your party based on your menu selections. Please finalize your menu at least {{MENU_CHANGE_CUTOFF_HOURS}} hours before your event date to ensure we have proper ingredients prepared.',
     category: 'Booking & Payments',
     subcategory: 'Modifying a Booking',
-    tags: ['menu changes', '12 hours', 'deadline', 'fresh ingredients', 'finalize menu'],
+    tags: ['menu changes', 'menu cutoff hours', 'deadline', 'fresh ingredients', 'finalize menu'],
     confidence: 'high',
     source_urls: ['/book-us/'],
   },
@@ -443,10 +448,17 @@ export const faqs: FaqItem[] = [
     id: 'guest-count-changes',
     question: 'When do I need to finalize my guest count?',
     answer:
-      'Final guest count is required 24+ hours before your event. We prepare fresh ingredients specifically for your party size, so accurate guest counts ensure proper portions. If your guest count changes significantly within 24 hours, contact us immediately at (916) 740-8768 and we will do our best to accommodate, but this cannot be guaranteed.',
+      'Final guest count is required {{GUEST_COUNT_FINALIZE_HOURS}}+ hours before your event. We prepare fresh ingredients specifically for your party size, so accurate guest counts ensure proper portions. If your guest count changes significantly within {{GUEST_COUNT_FINALIZE_HOURS}} hours, contact us immediately at (916) 740-8768 and we will do our best to accommodate, but this cannot be guaranteed.',
     category: 'Policies (Cancellation, Weather, Refunds)',
     subcategory: 'Cancellation & Changes',
-    tags: ['guest count', '24 hours', 'finalize', 'party size', 'changes', 'fresh ingredients'],
+    tags: [
+      'guest count',
+      'guest count hours',
+      'finalize',
+      'party size',
+      'changes',
+      'fresh ingredients',
+    ],
     confidence: 'high',
     source_urls: ['/book-us/'],
   },
@@ -465,10 +477,10 @@ export const faqs: FaqItem[] = [
     id: 'reschedule-timing',
     question: 'When can I reschedule my event for free?',
     answer:
-      'One free reschedule is allowed if requested 24+ hours before your event. This gives us time to adjust our chef schedule and ingredient preparation. Reschedules requested within 24 hours of the event or additional reschedules cost $200. This covers our preparation costs and chef scheduling.',
+      'One free reschedule is allowed if requested {{FREE_RESCHEDULE_HOURS}}+ hours before your event. This gives us time to adjust our chef schedule and ingredient preparation. Reschedules requested within {{FREE_RESCHEDULE_HOURS}} hours of the event or additional reschedules cost $200. This covers our preparation costs and chef scheduling.',
     category: 'Policies (Cancellation, Weather, Refunds)',
     subcategory: 'Cancellation & Changes',
-    tags: ['reschedule', 'free reschedule', '24 hours', '$200 fee', 'chef schedule'],
+    tags: ['reschedule', 'free reschedule', 'reschedule hours', '$200 fee', 'chef schedule'],
     confidence: 'high',
     source_urls: ['/book-us/'],
   },
@@ -478,17 +490,17 @@ export const faqs: FaqItem[] = [
     id: 'cancellation-policy',
     question: "What's your cancellation policy?",
     answer:
-      '$100 deposit is refundable if canceled 48+ hours before event, non-refundable within 48 hours. One free reschedule allowed if requested 24+ hours before event; additional reschedules cost $200. Menu changes not allowed within 12 hours of event. No refund for ordered food as we cannot keep food out of refrigeration for more than 4 hours.',
+      '${{DEPOSIT_AMOUNT}} deposit is refundable if canceled {{DEPOSIT_REFUNDABLE_DAYS}}+ days before event, non-refundable within {{DEPOSIT_REFUNDABLE_DAYS}} days. One free reschedule allowed if requested {{FREE_RESCHEDULE_HOURS}}+ hours before event; additional reschedules cost $200. Menu changes not allowed within {{MENU_CHANGE_CUTOFF_HOURS}} hours of event. No refund for ordered food as we cannot keep food out of refrigeration for more than 4 hours.',
     category: 'Policies (Cancellation, Weather, Refunds)',
     subcategory: 'Cancellation & Changes',
     tags: [
       '48 hours',
       'deposit refundable',
       'free reschedule',
-      '24 hours',
+      'reschedule hours',
       '$200 fee',
       'menu changes',
-      '12 hours',
+      'menu cutoff hours',
       'food safety',
     ],
     confidence: 'high',
@@ -602,7 +614,7 @@ export const faqs: FaqItem[] = [
     id: 'why-deposit-required',
     question: 'Why is a deposit required?',
     answer:
-      'The $100 deposit confirms your reservation and helps us prepare fresh ingredients specifically for your party. It also ensures commitment from both sides and covers our preparation costs. The deposit is deducted from your final bill on party day.',
+      'The ${{DEPOSIT_AMOUNT}} deposit confirms your reservation and helps us prepare fresh ingredients specifically for your party. It also ensures commitment from both sides and covers our preparation costs. The deposit is deducted from your final bill on party day.',
     category: 'Booking & Payments',
     subcategory: 'Deposits & Balance',
     tags: ['deposit explanation', 'reservation confirmation', 'preparation costs'],
@@ -835,7 +847,7 @@ export const allTags = [
   'requirements',
   'cancellation',
   'refund',
-  '7 days',
+  '4 days',
   'reschedule',
   'weather',
   'rain',

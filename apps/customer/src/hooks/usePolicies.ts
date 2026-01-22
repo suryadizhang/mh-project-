@@ -13,7 +13,7 @@
  *
  *   // Access pre-formatted policy text - values already injected by backend
  *   <p>{policies.deposit.text}</p>  // "Your $100 deposit is fully refundable..."
- *   <p>{policies.cancellation.text}</p>  // "Full refund if canceled 7+ days before..."
+ *   <p>{policies.cancellation.text}</p>  // "Full refund if canceled 4+ days before..."
  *
  * CRITICAL: Per SSoT architecture (20-SINGLE_SOURCE_OF_TRUTH.instructions.md)
  * - API is the single source of truth
@@ -130,22 +130,27 @@ export function usePolicies(): UsePoliciesReturn {
           refund_days: data.deposit?.refund_days ?? data.deposit_refundable_days ?? 0,
           text:
             data.deposit?.text ??
-            `$${data.deposit?.amount ?? data.deposit_amount ?? 100} deposit required, refundable if canceled ${data.deposit?.refund_days ?? data.deposit_refundable_days ?? 7}+ days before event.`,
+            `$${
+              data.deposit?.amount ?? data.deposit_amount ?? 100
+            } deposit required, refundable if canceled ${
+              data.deposit?.refund_days ?? data.deposit_refundable_days ?? 4
+            }+ days before event.`,
         },
         cancellation: {
           refund_days:
-            data.cancellation?.refund_days ?? data.deposit?.refund_days ?? data.refund_days ?? 7,
+            data.cancellation?.refund_days ?? data.deposit?.refund_days ?? data.refund_days ?? 4,
           text:
             data.cancellation?.text ??
-            `Full refund if canceled ${data.cancellation?.refund_days ?? 7}+ days before event.`,
+            `Full refund if canceled ${data.cancellation?.refund_days ?? 4}+ days before event.`,
         },
         travel: {
           free_miles: data.travel?.free_miles ?? data.free_miles ?? 0,
-          per_mile_rate:
-            data.travel?.per_mile_rate ?? (data.travel?.per_mile_cents ?? 0) / 100,
+          per_mile_rate: data.travel?.per_mile_rate ?? (data.travel?.per_mile_cents ?? 0) / 100,
           text:
             data.travel?.text ??
-            `First ${data.travel?.free_miles ?? 30} miles free, then $${data.travel?.per_mile_rate ?? 2}/mile.`,
+            `First ${data.travel?.free_miles ?? 30} miles free, then $${
+              data.travel?.per_mile_rate ?? 2
+            }/mile.`,
         },
         booking: {
           advance_hours: data.booking?.advance_hours ?? data.min_advance_hours ?? 0,

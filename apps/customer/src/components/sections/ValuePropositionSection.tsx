@@ -206,6 +206,7 @@ export default function ValuePropositionSection() {
     depositAmount,
     freeMiles,
     perMileRate,
+    minAdvanceHours,
     isLoading: pricingLoading,
   } = usePricing();
 
@@ -219,6 +220,8 @@ export default function ValuePropositionSection() {
     pricingLoading || depositAmount === undefined ? '...' : depositAmount;
   const displayFreeMiles = pricingLoading || freeMiles === undefined ? 30 : freeMiles;
   const displayPerMileRate = pricingLoading || perMileRate === undefined ? 2 : perMileRate;
+  const displayMinAdvanceHours =
+    pricingLoading || minAdvanceHours === undefined ? 48 : minAdvanceHours;
 
   return (
     <section className="value-proposition-section bg-gradient-to-br from-gray-50 to-gray-100 py-20">
@@ -470,7 +473,9 @@ export default function ValuePropositionSection() {
               <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm">
                 <Zap className="mx-auto mb-2 h-8 w-8" />
                 <h4 className="font-bold">Minimum Notice</h4>
-                <p className="text-sm text-red-100">48 hours required for all bookings</p>
+                <p className="text-sm text-red-100">
+                  {displayMinAdvanceHours} hours required for all bookings
+                </p>
               </div>
             </div>
 

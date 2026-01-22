@@ -82,26 +82,21 @@ Campaign models: From db.models.newsletter (schema: newsletter → crm)
 """
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
-from uuid import UUID
 from decimal import Decimal
 from enum import Enum
+from typing import TYPE_CHECKING, List, Optional
+from uuid import UUID
 
-from sqlalchemy import (
-    String,
-    Text,
-    Integer,
-    Boolean,
-    DateTime,
-    Numeric,
-    ForeignKey,
-    Index,
-    CheckConstraint,
-    Enum as SQLEnum,
-)
-from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
+from sqlalchemy import Boolean, CheckConstraint, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
+
+# Import shared enums (SSoT - Single Source of Truth)
+from db.models.enums import SocialPlatform, SocialThreadStatus
 
 # MIGRATED: from models.base → ..base_class (NEW unified architecture)
 from ..base_class import Base
@@ -204,22 +199,8 @@ class CampaignEventType(str, Enum):
 # ENUMS - Social Media
 # ============================================================================
 
-
-class SocialPlatform(str, Enum):
-    """Social media platforms"""
-
-    INSTAGRAM = "instagram"
-    FACEBOOK = "facebook"
-    GOOGLE = "google"
-    YELP = "yelp"
-
-
-class SocialThreadStatus(str, Enum):
-    """Social conversation status"""
-
-    OPEN = "open"
-    PENDING = "pending"
-    RESOLVED = "resolved"
+# SocialPlatform and SocialThreadStatus are imported from db.models.enums
+# See: apps/backend/src/db/models/enums/social.py
 
 
 # ============================================================================
@@ -286,7 +267,9 @@ class Contact(Base):
     first_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     last_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
-    phone_number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+    phone_number: Mapped[Optional[str]] = mapped_column(
+        String(20), nullable=True, index=True
+    )
 
     # Social media handles
     facebook_handle: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
@@ -303,7 +286,9 @@ class Contact(Base):
     )  # Flexible storage for additional data
 
     # Status
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="true"
+    )
     is_verified: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )  # Email/phone verified
@@ -400,7 +385,8 @@ class Lead(Base):
 
     # Source & Attribution
     source: Mapped[LeadSource] = mapped_column(
-        SQLEnum(LeadSource, name="lead_source", schema="public", create_type=False), nullable=False
+        SQLEnum(LeadSource, name="lead_source", schema="public", create_type=False),
+        nullable=False,
     )
     utm_source: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     utm_medium: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
@@ -413,16 +399,21 @@ class Lead(Base):
         default=LeadStatus.NEW,
     )
     quality: Mapped[Optional[LeadQuality]] = mapped_column(
-        SQLEnum(LeadQuality, name="lead_quality", schema="public", create_type=False), nullable=True
+        SQLEnum(LeadQuality, name="lead_quality", schema="public", create_type=False),
+        nullable=True,
     )
-    score: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
+    score: Mapped[Decimal] = mapped_column(
+        Numeric(5, 2), nullable=False, default=Decimal("0")
+    )
 
     # Assignment
     assigned_to: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
     # Customer Link (when converted)
     customer_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("core.customers.id", ondelete="SET NULL"), nullable=True
+        PGUUID(as_uuid=True),
+        ForeignKey("core.customers.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
     # Follow-up & Conversion
@@ -444,16 +435,24 @@ class Lead(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships to lead schema tables
     contacts: Mapped[List["LeadContact"]] = relationship(
         "LeadContact", back_populates="lead", cascade="all, delete-orphan"
     )
     context: Mapped[Optional["LeadContext"]] = relationship(
-        "LeadContext", back_populates="lead", uselist=False, cascade="all, delete-orphan"
+        "LeadContext",
+        back_populates="lead",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
     events: Mapped[List["LeadEvent"]] = relationship(
         "LeadEvent", back_populates="lead", cascade="all, delete-orphan"
@@ -542,7 +541,10 @@ class CustomerSegment(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -567,7 +569,10 @@ class SegmentRule(Base):
     """
 
     __tablename__ = "segment_rules"
-    __table_args__ = (Index("idx_crm_segment_rules_segment", "segment_id"), {"schema": "crm"})
+    __table_args__ = (
+        Index("idx_crm_segment_rules_segment", "segment_id"),
+        {"schema": "crm"},
+    )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(
@@ -585,7 +590,10 @@ class SegmentRule(Base):
     field_name: Mapped[str] = mapped_column(String(100), nullable=False)
     operator: Mapped[SegmentRuleOperator] = mapped_column(
         SQLEnum(
-            SegmentRuleOperator, name="segment_rule_operator", schema="public", create_type=False
+            SegmentRuleOperator,
+            name="segment_rule_operator",
+            schema="public",
+            create_type=False,
         ),
         nullable=False,
     )
@@ -631,4 +639,6 @@ __all__ = [
 __schema__ = "crm"
 __table_args__ = {"schema": "crm"}
 __version__ = "1.0.0"
-__description__ = "CRM Schema Models - Lead management, campaigns, customer segmentation"
+__description__ = (
+    "CRM Schema Models - Lead management, campaigns, customer segmentation"
+)

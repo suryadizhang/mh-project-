@@ -12,24 +12,25 @@ Run: python scripts/seed_ai_training_data.py
 """
 
 import asyncio
-from datetime import datetime
 import os
-from dotenv import load_dotenv
-import asyncpg
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import knowledge base models
 import sys
+from datetime import datetime
+
+import asyncpg
+from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import AsyncSession
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from models.knowledge_base import (
     BusinessRule,
     FAQItem,
+    KnowledgeCache,
+    SeasonalOffer,
     TrainingData,
     UpsellRule,
-    SeasonalOffer,
-    KnowledgeCache,
 )
 
 load_dotenv()
@@ -125,8 +126,13 @@ async def seed_business_rules(session: AsyncSession):
         BusinessRule(
             rule_type="deposit",
             title="Deposit Requirement",
-            content="$100 refundable deposit secures your date and is deducted from final bill. Refundable if canceled 7+ days before event.",
-            value={"amount": 100, "currency": "USD", "refundable": True, "refund_days": 7},
+            content="$100 refundable deposit secures your date and is deducted from final bill. Refundable if canceled 4+ days before event.",
+            value={
+                "amount": 100,
+                "currency": "USD",
+                "refundable": True,
+                "refund_days": 4,
+            },
             is_active=True,
             updated_by="seed_script",
         ),
@@ -135,7 +141,12 @@ async def seed_business_rules(session: AsyncSession):
             title="Accepted Payment Methods",
             content="Payment methods accepted for deposit and final balance",
             value={
-                "deposit": ["online", "venmo_business", "zelle_business", "credit_card"],
+                "deposit": [
+                    "online",
+                    "venmo_business",
+                    "zelle_business",
+                    "credit_card",
+                ],
                 "balance": ["venmo_business", "zelle_business", "cash", "credit_card"],
             },
             is_active=True,
@@ -144,17 +155,17 @@ async def seed_business_rules(session: AsyncSession):
         # Cancellation Policy
         BusinessRule(
             rule_type="cancellation",
-            title="Cancellation Policy - 7+ Days",
-            content="Full refund if canceled 7+ days before event",
-            value={"days_before": 7, "refund_percent": 100},
+            title="Cancellation Policy - 4+ Days",
+            content="Full refund if canceled 4+ days before event",
+            value={"days_before": 4, "refund_percent": 100},
             is_active=True,
             updated_by="seed_script",
         ),
         BusinessRule(
             rule_type="cancellation",
-            title="Cancellation Policy - Within 7 Days",
-            content="$100 deposit is non-refundable for cancellations within 7 days of event",
-            value={"days_before": 7, "refund_percent": 0, "forfeit_deposit": True},
+            title="Cancellation Policy - Within 4 Days",
+            content="$100 deposit is non-refundable for cancellations within 4 days of event",
+            value={"days_before": 4, "refund_percent": 0, "forfeit_deposit": True},
             is_active=True,
             updated_by="seed_script",
         ),
@@ -230,7 +241,9 @@ async def seed_business_rules(session: AsyncSession):
     for rule in rules:
         session.add(rule)
 
-    print(f"   ✅ Added {len(rules)} business rules (pricing, deposit, cancellation, travel, etc.)")
+    print(
+        f"   ✅ Added {len(rules)} business rules (pricing, deposit, cancellation, travel, etc.)"
+    )
 
 
 async def seed_faqs(session: AsyncSession):
@@ -282,7 +295,15 @@ async def seed_faqs(session: AsyncSession):
             answer="Each guest chooses 2 proteins: Chicken, NY Strip Steak, Shrimp, Scallops, Salmon, or Tofu. Plus fried rice, vegetables, salad, sauces, and sake for adults 21+.",
             category="Menu & Upgrades",
             subcategory="Included Items",
-            tags=["2 proteins", "chicken", "steak", "shrimp", "rice", "vegetables", "sake"],
+            tags=[
+                "2 proteins",
+                "chicken",
+                "steak",
+                "shrimp",
+                "rice",
+                "vegetables",
+                "sake",
+            ],
             source_urls=["/menu"],
             is_active=True,
         ),
@@ -332,16 +353,23 @@ async def seed_faqs(session: AsyncSession):
         # Booking & Payments
         FAQItem(
             question="How do I book My Hibachi Chef?",
-            answer="Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and $100 refundable deposit (refundable if canceled 7+ days before event).",
+            answer="Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and $100 refundable deposit (refundable if canceled 4+ days before event).",
             category="Booking & Payments",
             subcategory="How to Book",
-            tags=["booking", "online", "text", "48 hours", "$100 deposit", "refundable"],
+            tags=[
+                "booking",
+                "online",
+                "text",
+                "48 hours",
+                "$100 deposit",
+                "refundable",
+            ],
             source_urls=["/BookUs"],
             is_active=True,
         ),
         FAQItem(
             question="What's the deposit policy?",
-            answer="$100 refundable deposit secures your date and is deducted from final bill (refundable if canceled 7+ days before event). Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.",
+            answer="$100 refundable deposit secures your date and is deducted from final bill (refundable if canceled 4+ days before event). Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.",
             category="Booking & Payments",
             subcategory="Deposits & Balance",
             tags=["$100 deposit", "refundable", "deducted", "final bill"],
@@ -381,7 +409,13 @@ async def seed_faqs(session: AsyncSession):
             answer="We serve the Bay Area, Sacramento, Central Valley, and coastal/mountain communities throughout Northern California. Text (916) 740-8768 with your zip code for confirmation.",
             category="Travel & Service Area",
             subcategory="Coverage Radius",
-            tags=["bay area", "sacramento", "central valley", "zip code", "confirmation"],
+            tags=[
+                "bay area",
+                "sacramento",
+                "central valley",
+                "zip code",
+                "confirmation",
+            ],
             source_urls=["/contact"],
             is_active=True,
         ),
@@ -391,7 +425,13 @@ async def seed_faqs(session: AsyncSession):
             answer='Clear area 68.3"L × 27.5"W × 41.3"H for our grill. Need level ground, outdoor space or well-ventilated indoor area, and table access so guests can watch the show.',
             category="On-Site Setup & Requirements",
             subcategory="Space & Ventilation",
-            tags=["68x27x41 inches", "level ground", "outdoor", "ventilated", "table access"],
+            tags=[
+                "68x27x41 inches",
+                "level ground",
+                "outdoor",
+                "ventilated",
+                "table access",
+            ],
             source_urls=["/BookUs"],
             is_active=True,
         ),
@@ -400,7 +440,13 @@ async def seed_faqs(session: AsyncSession):
             answer="U-shape with chef's grill at the open end so everyone watches the show. Two 8-foot tables seat ~10 people, three 6-foot tables handle 12-15 guests.",
             category="On-Site Setup & Requirements",
             subcategory="Table Setup",
-            tags=["u-shape", "8-foot tables", "10 people", "6-foot tables", "12-15 guests"],
+            tags=[
+                "u-shape",
+                "8-foot tables",
+                "10 people",
+                "6-foot tables",
+                "12-15 guests",
+            ],
             source_urls=[],
             is_active=True,
         ),
@@ -409,7 +455,13 @@ async def seed_faqs(session: AsyncSession):
             answer="Outdoor preferred for safety, but indoor possible with high ceilings and excellent ventilation. Must handle smoke and propane safely. Email cs@myhibachichef.com to discuss indoor requirements.",
             category="On-Site Setup & Requirements",
             subcategory="Indoor vs Outdoor",
-            tags=["outdoor preferred", "indoor possible", "high ceilings", "ventilation", "smoke"],
+            tags=[
+                "outdoor preferred",
+                "indoor possible",
+                "high ceilings",
+                "ventilation",
+                "smoke",
+            ],
             source_urls=[],
             is_active=True,
         ),
@@ -443,10 +495,16 @@ async def seed_faqs(session: AsyncSession):
         # Policies (Cancellation, Weather, Refunds)
         FAQItem(
             question="What's your cancellation policy?",
-            answer="Full refund if canceled 7+ days before event. $100 deposit is refundable for cancellations 7+ days before event, non-refundable within 7 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.",
+            answer="Full refund if canceled 4+ days before event. $100 deposit is refundable for cancellations 4+ days before event, non-refundable within 4 days. One free reschedule if requested 24+ hours before event; additional reschedules cost $200.",
             category="Policies (Cancellation, Weather, Refunds)",
             subcategory="Cancellation & Changes",
-            tags=["7 days", "full refund", "deposit refundable", "free reschedule", "$100 fee"],
+            tags=[
+                "4 days",
+                "full refund",
+                "deposit refundable",
+                "free reschedule",
+                "$200 fee",
+            ],
             source_urls=["/BookUs"],
             is_active=True,
         ),
@@ -465,7 +523,13 @@ async def seed_faqs(session: AsyncSession):
             answer="Absolutely! Birthday parties are our specialty. Chefs make the show extra fun and family-friendly, accommodate dietary needs, and make the birthday person feel special. Book 48+ hours ahead!",
             category="Kids & Special Occasions",
             subcategory="Birthdays/Anniversaries",
-            tags=["birthday", "special events", "family-friendly", "dietary needs", "48 hours"],
+            tags=[
+                "birthday",
+                "special events",
+                "family-friendly",
+                "dietary needs",
+                "48 hours",
+            ],
             source_urls=[],
             is_active=True,
         ),
@@ -475,7 +539,14 @@ async def seed_faqs(session: AsyncSession):
             answer="Text (916) 740-8768 for fastest response, or email cs@myhibachichef.com. Follow @my_hibachi_chef on Instagram and Facebook. Usually respond within 1-2 hours during business hours.",
             category="Contact & Response Times",
             subcategory="Best Way to Reach",
-            tags=["text", "916-740-8768", "email", "instagram", "facebook", "1-2 hours"],
+            tags=[
+                "text",
+                "916-740-8768",
+                "email",
+                "instagram",
+                "facebook",
+                "1-2 hours",
+            ],
             source_urls=["/contact"],
             is_active=True,
         ),
@@ -520,7 +591,7 @@ async def seed_training_data(session: AsyncSession):
         ),
         TrainingData(
             customer_message="What is your cancellation policy?",
-            agent_response="Thank you for your inquiry. Our cancellation policy is as follows:\n\n**Cancellation Policy:**\n\n**More than 7 days before event:**\n- Full refund of all payments\n- No cancellation fee\n\n**Within 7 days before event:**\n- $100 deposit is non-refundable\n- No refund of remaining balance\n\n**Rescheduling:**\n- One free reschedule within 48 hours of booking\n- Additional reschedules: $100 fee\n\n**Exceptions:**\n- Weather emergencies\n- Medical emergencies (documentation required)\n\n**To cancel or reschedule:**\nPlease contact us at (916) 740-8768 or cs@myhibachichef.com with your booking reference number.\n\nMay I assist you with anything else regarding our policies?",
+            agent_response="Thank you for your inquiry. Our cancellation policy is as follows:\n\n**Cancellation Policy:**\n\n**More than 4 days before event:**\n- Full refund of all payments\n- No cancellation fee\n\n**Within 4 days before event:**\n- $100 deposit is non-refundable\n- No refund of remaining balance\n\n**Rescheduling:**\n- One free reschedule if requested 24+ hours before event\n- Additional reschedules: $200 fee\n\n**Exceptions:**\n- Weather emergencies\n- Medical emergencies (documentation required)\n\n**To cancel or reschedule:**\nPlease contact us at (916) 740-8768 or cs@myhibachichef.com with your booking reference number.\n\nMay I assist you with anything else regarding our policies?",
             customer_tone="formal",
             agent_type="knowledge",
             booking_context={},
@@ -553,7 +624,7 @@ async def seed_training_data(session: AsyncSession):
         ),
         TrainingData(
             customer_message="What's the deal with cancellations?",
-            agent_response="Good question! Here's the breakdown:\n\n**Cancellation Policy:**\n\n🟢 **Cancel 7+ days before?**\n→ Full refund, no problem!\n\n🔴 **Less than 7 days?**\n→ $100 deposit is gone, sorry friend\n\n**Rescheduling:**\n- First reschedule within 48hrs of booking? FREE!\n- After that? $100 fee\n\n**Exceptions we totally get:**\n- Bad weather (like real bad, not just rain)\n- Medical emergencies\n- Crazy unexpected stuff\n\nJust hit us up at (916) 740-8768 or cs@myhibachichef.com!\n\nNeed anything else?",
+            agent_response="Good question! Here's the breakdown:\n\n**Cancellation Policy:**\n\n🟢 **Cancel 4+ days before?**\n→ Full refund, no problem!\n\n🔴 **Less than 4 days?**\n→ $100 deposit is gone, sorry friend\n\n**Rescheduling:**\n- One free reschedule if requested 24+ hours before event\n- After that? $200 fee\n\n**Exceptions we totally get:**\n- Bad weather (like real bad, not just rain)\n- Medical emergencies\n- Crazy unexpected stuff\n\nJust hit us up at (916) 740-8768 or cs@myhibachichef.com!\n\nNeed anything else?",
             customer_tone="casual",
             agent_type="knowledge",
             booking_context={},
@@ -717,7 +788,9 @@ async def seed_upsell_rules(session: AsyncSession):
     for rule in upsell_rules:
         session.add(rule)
 
-    print(f"   ✅ Added {len(upsell_rules)} upsell rules (lobster, filet, scallops, etc.)")
+    print(
+        f"   ✅ Added {len(upsell_rules)} upsell rules (lobster, filet, scallops, etc.)"
+    )
 
 
 async def seed_seasonal_offers(session: AsyncSession):
@@ -796,14 +869,14 @@ async def seed_knowledge_cache(session: AsyncSession):
         KnowledgeCache(
             query_hash="deposit_policy",
             query_text="deposit requirement",
-            cached_response="$100 refundable deposit secures your date and is deducted from final bill. Refundable if canceled 7+ days before event.",
+            cached_response="$100 refundable deposit secures your date and is deducted from final bill. Refundable if canceled 4+ days before event.",
             source_tables=["business_rules", "faq_items"],
             is_valid=True,
         ),
         KnowledgeCache(
             query_hash="cancellation_policy",
             query_text="cancellation policy",
-            cached_response="Full refund if canceled 7+ days before event. Within 7 days, $100 deposit is non-refundable. One free reschedule within 48 hours of booking; additional reschedules cost $100.",
+            cached_response="Full refund if canceled 4+ days before event. Within 4 days, $100 deposit is non-refundable. One free reschedule if requested 24+ hours before event; additional reschedules cost $200.",
             source_tables=["business_rules", "faq_items"],
             is_valid=True,
         ),

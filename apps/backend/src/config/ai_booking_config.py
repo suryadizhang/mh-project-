@@ -109,6 +109,7 @@ def get_pricing_info() -> dict[str, Any]:
         "ssot_last_sync": _ssot_last_sync,
     }
 
+
 # ============================================================================
 # BRAND VOICE & PERSONALITY
 # ============================================================================
@@ -160,9 +161,9 @@ PRICING = {
         "gyoza": 10,
     },
     # Deposit & Fees
-    "deposit": 100,  # Refundable if canceled 7+ days before event
+    "deposit": 100,  # Refundable if canceled 4+ days before event
     "deposit_refundable": True,
-    "deposit_refund_days": 7,
+    "deposit_refund_days": 4,
     # Travel Fees
     "travel_free_miles": 30,
     "travel_per_mile": 2,
@@ -295,13 +296,18 @@ POLICIES = {
         "booking_methods": ["online", "text (916) 740-8768"],
     },
     "payment": {
-        "deposit_methods": ["online", "venmo_business", "zelle_business", "credit_card"],
+        "deposit_methods": [
+            "online",
+            "venmo_business",
+            "zelle_business",
+            "credit_card",
+        ],
         "balance_methods": ["venmo_business", "zelle_business", "cash", "credit_card"],
         "balance_due": "on event date or in advance",
     },
     "cancellation": {
-        "full_refund_days": 7,  # Cancel 7+ days before = full refund
-        "non_refundable_days": 7,  # Cancel within 7 days = no refund
+        "full_refund_days": 4,  # Cancel 4+ days before = full refund
+        "non_refundable_days": 4,  # Cancel within 4 days = no refund
     },
     "reschedule": {
         "free_within_hours": 48,  # Free reschedule within 48hrs of booking
@@ -312,7 +318,14 @@ POLICIES = {
         "policy": "Must provide overhead covering (tent, patio, garage) for rain cooking",
     },
     "dietary": {
-        "accommodations": ["Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Halal", "Kosher"],
+        "accommodations": [
+            "Vegetarian",
+            "Vegan",
+            "Gluten-free",
+            "Dairy-free",
+            "Halal",
+            "Kosher",
+        ],
         "notice_hours": 48,
     },
 }
@@ -322,7 +335,11 @@ POLICIES = {
 # ============================================================================
 
 SERVICE_AREAS = {
-    "primary": ["Sacramento", "Bay Area (San Francisco, Oakland, San Jose)", "Central Valley"],
+    "primary": [
+        "Sacramento",
+        "Bay Area (San Francisco, Oakland, San Jose)",
+        "Central Valley",
+    ],
     "extended": ["Coastal communities", "Mountain communities", "Northern California"],
     "verification": "Text (916) 740-8768 with your zip code for confirmation",
 }
@@ -332,7 +349,11 @@ SERVICE_AREAS = {
 # ============================================================================
 
 SETUP_REQUIREMENTS = {
-    "grill_dimensions": {"length": "68.3 inches", "width": "27.5 inches", "height": "41.3 inches"},
+    "grill_dimensions": {
+        "length": "68.3 inches",
+        "width": "27.5 inches",
+        "height": "41.3 inches",
+    },
     "space": {
         "requires": "Level ground, clear area for grill",
         "location": "Outdoor space or well-ventilated indoor area",
@@ -533,12 +554,24 @@ Help the customer book their perfect hibachi experience while embodying our warm
 UPSELL_RULES = {
     "priority_order": [
         # Priority: Simple add-ons (easy yes)
-        {"item": "yakisoba_noodles", "price": 5, "description": "Delicious yakisoba noodles"},
-        {"item": "extra_fried_rice", "price": 5, "description": "Extra hibachi fried rice"},
+        {
+            "item": "yakisoba_noodles",
+            "price": 5,
+            "description": "Delicious yakisoba noodles",
+        },
+        {
+            "item": "extra_fried_rice",
+            "price": 5,
+            "description": "Extra hibachi fried rice",
+        },
         {"item": "edamame", "price": 5, "description": "Fresh edamame appetizer"},
         {"item": "vegetables", "price": 5, "description": "Extra grilled vegetables"},
         # Medium: Protein add-ons
-        {"item": "extra_protein", "price": 10, "description": "Add an extra protein to your meal"},
+        {
+            "item": "extra_protein",
+            "price": 10,
+            "description": "Add an extra protein to your meal",
+        },
         {"item": "gyoza", "price": 10, "description": "Pan-fried gyoza dumplings"},
         # Premium: Special upgrades
         {"item": "lobster_tail", "price": 15, "description": "Upgrade to lobster tail"},

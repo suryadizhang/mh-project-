@@ -46,8 +46,12 @@ class PricingConfig(BaseModel):
     """Pricing configuration values (all amounts in cents)."""
 
     adult_price_cents: int = Field(..., description="Adult price per person in cents")
-    child_price_cents: int = Field(..., description="Child (6-12) price per person in cents")
-    child_free_under_age: int = Field(..., description="Age under which children are free")
+    child_price_cents: int = Field(
+        ..., description="Child (6-12) price per person in cents"
+    )
+    child_free_under_age: int = Field(
+        ..., description="Age under which children are free"
+    )
     party_minimum_cents: int = Field(..., description="Minimum party total in cents")
 
 
@@ -55,7 +59,9 @@ class TravelConfig(BaseModel):
     """Travel fee configuration."""
 
     free_miles: int = Field(..., description="Free travel radius in miles")
-    per_mile_cents: int = Field(..., description="Cost per mile in cents after free radius")
+    per_mile_cents: int = Field(
+        ..., description="Cost per mile in cents after free radius"
+    )
 
 
 class DepositConfig(BaseModel):
@@ -83,6 +89,52 @@ class GuestLimitsConfig(BaseModel):
     )
 
 
+class TimingConfig(BaseModel):
+    """Timing and deadline configuration (all values in hours unless noted)."""
+
+    menu_change_cutoff_hours: int = Field(
+        ..., description="Hours before event when menu changes are no longer allowed"
+    )
+    guest_count_finalize_hours: int = Field(
+        ..., description="Hours before event when guest count must be finalized"
+    )
+    free_reschedule_hours: int = Field(
+        ..., description="Hours before event to reschedule for free"
+    )
+
+
+class ServiceConfig(BaseModel):
+    """Service duration and logistics configuration (all values in minutes)."""
+
+    standard_duration_minutes: int = Field(
+        ..., description="Standard service duration in minutes"
+    )
+    extended_duration_minutes: int = Field(
+        ..., description="Maximum extended service duration for large parties"
+    )
+    chef_arrival_minutes_before: int = Field(
+        ..., description="Minutes before event when chef arrives"
+    )
+
+
+class PolicyConfig(BaseModel):
+    """Policy configuration for fees and limits."""
+
+    reschedule_fee_cents: int = Field(
+        ..., description="Fee for late rescheduling in cents"
+    )
+    free_reschedule_count: int = Field(
+        ..., description="Number of free reschedules allowed"
+    )
+
+
+class ContactConfig(BaseModel):
+    """Business contact information."""
+
+    business_phone: str = Field(..., description="Business phone number")
+    business_email: str = Field(..., description="Business email address")
+
+
 class BusinessConfigResponse(BaseModel):
     """
     Complete business configuration response.
@@ -95,6 +147,10 @@ class BusinessConfigResponse(BaseModel):
     travel: TravelConfig
     deposit: DepositConfig
     booking: BookingConfig
+    timing: TimingConfig
+    service: ServiceConfig
+    policy: PolicyConfig
+    contact: ContactConfig
     guest_limits: Optional[GuestLimitsConfig] = None
     source: str = Field(default="api", description="Data source for debugging")
 
@@ -111,7 +167,9 @@ class DepositPolicy(BaseModel):
     """Deposit policy with amount and human-readable text."""
 
     amount: int = Field(..., description="Deposit amount in dollars")
-    refund_days: int = Field(..., description="Days before event for refund eligibility")
+    refund_days: int = Field(
+        ..., description="Days before event for refund eligibility"
+    )
     text: str = Field(..., description="Human-readable policy text")
 
 
@@ -196,6 +254,24 @@ async def get_all_config(
             ),
             booking=BookingConfig(
                 min_advance_hours=config.min_advance_hours,
+            ),
+            timing=TimingConfig(
+                menu_change_cutoff_hours=config.menu_change_cutoff_hours,
+                guest_count_finalize_hours=config.guest_count_finalize_hours,
+                free_reschedule_hours=config.free_reschedule_hours,
+            ),
+            service=ServiceConfig(
+                standard_duration_minutes=config.standard_duration_minutes,
+                extended_duration_minutes=config.extended_duration_minutes,
+                chef_arrival_minutes_before=config.chef_arrival_minutes_before,
+            ),
+            policy=PolicyConfig(
+                reschedule_fee_cents=config.reschedule_fee_cents,
+                free_reschedule_count=config.free_reschedule_count,
+            ),
+            contact=ContactConfig(
+                business_phone=config.business_phone,
+                business_email=config.business_email,
             ),
             guest_limits=GuestLimitsConfig(
                 minimum=1,

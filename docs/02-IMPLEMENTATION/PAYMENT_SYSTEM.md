@@ -132,6 +132,15 @@ apps/backend/src/routers/v1/stripe/
 | `/api/v1/stripe/payments`              | GET    | List customer's payments       |
 | `/api/v1/stripe/invoices`              | GET    | List customer's invoices       |
 | `/api/v1/stripe/dashboard`             | GET    | Customer payment dashboard     |
+| `/api/v1/stripe/calculate-total`       | GET    | Calculate total with tax       |
+| `/api/v1/stripe/suggested-tips`        | GET    | Get suggested tip amounts      |
+| `/api/v1/stripe/lookup`                | POST   | Lookup customer by phone/email |
+
+### Public Endpoints (No Auth Required)
+
+| Endpoint                         | Method | Description              |
+| -------------------------------- | ------ | ------------------------ |
+| `/api/v1/public/quote/calculate` | POST   | Calculate quote estimate |
 
 ### Admin Endpoints
 
@@ -145,6 +154,146 @@ apps/backend/src/routers/v1/stripe/
 | Endpoint                 | Method | Description           |
 | ------------------------ | ------ | --------------------- |
 | `/api/v1/stripe/webhook` | POST   | Receive Stripe events |
+
+### New Endpoint Details
+
+#### Calculate Total with Tax
+
+**GET** `/api/v1/stripe/calculate-total`
+
+Calculates total payment including tax. Tips and travel fees are
+excluded from taxable amount.
+
+**Query Parameters:**
+
+| Parameter          | Type | Required | Description                       |
+| ------------------ | ---- | -------- | --------------------------------- |
+| `balance_cents`    | int  | Yes      | Remaining balance in cents        |
+| `travel_fee_cents` | int  | Yes      | Travel fee in cents (not taxable) |
+| `tip_cents`        | int  | Yes      | Tip amount in cents (not taxable) |
+
+**Response:**
+
+```json
+{
+  "taxable_amount_cents": 48000,
+  "tax_amount_cents": 3960,
+  "travel_fee_cents": 2000,
+  "tip_cents": 1000,
+  "subtotal_cents": 50000,
+  "total_cents": 54960,
+  "tax_rate": 0.0825
+}
+```
+
+#### Suggested Tips
+
+**GET** `/api/v1/stripe/suggested-tips`
+
+Returns suggested tip amounts based on percentage of subtotal.
+
+**Query Parameters:**
+
+| Parameter      | Type | Required | Description       |
+| -------------- | ---- | -------- | ----------------- |
+| `amount_cents` | int  | Yes      | Subtotal in cents |
+
+**Response:**
+
+```json
+{
+  "tip_20_percent": 10000,
+  "tip_25_percent": 12500,
+  "tip_30_percent": 15000,
+  "tip_35_percent": 17500
+}
+```
+
+#### Customer Lookup
+
+**POST** `/api/v1/stripe/lookup`
+
+Lookup customer and their unpaid bookings by phone or email.
+
+**Request Body:**
+
+```json
+{
+  "phone": "+15551234567",
+  "email": "customer@example.com"
+}
+```
+
+_At least one of `phone` or `email` is required._
+
+**Query Parameters:**
+
+| Parameter  | Type  | Required | Description                |
+| ---------- | ----- | -------- | -------------------------- |
+| `tax_rate` | float | No       | Tax rate (default: 0.0825) |
+
+**Response:**
+
+```json
+{
+  "customer_id": "uuid",
+  "customer_name": "John Doe",
+  "unpaid_bookings": [
+    {
+      "booking_id": "uuid",
+      "event_date": "2025-02-15",
+      "balance_due_cents": 50000,
+      "total_cents": 60000,
+      "deposit_paid_cents": 10000
+    }
+  ],
+  "loyalty_tier": "Gold",
+  "total_lifetime_spent_cents": 250000
+}
+```
+
+#### Public Quote Calculator
+
+**POST** `/api/v1/public/quote/calculate`
+
+Calculate an instant quote without authentication.
+
+**Request Body:**
+
+```json
+{
+  "adults": 10,
+  "children": 2,
+  "salmon": 2,
+  "filet_mignon": 3,
+  "lobster_tail": 1,
+  "venue_address": "123 Main St, Fremont, CA 94539"
+}
+```
+
+**Required Fields:** `adults` (1-100)
+
+**Optional Fields:** `children`, `salmon`, `scallops`, `filet_mignon`,
+`lobster_tail`, `extra_proteins`, `yakisoba_noodles`,
+`extra_fried_rice`, `extra_vegetables`, `edamame`, `gyoza`,
+`venue_address`, `zip_code`, `venue_lat`, `venue_lng`
+
+**Response:**
+
+```json
+{
+  "subtotal_cents": 68500,
+  "travel_fee_cents": 2000,
+  "tax_cents": 5651,
+  "total_cents": 76151,
+  "breakdown": {
+    "base_price_cents": 55000,
+    "children_price_cents": 6000,
+    "upgrades_cents": 5500,
+    "addons_cents": 2000
+  }
+}
+```
 
 ## Receipt Emails
 

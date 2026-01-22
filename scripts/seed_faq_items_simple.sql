@@ -149,7 +149,7 @@ INSERT INTO faq_items (question, answer, category, view_count, helpful_count, is
 
 INSERT INTO faq_items (question, answer, category, view_count, helpful_count, is_active) VALUES
 ('What''s your cancellation policy?',
- 'Full refund if canceled 7+ days before event. $100 deposit is refundable for cancellations 7+ days before event, non-refundable within 7 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.',
+ 'Full refund if canceled 4+ days before event. $100 deposit is refundable for cancellations 4+ days before event, non-refundable within 4 days. One free reschedule if requested 24+ hours before event; additional reschedules cost $200.',
  'Policies', 0, 0, true),
 
 ('What happens if it rains?',

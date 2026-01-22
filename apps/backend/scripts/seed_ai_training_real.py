@@ -24,11 +24,12 @@ Run: python scripts/seed_ai_training_real.py
 """
 
 import asyncio
+import json
 import os
 from datetime import datetime
-import json
-from dotenv import load_dotenv
+
 import asyncpg
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -113,20 +114,26 @@ async def seed_business_rules(conn):
             "pricing",
             "Party Minimum",
             "Minimum party spend requirement",
-            json.dumps({"party_minimum": 550, "currency": "USD", "equivalent": "10 adults"}),
+            json.dumps(
+                {"party_minimum": 550, "currency": "USD", "equivalent": "10 adults"}
+            ),
         ),
         (
             "pricing",
             "Free Under 5",
             "Children ages 5 and under eat free with adult purchase",
-            json.dumps({"age_limit": 5, "includes": ["1 protein", "small rice portion"]}),
+            json.dumps(
+                {"age_limit": 5, "includes": ["1 protein", "small rice portion"]}
+            ),
         ),
         # Deposit & Payment
         (
             "deposit",
             "Deposit Requirement",
-            "$100 refundable deposit secures your date and is deducted from final bill. Refundable if canceled 7+ days before event.",
-            json.dumps({"amount": 100, "currency": "USD", "refundable": True, "refund_days": 7}),
+            "$100 refundable deposit secures your date and is deducted from final bill. Refundable if canceled 4+ days before event.",
+            json.dumps(
+                {"amount": 100, "currency": "USD", "refundable": True, "refund_days": 4}
+            ),
         ),
         (
             "payment",
@@ -134,29 +141,41 @@ async def seed_business_rules(conn):
             "Payment methods accepted for deposit and final balance",
             json.dumps(
                 {
-                    "deposit": ["online", "venmo_business", "zelle_business", "credit_card"],
-                    "balance": ["venmo_business", "zelle_business", "cash", "credit_card"],
+                    "deposit": [
+                        "online",
+                        "venmo_business",
+                        "zelle_business",
+                        "credit_card",
+                    ],
+                    "balance": [
+                        "venmo_business",
+                        "zelle_business",
+                        "cash",
+                        "credit_card",
+                    ],
                 }
             ),
         ),
         # Cancellation Policy
         (
             "cancellation",
-            "Cancellation Policy - 7+ Days",
-            "Full refund if canceled 7+ days before event",
-            json.dumps({"days_before": 7, "refund_percent": 100}),
+            "Cancellation Policy - 4+ Days",
+            "Full refund if canceled 4+ days before event",
+            json.dumps({"days_before": 4, "refund_percent": 100}),
         ),
         (
             "cancellation",
-            "Cancellation Policy - Within 7 Days",
-            "$100 deposit is non-refundable for cancellations within 7 days of event",
-            json.dumps({"days_before": 7, "refund_percent": 0, "forfeit_deposit": True}),
+            "Cancellation Policy - Within 4 Days",
+            "$100 deposit is non-refundable for cancellations within 4 days of event",
+            json.dumps(
+                {"days_before": 4, "refund_percent": 0, "forfeit_deposit": True}
+            ),
         ),
         (
             "cancellation",
             "Reschedule Policy",
-            "One free reschedule within 48 hours of booking; additional reschedules cost $100",
-            json.dumps({"free_reschedule_hours": 48, "additional_reschedule_fee": 100}),
+            "One free reschedule if requested 24+ hours before event; additional reschedules cost $200",
+            json.dumps({"free_reschedule_hours": 24, "additional_reschedule_fee": 200}),
         ),
         # Travel Fees
         (
@@ -291,7 +310,7 @@ async def seed_faqs(conn):
         ),
         (
             "What's the deposit policy?",
-            "$100 refundable deposit secures your date and is deducted from final bill (refundable if canceled 7+ days before event). Remaining balance due on event date.",
+            "$100 refundable deposit secures your date and is deducted from final bill (refundable if canceled 4+ days before event). Remaining balance due on event date.",
             "Booking & Payments",
         ),
         (
@@ -330,7 +349,7 @@ async def seed_faqs(conn):
         # Policies
         (
             "What's your cancellation policy?",
-            "Full refund if canceled 7+ days before event. $100 deposit is non-refundable within 7 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.",
+            "Full refund if canceled 4+ days before event. $100 deposit is non-refundable within 4 days. One free reschedule if requested 24+ hours before event; additional reschedules cost $200.",
             "Policies",
         ),
         (

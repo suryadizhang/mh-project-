@@ -14,7 +14,7 @@ import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
 // Infer type from schema for type-safe responses
-type PaymentIntentResponse = z.infer;
+type PaymentIntentResponse = z.infer<typeof PaymentIntentResponseSchema>;
 
 // Initialize Stripe
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -32,7 +32,7 @@ interface BookingData {
   depositPaid: boolean;
   depositAmount: number;
   remainingBalance: number;
-  services: Array;
+  services: Array<{ name: string; price: number }>;
 }
 
 export default function PaymentPage() {

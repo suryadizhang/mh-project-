@@ -69,7 +69,7 @@ class KnowledgeAgent(BaseAgent):
         # Week 1: Extract tone information
         customer_tone = context.get("customer_tone", "casual") if context else "casual"
         tone_guidelines = context.get("tone_guidelines", {}) if context else {}
-        
+
         # Week 4: Extract DYNAMIC knowledge context from database
         knowledge_context = context.get("knowledge_context", "") if context else ""
 
@@ -119,7 +119,7 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
 
 **Tools Usage:**
 - Use `search_knowledge_base` for policy lookups
-- Use `search_faq` for common questions  
+- Use `search_faq` for common questions
 - Use `get_pricing_details` for accurate pricing
 
 **Remember**: ALWAYS match customer's tone while staying accurate.
@@ -151,7 +151,13 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
                             },
                             "document_type": {
                                 "type": "string",
-                                "enum": ["all", "policies", "pricing", "faq", "technical_docs"],
+                                "enum": [
+                                    "all",
+                                    "policies",
+                                    "pricing",
+                                    "faq",
+                                    "technical_docs",
+                                ],
                                 "description": "Filter by document type",
                             },
                             "top_k": {
@@ -203,7 +209,10 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
                                 "enum": ["standard", "premium", "deluxe"],
                                 "description": "Package type",
                             },
-                            "num_guests": {"type": "integer", "description": "Number of guests"},
+                            "num_guests": {
+                                "type": "integer",
+                                "description": "Number of guests",
+                            },
                             "addons": {
                                 "type": "array",
                                 "items": {
@@ -238,7 +247,10 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "question": {"type": "string", "description": "Customer's question"},
+                            "question": {
+                                "type": "string",
+                                "description": "Customer's question",
+                            },
                             "category": {
                                 "type": "string",
                                 "enum": [
@@ -277,7 +289,11 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
                 return await self._find_faq_answer(arguments)
 
             else:
-                return {"success": False, "result": None, "error": f"Unknown tool: {tool_name}"}
+                return {
+                    "success": False,
+                    "result": None,
+                    "error": f"Unknown tool: {tool_name}",
+                }
 
         except Exception as e:
             logger.error(f"Tool execution error: {tool_name} - {e}", exc_info=True)
@@ -298,18 +314,18 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
         # Simulate embedding generation + similarity search
         mock_results = [
             {
-                "content": "Our cancellation policy provides full refunds for cancellations made 14 or more days before the event. For cancellations between 7-13 days, we offer a 50% refund. Unfortunately, we cannot provide refunds for cancellations made less than 7 days before the event, though we're happy to discuss event credits for extenuating circumstances.",
+                "content": "Our cancellation policy provides a full deposit refund for cancellations made 4 or more days before the event. Cancellations within 4 days of the event are non-refundable. The deposit is a fixed $100 amount, not a percentage.",
                 "source": "Booking Terms & Conditions - Section 4.2 (Cancellation Policy)",
                 "document_type": "policies",
                 "relevance_score": 0.95,
-                "last_updated": "2024-10-01",
+                "last_updated": "2025-01-30",
             },
             {
-                "content": "Deposit requirement: We require a 50% deposit to secure your booking. The deposit is non-refundable but can be transferred to a different date if changed with 14+ days notice. The remaining 50% balance is due 24 hours before your event.",
+                "content": "Deposit requirement: We require a $100 fixed deposit to secure your booking. The deposit is fully refundable if canceled 4+ days before the event. The remaining balance is due on the event day.",
                 "source": "Payment Terms Document - Section 2.1",
                 "document_type": "policies",
                 "relevance_score": 0.88,
-                "last_updated": "2024-10-01",
+                "last_updated": "2025-01-30",
             },
             {
                 "content": "For events cancelled due to weather (outdoor events only), we offer full rescheduling at no charge. We monitor weather forecasts 48 hours before your event and will proactively reach out if conditions look unfavorable.",
@@ -322,7 +338,9 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
 
         # Filter by document type if specified
         if document_type != "all":
-            mock_results = [r for r in mock_results if r["document_type"] == document_type]
+            mock_results = [
+                r for r in mock_results if r["document_type"] == document_type
+            ]
 
         # Limit to top_k
         results = mock_results[:top_k]
@@ -398,7 +416,13 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
                 "content": {
                     "amount": "50% of total event cost",
                     "due_date": "Within 48 hours of booking confirmation",
-                    "payment_methods": ["Credit card", "Debit card", "Check", "Venmo", "Zelle"],
+                    "payment_methods": [
+                        "Credit card",
+                        "Debit card",
+                        "Check",
+                        "Venmo",
+                        "Zelle",
+                    ],
                     "refundable": "Yes, subject to cancellation policy terms",
                     "transferable": "Yes, to different date with 14+ days notice (no fee)",
                     "hold_period": "We'll hold your date for 48 hours without deposit, then release if not paid",
@@ -406,20 +430,19 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
             },
             "payment_terms": {
                 "title": "Payment Terms",
-                "version": "2.1",
-                "last_updated": "2024-10-01",
+                "version": "2.2",
+                "last_updated": "2025-01-30",
                 "content": {
-                    "deposit": "50% upfront to secure booking",
-                    "balance": "50% due 24 hours before event",
+                    "deposit": "$100 fixed deposit to secure booking",
+                    "balance": "Due on event day",
                     "late_payment": "Event may be cancelled if balance not received on time",
                     "payment_methods": [
                         "All major credit cards",
-                        "Checks (7 days before event)",
+                        "Cash",
                         "Venmo/Zelle",
-                        "Wire transfer (corporate only)",
                     ],
                     "invoicing": "Automatic via email upon booking",
-                    "payment_plans": "Available for events >$5,000 (split into 3 payments)",
+                    "cancellation": "Full deposit refund if cancelled 4+ days before event",
                 },
             },
             "weather_policy": {
@@ -505,7 +528,11 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
         policy = policies.get(policy_name)
 
         if not policy:
-            return {"success": False, "result": None, "error": f"Policy not found: {policy_name}"}
+            return {
+                "success": False,
+                "result": None,
+                "error": f"Policy not found: {policy_name}",
+            }
 
         return {"success": True, "result": policy}
 
@@ -566,17 +593,20 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
                         "subtotal": f"${base_cost:,.2f}",
                     },
                     "addons": [
-                        {"name": addon, "cost": f"${addon_costs[addon]:,.2f}"} for addon in addons
+                        {"name": addon, "cost": f"${addon_costs[addon]:,.2f}"}
+                        for addon in addons
                     ],
                     "addons_total": f"${addons_cost:,.2f}",
-                    "travel_fee": f"${travel_fee:,.2f}" if travel_fee > 0 else "Included",
+                    "travel_fee": f"${travel_fee:,.2f}"
+                    if travel_fee > 0
+                    else "Included",
                     "subtotal": f"${subtotal:,.2f}",
                     "discount": f"-${discount:,.2f}" if discount > 0 else "$0.00",
                     "discount_reason": discount_reason,
                 },
                 "total": f"${total:,.2f}",
-                "deposit_required": f"${deposit:,.2f} (50%)",
-                "balance_due": f"${total - deposit:,.2f}",
+                "deposit_required": "$100.00 (fixed deposit)",
+                "balance_due": f"${total - 100:,.2f}",
                 "per_person_effective": f"${total / num_guests:.2f}",
                 "notes": [
                     "Deposit due within 48 hours of booking",
@@ -604,7 +634,10 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
                 "category": "pricing",
                 "question": "What's included in the package price?",
                 "answer": "All packages include: hibachi chef performance, all food (protein, fried rice, vegetables), cooking equipment, setup and breakdown, plates/utensils, and cleanup. We bring everything - you just provide the space and guests!",
-                "related": ["Do I need to provide anything?", "What add-ons are available?"],
+                "related": [
+                    "Do I need to provide anything?",
+                    "What add-ons are available?",
+                ],
             },
             {
                 "category": "menu",
@@ -624,8 +657,11 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
             {
                 "category": "policies",
                 "question": "What's your cancellation policy?",
-                "answer": "Full refund for cancellations 14+ days before event, 50% refund for 7-13 days, no refund less than 7 days (but we offer event credit). We understand emergencies happen and will work with you on extenuating circumstances.",
-                "related": ["Can I reschedule my event?", "What if there's bad weather?"],
+                "answer": "$100 deposit is fully refundable if canceled 4+ days before your event, non-refundable within 4 days. One free reschedule is allowed if requested 24+ hours before your event. We understand emergencies happen and will work with you on extenuating circumstances.",
+                "related": [
+                    "Can I reschedule my event?",
+                    "What if there's bad weather?",
+                ],
             },
         ]
 
