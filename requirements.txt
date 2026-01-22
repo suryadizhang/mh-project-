@@ -1,69 +1,69 @@
 # MyHibachi Project - Unified Python Dependencies
 # Core FastAPI and web framework
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.6.0
-pydantic-settings==2.2.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
 
 # Database and ORM
-sqlalchemy==2.0.25
-psycopg2-binary==2.9.9
-asyncpg==0.29.0
-alembic==1.13.1
+sqlalchemy>=2.0.25
+psycopg2-binary>=2.9.9
+asyncpg>=0.30.0
+alembic>=1.14.0
 
 # Redis for caching and rate limiting
-redis==5.0.1
+redis>=5.2.0
 
 # HTTP client and async operations
-httpx==0.26.0
-aiofiles==23.2.1
-requests==2.31.0
+httpx>=0.28.0
+aiofiles>=24.1.0
+requests>=2.32.3
 
 # Authentication & Security
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.9
+pyjwt[crypto]>=2.10.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.20
 
 # Environment and configuration
-python-dotenv==1.0.1
-python-dateutil==2.8.2
-pytz==2024.1
-tzfpy==1.1.1  # Derive timezone from lat/lng coordinates (lightweight, no C++ deps)
+python-dotenv>=1.0.1
+python-dateutil>=2.9.0
+pytz>=2024.2
+tzfpy>=1.1.1  # Derive timezone from lat/lng coordinates (lightweight, no C++ deps)
 
 # Email functionality
-emails==0.6.0
-jinja2==3.1.3
+emails>=0.6.0
+jinja2>=3.1.6
 
 # Markdown to HTML conversion (for agreement templates)
-markdown==3.10
+markdown>=3.10
 
 # AI Backend specific (OpenAI integration)
-openai==1.3.8
+openai>=1.68.0
 
 # RingCentral Integration
-ringcentral==0.7.12
-PyJWT==2.8.0
+ringcentral>=0.7.12
+PyJWT[crypto]>=2.10.0
 
 # Monitoring and Metrics
-prometheus-client==0.19.0
+prometheus-client>=0.21.0
 
 # Testing and development data
-pytest==8.0.0
-pytest-asyncio==0.23.0
-pytest-cov==4.1.0
-pytest-benchmark==5.1.0
-faker==37.11.0
+pytest>=8.3.0
+pytest-asyncio>=0.25.0
+pytest-cov>=6.0.0
+pytest-benchmark>=5.1.0
+faker>=37.11.0
 
 # Code quality and formatting
-black==24.1.0
-ruff==0.2.0
-isort==5.13.0
-bandit==1.7.5
-mypy==1.8.0
+black>=25.1.0
+ruff>=0.9.0
+isort>=5.13.0
+bandit>=1.8.0
+mypy>=1.15.0
 
 # Development tools
-pre-commit==3.6.0
+pre-commit>=4.1.0
 
 # Documentation (optional)
-mkdocs==1.5.3
-mkdocs-material==9.5.3
+mkdocs>=1.6.0
+mkdocs-material>=9.6.0
