@@ -13,6 +13,13 @@ export interface PricingValues {
   partyMinimum: number;
   freeTravelMiles: number;
   costPerMileAfter: number;
+  // Deposit & Policy values (SSoT extension)
+  depositAmount: number;
+  depositRefundableDays: number;
+  // Timing values (SSoT extension - hours before event)
+  guestCountFinalizeHours?: number;
+  menuChangeCutoffHours?: number;
+  freeRescheduleHours?: number;
 }
 
 /**
@@ -26,10 +33,19 @@ export const DEFAULT_PRICING: PricingValues = {
   partyMinimum: 550,
   freeTravelMiles: 30,
   costPerMileAfter: 2,
+  // Deposit & Policy defaults (must match database dynamic_variables)
+  depositAmount: 100,
+  depositRefundableDays: 4,
+  // Timing defaults (must match database dynamic_variables)
+  guestCountFinalizeHours: 24,
+  menuChangeCutoffHours: 12,
+  freeRescheduleHours: 24,
 };
 
 /**
  * Template placeholders used in content strings
+ * All business-critical values should use these placeholders
+ * and be interpolated at runtime from the SSoT (database)
  */
 export const PRICING_PLACEHOLDERS = {
   ADULT_PRICE: '{{ADULT_PRICE}}',
@@ -38,6 +54,13 @@ export const PRICING_PLACEHOLDERS = {
   PARTY_MINIMUM: '{{PARTY_MINIMUM}}',
   FREE_TRAVEL_MILES: '{{FREE_TRAVEL_MILES}}',
   COST_PER_MILE: '{{COST_PER_MILE}}',
+  // Deposit & Policy placeholders (SSoT extension)
+  DEPOSIT_AMOUNT: '{{DEPOSIT_AMOUNT}}',
+  DEPOSIT_REFUNDABLE_DAYS: '{{DEPOSIT_REFUNDABLE_DAYS}}',
+  // Timing placeholders (SSoT extension - hours before event)
+  GUEST_COUNT_FINALIZE_HOURS: '{{GUEST_COUNT_FINALIZE_HOURS}}',
+  MENU_CHANGE_CUTOFF_HOURS: '{{MENU_CHANGE_CUTOFF_HOURS}}',
+  FREE_RESCHEDULE_HOURS: '{{FREE_RESCHEDULE_HOURS}}',
 } as const;
 
 /**
@@ -52,25 +75,53 @@ export const PRICING_PLACEHOLDERS = {
  * const template = "Adults cost ${{ADULT_PRICE}} each"
  * const result = interpolatePricing(template, { adultPrice: 55, ... })
  * // Returns: "Adults cost $55 each"
+ *
+ * const policyTemplate = "Refundable if canceled {{DEPOSIT_REFUNDABLE_DAYS}}+ days before"
+ * const policyResult = interpolatePricing(policyTemplate, { depositRefundableDays: 4, ... })
+ * // Returns: "Refundable if canceled 4+ days before"
  * ```
  */
 export function interpolatePricing(
   template: string,
   pricing: PricingValues = DEFAULT_PRICING,
 ): string {
-  return template
-    .replace(new RegExp(PRICING_PLACEHOLDERS.ADULT_PRICE, 'g'), String(pricing.adultPrice))
-    .replace(new RegExp(PRICING_PLACEHOLDERS.CHILD_PRICE, 'g'), String(pricing.childPrice))
-    .replace(
-      new RegExp(PRICING_PLACEHOLDERS.CHILD_FREE_AGE, 'g'),
-      String(pricing.childFreeUnderAge),
-    )
-    .replace(new RegExp(PRICING_PLACEHOLDERS.PARTY_MINIMUM, 'g'), String(pricing.partyMinimum))
-    .replace(
-      new RegExp(PRICING_PLACEHOLDERS.FREE_TRAVEL_MILES, 'g'),
-      String(pricing.freeTravelMiles),
-    )
-    .replace(new RegExp(PRICING_PLACEHOLDERS.COST_PER_MILE, 'g'), String(pricing.costPerMileAfter));
+  return (
+    template
+      .replace(new RegExp(PRICING_PLACEHOLDERS.ADULT_PRICE, 'g'), String(pricing.adultPrice))
+      .replace(new RegExp(PRICING_PLACEHOLDERS.CHILD_PRICE, 'g'), String(pricing.childPrice))
+      .replace(
+        new RegExp(PRICING_PLACEHOLDERS.CHILD_FREE_AGE, 'g'),
+        String(pricing.childFreeUnderAge),
+      )
+      .replace(new RegExp(PRICING_PLACEHOLDERS.PARTY_MINIMUM, 'g'), String(pricing.partyMinimum))
+      .replace(
+        new RegExp(PRICING_PLACEHOLDERS.FREE_TRAVEL_MILES, 'g'),
+        String(pricing.freeTravelMiles),
+      )
+      .replace(
+        new RegExp(PRICING_PLACEHOLDERS.COST_PER_MILE, 'g'),
+        String(pricing.costPerMileAfter),
+      )
+      // Deposit & Policy interpolations (SSoT extension)
+      .replace(new RegExp(PRICING_PLACEHOLDERS.DEPOSIT_AMOUNT, 'g'), String(pricing.depositAmount))
+      .replace(
+        new RegExp(PRICING_PLACEHOLDERS.DEPOSIT_REFUNDABLE_DAYS, 'g'),
+        String(pricing.depositRefundableDays),
+      )
+      // Timing interpolations (SSoT extension)
+      .replace(
+        new RegExp(PRICING_PLACEHOLDERS.GUEST_COUNT_FINALIZE_HOURS, 'g'),
+        String(pricing.guestCountFinalizeHours ?? DEFAULT_PRICING.guestCountFinalizeHours),
+      )
+      .replace(
+        new RegExp(PRICING_PLACEHOLDERS.MENU_CHANGE_CUTOFF_HOURS, 'g'),
+        String(pricing.menuChangeCutoffHours ?? DEFAULT_PRICING.menuChangeCutoffHours),
+      )
+      .replace(
+        new RegExp(PRICING_PLACEHOLDERS.FREE_RESCHEDULE_HOURS, 'g'),
+        String(pricing.freeRescheduleHours ?? DEFAULT_PRICING.freeRescheduleHours),
+      )
+  );
 }
 
 /**
@@ -82,6 +133,10 @@ export function hasPricingPlaceholders(text: string): boolean {
 
 /**
  * Convert pricing response from API to PricingValues format
+ *
+ * Handles responses from:
+ * - /api/v1/config/all (full config)
+ * - /api/v1/pricing/current (pricing only)
  */
 export function apiResponseToPricingValues(
   response: {
@@ -96,6 +151,17 @@ export function apiResponseToPricingValues(
     };
     policies?: {
       minimum_order?: number;
+      deposit_amount?: number;
+      deposit_refundable_days?: number;
+    };
+    deposit?: {
+      amount?: number;
+      refundable_days?: number;
+    };
+    timing?: {
+      guest_count_finalize_hours?: number;
+      menu_change_cutoff_hours?: number;
+      free_reschedule_hours?: number;
     };
   } | null,
 ): PricingValues {
@@ -109,5 +175,21 @@ export function apiResponseToPricingValues(
       response?.travel_policy?.free_travel_radius_miles ?? DEFAULT_PRICING.freeTravelMiles,
     costPerMileAfter:
       response?.travel_policy?.cost_per_mile_after ?? DEFAULT_PRICING.costPerMileAfter,
+    // Deposit values - check multiple possible locations in response
+    depositAmount:
+      response?.deposit?.amount ??
+      response?.policies?.deposit_amount ??
+      DEFAULT_PRICING.depositAmount,
+    depositRefundableDays:
+      response?.deposit?.refundable_days ??
+      response?.policies?.deposit_refundable_days ??
+      DEFAULT_PRICING.depositRefundableDays,
+    // Timing values (SSoT extension)
+    guestCountFinalizeHours:
+      response?.timing?.guest_count_finalize_hours ?? DEFAULT_PRICING.guestCountFinalizeHours,
+    menuChangeCutoffHours:
+      response?.timing?.menu_change_cutoff_hours ?? DEFAULT_PRICING.menuChangeCutoffHours,
+    freeRescheduleHours:
+      response?.timing?.free_reschedule_hours ?? DEFAULT_PRICING.freeRescheduleHours,
   };
 }

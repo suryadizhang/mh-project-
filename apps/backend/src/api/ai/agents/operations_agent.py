@@ -69,7 +69,7 @@ class OperationsAgent(BaseAgent):
         # Week 1: Extract tone information
         customer_tone = context.get("customer_tone", "casual") if context else "casual"
         tone_guidelines = context.get("tone_guidelines", {}) if context else {}
-        
+
         # Week 4: Extract DYNAMIC knowledge context from database
         knowledge_context = context.get("knowledge_context", "") if context else ""
 
@@ -169,7 +169,7 @@ Your mission: Ensure every event runs flawlessly through precise planning and pr
 - Package selection
 - Any dietary restrictions
 - Contact information
-Once you confirm, I'll send a booking confirmation with your 50% deposit invoice."
+Once you confirm, I'll send a booking confirmation with your $100 deposit invoice."
 
 **3. Schedule Change:**
 "I understand you need to change the date. Let me check what options are available. [Check availability]. I can offer you [alternative dates]. There's no charge for date changes if made 14+ days before the original event. Would any of these work for you?"
@@ -196,8 +196,8 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
 - Maximum per event: 150 guests (above this, requires multiple chefs/setups)
 - Weather policy: Indoor events preferred; outdoor requires backup plan
 - Venue requirements: Access to electricity (standard outlet), flat surface (10x10 ft minimum)
-- Cancellation: Full refund if 14+ days notice, 50% if 7-13 days, no refund <7 days
-- Rescheduling: Free if 14+ days notice, $200 fee if <14 days
+- Cancellation: Full refund if canceled 4+ days before event, non-refundable within 4 days
+- Rescheduling: One free reschedule if requested 24+ hours before event, $200 fee for additional reschedules
 
 **Problem-Solving Examples:**
 
@@ -251,7 +251,10 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                                 "type": "string",
                                 "description": "Event start time (HH:MM AM/PM)",
                             },
-                            "num_guests": {"type": "integer", "description": "Number of guests"},
+                            "num_guests": {
+                                "type": "integer",
+                                "description": "Number of guests",
+                            },
                             "location": {
                                 "type": "string",
                                 "description": "Event location (city or zip code)",
@@ -289,7 +292,10 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                                 "type": "string",
                                 "description": "Event start time (HH:MM AM/PM)",
                             },
-                            "num_guests": {"type": "integer", "description": "Number of guests"},
+                            "num_guests": {
+                                "type": "integer",
+                                "description": "Number of guests",
+                            },
                             "package": {
                                 "type": "string",
                                 "enum": ["standard", "premium", "deluxe"],
@@ -324,7 +330,10 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "order_id": {"type": "string", "description": "Booking order ID"},
+                            "order_id": {
+                                "type": "string",
+                                "description": "Booking order ID",
+                            },
                             "changes": {
                                 "type": "object",
                                 "description": "Fields to update (event_date, event_time, num_guests, etc.)",
@@ -336,7 +345,10 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                                     "special_requests": {"type": "string"},
                                 },
                             },
-                            "reason": {"type": "string", "description": "Reason for change"},
+                            "reason": {
+                                "type": "string",
+                                "description": "Reason for change",
+                            },
                         },
                         "required": ["order_id", "changes"],
                     },
@@ -350,7 +362,10 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "order_id": {"type": "string", "description": "Booking order ID"},
+                            "order_id": {
+                                "type": "string",
+                                "description": "Booking order ID",
+                            },
                             "chef_preference": {
                                 "type": "string",
                                 "description": "Preferred chef name or 'auto' for automatic assignment",
@@ -386,7 +401,11 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                 return await self._assign_chef(arguments)
 
             else:
-                return {"success": False, "result": None, "error": f"Unknown tool: {tool_name}"}
+                return {
+                    "success": False,
+                    "result": None,
+                    "error": f"Unknown tool: {tool_name}",
+                }
 
         except Exception as e:
             logger.error(f"Tool execution error: {tool_name} - {e}", exc_info=True)
@@ -405,8 +424,8 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
         # TODO: Integrate with actual calendar system
         # This is a mock implementation
 
-        from datetime import datetime
         import random
+        from datetime import datetime
 
         # Parse date
         date_obj = datetime.strptime(event_date, "%Y-%m-%d")
@@ -418,7 +437,9 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
 
         # Calculate available resources
         chefs_needed = 1 if num_guests <= 50 else 2
-        chefs_available = random.randint(2, 5) if not is_weekend else random.randint(0, 3)
+        chefs_available = (
+            random.randint(2, 5) if not is_weekend else random.randint(0, 3)
+        )
         equipment_sets_available = random.randint(1, 4)
 
         is_available = chefs_available >= chefs_needed and equipment_sets_available >= 1
@@ -487,10 +508,10 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                 "booking": booking,
                 "next_steps": [
                     f"Invoice sent to {args['customer_email']}",
-                    f"Deposit due: ${deposit:,.2f} (50%)",
+                    "Deposit due: $100.00 (fixed)",
                     "Payment link included in email",
                     "Booking confirmed upon deposit receipt",
-                    "Final balance due 24 hours before event",
+                    "Final balance due on event day",
                 ],
                 "confirmation": f"Booking #{booking['order_id']} created successfully!",
             },
@@ -583,7 +604,8 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
         else:
             # Find requested chef
             assigned_chef = next(
-                (c for c in chefs if c["name"].lower() == chef_preference.lower()), chefs[0]
+                (c for c in chefs if c["name"].lower() == chef_preference.lower()),
+                chefs[0],
             )
 
         result = {

@@ -1,14 +1,14 @@
 [
   {
     "title": "Booking & Cancellation Policy",
-    "content": "📋 Booking requires 48 hours advance notice. 50% deposit required to secure your date. Cancellations more than 24 hours in advance receive full deposit refund. Cancellations within 24 hours forfeit deposit due to ingredient purchasing and chef scheduling.",
+    "content": "📋 Booking requires 48 hours advance notice. ${{DEPOSIT_AMOUNT}} fixed deposit required to secure your date. Cancellations {{DEPOSIT_REFUNDABLE_DAYS}}+ days before event receive full deposit refund. Cancellations within {{DEPOSIT_REFUNDABLE_DAYS}} days forfeit deposit due to ingredient purchasing and chef scheduling.",
     "category": "policies",
     "href": "/faqs",
     "keywords": ["booking", "cancellation", "deposit", "refund", "advance notice", "policy"]
   },
   {
     "title": "Payment Terms",
-    "content": "💳 50% deposit due at booking to secure date. Remaining 50% due day of service. We accept cash, credit cards, Venmo, Zelle, and PayPal. No hidden fees - our quoted price is your final price!",
+    "content": "💳 ${{DEPOSIT_AMOUNT}} fixed deposit due at booking to secure date. Remaining balance due day of service. We accept cash, credit cards, Venmo, Zelle, and PayPal. No hidden fees - our quoted price is your final price!",
     "category": "policies",
     "href": "/faqs",
     "keywords": ["payment", "deposit", "cash", "credit card", "venmo", "zelle", "paypal", "fees"]

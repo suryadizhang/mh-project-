@@ -26,13 +26,14 @@ Architecture:
 
 import hashlib
 from datetime import datetime
-from typing import Dict, List, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
+
 from sqlalchemy.orm import Session
 
 # Models
 # MIGRATED: from models.knowledge_base → db.models.knowledge_base
-from db.models.knowledge_base import MenuItem, FAQItem, BusinessRule
+from db.models.knowledge_base import BusinessRule, FAQItem, MenuItem
 
 
 class KnowledgeSyncService:
@@ -142,7 +143,9 @@ class KnowledgeSyncService:
                             }
                         )
                     elif self._items_differ(file_item, db_item.to_dict()):
-                        modified.append({"name": name, "old": db_item.to_dict(), "new": file_item})
+                        modified.append(
+                            {"name": name, "old": db_item.to_dict(), "new": file_item}
+                        )
 
             # Check for deleted items
             file_names = {item["name"] for item in file_items}
@@ -230,7 +233,11 @@ class KnowledgeSyncService:
                         )
                     elif self._items_differ(file_item, db_item.to_dict()):
                         modified.append(
-                            {"question": question, "old": db_item.to_dict(), "new": file_item}
+                            {
+                                "question": question,
+                                "old": db_item.to_dict(),
+                                "new": file_item,
+                            }
                         )
 
             # Check for deleted items
@@ -291,7 +298,9 @@ class KnowledgeSyncService:
             try:
                 db_items = self.db.query(BusinessRule).all()
             except Exception as e:
-                print(f"⚠️ WARNING: Could not query business_rules table (may not exist): {e}")
+                print(
+                    f"⚠️ WARNING: Could not query business_rules table (may not exist): {e}"
+                )
                 db_items = []
 
             db_by_title = {item.title: item for item in db_items}
@@ -380,7 +389,12 @@ class KnowledgeSyncService:
             }
         """
         if not changes.get("changed"):
-            return {"success": True, "applied": 0, "skipped": 0, "message": "No changes detected"}
+            return {
+                "success": True,
+                "applied": 0,
+                "skipped": 0,
+                "message": "No changes detected",
+            }
 
         if changes["conflicts"] and not force:
             return {
@@ -412,7 +426,9 @@ class KnowledgeSyncService:
 
             # Delete removed items
             for item_data in changes["deleted"]:
-                db_item = self.db.query(MenuItem).filter_by(name=item_data["name"]).first()
+                db_item = (
+                    self.db.query(MenuItem).filter_by(name=item_data["name"]).first()
+                )
                 if db_item:
                     self.db.delete(db_item)
                     applied += 1
@@ -421,7 +437,11 @@ class KnowledgeSyncService:
             if force and changes["conflicts"]:
                 for conflict in changes["conflicts"]:
                     if "file_data" in conflict:
-                        db_item = self.db.query(MenuItem).filter_by(name=conflict["name"]).first()
+                        db_item = (
+                            self.db.query(MenuItem)
+                            .filter_by(name=conflict["name"])
+                            .first()
+                        )
                         if db_item:
                             for key, value in conflict["file_data"].items():
                                 setattr(db_item, key, value)
@@ -440,7 +460,12 @@ class KnowledgeSyncService:
 
         except Exception as e:
             self.db.rollback()
-            return {"success": False, "applied": 0, "skipped": applied, "errors": [str(e)]}
+            return {
+                "success": False,
+                "applied": 0,
+                "skipped": applied,
+                "errors": [str(e)],
+            }
 
     def auto_sync_faqs(self, changes: Dict, force: bool = False) -> Dict:
         """Apply FAQ changes to database (same pattern as auto_sync_menu)"""
@@ -480,7 +505,9 @@ class KnowledgeSyncService:
 
         # Find all base proteins (in "Base Proteins" section before "Premium Upgrades")
         base_section_match = re.search(
-            r"Base Proteins.*?(?=Premium Upgrades|Additional Enhancements)", content, re.DOTALL
+            r"Base Proteins.*?(?=Premium Upgrades|Additional Enhancements)",
+            content,
+            re.DOTALL,
         )
         if base_section_match:
             base_section = base_section_match.group(0)
@@ -500,7 +527,9 @@ class KnowledgeSyncService:
 
         # Find premium upgrades (look for price indicators like "+$5", "+$20", "+$15.99", etc.)
         premium_section_match = re.search(
-            r"Premium Upgrades.*?(?=Additional Enhancements|Included Items)", content, re.DOTALL
+            r"Premium Upgrades.*?(?=Additional Enhancements|Included Items)",
+            content,
+            re.DOTALL,
         )
         if premium_section_match:
             premium_section = premium_section_match.group(0)
@@ -529,7 +558,9 @@ class KnowledgeSyncService:
             enhancements_section = enhancements_section_match.group(0)
             # Pattern for enhancement items - captures any price format (integer or decimal)
             enhancement_pattern = r'<h5[^>]*>([^<]+)</h5>.*?<span className="price[^"]*">\+\$(\d+(?:\.\d{1,2})?)</span>.*?<p[^>]*>\s*([^<]+)</p>'
-            for match in re.finditer(enhancement_pattern, enhancements_section, re.DOTALL):
+            for match in re.finditer(
+                enhancement_pattern, enhancements_section, re.DOTALL
+            ):
                 name = match.group(1).strip()
                 price = float(match.group(2))  # Handles both "10" and "10.50"
                 description = match.group(3).strip()
@@ -554,7 +585,8 @@ class KnowledgeSyncService:
         elif any(x in name_lower for x in ["steak", "filet", "beef", "sirloin"]):
             return "beef"
         elif any(
-            x in name_lower for x in ["shrimp", "lobster", "scallop", "salmon", "calamari", "fish"]
+            x in name_lower
+            for x in ["shrimp", "lobster", "scallop", "salmon", "calamari", "fish"]
         ):
             return "seafood"
         elif any(x in name_lower for x in ["tofu", "vegetable"]):
@@ -591,7 +623,9 @@ class KnowledgeSyncService:
 
         # Find the faqs array: export const faqs: FaqItem[] = [...]
         faqs_array_match = re.search(
-            r"export const faqs: FaqItem\[\] = \[(.*?)\](?=\s*export|\s*$)", content, re.DOTALL
+            r"export const faqs: FaqItem\[\] = \[(.*?)\](?=\s*export|\s*$)",
+            content,
+            re.DOTALL,
         )
         if not faqs_array_match:
             return []
@@ -673,7 +707,9 @@ class KnowledgeSyncService:
 
         # Parse cancellation policy
         cancellation_match = re.search(
-            r"<h2>4\. Cancellation Policy</h2>(.*?)(?=<h2>|</section>)", content, re.DOTALL
+            r"<h2>4\. Cancellation Policy</h2>(.*?)(?=<h2>|</section>)",
+            content,
+            re.DOTALL,
         )
         if cancellation_match:
             section = cancellation_match.group(1)
@@ -696,14 +732,14 @@ class KnowledgeSyncService:
                 )
 
             # No refund rule
-            if "Less than 7 Days" in section:
+            if "Less than 4 Days" in section:
                 rules.append(
                     {
                         "rule_type": "CANCELLATION",
                         "title": "No Refund Period",
-                        "content": "$100 deposit is non-refundable if canceled less than 7 days before event",
+                        "content": "$100 deposit is non-refundable if canceled less than 4 days before event",
                         "value": {
-                            "days_before": 7,
+                            "days_before": 4,
                             "deposit_refundable": False,
                             "balance_refundable": False,
                         },
@@ -714,7 +750,9 @@ class KnowledgeSyncService:
 
         # Parse rescheduling policy
         rescheduling_match = re.search(
-            r"<h2>5\. Rescheduling Policy</h2>(.*?)(?=<h2>|</section>)", content, re.DOTALL
+            r"<h2>5\. Rescheduling Policy</h2>(.*?)(?=<h2>|</section>)",
+            content,
+            re.DOTALL,
         )
         if rescheduling_match:
             section = rescheduling_match.group(1)
@@ -751,7 +789,9 @@ class KnowledgeSyncService:
 
         # Parse payment terms
         payment_match = re.search(
-            r"<h2>3\. Booking and Payment Terms</h2>(.*?)(?=<h2>|</section>)", content, re.DOTALL
+            r"<h2>3\. Booking and Payment Terms</h2>(.*?)(?=<h2>|</section>)",
+            content,
+            re.DOTALL,
         )
         if payment_match:
             section = payment_match.group(1)
@@ -774,7 +814,9 @@ class KnowledgeSyncService:
                 )
 
             # Extract pricing minimum from content
-            minimum_match = re.search(r"\$(\d+)\s*(?:party\s*)?minimum", section, re.IGNORECASE)
+            minimum_match = re.search(
+                r"\$(\d+)\s*(?:party\s*)?minimum", section, re.IGNORECASE
+            )
             if minimum_match:
                 minimum_amount = int(minimum_match.group(1))
                 rules.append(
@@ -794,7 +836,9 @@ class KnowledgeSyncService:
 
         # Parse travel fees (may be in multiple sections)
         travel_match = re.search(
-            r"first\s+(\d+)\s+miles.*?\$(\d+)\s*(?:per\s*)?mile", content, re.IGNORECASE | re.DOTALL
+            r"first\s+(\d+)\s+miles.*?\$(\d+)\s*(?:per\s*)?mile",
+            content,
+            re.IGNORECASE | re.DOTALL,
         )
         if travel_match:
             free_miles = int(travel_match.group(1))
@@ -886,7 +930,11 @@ class KnowledgeSyncService:
         terms_changes = self.detect_terms_changes()
 
         has_changes = any(
-            [menu_changes.get("changed"), faq_changes.get("changed"), terms_changes.get("changed")]
+            [
+                menu_changes.get("changed"),
+                faq_changes.get("changed"),
+                terms_changes.get("changed"),
+            ]
         )
 
         has_conflicts = any(

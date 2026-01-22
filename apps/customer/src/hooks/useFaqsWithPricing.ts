@@ -43,7 +43,23 @@ interface UseFaqsWithPricingResult {
  * ```
  */
 export function useFaqsWithPricing(): UseFaqsWithPricingResult {
-  const { adultPrice, childPrice, childFreeUnderAge, isLoading, error, pricing } = usePricing();
+  const {
+    adultPrice,
+    childPrice,
+    childFreeUnderAge,
+    partyMinimum,
+    freeMiles,
+    perMileRate,
+    depositAmount,
+    depositRefundableDays,
+    // Timing values from SSoT
+    guestCountFinalizeHours,
+    menuChangeCutoffHours,
+    freeRescheduleHours,
+    isLoading,
+    error,
+    pricing,
+  } = usePricing();
 
   // Build pricing values object, using defaults for missing values
   // Note: FAQs require actual values for template interpolation, so we use defaults as fallback
@@ -52,16 +68,32 @@ export function useFaqsWithPricing(): UseFaqsWithPricingResult {
       adultPrice: adultPrice ?? DEFAULT_PRICING.adultPrice,
       childPrice: childPrice ?? DEFAULT_PRICING.childPrice,
       childFreeUnderAge: childFreeUnderAge ?? DEFAULT_PRICING.childFreeUnderAge,
-      // These values come from travel_policy in pricing response
-      partyMinimum: pricing?.travel_policy
-        ? 550 // Default party minimum - not in current API response
-        : DEFAULT_PRICING.partyMinimum,
-      freeTravelMiles:
-        pricing?.travel_policy?.free_travel_radius_miles ?? DEFAULT_PRICING.freeTravelMiles,
-      costPerMileAfter:
-        pricing?.travel_policy?.cost_per_mile_after ?? DEFAULT_PRICING.costPerMileAfter,
+      partyMinimum: partyMinimum ?? DEFAULT_PRICING.partyMinimum,
+      // Map usePricing property names to PricingValues interface names
+      freeTravelMiles: freeMiles ?? DEFAULT_PRICING.freeTravelMiles,
+      costPerMileAfter: perMileRate ?? DEFAULT_PRICING.costPerMileAfter,
+      // Deposit & Policy values from SSoT (usePricing hook)
+      depositAmount: depositAmount ?? DEFAULT_PRICING.depositAmount,
+      depositRefundableDays: depositRefundableDays ?? DEFAULT_PRICING.depositRefundableDays,
+      // Timing values from SSoT (usePricing hook)
+      guestCountFinalizeHours: guestCountFinalizeHours ?? DEFAULT_PRICING.guestCountFinalizeHours,
+      menuChangeCutoffHours: menuChangeCutoffHours ?? DEFAULT_PRICING.menuChangeCutoffHours,
+      freeRescheduleHours: freeRescheduleHours ?? DEFAULT_PRICING.freeRescheduleHours,
     }),
-    [adultPrice, childPrice, childFreeUnderAge, pricing],
+    [
+      adultPrice,
+      childPrice,
+      childFreeUnderAge,
+      partyMinimum,
+      freeMiles,
+      perMileRate,
+      depositAmount,
+      depositRefundableDays,
+      guestCountFinalizeHours,
+      menuChangeCutoffHours,
+      freeRescheduleHours,
+      pricing,
+    ],
   );
 
   // Interpolate pricing into all FAQ answers and tags

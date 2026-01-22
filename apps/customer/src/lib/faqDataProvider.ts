@@ -50,6 +50,10 @@ async function fetchPricingServer(): Promise<PricingValues> {
       freeTravelMiles:
         data.travel_policy?.free_travel_radius_miles ?? DEFAULT_PRICING.freeTravelMiles,
       costPerMileAfter: data.travel_policy?.cost_per_mile_after ?? DEFAULT_PRICING.costPerMileAfter,
+      // Deposit & Policy values - using defaults until API extended
+      // TODO: Update when /api/v1/pricing/current includes deposit_amount and deposit_refundable_days
+      depositAmount: DEFAULT_PRICING.depositAmount,
+      depositRefundableDays: DEFAULT_PRICING.depositRefundableDays,
     };
   } catch {
     // Silently fall back to defaults - this is expected when backend is not running
@@ -72,10 +76,7 @@ async function fetchPricingServer(): Promise<PricingValues> {
  * }
  * ```
  */
-export async function getFaqsWithPricing(): Promise<{
-  faqs: FaqItem[];
-  pricing: PricingValues;
-}> {
+export async function getFaqsWithPricing(): Promise<{ faqs: FaqItem[]; pricing: PricingValues }> {
   const pricing = await fetchPricingServer();
 
   const faqs = rawFaqs.map((faq) => ({

@@ -49,7 +49,18 @@ export interface Payment {
   amount_cents: number;
   payment_method: string;
   payment_reference?: string;
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  /**
+   * Payment status - uses Stripe-standard 'succeeded' (NOT 'completed')
+   * See: backend/src/db/models/enums/payment.py
+   */
+  status:
+    | 'pending'
+    | 'processing'
+    | 'succeeded'
+    | 'failed'
+    | 'canceled'
+    | 'refunded'
+    | 'partially_refunded';
   created_at: string;
   notes?: string;
 }

@@ -75,10 +75,57 @@ export interface PaymentInfo {
   method: PaymentMethod;
   amount: number;
   currency: 'USD';
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  status:
+    | 'pending'
+    | 'processing'
+    | 'succeeded'
+    | 'failed'
+    | 'canceled'
+    | 'refunded'
+    | 'partially_refunded';
   transactionId?: string;
   stripeSessionId?: string;
 }
+
+/**
+ * Payment Status enum values - matches backend PaymentStatus and Stripe standard
+ * IMPORTANT: 'succeeded' is the Stripe-standard term (NOT 'completed')
+ */
+export type PaymentStatus =
+  | 'pending'
+  | 'processing'
+  | 'succeeded'
+  | 'failed'
+  | 'canceled'
+  | 'refunded'
+  | 'partially_refunded';
+
+/**
+ * Stripe Payment Intent status values
+ */
+export type StripePaymentIntentStatus =
+  | 'requires_payment_method'
+  | 'requires_confirmation'
+  | 'requires_action'
+  | 'processing'
+  | 'requires_capture'
+  | 'canceled'
+  | 'succeeded';
+
+/**
+ * Invoice status values - matches backend InvoiceStatus
+ */
+export type InvoiceStatus =
+  | 'draft'
+  | 'open'
+  | 'paid'
+  | 'uncollectible'
+  | 'void';
+
+/**
+ * Refund status values - matches backend RefundStatus
+ */
+export type RefundStatus = 'pending' | 'succeeded' | 'failed' | 'canceled';
 
 // Zod schemas for validation
 export const UserSchema = z.object({

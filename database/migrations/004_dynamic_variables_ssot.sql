@@ -147,7 +147,7 @@ ON CONFLICT (category, key) DO NOTHING;
 
 -- Policy settings
 INSERT INTO public.dynamic_variables (category, key, value, display_name, description, unit, validation_rules) VALUES
-    ('policy', 'deposit_refund_days', '{"amount": 7}', 'Deposit Refund Window', 'Days before event when deposit is refundable', 'days', '{"min": 1, "max": 30, "type": "integer"}'),
+    ('policy', 'deposit_refund_days', '{"amount": 4}', 'Deposit Refund Window', 'Days before event when deposit is refundable', 'days', '{"min": 1, "max": 30, "type": "integer"}'),
     ('policy', 'min_booking_advance_hours', '{"amount": 48}', 'Minimum Advance Booking', 'Minimum hours before event to book', 'hours', '{"min": 24, "max": 168, "type": "integer"}'),
     ('policy', 'menu_change_deadline_hours', '{"amount": 12}', 'Menu Change Deadline', 'Hours before event when menu changes are locked', 'hours', '{"min": 6, "max": 72, "type": "integer"}'),
     ('policy', 'free_reschedule_hours', '{"amount": 24}', 'Free Reschedule Window', 'Hours before event to reschedule for free', 'hours', '{"min": 12, "max": 72, "type": "integer"}'),

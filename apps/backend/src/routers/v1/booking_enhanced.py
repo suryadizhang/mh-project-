@@ -1,22 +1,11 @@
-from datetime import UTC, datetime
 import logging
-from pathlib import Path
 
 # Import query optimizer functions from utils
 import sys
-from typing import Any
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Optional
 
-from core.database import get_db
-from schemas.booking_schemas import (
-    BookingCreate,
-    CancelBookingRequest,
-)
-from utils.auth import (
-    admin_required,
-    get_current_user,
-    superadmin_required,
-)
-from utils.timezone_utils import format_for_display
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -28,9 +17,17 @@ from fastapi import (
     Request,
 )
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel, Field
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.database import get_db
+from core.dependencies import get_booking_service
+from schemas.booking_schemas import BookingCreate, CancelBookingRequest
+from services.booking_service import BookingService
+from utils.auth import admin_required, get_current_user, superadmin_required
+from utils.timezone_utils import format_for_display
 
 backend_dir = Path(__file__).parent.parent.parent.parent
 if str(backend_dir) not in sys.path:
@@ -184,13 +181,47 @@ async def cancel_booking(
 
 @router.post("/admin/confirm_deposit")
 async def confirm_deposit(
-    booking_id: int,
-    date: str,
-    reason: str = Body(..., embed=True),
+    booking_id: int = Body(..., description="Booking ID to confirm deposit for"),
+    amount: float = Body(..., ge=0, description="Deposit amount received in dollars"),
+    payment_method: str = Body(
+        ...,
+        description="Payment method used: venmo, zelle, cash, or stripe",
+    ),
+    notes: Optional[str] = Body(
+        None, description="Optional admin notes about the payment"
+    ),
     user=Depends(admin_required),
+    booking_service: BookingService = Depends(get_booking_service),
 ):
-    """Admin marks a booking as deposit received and sends notification."""
-    # Implementation for deposit confirmation
+    """
+    Admin confirms a deposit has been received via alternative payment method.
+
+    This endpoint:
+    - Validates the deposit amount against SSoT minimum requirements
+    - Updates the booking status to CONFIRMED
+    - Creates an audit log entry with payment details
+    - Removes any holds on the booking
+
+    Supported payment methods: venmo, zelle, cash, stripe
+    """
+    try:
+        result = await booking_service.confirm_deposit(
+            booking_id=booking_id,
+            staff_member=user.email,
+            amount=amount,
+            payment_method=payment_method,
+            notes=notes,
+        )
+        return {
+            "success": True,
+            "message": f"Deposit of ${amount:.2f} confirmed for booking {booking_id}",
+            "booking": result,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to confirm deposit for booking {booking_id}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to confirm deposit")
 
 
 # ============ ADMIN ANALYTICS & KPIs ============
@@ -242,15 +273,9 @@ async def admin_kpis(
                 "upcoming_bookings": int(kpis.get("upcoming_bookings", 0)),
                 "revenue": {
                     "total": float(kpis.get("total_revenue", 0)),
-                    "deposits_collected": float(
-                        kpis.get("deposits_collected", 0)
-                    ),
-                    "outstanding_balance": float(
-                        kpis.get("outstanding_balance", 0)
-                    ),
-                    "average_booking_value": float(
-                        kpis.get("avg_booking_value", 0)
-                    ),
+                    "deposits_collected": float(kpis.get("deposits_collected", 0)),
+                    "outstanding_balance": float(kpis.get("outstanding_balance", 0)),
+                    "average_booking_value": float(kpis.get("avg_booking_value", 0)),
                 },
                 "timezone": station_timezone,
             },
@@ -259,9 +284,7 @@ async def admin_kpis(
 
     except Exception as e:
         logger.exception(f"Error fetching KPIs: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Failed to fetch KPIs: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to fetch KPIs: {e!s}")
 
 
 @router.get("/admin/customers")
@@ -326,16 +349,10 @@ async def get_customer_analytics(
             "data": {
                 "customer_email": customer_email,
                 "total_bookings": int(analytics.get("total_bookings") or 0),
-                "completed_bookings": int(
-                    analytics.get("completed_bookings") or 0
-                ),
-                "cancelled_bookings": int(
-                    analytics.get("cancelled_bookings") or 0
-                ),
+                "completed_bookings": int(analytics.get("completed_bookings") or 0),
+                "cancelled_bookings": int(analytics.get("cancelled_bookings") or 0),
                 "total_spent": float(analytics.get("total_spent") or 0),
-                "average_booking_value": float(
-                    analytics.get("avg_booking_value") or 0
-                ),
+                "average_booking_value": float(analytics.get("avg_booking_value") or 0),
                 "last_booking_date": last_booking_utc,
                 "last_booking_date_local": (
                     format_for_display(last_booking_utc, station_timezone)
@@ -406,9 +423,7 @@ async def get_activity_logs(
 
 
 @router.get("/superadmin/activity_logs")
-async def get_admin_activity_logs(
-    limit: int = 100, user=Depends(superadmin_required)
-):
+async def get_admin_activity_logs(limit: int = 100, user=Depends(superadmin_required)):
     """Get admin activity logs (superadmin only)."""
     # Implementation for admin activity logs
 

@@ -3,9 +3,9 @@ Customer Booking AI Functions
 Handles all customer booking-related AI interactions with proper scope restrictions
 """
 
-from datetime import datetime, timezone, timedelta
 import logging
 import time
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -25,9 +25,7 @@ except ImportError:
 # Import performance optimization services
 try:
     from api.ai.endpoints.services.ai_cache_service import get_ai_cache
-    from api.ai.endpoints.services.intelligent_model_router import (
-        get_model_router,
-    )
+    from api.ai.endpoints.services.intelligent_model_router import get_model_router
     from api.ai.endpoints.services.self_learning_ai import get_self_learning_ai
 
     OPTIMIZATIONS_AVAILABLE = True
@@ -122,7 +120,9 @@ class CustomerBookingAI:
 
             # === OPTIMIZATION 1: Check cache first ===
             if self.optimizations_enabled and self.cache_service:
-                cached_response = await self.cache_service.get_cached_response(message, context)
+                cached_response = await self.cache_service.get_cached_response(
+                    message, context
+                )
                 if cached_response:
                     response_time = int((time.time() - start_time) * 1000)
                     logger.info(
@@ -195,10 +195,16 @@ Keep responses concise but friendly. Use emojis sparingly."""
                     response_text = ai_response_tuple[0]
                     confidence = ai_response_tuple[1]
                     model_used = (
-                        ai_response_tuple[2] if len(ai_response_tuple) > 2 else selected_model
+                        ai_response_tuple[2]
+                        if len(ai_response_tuple) > 2
+                        else selected_model
                     )
-                    tokens_in = ai_response_tuple[3] if len(ai_response_tuple) > 3 else 0
-                    tokens_out = ai_response_tuple[4] if len(ai_response_tuple) > 4 else 0
+                    tokens_in = (
+                        ai_response_tuple[3] if len(ai_response_tuple) > 3 else 0
+                    )
+                    tokens_out = (
+                        ai_response_tuple[4] if len(ai_response_tuple) > 4 else 0
+                    )
                     cost = ai_response_tuple[5] if len(ai_response_tuple) > 5 else 0
 
                     response_time = int((time.time() - start_time) * 1000)
@@ -225,7 +231,9 @@ Keep responses concise but friendly. Use emojis sparingly."""
 
                     # === OPTIMIZATION 3: Cache the response ===
                     if self.optimizations_enabled and self.cache_service:
-                        await self.cache_service.cache_response(message, response_data, context)
+                        await self.cache_service.cache_response(
+                            message, response_data, context
+                        )
                         logger.debug("Response cached for future requests")
 
                     # === OPTIMIZATION 4: Record for self-learning ===
@@ -240,7 +248,9 @@ Keep responses concise but friendly. Use emojis sparingly."""
                     return response_data
                 else:
                     # If unexpected response format, use fallback
-                    logger.warning(f"Unexpected OpenAI response format: {ai_response_tuple}")
+                    logger.warning(
+                        f"Unexpected OpenAI response format: {ai_response_tuple}"
+                    )
                     return self._get_fallback_response(message, context)
             else:
                 # Fallback to simple responses if OpenAI not available
@@ -325,7 +335,14 @@ Keep responses concise but friendly. Use emojis sparingly."""
     def _identify_booking_intent(self, message: str) -> str | None:
         """Identify the specific type of booking request"""
         booking_keywords = {
-            "create": ["book", "reserve", "table", "reservation", "make booking", "schedule"],
+            "create": [
+                "book",
+                "reserve",
+                "table",
+                "reservation",
+                "make booking",
+                "schedule",
+            ],
             "modify": ["change", "modify", "update", "reschedule", "move"],
             "cancel": ["cancel", "delete", "remove", "cancel booking"],
             "view": ["check", "view", "see", "show", "status", "my booking"],
@@ -454,7 +471,9 @@ I'll then show you the cancellation details and help you process it."""
             "intent": "cancel_booking",
             "response": response,
             "booking_reference": booking_ref,
-            "next_action": "identify_booking" if not booking_ref else "confirm_cancellation",
+            "next_action": "identify_booking"
+            if not booking_ref
+            else "confirm_cancellation",
         }
 
     async def _view_booking_assistant(
@@ -502,9 +521,14 @@ Would you like to:
             response = self._get_menu_information()
         elif any(word in message_lower for word in ["hour", "open", "close", "time"]):
             response = self._get_restaurant_hours()
-        elif any(word in message_lower for word in ["location", "address", "where", "direction"]):
+        elif any(
+            word in message_lower
+            for word in ["location", "address", "where", "direction"]
+        ):
             response = self._get_restaurant_location()
-        elif any(word in message_lower for word in ["contact", "phone", "email", "call"]):
+        elif any(
+            word in message_lower for word in ["contact", "phone", "email", "call"]
+        ):
             response = self._get_contact_information()
         else:
             response = self._get_general_assistance()
@@ -552,14 +576,18 @@ Would you like to:
                     details["add_ons"] = nlp_details["add_ons"]
 
                 if nlp_details.get("dietary_restrictions"):
-                    details["dietary_restrictions"] = nlp_details["dietary_restrictions"]
+                    details["dietary_restrictions"] = nlp_details[
+                        "dietary_restrictions"
+                    ]
 
                 if nlp_details.get("special_requests"):
                     details["special_requests"] = nlp_details["special_requests"]
 
                 if nlp_details.get("locations"):
                     details["location"] = (
-                        nlp_details["locations"][0] if nlp_details["locations"] else None
+                        nlp_details["locations"][0]
+                        if nlp_details["locations"]
+                        else None
                     )
 
                 logger.info(
@@ -568,7 +596,9 @@ Would you like to:
                 return details
 
             except Exception as e:
-                logger.warning(f"⚠️ Enhanced NLP extraction failed, falling back to regex: {e}")
+                logger.warning(
+                    f"⚠️ Enhanced NLP extraction failed, falling back to regex: {e}"
+                )
 
         # Fallback to regex-based extraction
         details = {}
@@ -582,7 +612,9 @@ Would you like to:
             details["party_size"] = int(party_match.group(1))
 
         # Extract time
-        time_match = re.search(r"(\d{1,2}):?(\d{2})?\s*(am|pm|o\'?clock)?", message_lower)
+        time_match = re.search(
+            r"(\d{1,2}):?(\d{2})?\s*(am|pm|o\'?clock)?", message_lower
+        )
         if time_match:
             hour = time_match.group(1)
             minute = time_match.group(2) or "00"
@@ -592,7 +624,9 @@ Would you like to:
         # Extract date keywords
         date_keywords = {
             "today": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-            "tomorrow": (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%d"),
+            "tomorrow": (datetime.now(timezone.utc) + timedelta(days=1)).strftime(
+                "%Y-%m-%d"
+            ),
             "friday": "this Friday",
             "saturday": "this Saturday",
             "sunday": "this Sunday",
@@ -805,7 +839,9 @@ What would you like to do?""",
         """Check if message should be escalated to human agent"""
         return any(keyword in message for keyword in self.escalation_keywords)
 
-    async def _handle_escalation(self, message: str, context: dict[str, Any]) -> dict[str, Any]:
+    async def _handle_escalation(
+        self, message: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Handle escalation to customer service agent"""
         return {
             "intent": "escalation",
@@ -829,7 +865,9 @@ Is there anything urgent I can help you with while you wait?""",
             "next_action": "transfer_to_agent",
         }
 
-    def _get_fallback_response(self, message: str, context: dict[str, Any]) -> dict[str, Any]:
+    def _get_fallback_response(
+        self, message: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Provide fallback response when OpenAI is not available"""
         message_lower = message.lower()
 
@@ -918,7 +956,9 @@ Ready to schedule your hibachi chef for a private party?""",
             "next_action": "offer_booking",
         }
 
-    async def _handle_quote_request(self, message: str, context: dict[str, Any]) -> dict[str, Any]:
+    async def _handle_quote_request(
+        self, message: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Handle pricing and quote requests"""
         return {
             "intent": "quote",
@@ -959,7 +999,9 @@ Ready to get a custom quote for your event?""",
             "next_action": "offer_booking",
         }
 
-    async def _handle_faq_inquiry(self, message: str, context: dict[str, Any]) -> dict[str, Any]:
+    async def _handle_faq_inquiry(
+        self, message: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Handle frequently asked questions"""
         message_lower = message.lower()
 
@@ -967,7 +1009,9 @@ Ready to get a custom quote for your event?""",
             faq_response = self._get_hours_faq()
         elif any(word in message_lower for word in ["parking", "park"]):
             faq_response = self._get_parking_faq()
-        elif any(word in message_lower for word in ["menu", "food", "dietary", "allergy"]):
+        elif any(
+            word in message_lower for word in ["menu", "food", "dietary", "allergy"]
+        ):
             faq_response = self._get_menu_faq()
         elif any(word in message_lower for word in ["dress", "attire", "code"]):
             faq_response = self._get_dress_code_faq()
@@ -1134,7 +1178,7 @@ Ready to book your private hibachi experience?"""
 • 48-hour advance notice minimum
 • 1-week notice for weekend bookings
 • 2-week notice for holiday events
-• 50% deposit to secure booking
+• $100 fixed deposit to secure booking (refundable if canceled 4+ days before)
 
 **Special Packages**:
 • Birthday Party Package: Starting at $399
@@ -1180,7 +1224,12 @@ Ready to schedule your hibachi chef?"""
     def _load_pricing_info(self) -> dict[str, Any]:
         """Load pricing information"""
         return {
-            "hibachi_dinner": {"chicken": 24.95, "steak": 32.95, "shrimp": 28.95, "salmon": 29.95},
+            "hibachi_dinner": {
+                "chicken": 24.95,
+                "steak": 32.95,
+                "shrimp": 28.95,
+                "salmon": 29.95,
+            },
             "lunch_specials": {"range": "16.95-22.95"},
             "group_discount": 0.10,
             "birthday_package": 299.00,

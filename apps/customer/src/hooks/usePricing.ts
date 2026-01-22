@@ -35,9 +35,31 @@ interface UsePricingResult {
   childFreeUnderAge: number | undefined;
   partyMinimum: number | undefined;
   depositAmount: number | undefined;
+  depositRefundableDays: number | undefined;
   freeMiles: number | undefined;
   perMileRate: number | undefined;
   addonPrices: Record<string, number> | undefined;
+
+  // Booking rules
+  minAdvanceHours: number | undefined;
+
+  // Timing (deadlines/cutoffs in hours) - SSoT from dynamic_variables
+  menuChangeCutoffHours: number | undefined;
+  guestCountFinalizeHours: number | undefined;
+  freeRescheduleHours: number | undefined;
+
+  // Service (duration and logistics)
+  standardDurationMinutes: number | undefined;
+  extendedDurationMinutes: number | undefined;
+  chefArrivalMinutesBefore: number | undefined;
+
+  // Policy (fees and limits)
+  rescheduleFee: number | undefined; // in dollars (converted from cents)
+  freeRescheduleCount: number | undefined;
+
+  // Contact (business info)
+  businessPhone: string | undefined;
+  businessEmail: string | undefined;
 
   // Helper functions
   hasData: boolean;
@@ -62,6 +84,24 @@ interface BusinessConfig {
   };
   booking: {
     min_advance_hours: number;
+  };
+  timing?: {
+    menu_change_cutoff_hours: number;
+    guest_count_finalize_hours: number;
+    free_reschedule_hours: number;
+  };
+  service?: {
+    standard_duration_minutes: number;
+    extended_duration_minutes: number;
+    chef_arrival_minutes_before: number;
+  };
+  policy?: {
+    reschedule_fee_cents: number;
+    free_reschedule_count: number;
+  };
+  contact?: {
+    business_phone: string;
+    business_email: string;
   };
   source: string;
 }
@@ -156,10 +196,34 @@ export function usePricing(): UsePricingResult {
   const depositAmount = businessConfig?.deposit?.deposit_amount_cents
     ? businessConfig.deposit.deposit_amount_cents / 100
     : undefined;
+  const depositRefundableDays = businessConfig?.deposit?.deposit_refundable_days;
   const freeMiles = businessConfig?.travel?.free_miles;
   const perMileRate = businessConfig?.travel?.per_mile_cents
     ? businessConfig.travel.per_mile_cents / 100
     : undefined;
+
+  // Booking rules
+  const minAdvanceHours = businessConfig?.booking?.min_advance_hours;
+
+  // Timing (deadlines/cutoffs) from SSoT
+  const menuChangeCutoffHours = businessConfig?.timing?.menu_change_cutoff_hours;
+  const guestCountFinalizeHours = businessConfig?.timing?.guest_count_finalize_hours;
+  const freeRescheduleHours = businessConfig?.timing?.free_reschedule_hours;
+
+  // Service (duration and logistics)
+  const standardDurationMinutes = businessConfig?.service?.standard_duration_minutes;
+  const extendedDurationMinutes = businessConfig?.service?.extended_duration_minutes;
+  const chefArrivalMinutesBefore = businessConfig?.service?.chef_arrival_minutes_before;
+
+  // Policy (fees and limits) - convert cents to dollars
+  const rescheduleFee = businessConfig?.policy?.reschedule_fee_cents
+    ? businessConfig.policy.reschedule_fee_cents / 100
+    : undefined;
+  const freeRescheduleCount = businessConfig?.policy?.free_reschedule_count;
+
+  // Contact (business info)
+  const businessPhone = businessConfig?.contact?.business_phone;
+  const businessEmail = businessConfig?.contact?.business_email;
 
   // Debug logging for pricing extraction
   console.log('[usePricing] Extracted values:', {
@@ -168,8 +232,14 @@ export function usePricing(): UsePricingResult {
     childPrice,
     partyMinimum,
     depositAmount,
+    depositRefundableDays,
     freeMiles,
     perMileRate,
+    minAdvanceHours,
+    menuChangeCutoffHours,
+    standardDurationMinutes,
+    rescheduleFee,
+    businessPhone,
     isLoading,
   });
 
@@ -186,9 +256,21 @@ export function usePricing(): UsePricingResult {
     childFreeUnderAge,
     partyMinimum,
     depositAmount,
+    depositRefundableDays,
     freeMiles,
     perMileRate,
     addonPrices,
+    minAdvanceHours,
+    menuChangeCutoffHours,
+    guestCountFinalizeHours,
+    freeRescheduleHours,
+    standardDurationMinutes,
+    extendedDurationMinutes,
+    chefArrivalMinutesBefore,
+    rescheduleFee,
+    freeRescheduleCount,
+    businessPhone,
+    businessEmail,
     hasData,
     refetch: fetchPricing,
   };

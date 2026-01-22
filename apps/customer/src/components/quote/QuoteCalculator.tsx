@@ -225,6 +225,7 @@ export function QuoteCalculator() {
     childFreeUnderAge,
     partyMinimum,
     depositAmount,
+    depositRefundableDays,
     freeMiles,
     perMileRate,
     isLoading: pricingLoading,
@@ -1413,7 +1414,7 @@ export function QuoteCalculator() {
                     <span className="mt-0.5 text-green-500">✓</span>
                     <span>
                       <strong>Deposit:</strong> ${depositAmount ?? 100} refundable deposit required
-                      (refunded if canceled 7+ days before event)
+                      (refunded if canceled {depositRefundableDays ?? 4}+ days before event)
                     </span>
                   </li>
                   <li className="flex items-start gap-2">

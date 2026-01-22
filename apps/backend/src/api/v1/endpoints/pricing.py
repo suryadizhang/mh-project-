@@ -3,10 +3,11 @@ Pricing API Endpoints
 Provides pricing data using BusinessConfig for dynamic values (Single Source of Truth)
 """
 
+import logging
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Any
-import logging
 
 from core.database import get_db
 from services.business_config_service import get_business_config
@@ -274,7 +275,9 @@ async def get_current_pricing(
                 "child_price": child_price,  # From BusinessConfig
                 "child_free_under_age": child_free_under_age,  # From BusinessConfig
                 "party_minimum": party_minimum,  # From BusinessConfig
-                "deposit_amount": config.deposit_amount_cents / 100,  # From BusinessConfig
+                "deposit_amount": config.deposit_amount_cents
+                / 100,  # From BusinessConfig
+                "deposit_refundable_days": config.deposit_refundable_days,  # From BusinessConfig
             },
             "travel_fee_config": {
                 "free_miles": free_miles,
@@ -290,7 +293,9 @@ async def get_current_pricing(
 
     except Exception as e:
         logger.exception(f"Error fetching pricing data: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch pricing data: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch pricing data: {str(e)}"
+        )
 
 
 @router.post("/pricing/calculate", response_model=dict[str, Any])
@@ -349,7 +354,9 @@ async def calculate_quote(
 
     except Exception as e:
         logger.exception(f"Error calculating quote: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to calculate quote: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to calculate quote: {str(e)}"
+        )
 
 
 @router.get("/pricing/summary", response_model=dict[str, Any])
@@ -365,4 +372,6 @@ async def get_pricing_summary(
 
     except Exception as e:
         logger.exception(f"Error fetching pricing summary: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch pricing summary: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch pricing summary: {str(e)}"
+        )
