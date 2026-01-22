@@ -29,12 +29,15 @@ repos:
         description: Check for case conflicts
 
   # Python formatting and linting
+  # NOTE: Using --check mode to VALIDATE only (no auto-fixing)
+  # This prevents pre-commit from reverting intentional changes
+  # Run `black .` or `ruff --fix .` manually when you want to format
   - repo: https://github.com/psf/black
     rev: 23.12.1
     hooks:
       - id: black
-        description: Format Python code with Black
-        args: [--line-length=88]
+        description: Check Python formatting (no auto-fix)
+        args: [--check, --line-length=88]
         language_version: python3
         files: ^apps/backend/.*\.py$
 
@@ -42,8 +45,8 @@ repos:
     rev: v0.1.8
     hooks:
       - id: ruff
-        description: Lint and fix Python code with Ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        description: Lint Python code (no auto-fix)
+        args: [--exit-non-zero-on-fix]
         files: ^apps/backend/.*\.py$
 
   # Import sorting
@@ -51,8 +54,8 @@ repos:
     rev: 5.13.2
     hooks:
       - id: isort
-        description: Sort Python imports
-        args: [--profile, black, --line-length, "88"]
+        description: Check import order (no auto-fix)
+        args: [--check-only, --profile, black, --line-length, "88"]
         files: ^apps/backend/.*\.py$
 
   # Security scanning
@@ -85,15 +88,17 @@ repos:
         args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
 
   # TypeScript/JavaScript formatting
-  # NOTE: mirrors-prettier v3.1.0 is the latest stable release in this repo
-  # Local prettier (v3.6.2) may format differently - run `npm run format` if needed
+  # NOTE: Using --check mode to VALIDATE only (no auto-fixing)
+  # This prevents prettier from reverting intentional code changes
+  # Run `npm run format` manually when you want to format
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
       - id: prettier
-        description: Format TypeScript/JavaScript with Prettier
+        description: Check TS/JS formatting (no auto-fix)
+        args: ['--check']
         files: \.(ts|tsx|js|jsx|json|css|scss|md)$
-        exclude: ^(package-lock\.json|\.next/|node_modules/)
+        exclude: ^(package-lock\.json|\.next/|node_modules/|apps/backend/)
 
   # Custom security checks
   # NOTE: Using Python instead of bash for Windows compatibility
