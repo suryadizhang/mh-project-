@@ -13,7 +13,9 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from jose import ExpiredSignatureError, JWTError, jwt
+import jwt
+from jwt.exceptions import DecodeError as JWTError
+from jwt.exceptions import ExpiredSignatureError
 
 from core.config import settings
 from utils.auth import UserRole
@@ -21,7 +23,9 @@ from utils.auth import UserRole
 logger = logging.getLogger(__name__)
 
 
-def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
+def create_access_token(
+    data: dict[str, Any], expires_delta: timedelta | None = None
+) -> str:
     """
     Create JWT access token with JTI for blacklist tracking.
 
@@ -74,7 +78,9 @@ def create_refresh_token(user_id: str, expires_delta: timedelta | None = None) -
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(timezone.utc) + timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        )
 
     to_encode = {
         "sub": user_id,

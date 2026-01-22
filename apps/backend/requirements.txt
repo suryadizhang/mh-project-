@@ -1,44 +1,45 @@
 # Core FastAPI and web framework
-fastapi>=0.104.1
-uvicorn[standard]>=0.24.0
-gunicorn>=21.2.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+gunicorn>=23.0.0  # Fixed HTTP Request/Response Smuggling vulnerability
 
 # Pydantic for data validation and settings
-pydantic>=2.5.0
-pydantic-settings>=2.1.0
+pydantic>=2.10.0
+pydantic-settings>=2.6.0
 
 # Database
-sqlalchemy>=2.0.23
-alembic>=1.13.1
-asyncpg>=0.29.0  # PostgreSQL async driver
-psycopg2-binary>=2.9.9  # PostgreSQL sync driver (backup)
+sqlalchemy>=2.0.36
+alembic>=1.14.0
+asyncpg>=0.30.0  # PostgreSQL async driver
+psycopg2-binary>=2.9.10  # PostgreSQL sync driver (backup)
 
 # Redis for caching and rate limiting
-redis>=5.0.1
-hiredis>=2.2.3  # Faster Redis parser
+redis>=5.2.0
+hiredis>=3.1.0  # Faster Redis parser
 slowapi>=0.1.9  # Rate limiting for FastAPI
-schedule>=1.2.0  # Background job scheduling for payment email monitoring
+schedule>=1.2.2  # Background job scheduling for payment email monitoring
 apscheduler>=3.10.4  # Advanced Python Scheduler for follow-ups
 
 # Celery for async task queue (escalation notifications, recording downloads)
-celery>=5.3.4
-kombu>=5.3.4  # Celery messaging library
-celery[redis]>=5.3.4  # Celery with Redis broker support
+celery>=5.4.0
+kombu>=5.4.0  # Celery messaging library
+celery[redis]>=5.4.0  # Celery with Redis broker support
 flower>=2.0.1  # Celery monitoring web UI (optional)
-billiard>=4.2.0  # Celery process pool implementation
+billiard>=4.2.1  # Celery process pool implementation
 
 # Systemd integration (enterprise-standard watchdog support)
 sdnotify>=0.3.2  # Notify systemd of service readiness and health
 
 # Authentication and security
-python-jose[cryptography]>=3.3.0
+pyjwt[crypto]>=2.10.0  # Replaced python-jose (has algorithm confusion vulnerability)
 passlib[bcrypt]>=1.7.4
-python-multipart>=0.0.6
-cryptography>=41.0.0
+python-multipart>=0.0.20  # Fixed DoS vulnerability
+cryptography>=44.0.0
 
 # HTTP client for integrations
 httpx>=0.28.0
-aiohttp>=3.9.1
+aiohttp>=3.11.0
+requests>=2.32.3  # Security update for .netrc credential leak fix
 
 # OpenAI integration
 openai>=1.50.0
@@ -63,8 +64,8 @@ google-api-python-client>=2.108.0  # Google Calendar API for chef booking sync
 google-auth>=2.25.0  # Google OAuth2 authentication
 
 # Email
-email-validator>=2.1.0
-jinja2>=3.1.2
+email-validator>=2.2.0
+jinja2>=3.1.6  # Fixed sandbox breakout vulnerabilities
 resend>=2.19.0  # Resend API for email delivery (replaces SMTP)
 
 # Environment and configuration
@@ -92,17 +93,17 @@ structlog>=23.2.0
 sentry-sdk[fastapi]>=1.39.2
 
 # Testing
-pytest>=7.4.3
-pytest-asyncio>=0.21.1
+pytest>=8.3.0
+pytest-asyncio>=0.24.0
 pytest-benchmark>=5.1.0
-pytest-cov>=4.1.0  # Coverage reporting
+pytest-cov>=6.0.0  # Coverage reporting
 faker>=37.11.0  # Generate realistic test data
 
 # Development tools
-black>=23.11.0
-isort>=5.12.0
-flake8>=6.1.0
-mypy>=1.7.1
+black>=25.1.0  # Fixed ReDoS vulnerability
+isort>=5.13.0
+flake8>=7.1.0
+mypy>=1.14.0
 
 # Performance
 orjson>=3.9.10  # Faster JSON serialization
