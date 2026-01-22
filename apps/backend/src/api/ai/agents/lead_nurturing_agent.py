@@ -262,7 +262,10 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
                                 "enum": ["standard", "premium", "deluxe"],
                                 "description": "Base package selected",
                             },
-                            "num_guests": {"type": "integer", "description": "Number of guests"},
+                            "num_guests": {
+                                "type": "integer",
+                                "description": "Number of guests",
+                            },
                             "addons": {
                                 "type": "array",
                                 "items": {"type": "string"},
@@ -311,7 +314,10 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
                                 "enum": ["standard", "premium", "deluxe"],
                                 "description": "Selected package",
                             },
-                            "num_guests": {"type": "integer", "description": "Number of guests"},
+                            "num_guests": {
+                                "type": "integer",
+                                "description": "Number of guests",
+                            },
                             "addons": {
                                 "type": "array",
                                 "items": {"type": "string"},
@@ -347,7 +353,11 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
                 return await self._estimate_event_cost(arguments)
 
             else:
-                return {"success": False, "result": None, "error": f"Unknown tool: {tool_name}"}
+                return {
+                    "success": False,
+                    "result": None,
+                    "error": f"Unknown tool: {tool_name}",
+                }
 
         except Exception as e:
             logger.error(f"Tool execution error: {tool_name} - {e}", exc_info=True)
@@ -355,7 +365,9 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
 
     # ===== Tool Implementations =====
 
-    async def _get_product_recommendations(self, args: dict[str, Any]) -> dict[str, Any]:
+    async def _get_product_recommendations(
+        self, args: dict[str, Any]
+    ) -> dict[str, Any]:
         """Recommend packages based on event details"""
 
         num_guests = args["num_guests"]
@@ -380,7 +392,11 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
                 ],
                 "best_for": "Luxury events, corporate VIP, milestone celebrations",
             }
-        elif budget_range == "premium" or occasion in ["wedding", "corporate", "anniversary"]:
+        elif budget_range == "premium" or occasion in [
+            "wedding",
+            "corporate",
+            "anniversary",
+        ]:
             base = {
                 "package": "Premium Package",
                 "price_per_person": 65,
@@ -519,12 +535,14 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
                     "base_package": f"${base_total:,.2f}",
                     "addons": f"${addons_total:,.2f}",
                     "subtotal": f"${subtotal:,.2f}",
-                    "discount": f"-${discount_amount:,.2f}" if discount_amount > 0 else "$0.00",
+                    "discount": f"-${discount_amount:,.2f}"
+                    if discount_amount > 0
+                    else "$0.00",
                     "discount_reason": discount_reason,
                 },
                 "total": f"${final_total:,.2f}",
-                "deposit_required": f"${deposit:,.2f} (50%)",
-                "balance_due": f"${final_total - deposit:,.2f} (day of event)",
+                "deposit_required": "$100.00 (fixed deposit)",
+                "balance_due": f"${final_total - 100:,.2f} (day of event)",
                 "per_person_effective": f"${final_total / num_guests:.2f}",
             },
         }
@@ -627,7 +645,10 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
             extra_hours = duration_hours - 2
             extra_cost = extra_hours * 200
             extras.append(
-                {"item": f"Extended time ({extra_hours} hour)", "cost": f"${extra_cost:,.2f}"}
+                {
+                    "item": f"Extended time ({extra_hours} hour)",
+                    "cost": f"${extra_cost:,.2f}",
+                }
             )
 
         # Build estimate
@@ -650,10 +671,10 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
                 "Event venue rental (we bring equipment to your location)",
             ],
             "payment_terms": {
-                "deposit": "50% required to secure booking",
-                "balance": "Due 24 hours before event",
-                "accepted": "Credit card, check, Venmo, Zelle",
-                "cancellation": "Full refund if cancelled 14+ days before event",
+                "deposit": "$100 fixed deposit to secure booking",
+                "balance": "Due on event day",
+                "accepted": "Credit card, cash, Venmo, Zelle",
+                "cancellation": "Full deposit refund if cancelled 4+ days before event",
             },
         }
 

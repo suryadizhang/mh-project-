@@ -1,12 +1,13 @@
 # MyHibachi API Documentation
 
-**Last Updated:** January 30, 2025  
-**API Version:** 1.0.0  
-**Base URL (Production):** `https://mhapi.mysticdatanode.net`  
-**Base URL (Staging):** `https://staging-api.mysticdatanode.net` (or `http://127.0.0.1:8002` via SSH tunnel)  
-**Base URL (Development):** `http://localhost:8000`
+**Last Updated:** January 30, 2025 **API Version:** 1.0.0 **Base URL
+(Production):** `https://mhapi.mysticdatanode.net` **Base URL
+(Staging):** `https://staging-api.mysticdatanode.net` (or
+`http://127.0.0.1:8002` via SSH tunnel) **Base URL (Development):**
+`http://localhost:8000`
 
-> **Note:** Port 8000 is used for production backend, port 8002 for staging. The old `api.myhibachi.com:8003` URL is deprecated.
+> **Note:** Port 8000 is used for production backend, port 8002 for
+> staging. The old `api.myhibachi.com:8003` URL is deprecated.
 
 ---
 
@@ -35,7 +36,8 @@
 
 ### API Architecture
 
-MyHibachi uses a unified REST API architecture combining operational (CRM) and AI capabilities:
+MyHibachi uses a unified REST API architecture combining operational
+(CRM) and AI capabilities:
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -58,30 +60,34 @@ MyHibachi uses a unified REST API architecture combining operational (CRM) and A
 
 ### Key Features
 
-- **RESTful Design:** Standard HTTP methods (GET, POST, PUT, DELETE, PATCH)
+- **RESTful Design:** Standard HTTP methods (GET, POST, PUT, DELETE,
+  PATCH)
 - **JSON Responses:** All responses in JSON format
 - **JWT Authentication:** Secure token-based authentication
 - **Role-Based Access Control (RBAC):** Admin, Staff, Customer roles
 - **Rate Limiting:** Tier-based rate limiting (Public, Admin, AI)
-- **Comprehensive Error Handling:** Detailed error messages with status codes
+- **Comprehensive Error Handling:** Detailed error messages with
+  status codes
 - **Real-time Updates:** WebSocket support for chat and notifications
 - **Webhook Support:** External integrations (Stripe, RingCentral)
 - **OpenAPI Documentation:** Interactive API docs at `/docs`
 
 ### API Versions
 
-| Version | Status | Endpoint Prefix | Notes |
-|---------|--------|----------------|-------|
-| **v1** | ✅ Current | `/api/v1` | Production stable |
-| v2 | 🚧 Planned | `/api/v2` | GraphQL support planned |
+| Version | Status     | Endpoint Prefix | Notes                   |
+| ------- | ---------- | --------------- | ----------------------- |
+| **v1**  | ✅ Current | `/api/v1`       | Production stable       |
+| v2      | 🚧 Planned | `/api/v2`       | GraphQL support planned |
 
 ### Supported Content Types
 
 **Request:**
+
 - `application/json` (default)
 - `multipart/form-data` (file uploads)
 
 **Response:**
+
 - `application/json` (default)
 - `text/event-stream` (SSE for AI streaming)
 
@@ -99,11 +105,13 @@ MyHibachi API supports two authentication methods:
 ### JWT Bearer Authentication
 
 **Token Format:**
+
 ```
 Authorization: Bearer <jwt_token>
 ```
 
 **Token Structure:**
+
 ```json
 {
   "sub": "user@example.com",
@@ -115,12 +123,14 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Token Expiration:**
+
 - **Access Token:** 30 minutes
 - **Refresh Token:** 7 days
 
 ### Obtaining Tokens
 
 **Login Endpoint:**
+
 ```http
 POST /api/v1/auth/login
 Content-Type: application/json
@@ -132,6 +142,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -172,18 +183,19 @@ X-API-Key: your_api_key_here
 **API Key Format:** 32+ character alphanumeric string
 
 **Obtaining API Key:**
+
 - Contact admin or generate via admin panel
 - API keys are scoped to specific permissions
 
 ### User Roles & Permissions
 
-| Role | Permissions | Endpoints |
-|------|-------------|-----------|
-| **Public** | Read public data, create leads | `/api/v1/public/*` |
-| **Customer** | View own bookings, update profile | `/api/v1/bookings`, `/api/v1/customers/{self}` |
-| **Staff** | Manage bookings, customers, leads | Most `/api/v1/*` endpoints |
-| **Admin** | Full access, system configuration | All endpoints |
-| **Super Admin** | Multi-tenant management | `/api/v1/admin/*` |
+| Role            | Permissions                       | Endpoints                                      |
+| --------------- | --------------------------------- | ---------------------------------------------- |
+| **Public**      | Read public data, create leads    | `/api/v1/public/*`                             |
+| **Customer**    | View own bookings, update profile | `/api/v1/bookings`, `/api/v1/customers/{self}` |
+| **Staff**       | Manage bookings, customers, leads | Most `/api/v1/*` endpoints                     |
+| **Admin**       | Full access, system configuration | All endpoints                                  |
+| **Super Admin** | Multi-tenant management           | `/api/v1/admin/*`                              |
 
 ---
 
@@ -191,12 +203,12 @@ X-API-Key: your_api_key_here
 
 ### Rate Limit Tiers
 
-| Tier | Requests/Minute | Burst Limit | Endpoints |
-|------|-----------------|-------------|-----------|
-| **Public** | 20 | 40 | `/api/v1/public/*` |
-| **Authenticated** | 60 | 100 | Standard authenticated endpoints |
-| **Admin** | 120 | 200 | Admin endpoints |
-| **AI** | 10 | 15 | `/api/v1/ai/*` (OpenAI costs) |
+| Tier              | Requests/Minute | Burst Limit | Endpoints                        |
+| ----------------- | --------------- | ----------- | -------------------------------- |
+| **Public**        | 20              | 40          | `/api/v1/public/*`               |
+| **Authenticated** | 60              | 100         | Standard authenticated endpoints |
+| **Admin**         | 120             | 200         | Admin endpoints                  |
+| **AI**            | 10              | 15          | `/api/v1/ai/*` (OpenAI costs)    |
 
 ### Rate Limit Headers
 
@@ -232,6 +244,7 @@ Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "tier": "authenticated",
@@ -266,38 +279,39 @@ All errors follow a consistent structure:
 
 ### HTTP Status Codes
 
-| Code | Status | Meaning |
-|------|--------|---------|
-| **200** | OK | Request successful |
-| **201** | Created | Resource created successfully |
-| **204** | No Content | Request successful, no response body |
-| **400** | Bad Request | Invalid request data |
-| **401** | Unauthorized | Missing or invalid authentication |
-| **403** | Forbidden | Insufficient permissions |
-| **404** | Not Found | Resource not found |
-| **409** | Conflict | Resource conflict (duplicate) |
-| **422** | Unprocessable Entity | Validation error |
-| **429** | Too Many Requests | Rate limit exceeded |
-| **500** | Internal Server Error | Server error |
-| **503** | Service Unavailable | Temporary service issue |
+| Code    | Status                | Meaning                              |
+| ------- | --------------------- | ------------------------------------ |
+| **200** | OK                    | Request successful                   |
+| **201** | Created               | Resource created successfully        |
+| **204** | No Content            | Request successful, no response body |
+| **400** | Bad Request           | Invalid request data                 |
+| **401** | Unauthorized          | Missing or invalid authentication    |
+| **403** | Forbidden             | Insufficient permissions             |
+| **404** | Not Found             | Resource not found                   |
+| **409** | Conflict              | Resource conflict (duplicate)        |
+| **422** | Unprocessable Entity  | Validation error                     |
+| **429** | Too Many Requests     | Rate limit exceeded                  |
+| **500** | Internal Server Error | Server error                         |
+| **503** | Service Unavailable   | Temporary service issue              |
 
 ### Common Error Codes
 
-| Error Code | HTTP Status | Description |
-|-----------|-------------|-------------|
-| `invalid_request` | 400 | Malformed request |
-| `validation_error` | 422 | Field validation failed |
-| `unauthorized` | 401 | Authentication required |
-| `forbidden` | 403 | Insufficient permissions |
-| `not_found` | 404 | Resource not found |
-| `already_exists` | 409 | Duplicate resource |
-| `rate_limit_exceeded` | 429 | Too many requests |
-| `internal_error` | 500 | Server error |
-| `external_api_error` | 502 | External API failure |
+| Error Code            | HTTP Status | Description              |
+| --------------------- | ----------- | ------------------------ |
+| `invalid_request`     | 400         | Malformed request        |
+| `validation_error`    | 422         | Field validation failed  |
+| `unauthorized`        | 401         | Authentication required  |
+| `forbidden`           | 403         | Insufficient permissions |
+| `not_found`           | 404         | Resource not found       |
+| `already_exists`      | 409         | Duplicate resource       |
+| `rate_limit_exceeded` | 429         | Too many requests        |
+| `internal_error`      | 500         | Server error             |
+| `external_api_error`  | 502         | External API failure     |
 
 ### Validation Errors
 
 **Request:**
+
 ```http
 POST /api/v1/public/leads
 Content-Type: application/json
@@ -310,6 +324,7 @@ Content-Type: application/json
 ```
 
 **Response:** `422 Unprocessable Entity`
+
 ```json
 {
   "error": "validation_error",
@@ -328,13 +343,14 @@ Content-Type: application/json
 
 ### Create Lead (Quote Request)
 
-**Endpoint:** `POST /api/v1/public/leads`  
-**Authentication:** None required  
-**Rate Limit:** 20/min
+**Endpoint:** `POST /api/v1/public/leads` **Authentication:** None
+required **Rate Limit:** 20/min
 
-**Description:** Submit a quote request or general inquiry. Automatically subscribes user to newsletter if phone provided.
+**Description:** Submit a quote request or general inquiry.
+Automatically subscribes user to newsletter if phone provided.
 
 **Request:**
+
 ```json
 {
   "name": "John Doe",
@@ -351,6 +367,7 @@ Content-Type: application/json
 ```
 
 **Response:** `201 Created`
+
 ```json
 {
   "success": true,
@@ -362,6 +379,7 @@ Content-Type: application/json
 ```
 
 **Validation Rules:**
+
 - `name`: Required, 2-100 characters
 - `phone`: Required, valid phone format (US/International)
 - `email`: Optional, valid email format
@@ -372,13 +390,13 @@ Content-Type: application/json
 
 ### Create Booking Request
 
-**Endpoint:** `POST /api/v1/public/bookings`  
-**Authentication:** None required  
-**Rate Limit:** 20/min
+**Endpoint:** `POST /api/v1/public/bookings` **Authentication:** None
+required **Rate Limit:** 20/min
 
 **Description:** Submit a booking request with event details.
 
 **Request:**
+
 ```json
 {
   "name": "Jane Smith",
@@ -396,6 +414,7 @@ Content-Type: application/json
 ```
 
 **Response:** `201 Created`
+
 ```json
 {
   "success": true,
@@ -407,32 +426,34 @@ Content-Type: application/json
   "next_steps": [
     "We'll review your request",
     "You'll receive a quote via email",
-    "Confirm booking with 50% deposit"
+    "Confirm booking with $100 deposit"
   ]
 }
 ```
 
 **Validation Rules:**
+
 - `name`: Required, 2-100 characters
 - `phone`: Required, valid phone format
 - `email`: Optional but recommended
 - `event_date`: Required, future date, not Monday (restaurant closed)
 - `event_time`: Optional, format HH:MM
 - `guest_count`: Required, 1-500 guests
-- `event_type`: Optional, one of: birthday, wedding, corporate, anniversary, other
+- `event_type`: Optional, one of: birthday, wedding, corporate,
+  anniversary, other
 - `location`: Required, city/state or address
 
 ---
 
 ### Health Check
 
-**Endpoint:** `GET /health`  
-**Authentication:** None  
-**Rate Limit:** No limit
+**Endpoint:** `GET /health` **Authentication:** None **Rate Limit:**
+No limit
 
 **Description:** Check API health status.
 
 **Response:** `200 OK`
+
 ```json
 {
   "status": "healthy",
@@ -454,11 +475,11 @@ Content-Type: application/json
 
 ### Login
 
-**Endpoint:** `POST /api/v1/auth/login`  
-**Authentication:** None  
+**Endpoint:** `POST /api/v1/auth/login` **Authentication:** None
 **Rate Limit:** 5/min (stricter for security)
 
 **Request:**
+
 ```json
 {
   "email": "admin@myhibachi.com",
@@ -467,6 +488,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -478,7 +500,11 @@ Content-Type: application/json
     "email": "admin@myhibachi.com",
     "role": "admin",
     "full_name": "Admin User",
-    "permissions": ["bookings:read", "bookings:write", "customers:read"]
+    "permissions": [
+      "bookings:read",
+      "bookings:write",
+      "customers:read"
+    ]
   }
 }
 ```
@@ -487,11 +513,11 @@ Content-Type: application/json
 
 ### Logout
 
-**Endpoint:** `POST /api/v1/auth/logout`  
-**Authentication:** Required  
+**Endpoint:** `POST /api/v1/auth/logout` **Authentication:** Required
 **Rate Limit:** 60/min
 
 **Request:**
+
 ```json
 {
   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -504,11 +530,11 @@ Content-Type: application/json
 
 ### Refresh Token
 
-**Endpoint:** `POST /api/v1/auth/refresh`  
-**Authentication:** Refresh token required  
-**Rate Limit:** 10/min
+**Endpoint:** `POST /api/v1/auth/refresh` **Authentication:** Refresh
+token required **Rate Limit:** 10/min
 
 **Request:**
+
 ```json
 {
   "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -516,6 +542,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -531,11 +558,11 @@ Content-Type: application/json
 
 ### List Bookings
 
-**Endpoint:** `GET /api/v1/bookings`  
-**Authentication:** Required (Staff/Admin)  
-**Rate Limit:** 60/min
+**Endpoint:** `GET /api/v1/bookings` **Authentication:** Required
+(Staff/Admin) **Rate Limit:** 60/min
 
 **Query Parameters:**
+
 ```
 ?status=confirmed              # Filter by status
 &event_date_from=2025-11-01    # Date range start
@@ -548,6 +575,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "items": [
@@ -566,8 +594,8 @@ Content-Type: application/json
       "event_type": "birthday",
       "location": "Los Angeles, CA",
       "status": "confirmed",
-      "total_amount": 1500.00,
-      "deposit_amount": 750.00,
+      "total_amount": 1500.0,
+      "deposit_amount": 750.0,
       "deposit_paid": true,
       "created_at": "2025-10-25T10:30:00Z",
       "updated_at": "2025-10-25T11:00:00Z"
@@ -588,11 +616,11 @@ Content-Type: application/json
 
 ### Get Booking Details
 
-**Endpoint:** `GET /api/v1/bookings/{id}`  
-**Authentication:** Required (Staff/Admin or Owner)  
-**Rate Limit:** 60/min
+**Endpoint:** `GET /api/v1/bookings/{id}` **Authentication:** Required
+(Staff/Admin or Owner) **Rate Limit:** 60/min
 
 **Response:** `200 OK`
+
 ```json
 {
   "id": 67890,
@@ -610,13 +638,23 @@ Content-Type: application/json
   "location": "123 Main St, Los Angeles, CA 90001",
   "status": "confirmed",
   "menu_items": [
-    {"id": 1, "name": "Hibachi Chicken", "quantity": 15, "price": 25.00},
-    {"id": 2, "name": "Hibachi Steak", "quantity": 10, "price": 35.00}
+    {
+      "id": 1,
+      "name": "Hibachi Chicken",
+      "quantity": 15,
+      "price": 25.0
+    },
+    {
+      "id": 2,
+      "name": "Hibachi Steak",
+      "quantity": 10,
+      "price": 35.0
+    }
   ],
-  "subtotal": 725.00,
-  "tax": 72.50,
-  "service_fee": 145.00,
-  "total_amount": 942.50,
+  "subtotal": 725.0,
+  "tax": 72.5,
+  "service_fee": 145.0,
+  "total_amount": 942.5,
   "deposit_amount": 471.25,
   "deposit_paid": true,
   "balance_due": 471.25,
@@ -632,11 +670,11 @@ Content-Type: application/json
 
 ### Create Booking (Admin)
 
-**Endpoint:** `POST /api/v1/bookings`  
-**Authentication:** Required (Staff/Admin)  
-**Rate Limit:** 60/min
+**Endpoint:** `POST /api/v1/bookings` **Authentication:** Required
+(Staff/Admin) **Rate Limit:** 60/min
 
 **Request:**
+
 ```json
 {
   "customer_id": 123,
@@ -646,8 +684,8 @@ Content-Type: application/json
   "event_type": "birthday",
   "location": "123 Main St, Los Angeles, CA 90001",
   "menu_items": [
-    {"menu_item_id": 1, "quantity": 15},
-    {"menu_item_id": 2, "quantity": 10}
+    { "menu_item_id": 1, "quantity": 15 },
+    { "menu_item_id": 2, "quantity": 10 }
   ],
   "notes": "Customer requested outdoor setup",
   "status": "confirmed"
@@ -655,12 +693,13 @@ Content-Type: application/json
 ```
 
 **Response:** `201 Created`
+
 ```json
 {
   "id": 67890,
   "reference_number": "BK-2025-67890",
   "status": "confirmed",
-  "total_amount": 942.50,
+  "total_amount": 942.5,
   "message": "Booking created successfully"
 }
 ```
@@ -669,11 +708,11 @@ Content-Type: application/json
 
 ### Update Booking
 
-**Endpoint:** `PUT /api/v1/bookings/{id}`  
-**Authentication:** Required (Staff/Admin)  
-**Rate Limit:** 60/min
+**Endpoint:** `PUT /api/v1/bookings/{id}` **Authentication:** Required
+(Staff/Admin) **Rate Limit:** 60/min
 
 **Request:**
+
 ```json
 {
   "status": "confirmed",
@@ -682,6 +721,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "id": 67890,
@@ -695,9 +735,8 @@ Content-Type: application/json
 
 ### Cancel Booking
 
-**Endpoint:** `DELETE /api/v1/bookings/{id}`  
-**Authentication:** Required (Staff/Admin)  
-**Rate Limit:** 60/min
+**Endpoint:** `DELETE /api/v1/bookings/{id}` **Authentication:**
+Required (Staff/Admin) **Rate Limit:** 60/min
 
 **Response:** `204 No Content`
 
@@ -707,11 +746,11 @@ Content-Type: application/json
 
 ### List Customers
 
-**Endpoint:** `GET /api/v1/customers`  
-**Authentication:** Required (Staff/Admin)  
-**Rate Limit:** 60/min
+**Endpoint:** `GET /api/v1/customers` **Authentication:** Required
+(Staff/Admin) **Rate Limit:** 60/min
 
 **Query Parameters:**
+
 ```
 ?search=john                # Search by name/email/phone
 &loyalty_tier=gold          # Filter by loyalty tier
@@ -720,6 +759,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "items": [
@@ -730,7 +770,7 @@ Content-Type: application/json
       "phone": "555-987-6543",
       "loyalty_tier": "silver",
       "total_bookings": 5,
-      "total_spent": 4500.00,
+      "total_spent": 4500.0,
       "created_at": "2024-01-15T10:00:00Z"
     }
   ],
@@ -747,11 +787,11 @@ Content-Type: application/json
 
 ### Get Customer Details
 
-**Endpoint:** `GET /api/v1/customers/{id}`  
-**Authentication:** Required (Staff/Admin or Owner)  
-**Rate Limit:** 60/min
+**Endpoint:** `GET /api/v1/customers/{id}` **Authentication:**
+Required (Staff/Admin or Owner) **Rate Limit:** 60/min
 
 **Response:** `200 OK`
+
 ```json
 {
   "id": 123,
@@ -767,7 +807,7 @@ Content-Type: application/json
   "loyalty_tier": "silver",
   "loyalty_points": 450,
   "total_bookings": 5,
-  "total_spent": 4500.00,
+  "total_spent": 4500.0,
   "upcoming_bookings": 2,
   "last_booking_date": "2025-09-15",
   "preferences": {
@@ -785,11 +825,11 @@ Content-Type: application/json
 
 ### List Leads
 
-**Endpoint:** `GET /api/v1/leads`  
-**Authentication:** Required (Staff/Admin)  
-**Rate Limit:** 60/min
+**Endpoint:** `GET /api/v1/leads` **Authentication:** Required
+(Staff/Admin) **Rate Limit:** 60/min
 
 **Query Parameters:**
+
 ```
 ?status=new                 # Filter by status
 &source=website             # Filter by source
@@ -799,6 +839,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "items": [
@@ -826,11 +867,11 @@ Content-Type: application/json
 
 ### Convert Lead to Customer
 
-**Endpoint:** `POST /api/v1/leads/{id}/convert`  
-**Authentication:** Required (Staff/Admin)  
-**Rate Limit:** 60/min
+**Endpoint:** `POST /api/v1/leads/{id}/convert` **Authentication:**
+Required (Staff/Admin) **Rate Limit:** 60/min
 
 **Request:**
+
 ```json
 {
   "create_booking": true,
@@ -843,6 +884,7 @@ Content-Type: application/json
 ```
 
 **Response:** `201 Created`
+
 ```json
 {
   "customer_id": 234,
@@ -857,11 +899,12 @@ Content-Type: application/json
 
 ### Chat with AI Assistant
 
-**Endpoint:** `POST /api/v1/ai/chat`  
-**Authentication:** Optional (better experience when authenticated)  
-**Rate Limit:** 10/min (strict due to OpenAI costs)
+**Endpoint:** `POST /api/v1/ai/chat` **Authentication:** Optional
+(better experience when authenticated) **Rate Limit:** 10/min (strict
+due to OpenAI costs)
 
 **Request:**
+
 ```json
 {
   "message": "I want to book a hibachi party for 25 people",
@@ -875,6 +918,7 @@ Content-Type: application/json
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "response": "I'd be happy to help you book a hibachi party for 25 people! To get started, could you tell me your preferred date and location?",
@@ -904,15 +948,16 @@ Content-Type: application/json
 
 ### Chat Streaming (SSE)
 
-**Endpoint:** `POST /api/v1/ai/chat/stream`  
-**Authentication:** Optional  
-**Rate Limit:** 10/min
+**Endpoint:** `POST /api/v1/ai/chat/stream` **Authentication:**
+Optional **Rate Limit:** 10/min
 
-**Description:** Returns server-sent events for real-time streaming responses.
+**Description:** Returns server-sent events for real-time streaming
+responses.
 
 **Request:** Same as `/api/v1/ai/chat`
 
 **Response:** `text/event-stream`
+
 ```
 data: {"type":"start","thread_id":"thread_abc123"}
 
@@ -931,11 +976,11 @@ data: {"type":"done","metadata":{"tokens_used":150}}
 
 ### Analytics Dashboard
 
-**Endpoint:** `GET /api/v1/admin/analytics`  
-**Authentication:** Required (Admin)  
-**Rate Limit:** 120/min
+**Endpoint:** `GET /api/v1/admin/analytics` **Authentication:**
+Required (Admin) **Rate Limit:** 120/min
 
 **Query Parameters:**
+
 ```
 ?date_from=2025-10-01
 &date_to=2025-10-31
@@ -943,6 +988,7 @@ data: {"type":"done","metadata":{"tokens_used":150}}
 ```
 
 **Response:** `200 OK`
+
 ```json
 {
   "period": {
@@ -950,7 +996,7 @@ data: {"type":"done","metadata":{"tokens_used":150}}
     "to": "2025-10-31"
   },
   "revenue": {
-    "total": 45000.00,
+    "total": 45000.0,
     "change_percent": 15.5,
     "trend": "up"
   },
@@ -968,8 +1014,8 @@ data: {"type":"done","metadata":{"tokens_used":150}}
   },
   "charts": {
     "revenue_by_day": [
-      {"date": "2025-10-01", "amount": 1500.00},
-      {"date": "2025-10-02", "amount": 1800.00}
+      { "date": "2025-10-01", "amount": 1500.0 },
+      { "date": "2025-10-02", "amount": 1800.0 }
     ],
     "bookings_by_type": {
       "birthday": 40,
@@ -988,16 +1034,20 @@ data: {"type":"done","metadata":{"tokens_used":150}}
 
 ### Real-time Chat
 
-**Endpoint:** `wss://mhapi.mysticdatanode.net/ws/chat/{thread_id}`  
-**Authentication:** Optional (include `?token=jwt_token`)  
+**Endpoint:** `wss://mhapi.mysticdatanode.net/ws/chat/{thread_id}`
+**Authentication:** Optional (include `?token=jwt_token`)
 **Protocol:** WebSocket
 
 **Connect:**
+
 ```javascript
-const ws = new WebSocket('wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?token=jwt_token');
+const ws = new WebSocket(
+  'wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?token=jwt_token'
+);
 ```
 
 **Send Message:**
+
 ```json
 {
   "type": "message",
@@ -1009,6 +1059,7 @@ const ws = new WebSocket('wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?t
 ```
 
 **Receive Message:**
+
 ```json
 {
   "type": "message",
@@ -1019,6 +1070,7 @@ const ws = new WebSocket('wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?t
 ```
 
 **Typing Indicator:**
+
 ```json
 {
   "type": "typing",
@@ -1032,13 +1084,13 @@ const ws = new WebSocket('wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?t
 
 ### Stripe Webhook
 
-**Endpoint:** `POST /api/webhooks/stripe`  
-**Authentication:** Stripe signature verification  
-**Rate Limit:** No limit
+**Endpoint:** `POST /api/webhooks/stripe` **Authentication:** Stripe
+signature verification **Rate Limit:** No limit
 
 **Description:** Receives Stripe payment events.
 
 **Events Handled:**
+
 - `payment_intent.succeeded`
 - `payment_intent.failed`
 - `charge.refunded`
@@ -1048,13 +1100,13 @@ const ws = new WebSocket('wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?t
 
 ### RingCentral Webhook
 
-**Endpoint:** `POST /api/webhooks/ringcentral`  
-**Authentication:** RingCentral signature verification  
-**Rate Limit:** No limit
+**Endpoint:** `POST /api/webhooks/ringcentral` **Authentication:**
+RingCentral signature verification **Rate Limit:** No limit
 
 **Description:** Receives SMS/call notifications.
 
 **Events Handled:**
+
 - `message.received`
 - `call.completed`
 
@@ -1096,16 +1148,16 @@ const ws = new WebSocket('wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?t
   id: number;
   reference_number: string;
   customer: Customer;
-  event_date: string;     // YYYY-MM-DD
-  event_time: string;     // HH:MM:SS
+  event_date: string; // YYYY-MM-DD
+  event_time: string; // HH:MM:SS
   guest_count: number;
   event_type: string;
   location: string;
-  status: "pending" | "confirmed" | "completed" | "cancelled";
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   total_amount: number;
   deposit_amount: number;
   deposit_paid: boolean;
-  payment_status: "unpaid" | "partial" | "paid";
+  payment_status: 'unpaid' | 'partial' | 'paid';
   created_at: string;
   updated_at: string;
 }
@@ -1118,20 +1170,24 @@ const ws = new WebSocket('wss://mhapi.mysticdatanode.net/ws/chat/thread_abc123?t
 ### JavaScript/TypeScript (Fetch)
 
 **Authentication:**
+
 ```typescript
 async function login(email: string, password: string) {
-  const response = await fetch('https://mhapi.mysticdatanode.net/api/v1/auth/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
-  
+  const response = await fetch(
+    'https://mhapi.mysticdatanode.net/api/v1/auth/login',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    }
+  );
+
   if (!response.ok) {
     throw new Error('Login failed');
   }
-  
+
   const data = await response.json();
   localStorage.setItem('access_token', data.access_token);
   return data;
@@ -1139,16 +1195,20 @@ async function login(email: string, password: string) {
 ```
 
 **Authenticated Request:**
+
 ```typescript
 async function getBookings() {
   const token = localStorage.getItem('access_token');
-  
-  const response = await fetch('https://mhapi.mysticdatanode.net/api/v1/bookings?page=1&limit=20', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-  
+
+  const response = await fetch(
+    'https://mhapi.mysticdatanode.net/api/v1/bookings?page=1&limit=20',
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
   if (!response.ok) {
     if (response.status === 401) {
       // Token expired, refresh or re-login
@@ -1156,7 +1216,7 @@ async function getBookings() {
     }
     throw new Error('Request failed');
   }
-  
+
   return await response.json();
 }
 ```
@@ -1166,6 +1226,7 @@ async function getBookings() {
 ### Python (requests)
 
 **Authentication:**
+
 ```python
 import requests
 
@@ -1184,13 +1245,14 @@ access_token = auth_data['access_token']
 ```
 
 **Authenticated Request:**
+
 ```python
 def get_bookings(access_token: str, page: int = 1, limit: int = 20):
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
     params = {'page': page, 'limit': limit}
-    
+
     response = requests.get(
         'https://mhapi.mysticdatanode.net/api/v1/bookings',
         headers=headers,
@@ -1205,6 +1267,7 @@ def get_bookings(access_token: str, page: int = 1, limit: int = 20):
 ### cURL
 
 **Login:**
+
 ```bash
 curl -X POST https://mhapi.mysticdatanode.net/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -1212,12 +1275,14 @@ curl -X POST https://mhapi.mysticdatanode.net/api/v1/auth/login \
 ```
 
 **Get Bookings:**
+
 ```bash
 curl -X GET "https://mhapi.mysticdatanode.net/api/v1/bookings?page=1&limit=20" \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 **Create Lead:**
+
 ```bash
 curl -X POST https://mhapi.mysticdatanode.net/api/v1/public/leads \
   -H "Content-Type: application/json" \
@@ -1275,6 +1340,7 @@ curl -X POST https://mhapi.mysticdatanode.net/api/v1/public/leads \
 **URL:** `https://mhapi.mysticdatanode.net/docs`
 
 Features:
+
 - Interactive API explorer
 - Try endpoints directly from browser
 - View request/response schemas
@@ -1285,6 +1351,7 @@ Features:
 **URL:** `https://mhapi.mysticdatanode.net/redoc`
 
 Features:
+
 - Clean, readable documentation
 - Search functionality
 - Code samples
@@ -1295,6 +1362,7 @@ Features:
 ## Changelog
 
 ### Version 1.0.0 (Current)
+
 - ✅ Initial API release
 - ✅ Authentication with JWT
 - ✅ CRUD operations for bookings, customers, leads
@@ -1304,6 +1372,7 @@ Features:
 - ✅ Stripe webhook integration
 
 ### Upcoming (v1.1.0)
+
 - 🚧 GraphQL endpoint
 - 🚧 Bulk operations
 - 🚧 Advanced filtering
@@ -1315,34 +1384,41 @@ Features:
 ## Support & Resources
 
 ### Documentation
+
 - **This Guide:** Comprehensive API reference
 - **OpenAPI Spec:** `/docs` (interactive)
 - **Postman Collection:** Available on request
 
 ### Getting Help
+
 - **Email:** dev@myhibachi.com
 - **Slack:** #api-support (internal)
 - **GitHub Issues:** For bug reports
 
 ### Rate Limit Increase
+
 Contact admin for rate limit increase requests. Provide:
+
 - Use case description
 - Expected request volume
 - Timeframe
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** January 30, 2025  
-**Maintained By:** Development Team  
+**Document Version:** 1.0 **Last Updated:** January 30, 2025
+**Maintained By:** Development Team
 
 ---
 
 ## Related Documentation
 
-- [TESTING_COMPREHENSIVE_GUIDE.md](./TESTING_COMPREHENSIVE_GUIDE.md) - API testing procedures
-- [PRODUCTION_OPERATIONS_RUNBOOK.md](./PRODUCTION_OPERATIONS_RUNBOOK.md) - Production operations
-- [LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md) - Local development setup
-- [AUTHENTICATION_GUIDE.md](./docs/authentication/) - Detailed auth guide
+- [TESTING_COMPREHENSIVE_GUIDE.md](./TESTING_COMPREHENSIVE_GUIDE.md) -
+  API testing procedures
+- [PRODUCTION_OPERATIONS_RUNBOOK.md](./PRODUCTION_OPERATIONS_RUNBOOK.md) -
+  Production operations
+- [LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md) - Local
+  development setup
+- [AUTHENTICATION_GUIDE.md](./docs/authentication/) - Detailed auth
+  guide
 
 ---

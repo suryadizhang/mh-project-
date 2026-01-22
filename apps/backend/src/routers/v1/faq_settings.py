@@ -13,8 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...database import get_db
 from ...models.faq_settings import FAQSettings
-from ...services.faq_service import FAQService
 from ...services.faq_health_check import FAQHealthCheck
+from ...services.faq_service import FAQService
 
 router = APIRouter(prefix="/api/faq-settings", tags=["FAQ Settings"])
 
@@ -26,7 +26,9 @@ class FAQSettingsUpdate(BaseModel):
     service_area: str = Field(..., min_length=5, max_length=500)
     service_area_details: str | None = None
 
-    deposit_amount: int = Field(..., ge=0, le=1000, description="Deposit amount in dollars")
+    deposit_amount: int = Field(
+        ..., ge=0, le=1000, description="Deposit amount in dollars"
+    )
     deposit_policy: str = Field(..., min_length=10, max_length=1000)
 
     pricing_info: dict = Field(..., description="Pricing structure as JSON")
@@ -80,14 +82,17 @@ async def get_current_faq_settings(db: AsyncSession = Depends(get_db)):
 
     if not faq_settings:
         raise HTTPException(
-            status_code=404, detail="No active FAQ settings found. Please create initial settings."
+            status_code=404,
+            detail="No active FAQ settings found. Please create initial settings.",
         )
 
     return faq_settings
 
 
 @router.post("/", response_model=FAQSettingsResponse, status_code=201)
-async def create_faq_settings(settings_data: FAQSettingsUpdate, db: AsyncSession = Depends(get_db)):
+async def create_faq_settings(
+    settings_data: FAQSettingsUpdate, db: AsyncSession = Depends(get_db)
+):
     """
     Create new FAQ settings
 
@@ -362,9 +367,9 @@ async def scrape_website_data():
             },
             "deposit": {
                 "amount": 100,
-                "policy": "$100 deposit required to secure your booking. The deposit is fully deducted from your total balance, which is paid on the event day with your chef or online. Refundable if canceled 7+ days before event.",
+                "policy": "$100 deposit required to secure your booking. The deposit is fully deducted from your total balance, which is paid on the event day with your chef or online. Refundable if canceled 4+ days before event.",
             },
-            "cancellation_policy": "Full refund if canceled 7+ days before event. $100 deposit is non-refundable within 7 days of event. One free reschedule within 48 hours of booking; additional reschedules cost $100.",
+            "cancellation_policy": "Full refund if canceled 4+ days before event. $100 deposit is non-refundable within 4 days of event. One free reschedule within 48 hours of booking; additional reschedules cost $100.",
             "contact": {
                 "phone": "+1-916-740-8768",
                 "email": None,

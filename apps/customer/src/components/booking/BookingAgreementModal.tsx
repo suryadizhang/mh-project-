@@ -30,8 +30,16 @@ export default function BookingAgreementModal({
   willCommunicate,
   setWillCommunicate,
 }: BookingAgreementModalProps) {
-  // Get deposit amount from SSoT pricing system
-  const { depositAmount } = usePricing();
+  // Get dynamic values from SSoT pricing system
+  const {
+    depositAmount,
+    depositRefundableDays,
+    standardDurationMinutes,
+    rescheduleFee,
+    freeRescheduleHours,
+    guestCountFinalizeHours,
+    menuChangeCutoffHours,
+  } = usePricing();
 
   // Signature state for digital signing
   const [signatureBase64, setSignatureBase64] = useState<string | null>(null);
@@ -79,7 +87,8 @@ export default function BookingAgreementModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-green-500">✓</span>
-                  Approximately 90-minute service duration (additional time available upon request)
+                  Approximately {standardDurationMinutes ?? 90}-minute service duration (additional
+                  time available upon request)
                 </li>
               </ul>
             </div>
@@ -103,8 +112,8 @@ export default function BookingAgreementModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-green-500">✓</span>
-                  <strong>48-hour full refund guarantee</strong> - cancel 48+ hours before event for
-                  full deposit refund
+                  <strong>{depositRefundableDays ?? 4}+ day full refund guarantee</strong> - cancel{' '}
+                  {depositRefundableDays ?? 4}+ days before event for full deposit refund
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-green-500">✓</span>
@@ -129,28 +138,32 @@ export default function BookingAgreementModal({
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 font-bold text-green-500">•</span>
                   <span>
-                    <strong>48-Hour Full Refund:</strong> Cancel 48+ hours before event for full
-                    deposit refund, no questions asked
+                    <strong>{depositRefundableDays ?? 4}+ Day Full Refund:</strong> Cancel{' '}
+                    {depositRefundableDays ?? 4}+ days before event for full deposit refund, no
+                    questions asked
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 font-bold text-green-500">•</span>
                   <span>
-                    <strong>Free Rescheduling:</strong> Reschedule free of charge with 48+ hours
-                    notice; $200 rescheduling fee applies with less than 48 hours notice
+                    <strong>Free Rescheduling:</strong> Reschedule free of charge with{' '}
+                    {freeRescheduleHours ?? 24}+ hours notice; ${rescheduleFee ?? 200} rescheduling
+                    fee applies with less than {freeRescheduleHours ?? 24} hours notice
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 font-bold text-amber-500">•</span>
                   <span>
-                    <strong>Guest Count Changes:</strong> Final guest count required 24+ hours
-                    before event (we prepare fresh ingredients specifically for your party size)
+                    <strong>Guest Count Changes:</strong> Final guest count required{' '}
+                    {guestCountFinalizeHours ?? 24}+ hours before event (we prepare fresh
+                    ingredients specifically for your party size)
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 font-bold text-amber-500">•</span>
                   <span>
-                    <strong>Menu Changes:</strong> No menu changes allowed within 12 hours of event
+                    <strong>Menu Changes:</strong> No menu changes allowed within{' '}
+                    {menuChangeCutoffHours ?? 12} hours of event
                   </span>
                 </li>
                 <li className="flex items-start gap-2">

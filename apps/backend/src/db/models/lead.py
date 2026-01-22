@@ -26,57 +26,31 @@ All models use:
 - Type hints for IDE support
 """
 
-from datetime import datetime, date
-from typing import Optional, List, TYPE_CHECKING
-from uuid import UUID, uuid4
+from datetime import date, datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING, List, Optional
+from uuid import UUID, uuid4
 
-from sqlalchemy import (
-    String,
-    Text,
-    Integer,
-    Float,
-    Boolean,
-    DateTime,
-    Date,
-    Numeric,
-    ForeignKey,
-    Index,
-    CheckConstraint,
-    Enum as SQLEnum,
-)
-from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import Float, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
+
+# Import shared enums from enums module (SSoT)
+from db.models.enums import SocialPlatform, SocialThreadStatus
 
 from ..base_class import Base
 
 # Import shared enums from crm module (after Base to avoid circular import)
-from .crm import ContactChannel, LeadSource, LeadStatus, LeadQuality
-
+from .crm import ContactChannel, LeadQuality, LeadSource, LeadStatus
 
 # ==================== ENUMS ====================
 # NOTE: LeadSource, LeadStatus, LeadQuality, ContactChannel moved to db.models.crm
 # Imported above from db.models.crm
 
-import enum
-
-
-class SocialPlatform(str, enum.Enum):
-    """Social media platforms"""
-
-    INSTAGRAM = "instagram"
-    FACEBOOK = "facebook"
-    GOOGLE = "google"
-    YELP = "yelp"
-
-
-class SocialThreadStatus(str, enum.Enum):
-    """Social conversation status"""
-
-    OPEN = "open"
-    PENDING = "pending"
-    RESOLVED = "resolved"
 
 
 # ==================== MODELS ====================
@@ -106,12 +80,16 @@ class LeadContact(Base):
 
     # Foreign Keys
     lead_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("crm.leads.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("crm.leads.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     # Contact Info
     channel: Mapped[ContactChannel] = mapped_column(
-        SQLEnum(ContactChannel, name="contact_channel", schema="public", create_type=False),
+        SQLEnum(
+            ContactChannel, name="contact_channel", schema="public", create_type=False
+        ),
         nullable=False,
     )
     handle_or_address: Mapped[str] = mapped_column(Text, nullable=False)
@@ -139,7 +117,9 @@ class LeadContext(Base):
 
     # Primary Key (also FK to Lead)
     id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("crm.leads.id", ondelete="CASCADE"), primary_key=True
+        PGUUID(as_uuid=True),
+        ForeignKey("crm.leads.id", ondelete="CASCADE"),
+        primary_key=True,
     )
 
     # Party Size
@@ -147,7 +127,9 @@ class LeadContext(Base):
     party_size_kids: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # Budget
-    estimated_budget_cents: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    estimated_budget_cents: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True
+    )
 
     # Event Date Preferences
     event_date_pref: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
@@ -165,7 +147,10 @@ class LeadContext(Base):
 
     # Timestamps
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships
@@ -181,7 +166,10 @@ class LeadEvent(Base):
     """
 
     __tablename__ = "lead_events"
-    __table_args__ = (Index("ix_lead_events_lead", "lead_id", "occurred_at"), {"schema": "lead"})
+    __table_args__ = (
+        Index("ix_lead_events_lead", "lead_id", "occurred_at"),
+        {"schema": "lead"},
+    )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(
@@ -190,7 +178,9 @@ class LeadEvent(Base):
 
     # Foreign Keys
     lead_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("crm.leads.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("crm.leads.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     # Event Details
@@ -217,18 +207,24 @@ class BusinessSocialAccount(Base):
 
     __tablename__ = "social_accounts"
     __table_args__ = (
-        Index("ix_social_accounts_platform_page_id", "platform", "page_id", unique=True),
+        Index(
+            "ix_social_accounts_platform_page_id", "platform", "page_id", unique=True
+        ),
         Index("ix_social_accounts_platform", "platform"),
         Index("ix_social_accounts_is_active", "is_active"),
         {"schema": "lead"},
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid4
+    )
 
     # Platform Info
     platform: Mapped[str] = mapped_column(
-        String(50), nullable=False, comment="Social media platform (instagram, facebook, etc.)"
+        String(50),
+        nullable=False,
+        comment="Social media platform (instagram, facebook, etc.)",
     )
     page_id: Mapped[str] = mapped_column(
         String(255), nullable=False, comment="Platform-specific page/business ID"
@@ -246,7 +242,9 @@ class BusinessSocialAccount(Base):
 
     # Connection
     connected_by: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), nullable=False, comment="User ID who connected this account"
+        PGUUID(as_uuid=True),
+        nullable=False,
+        comment="User ID who connected this account",
     )
     connected_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -259,22 +257,32 @@ class BusinessSocialAccount(Base):
         comment="Encrypted reference to access tokens (do not store plaintext tokens)",
     )
     webhook_verified: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, comment="Whether webhook subscription is verified"
+        Boolean,
+        nullable=False,
+        default=False,
+        comment="Whether webhook subscription is verified",
     )
 
     # Sync
     last_sync_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True, comment="Last successful sync with platform API"
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Last successful sync with platform API",
     )
 
     # Status
     is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, comment="Whether account is currently active"
+        Boolean,
+        nullable=False,
+        default=True,
+        comment="Whether account is currently active",
     )
 
     # Metadata
     platform_metadata: Mapped[Optional[dict]] = mapped_column(
-        JSONB, nullable=True, comment="Platform-specific settings, capabilities, and metadata"
+        JSONB,
+        nullable=True,
+        comment="Platform-specific settings, capabilities, and metadata",
     )
 
     # Timestamps
@@ -282,7 +290,10 @@ class BusinessSocialAccount(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
     deleted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True, comment="Soft delete timestamp"
@@ -299,14 +310,18 @@ class SocialIdentity(Base):
 
     __tablename__ = "social_identities"
     __table_args__ = (
-        Index("ix_social_identities_platform_handle", "platform", "handle", unique=True),
+        Index(
+            "ix_social_identities_platform_handle", "platform", "handle", unique=True
+        ),
         Index("ix_social_identities_platform", "platform"),
         Index("ix_social_identities_customer_id", "customer_id"),
         {"schema": "lead"},
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid4
+    )
 
     # Platform Info
     platform: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -321,10 +336,15 @@ class SocialIdentity(Base):
 
     # Customer Mapping
     customer_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True), nullable=True, comment="Link to known customer (soft reference)"
+        PGUUID(as_uuid=True),
+        nullable=True,
+        comment="Link to known customer (soft reference)",
     )
     confidence_score: Mapped[float] = mapped_column(
-        Float, nullable=False, default=1.0, comment="Confidence in customer mapping (0.0 to 1.0)"
+        Float,
+        nullable=False,
+        default=1.0,
+        comment="Confidence in customer mapping (0.0 to 1.0)",
     )
     verification_status: Mapped[str] = mapped_column(
         String(50),
@@ -354,7 +374,10 @@ class SocialIdentity(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -381,7 +404,9 @@ class LeadSocialThread(Base):
 
     # Platform Info
     platform: Mapped[SocialPlatform] = mapped_column(
-        SQLEnum(SocialPlatform, name="social_platform", schema="public", create_type=False),
+        SQLEnum(
+            SocialPlatform, name="social_platform", schema="public", create_type=False
+        ),
         nullable=False,
     )
     account_id: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -391,15 +416,21 @@ class LeadSocialThread(Base):
 
     # Entity Links
     lead_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("crm.leads.id", ondelete="SET NULL"), nullable=True
+        PGUUID(as_uuid=True),
+        ForeignKey("crm.leads.id", ondelete="SET NULL"),
+        nullable=True,
     )
     customer_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("core.customers.id", ondelete="SET NULL"), nullable=True
+        PGUUID(as_uuid=True),
+        ForeignKey("core.customers.id", ondelete="SET NULL"),
+        nullable=True,
     )
 
     # Status
     status: Mapped[SocialThreadStatus] = mapped_column(
-        SQLEnum(SocialThreadStatus, name="thread_status", schema="public", create_type=False),
+        SQLEnum(
+            SocialThreadStatus, name="thread_status", schema="public", create_type=False
+        ),
         nullable=False,
         default=SocialThreadStatus.OPEN,
     )
@@ -415,4 +446,6 @@ class LeadSocialThread(Base):
     )
 
     # Relationships
-    lead: Mapped[Optional["Lead"]] = relationship("Lead", back_populates="social_threads")
+    lead: Mapped[Optional["Lead"]] = relationship(
+        "Lead", back_populates="social_threads"
+    )

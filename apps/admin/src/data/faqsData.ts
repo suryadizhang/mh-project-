@@ -123,7 +123,7 @@ export const faqs: FaqItem[] = [
     id: 'how-to-book',
     question: 'How do I book My Hibachi Chef?',
     answer:
-      'Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and $100 refundable deposit (refundable if canceled 7+ days before event).',
+      'Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and $100 refundable deposit (refundable if canceled 4+ days before event).',
     category: 'Booking & Payments',
     subcategory: 'How to Book',
     tags: [
@@ -141,7 +141,7 @@ export const faqs: FaqItem[] = [
     id: 'deposit-policy',
     question: "What's the deposit policy?",
     answer:
-      '$100 refundable deposit secures your date and is deducted from final bill (refundable if canceled 7+ days before event). Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
+      '$100 refundable deposit secures your date and is deducted from final bill (refundable if canceled 4+ days before event). Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
     category: 'Booking & Payments',
     subcategory: 'Deposits & Balance',
     tags: ['$100 deposit', 'refundable', 'deducted', 'final bill'],
@@ -291,11 +291,11 @@ export const faqs: FaqItem[] = [
     id: 'cancellation-policy',
     question: "What's your cancellation policy?",
     answer:
-      'Full refund if canceled 7+ days before event. $100 deposit is refundable for cancellations 7+ days before event, non-refundable within 7 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.',
+      'Full refund if canceled 4+ days before event. $100 deposit is refundable for cancellations 4+ days before event, non-refundable within 4 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.',
     category: 'Policies (Cancellation, Weather, Refunds)',
     subcategory: 'Cancellation & Changes',
     tags: [
-      '7 days',
+      '4 days',
       'full refund',
       'deposit refundable',
       'free reschedule',

@@ -20,13 +20,24 @@ export default function MenuPage() {
   const [isAdditionsOpen, setIsAdditionsOpen] = useState(false);
 
   // Get dynamic pricing values - API is source of truth
-  const { adultPrice, childPrice, partyMinimum, childFreeUnderAge, isLoading: pricingLoading } = usePricing();
+  const {
+    adultPrice,
+    childPrice,
+    partyMinimum,
+    childFreeUnderAge,
+    freeMiles,
+    perMileRate,
+    isLoading: pricingLoading,
+  } = usePricing();
 
   // Safe pricing display values (show placeholder during loading)
   const displayAdultPrice = pricingLoading || adultPrice === undefined ? '...' : adultPrice;
   const displayChildPrice = pricingLoading || childPrice === undefined ? '...' : childPrice;
   const displayPartyMinimum = pricingLoading || partyMinimum === undefined ? 0 : partyMinimum;
-  const displayChildFreeUnderAge = pricingLoading || childFreeUnderAge === undefined ? 5 : childFreeUnderAge;
+  const displayChildFreeUnderAge =
+    pricingLoading || childFreeUnderAge === undefined ? 5 : childFreeUnderAge;
+  const displayFreeMiles = pricingLoading || freeMiles === undefined ? '...' : freeMiles;
+  const displayPerMileRate = pricingLoading || perMileRate === undefined ? '...' : perMileRate;
 
   return (
     <main>
@@ -211,7 +222,13 @@ export default function MenuPage() {
                     </div>
                     <div className="info-content">
                       <h5>Party Minimum</h5>
-                      <p>${displayPartyMinimum} total order (≈ {displayPartyMinimum && displayAdultPrice !== '...' ? Math.ceil(displayPartyMinimum / Number(displayAdultPrice)) : '...'} adults)</p>
+                      <p>
+                        ${displayPartyMinimum} total order (≈{' '}
+                        {displayPartyMinimum && displayAdultPrice !== '...'
+                          ? Math.ceil(displayPartyMinimum / Number(displayAdultPrice))
+                          : '...'}{' '}
+                        adults)
+                      </p>
                     </div>
                   </div>
 
@@ -231,7 +248,9 @@ export default function MenuPage() {
                     </div>
                     <div className="info-content">
                       <h5>Travel Policy</h5>
-                      <p>Free 30 mi, $2/mi after</p>
+                      <p>
+                        Free {displayFreeMiles} mi, ${displayPerMileRate}/mi after
+                      </p>
                     </div>
                   </div>
                 </div>

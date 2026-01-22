@@ -4,23 +4,24 @@ applyTo: '**'
 
 # My Hibachi – Single Source of Truth (SSoT) Architecture
 
-**Priority: CRITICAL** – ALL business data MUST flow from centralized sources.
-**Version:** 1.0.0
-**Created:** 2025-12-27
-**Updated:** 2025-12-27
+**Priority: CRITICAL** – ALL business data MUST flow from centralized
+sources. **Version:** 1.0.0 **Created:** 2025-12-27 **Updated:**
+2025-12-27
 
 ---
 
 ## 🎯 Purpose
 
-This document defines the **Single Source of Truth** architecture for the
-My Hibachi ecosystem. ALL business data, pricing, policies, and
-configuration values MUST originate from centralized database sources and
-flow through defined API channels.
+This document defines the **Single Source of Truth** architecture for
+the My Hibachi ecosystem. ALL business data, pricing, policies, and
+configuration values MUST originate from centralized database sources
+and flow through defined API channels.
 
 **Core Principle:**
-> If a value can change, it MUST come from the database. Never hardcode
-> business values in frontend code, AI configurations, or static files.
+
+> If a value can change, it MUST come from the database. Never
+> hardcode business values in frontend code, AI configurations, or
+> static files.
 
 ---
 
@@ -123,17 +124,17 @@ flow through defined API channels.
 
 ### Core Configuration Tables
 
-| Table | Schema | Purpose | Admin Editable |
-|-------|--------|---------|----------------|
-| `dynamic_variables` | `public` | All pricing, fees, limits | ✅ Yes |
-| `business_rules` | `public` | Policies, time rules | ✅ Yes |
-| `travel_fee_configurations` | `core` | Travel zones, per-mile rates | ✅ Yes |
-| `slot_configurations` | `ops` | Time slots, durations | ✅ Yes |
-| `faq_items` | `public` | FAQ content with templates | ✅ Yes |
-| `legal_documents` | `public` | Terms, privacy with templates | ✅ Yes |
-| `email_templates` | `newsletter` | Email content templates | ✅ Yes |
-| `newsletter_config` | `newsletter` | Newsletter settings | ✅ Yes |
-| `sms_config` | `comms` | SMS settings | ✅ Yes |
+| Table                       | Schema       | Purpose                       | Admin Editable |
+| --------------------------- | ------------ | ----------------------------- | -------------- |
+| `dynamic_variables`         | `public`     | All pricing, fees, limits     | ✅ Yes         |
+| `business_rules`            | `public`     | Policies, time rules          | ✅ Yes         |
+| `travel_fee_configurations` | `core`       | Travel zones, per-mile rates  | ✅ Yes         |
+| `slot_configurations`       | `ops`        | Time slots, durations         | ✅ Yes         |
+| `faq_items`                 | `public`     | FAQ content with templates    | ✅ Yes         |
+| `legal_documents`           | `public`     | Terms, privacy with templates | ✅ Yes         |
+| `email_templates`           | `newsletter` | Email content templates       | ✅ Yes         |
+| `newsletter_config`         | `newsletter` | Newsletter settings           | ✅ Yes         |
+| `sms_config`                | `comms`      | SMS settings                  | ✅ Yes         |
 
 ### Variable Reference Format
 
@@ -165,7 +166,7 @@ GET /api/v1/config/all:
       per_mile_cents: 200
     policies:
       advance_booking_hours: 48
-      refund_days: 7
+      refund_days: 4
       reschedule_allowed: true
     guest_limits:
       minimum: 1
@@ -237,7 +238,7 @@ GET /api/v1/admin/config/audit:
 
 interface ConfigBundle {
   pricing: {
-    adultPrice: number;      // Dollars (converted from cents)
+    adultPrice: number; // Dollars (converted from cents)
     childPrice: number;
     partyMinimum: number;
     depositAmount: number;
@@ -275,20 +276,20 @@ export function useConfig(): ConfigBundle {
 interface PolicyBundle {
   deposit: {
     amount: number;
-    text: string;  // "Your $100 deposit is fully refundable..."
+    text: string; // "Your $100 deposit is fully refundable..."
   };
   cancellation: {
     refundDays: number;
-    text: string;  // "Full refund if canceled 7+ days before..."
+    text: string; // "Full refund if canceled 4+ days before..."
   };
   travel: {
     freeMiles: number;
     perMileRate: number;
-    text: string;  // "First 30 miles free, then $2/mile"
+    text: string; // "First 30 miles free, then $2/mile"
   };
   booking: {
     advanceHours: number;
-    text: string;  // "Book at least 48 hours in advance"
+    text: string; // "Book at least 48 hours in advance"
   };
 }
 
@@ -306,7 +307,7 @@ export function usePolicies(): PolicyBundle {
 interface FAQ {
   id: string;
   question: string;
-  answer: string;  // Values already injected
+  answer: string; // Values already injected
   category: string;
 }
 
@@ -329,8 +330,8 @@ export function useFaqs(category?: string): FAQBundle {
 
 ### NO HARDCODED FALLBACKS
 
-The AI system MUST NOT have any hardcoded pricing or policy values.
-If the pricing API is unavailable:
+The AI system MUST NOT have any hardcoded pricing or policy values. If
+the pricing API is unavailable:
 
 ```python
 # apps/backend/src/api/ai/orchestrator/tools/pricing_tool.py
@@ -464,7 +465,7 @@ async def get_rendered_faqs(db: AsyncSession, category: str = None) -> list[dict
     - {{free_miles}} → "30 miles"
     - {{per_mile_rate}} → "$2"
     - {{advance_hours}} → "48 hours"
-    - {{refund_days}} → "7 days"
+    - {{refund_days}} → "4 days"
     """
     config = await get_business_config(db)
 
@@ -585,16 +586,16 @@ async def get_rendered_legal_document(
 
 ### Admin-Configurable Settings
 
-| Setting | Table | Description |
-|---------|-------|-------------|
-| `sender_email` | `newsletter_config` | From email address |
-| `sender_name` | `newsletter_config` | Display name |
-| `reply_to_email` | `newsletter_config` | Reply-to address |
-| `daily_limit` | `newsletter_config` | Max emails per day |
-| `batch_size` | `newsletter_config` | Emails per batch |
-| `batch_delay_seconds` | `newsletter_config` | Delay between batches |
+| Setting                  | Table               | Description                      |
+| ------------------------ | ------------------- | -------------------------------- |
+| `sender_email`           | `newsletter_config` | From email address               |
+| `sender_name`            | `newsletter_config` | Display name                     |
+| `reply_to_email`         | `newsletter_config` | Reply-to address                 |
+| `daily_limit`            | `newsletter_config` | Max emails per day               |
+| `batch_size`             | `newsletter_config` | Emails per batch                 |
+| `batch_delay_seconds`    | `newsletter_config` | Delay between batches            |
 | `unsubscribe_grace_days` | `newsletter_config` | Days before re-subscribe allowed |
-| `default_template_id` | `newsletter_config` | Default email template |
+| `default_template_id`    | `newsletter_config` | Default email template           |
 
 ### Email Template System
 
@@ -674,8 +675,10 @@ async def update_config(
 
 ### Before Creating Any Component
 
-- [ ] Does this component display any business value (price, time, policy)?
-- [ ] If YES → Use appropriate hook (`useConfig`, `usePricing`, `usePolicies`, `useFaqs`)
+- [ ] Does this component display any business value (price, time,
+      policy)?
+- [ ] If YES → Use appropriate hook (`useConfig`, `usePricing`,
+      `usePolicies`, `useFaqs`)
 - [ ] If NO → Safe to use static content
 
 ### Before Creating Any Backend Endpoint
@@ -745,31 +748,39 @@ const { guestLimits } = useConfig();
 
 ## 🔗 Related Documentation
 
-- [02-ARCHITECTURE.instructions.md](./02-ARCHITECTURE.instructions.md) – System architecture
-- [08-FEATURE_FLAGS.instructions.md](./08-FEATURE_FLAGS.instructions.md) – Feature flags
-- [19-DATABASE_SCHEMA_MANAGEMENT.instructions.md](./19-DATABASE_SCHEMA_MANAGEMENT.instructions.md) – DB schema
-- [business_config_service.py](../../apps/backend/src/services/business_config_service.py) – Config service
+- [02-ARCHITECTURE.instructions.md](./02-ARCHITECTURE.instructions.md)
+  – System architecture
+- [08-FEATURE_FLAGS.instructions.md](./08-FEATURE_FLAGS.instructions.md)
+  – Feature flags
+- [19-DATABASE_SCHEMA_MANAGEMENT.instructions.md](./19-DATABASE_SCHEMA_MANAGEMENT.instructions.md)
+  – DB schema
+- [business_config_service.py](../../apps/backend/src/services/business_config_service.py)
+  – Config service
 
 ---
 
 ## 📋 Implementation Priority
 
 ### Phase 1: Critical (Legal/Revenue) - Week 1
+
 1. Legal documents template system
 2. AI graceful degradation (no fallbacks)
 3. Travel fee calculation from config
 
 ### Phase 2: Content (FAQs/Policies) - Week 2
+
 1. FAQ template migration
 2. Policy text hooks
 3. UI text centralization
 
 ### Phase 3: Admin UI - Week 3
+
 1. FAQ editor in admin panel
 2. Legal document editor
 3. Newsletter configuration UI
 
 ### Phase 4: Validation Rules - Week 4
+
 1. Dynamic guest limits
 2. Dynamic time rules
 3. Dynamic validation messages

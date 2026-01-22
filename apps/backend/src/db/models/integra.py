@@ -34,6 +34,9 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+# Import shared enums (SSoT - Single Source of Truth)
+from db.models.enums import SocialPlatform
+
 from ..base_class import Base
 
 # ==========================================
@@ -89,23 +92,8 @@ class CallDirection(str, PyEnum):
     OUTBOUND = "outbound"
 
 
-class SocialPlatform(str, PyEnum):
-    """Social media platforms.
-
-    - instagram: Instagram
-    - facebook: Facebook
-    - google_business: Google Business Profile
-    - yelp: Yelp
-    - tiktok: TikTok
-    - twitter: Twitter/X
-    """
-
-    INSTAGRAM = "instagram"
-    FACEBOOK = "facebook"
-    GOOGLE_BUSINESS = "google_business"
-    YELP = "yelp"
-    TIKTOK = "tiktok"
-    TWITTER = "twitter"
+# SocialPlatform is imported from db.models.enums
+# See: apps/backend/src/db/models/enums/social.py
 
 
 # ==========================================

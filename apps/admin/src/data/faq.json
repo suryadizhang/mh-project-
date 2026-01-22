@@ -15,7 +15,7 @@
   },
   {
     "question": "How much deposit is required?",
-    "answer": "💳 We require a 50% deposit to secure your booking. The remaining balance is due on the day of service. No surprise fees! Payment can be made via cash, card, or digital payment.",
+    "answer": "💳 We require a $100 fixed deposit to secure your booking. This deposit is fully refundable if canceled 4+ days before your event. The remaining balance is due on the day of service. No surprise fees! Payment can be made via cash, card, or digital payment.",
     "category": "booking",
     "href": "/faqs",
     "keywords": ["deposit", "payment", "booking", "secure", "reserve"]

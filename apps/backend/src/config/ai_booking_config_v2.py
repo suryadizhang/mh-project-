@@ -22,9 +22,9 @@ Last Updated: 2025-11-18 (v3.0 Dynamic Data Upgrade)
 Version: 3.0.0-dynamic-data
 """
 
-from typing import Any, Dict, TypedDict
 import json
 from pathlib import Path
+from typing import Any, Dict, TypedDict
 
 # ============================================================================
 # DYNAMIC DATA LOADING UTILITIES
@@ -246,7 +246,7 @@ PRICING: PricingConfig = {
     # Source: faqsData.ts id: 'deposit-policy'
     "deposit": 100,  # $100 deposit to secure booking
     "deposit_refundable": True,
-    "deposit_refund_days": 7,  # Refundable if cancel 7+ days before
+    "deposit_refund_days": 4,  # Refundable if cancel 4+ days before
     # ========================================
     # TRAVEL FEES
     # ========================================
@@ -351,7 +351,11 @@ class PricingCalculator:
                     "price_each": PRICING["child_base"],
                     "total": float(child_cost),
                 },
-                "children_under_5": {"count": children_under_5, "price_each": 0, "total": 0.0},
+                "children_under_5": {
+                    "count": children_under_5,
+                    "price_each": 0,
+                    "total": 0.0,
+                },
             },
             "meets_minimum": meets_minimum,
             "minimum_required": float(minimum),
@@ -1157,9 +1161,9 @@ BUSINESS_POLICIES = {
         "accepted_methods": ["Venmo Business", "Zelle Business", "Cash", "Credit Card"],
     },
     "cancellation": {
-        "full_refund_days": 7,
-        "policy": "Cancel 7+ days before event = full refund. Within 7 days = non-refundable.",
-        "deposit_refundable_if": "canceled 7+ days before event",
+        "full_refund_days": 4,
+        "policy": "Cancel 4+ days before event = full deposit refund. Within 4 days = non-refundable.",
+        "deposit_refundable_if": "canceled 4+ days before event",
     },
     "reschedule": {
         "free_within_hours": 48,
@@ -1172,7 +1176,14 @@ BUSINESS_POLICIES = {
         "policy": "We cannot cook in unsafe/uncovered rain conditions",
     },
     "dietary": {
-        "accommodations": ["Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Halal", "Kosher"],
+        "accommodations": [
+            "Vegetarian",
+            "Vegan",
+            "Gluten-free",
+            "Dairy-free",
+            "Halal",
+            "Kosher",
+        ],
         "advance_notice": "48 hours required",
         "contact": "cs@myhibachichef.com",
     },
@@ -1184,7 +1195,14 @@ BUSINESS_POLICIES = {
         "table_setup": "U-shape with grill at open end",
         "ventilation": "Required for indoor cooking",
         "fire_show_note": "Chef stands on ground, needs 10+ ft ceiling for fire tricks",
-        "customer_provides": ["tables", "chairs", "plates", "utensils", "glasses", "napkins"],
+        "customer_provides": [
+            "tables",
+            "chairs",
+            "plates",
+            "utensils",
+            "glasses",
+            "napkins",
+        ],
         "chef_brings": [
             "hibachi grill",
             "food",
@@ -1248,7 +1266,11 @@ FAQS_KNOWLEDGE = {
             "understanding": "These REPLACE one of the 2 free proteins, not in addition. Explain the value - restaurant-quality at home.",
         },
         "kids_meals": {
-            "ages_6_12": {"price": 30, "proteins": 2, "portions": "Same menu, smaller portions"},
+            "ages_6_12": {
+                "price": 30,
+                "proteins": 2,
+                "portions": "Same menu, smaller portions",
+            },
             "under_5": {
                 "price": 0,
                 "note": "FREE with adult purchase",
@@ -1387,7 +1409,7 @@ FAQS_KNOWLEDGE = {
         "deposit_policy": {
             "amount": 100,
             "when_due": "At booking to secure date",
-            "refundable": "If canceled 7+ days before event",
+            "refundable": "If canceled 4+ days before event",
             "deducted_from_final": True,
             "understanding": "Deposit secures their date - it's not extra cost, it comes off the final bill. Refundable with notice.",
         },
@@ -1398,9 +1420,9 @@ FAQS_KNOWLEDGE = {
             "understanding": "Flexible payment options. Most people pay balance day-of, but can prepay if they prefer.",
         },
         "cancellation_and_changes": {
-            "full_refund_days": 7,
-            "policy": "Cancel 7+ days before = full refund. Within 7 days = non-refundable",
-            "free_reschedule": "One free reschedule within 48hrs of booking",
+            "full_refund_days": 4,
+            "policy": "Cancel 4+ days before = full refund. Within 4 days = non-refundable",
+            "free_reschedule": "One free reschedule if requested 24+ hours before event",
             "additional_reschedule_fee": 100,
             "understanding": "Fair cancellation policy - we need notice because we buy fresh ingredients. Early reschedules are free.",
         },
@@ -1456,7 +1478,14 @@ FAQS_KNOWLEDGE = {
         },
     },
     "dietary_and_special_needs": {
-        "accommodations": ["Vegetarian", "Vegan", "Gluten-free", "Dairy-free", "Halal", "Kosher"],
+        "accommodations": [
+            "Vegetarian",
+            "Vegan",
+            "Gluten-free",
+            "Dairy-free",
+            "Halal",
+            "Kosher",
+        ],
         "notice_required": "48 hours in advance",
         "contact_for_details": "cs@myhibachichef.com",
         "understanding": "We can accommodate almost anything - just need advance notice so chef can prepare properly. Be reassuring!",
@@ -1614,7 +1643,9 @@ def validate_configuration() -> dict[str, Any]:
     try:
         result = calc.calculate_base_cost(20, 0, 0)
         if result["base_cost"] != 1100.00:
-            errors.append(f"Test failed: 20 adults should be $1,100, got ${result['base_cost']}")
+            errors.append(
+                f"Test failed: 20 adults should be $1,100, got ${result['base_cost']}"
+            )
         if not result["meets_minimum"]:
             errors.append("Test failed: 20 adults should meet minimum")
     except Exception as e:
@@ -1634,7 +1665,9 @@ def validate_configuration() -> dict[str, Any]:
     try:
         result = calc.calculate_base_cost(5, 0, 0)
         if result["base_cost"] != 275.00:
-            errors.append(f"Test failed: 5 adults base should be $275, got ${result['base_cost']}")
+            errors.append(
+                f"Test failed: 5 adults base should be $275, got ${result['base_cost']}"
+            )
         if result["final_cost_after_minimum"] != 550.00:
             errors.append(
                 f"Test failed: 5 adults should have $550 minimum applied, got ${result['final_cost_after_minimum']}"
@@ -1656,10 +1689,14 @@ def validate_configuration() -> dict[str, Any]:
 
     # Consistency checks
     if PRICING["adult_base"] != 55:
-        errors.append(f"CRITICAL: Adult price changed to ${PRICING['adult_base']} (should be $55)")
+        errors.append(
+            f"CRITICAL: Adult price changed to ${PRICING['adult_base']} (should be $55)"
+        )
 
     if PRICING["child_base"] != 30:
-        errors.append(f"CRITICAL: Child price changed to ${PRICING['child_base']} (should be $30)")
+        errors.append(
+            f"CRITICAL: Child price changed to ${PRICING['child_base']} (should be $30)"
+        )
 
     if PRICING["party_minimum"] != 550:
         errors.append(

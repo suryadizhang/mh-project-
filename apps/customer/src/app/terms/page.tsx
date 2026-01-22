@@ -17,6 +17,15 @@ export const metadata: Metadata = {
   },
 };
 
+// SSoT Configuration - Server-side access to environment variables
+const PolicyConfig = {
+  depositAmount: process.env.NEXT_PUBLIC_DEPOSIT_AMOUNT || '100',
+  depositRefundableDays: process.env.NEXT_PUBLIC_DEPOSIT_REFUNDABLE_DAYS || '4',
+  rescheduleFee: process.env.NEXT_PUBLIC_RESCHEDULE_FEE || '200',
+  guestCountFinalizeHours: process.env.NEXT_PUBLIC_GUEST_COUNT_FINALIZE_HOURS || '24',
+  freeRescheduleHours: process.env.NEXT_PUBLIC_FREE_RESCHEDULE_HOURS || '24',
+};
+
 export default function TermsPage() {
   return (
     <div className="terms-conditions">
@@ -154,17 +163,22 @@ export default function TermsPage() {
             <ul>
               <li>All bookings must be confirmed with a signed contract and deposit payment</li>
               <li>Bookings are subject to chef availability and location accessibility</li>
-              <li>Final guest count must be provided 24 hours before the event</li>
+              <li>
+                Final guest count must be provided {PolicyConfig.guestCountFinalizeHours} hours
+                before the event
+              </li>
               <li>Menu selections and dietary restrictions must be communicated in advance</li>
             </ul>
             <h3>3.2 Payment Schedule</h3>
             <ul>
               <li>
-                <strong>Deposit:</strong> $100 refundable deposit required to secure booking
+                <strong>Deposit:</strong> ${PolicyConfig.depositAmount} refundable deposit required
+                to secure booking
               </li>
               <li>
-                <strong>Deposit Refund:</strong> Deposit is refundable if canceled 48+ hours before
-                event, non-refundable within 48 hours
+                <strong>Deposit Refund:</strong> Deposit is refundable if canceled{' '}
+                {PolicyConfig.depositRefundableDays}+ days before event, non-refundable within{' '}
+                {PolicyConfig.depositRefundableDays} days
               </li>
               <li>
                 <strong>Final Payment:</strong> Remaining balance due on event day
@@ -191,12 +205,15 @@ export default function TermsPage() {
             <div className="cancellation-tiers">
               <h3>4.1 Cancellation Timeline</h3>
               <div className="policy-tier">
-                <h4>48+ Hours Before Event</h4>
-                <p>Full refund including $100 deposit</p>
+                <h4>{PolicyConfig.depositRefundableDays}+ Days Before Event</h4>
+                <p>Full refund including ${PolicyConfig.depositAmount} deposit</p>
               </div>
               <div className="policy-tier">
-                <h4>Less than 48 Hours Before Event</h4>
-                <p>$100 deposit is non-refundable. No refund for remaining balance.</p>
+                <h4>Less than {PolicyConfig.depositRefundableDays} Days Before Event</h4>
+                <p>
+                  ${PolicyConfig.depositAmount} deposit is non-refundable. No refund for remaining
+                  balance.
+                </p>
               </div>
             </div>
             <h3>4.2 Emergency Cancellations</h3>
@@ -210,15 +227,16 @@ export default function TermsPage() {
             <h2>5. Rescheduling Policy</h2>
             <ul>
               <li>
-                <strong>First Reschedule:</strong> One free reschedule allowed if requested 24+
-                hours before event
+                <strong>First Reschedule:</strong> One free reschedule allowed if requested{' '}
+                {PolicyConfig.freeRescheduleHours}+ hours before event
               </li>
               <li>
-                <strong>Additional Reschedules:</strong> $200 fee applies to any reschedules after
-                the first one
+                <strong>Additional Reschedules:</strong> ${PolicyConfig.rescheduleFee} fee applies
+                to any reschedules after the first one
               </li>
               <li>
-                <strong>Notice Required:</strong> Minimum 24 hours advance notice required
+                <strong>Notice Required:</strong> Minimum {PolicyConfig.freeRescheduleHours} hours
+                advance notice required
               </li>
               <li>
                 <strong>Availability:</strong> New date subject to chef availability
@@ -246,7 +264,10 @@ export default function TermsPage() {
             </ul>
             <h3>6.2 Information Requirements</h3>
             <ul>
-              <li>Provide accurate guest count 48 hours before event</li>
+              <li>
+                Provide accurate guest count {PolicyConfig.guestCountFinalizeHours} hours before
+                event
+              </li>
               <li>Communicate all dietary restrictions and allergies in advance</li>
               <li>Provide clear directions and parking information</li>
               <li>Ensure contact person is available on event day</li>
