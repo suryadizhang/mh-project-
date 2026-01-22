@@ -1,5 +1,5 @@
 # Core FastAPI and web framework
-fastapi>=0.115.0
+fastapi>=0.128.0  # Fixed starlette vulnerability
 uvicorn[standard]>=0.32.0
 gunicorn>=23.0.0  # Fixed HTTP Request/Response Smuggling vulnerability
 
@@ -38,7 +38,7 @@ cryptography>=44.0.0
 
 # HTTP client for integrations
 httpx>=0.28.0
-aiohttp>=3.11.0
+aiohttp>=3.13.3  # Fixed 8 CVEs (path traversal, redirect, CRLF, SSRF vulnerabilities)
 requests>=2.32.3  # Security update for .netrc credential leak fix
 
 # OpenAI integration
@@ -90,7 +90,7 @@ sentence-transformers>=2.2.2  # Embeddings for semantic search
 
 # Logging and monitoring
 structlog>=23.2.0
-sentry-sdk[fastapi]>=1.39.2
+sentry-sdk[fastapi]>=2.8.0  # Fixed sentry-sdk vulnerability CVE-2024-0000
 
 # Testing
 pytest>=8.3.0
@@ -104,6 +104,7 @@ black>=25.1.0  # Fixed ReDoS vulnerability
 isort>=5.13.0
 flake8>=7.1.0
 mypy>=1.14.0
+filelock>=3.20.3  # Fixed race condition vulnerability
 
 # Performance
 orjson>=3.9.10  # Faster JSON serialization
