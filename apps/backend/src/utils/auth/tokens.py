@@ -6,9 +6,10 @@ import logging
 import secrets
 from datetime import UTC, datetime, timedelta
 
-from core.config import get_settings
+import jwt
 from fastapi import HTTPException, status
-from jose import jwt
+
+from core.config import get_settings
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -37,7 +38,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire})
 
     try:
-        encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.jwt_algorithm)
+        encoded_jwt = jwt.encode(
+            to_encode, settings.secret_key, algorithm=settings.jwt_algorithm
+        )
         return encoded_jwt
     except Exception as e:
         logger.exception(f"Token creation error: {e}")
