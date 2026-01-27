@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-**Frontend**: Vercel handles deployment automatically ✅  
+**Frontend**: Vercel handles deployment automatically ✅
 **Backend**: GitHub Actions → Plesk VPS with full automation 🚀
 
 ---
@@ -484,6 +484,96 @@ python run_backend.py  # Manual test
 
 ---
 
+## Docker Deployment (Future Migration)
+
+> 📋 **Full Reference**: See [`DOCKER_GUIDE.md`](./DOCKER_GUIDE.md) for comprehensive Docker commands and configurations.
+
+### Overview
+
+Docker deployment is planned as a future migration path for the My Hibachi backend. This will provide:
+
+- **Consistent environments** across development, staging, and production
+- **Easier scaling** with container orchestration
+- **Simplified dependencies** (no more Python version conflicts)
+- **Better resource isolation** between services
+
+### Current Status
+
+| Component | Current | Docker Target |
+|-----------|---------|---------------|
+| **Backend API** | Plesk + uvicorn | Docker container |
+| **Database** | VPS PostgreSQL | PostgreSQL container |
+| **Cache** | VPS Redis | Redis container |
+| **Monitoring** | Basic | Prometheus + Grafana |
+
+### Docker Profiles
+
+The `docker-compose.yml` supports multiple profiles:
+
+```bash
+# Development (includes hot-reload)
+docker compose --profile development up
+
+# Production (optimized, no dev tools)
+docker compose --profile production up -d
+
+# Monitoring (Prometheus + Grafana)
+docker compose --profile monitoring up -d
+```
+
+### Service Access Points (Docker)
+
+| Service | Port | URL |
+|---------|------|-----|
+| **Backend API** | 8000 | http://localhost:8000 |
+| **PostgreSQL** | 5432 | localhost:5432 |
+| **Redis** | 6379 | localhost:6379 |
+| **PgAdmin** | 5050 | http://localhost:5050 |
+| **Prometheus** | 9090 | http://localhost:9090 |
+| **Grafana** | 3001 | http://localhost:3001 |
+
+### Migration Timeline
+
+| Phase | Target | Description |
+|-------|--------|-------------|
+| **Phase 1** | Q2 2025 | Docker local development (done ✅) |
+| **Phase 2** | Q3 2025 | Docker staging environment |
+| **Phase 3** | Q4 2025 | Docker production with orchestration |
+
+### CI/CD with Docker
+
+When Docker deployment is active, the CI/CD pipeline will:
+
+1. **Build**: Create Docker image on push to `dev`
+2. **Test**: Run tests inside container
+3. **Push**: Upload image to container registry (GitHub Container Registry)
+4. **Deploy**: Pull and restart containers on VPS
+
+```yaml
+# Future .github/workflows/docker-deploy.yml
+- name: Build and push Docker image
+  uses: docker/build-push-action@v5
+  with:
+    context: ./apps/backend
+    push: true
+    tags: ghcr.io/myhibachi/backend:${{ github.sha }}
+```
+
+### Environment Configuration for Docker
+
+Use `.env.vps.example` as template for Docker environment:
+
+```bash
+# Copy template
+cp .env.vps.example .env.docker
+
+# Modify for Docker networking
+# Change DATABASE_URL host from localhost to postgres
+# Change REDIS_URL host from localhost to redis
+```
+
+---
+
 ## Next Actions
 
 ### Immediate (Today)
@@ -522,7 +612,7 @@ python run_backend.py  # Manual test
 
 ---
 
-**CI/CD Strategy Document**  
-**Version**: 1.0  
-**Date**: October 30, 2025  
+**CI/CD Strategy Document**
+**Version**: 1.0
+**Date**: October 30, 2025
 **Status**: Ready for Implementation 🚀
