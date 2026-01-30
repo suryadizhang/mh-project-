@@ -25,14 +25,30 @@ Related:
 """
 
 import logging
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Optional
 
 from celery import shared_task
-from sqlalchemy import select, and_
+from sqlalchemy import and_, select
 
-from db.session import get_db_sync
+from core.database import SessionLocal
 from db.models.slot_hold import SlotHold
+
+
+@contextmanager
+def get_db_sync():
+    """Sync database session for Celery tasks."""
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
 
 logger = logging.getLogger(__name__)
 
@@ -562,7 +578,9 @@ def get_holds_summary() -> dict:
         # Count pending by phase
         pending_unsigned = db.execute(
             select(func.count(SlotHold.id)).where(
-                and_(SlotHold.status == "pending", SlotHold.agreement_signed_at.is_(None))
+                and_(
+                    SlotHold.status == "pending", SlotHold.agreement_signed_at.is_(None)
+                )
             )
         ).scalar()
 

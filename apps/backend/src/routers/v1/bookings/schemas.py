@@ -15,7 +15,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
-
 # =============================================================================
 # CRUD Schemas
 # =============================================================================
@@ -27,7 +26,9 @@ class BookingCreate(BaseModel):
     date: str = Field(..., description="Booking date in YYYY-MM-DD format")
     time: str = Field(..., description="Booking time in HH:MM format")
     guests: int = Field(..., ge=1, le=50, description="Number of guests (1-50)")
-    location_address: str = Field(..., min_length=10, description="Event location address")
+    location_address: str = Field(
+        ..., min_length=10, description="Event location address"
+    )
     customer_name: str = Field(..., min_length=2, description="Customer full name")
     customer_email: EmailStr = Field(..., description="Customer email address")
     customer_phone: str = Field(..., description="Customer phone number")
@@ -61,7 +62,11 @@ class BookingResponse(BaseModel):
     id: str = Field(..., description="Unique booking identifier")
     user_id: str = Field(..., description="User ID who created the booking")
     date: str = Field(..., description="Booking date")
-    time: str = Field(..., description="Booking time")
+    time: str = Field(..., description="Booking time (slot-snapped for scheduling)")
+    customer_requested_time: str | None = Field(
+        None,
+        description="Original time customer requested (Option C+E Hybrid - for display)",
+    )
     guests: int = Field(..., description="Number of guests")
     status: str = Field(
         ...,
@@ -81,6 +86,7 @@ class BookingResponse(BaseModel):
                     "user_id": "user-xyz789",
                     "date": "2024-12-25",
                     "time": "18:00",
+                    "customer_requested_time": "17:45",
                     "guests": 8,
                     "status": "confirmed",
                     "total_amount": 450.00,
@@ -135,7 +141,9 @@ class DeleteBookingRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [{"reason": "Customer requested cancellation due to weather concerns"}]
+            "examples": [
+                {"reason": "Customer requested cancellation due to weather concerns"}
+            ]
         }
     }
 
@@ -251,4 +259,6 @@ class ErrorResponse(BaseModel):
 
     detail: str = Field(..., description="Error message")
 
-    model_config = {"json_schema_extra": {"examples": [{"detail": "Booking not found"}]}}
+    model_config = {
+        "json_schema_extra": {"examples": [{"detail": "Booking not found"}]}
+    }

@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { BookingDetailModal } from '@/components/booking/BookingDetailModal';
 import { CancellationRequestModal } from '@/components/booking/CancellationRequestModal';
 import { CancellationReviewModal } from '@/components/booking/CancellationReviewModal';
 import {
@@ -60,6 +61,8 @@ export default function BookingPage() {
   const [reviewModalBooking, setReviewModalBooking] = useState<any | null>(
     null
   );
+  // View detail modal state
+  const [viewModalBooking, setViewModalBooking] = useState<any | null>(null);
 
   // Sort state - default to upcoming events first
   const { sortBy, sortOrder, toggleSort } = useSort<
@@ -514,7 +517,9 @@ export default function BookingPage() {
                 {bookings.map((booking: any) => (
                   <tr
                     key={booking.booking_id}
-                    className={`hover:bg-gray-50 ${isUpcoming(booking.date) ? 'bg-blue-50' : ''}`}
+                    className={`hover:bg-gray-50 ${
+                      isUpcoming(booking.date) ? 'bg-blue-50' : ''
+                    }`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       <div className="flex items-center">
@@ -559,7 +564,9 @@ export default function BookingPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          booking.status
+                        )}`}
                       >
                         {booking.status === 'cancellation_requested'
                           ? 'Pending Cancellation'
@@ -569,7 +576,9 @@ export default function BookingPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPaymentStatusColor(booking.payment_status)}`}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPaymentStatusColor(
+                          booking.payment_status
+                        )}`}
                       >
                         {booking.payment_status.charAt(0).toUpperCase() +
                           booking.payment_status.slice(1)}
@@ -577,7 +586,10 @@ export default function BookingPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900">
+                        <button
+                          className="text-blue-600 hover:text-blue-900"
+                          onClick={() => setViewModalBooking(booking)}
+                        >
                           View
                         </button>
                         <button className="text-gray-600 hover:text-gray-900">
@@ -704,6 +716,13 @@ export default function BookingPage() {
         cancellationReason={reviewModalBooking?.cancellation_reason ?? ''}
         requestedAt={reviewModalBooking?.cancellation_requested_at}
         requestedBy={reviewModalBooking?.cancellation_requested_by?.name}
+      />
+
+      {/* Booking Detail Modal - with Customer Preferences */}
+      <BookingDetailModal
+        isOpen={viewModalBooking !== null}
+        onClose={() => setViewModalBooking(null)}
+        booking={viewModalBooking}
       />
     </div>
   );

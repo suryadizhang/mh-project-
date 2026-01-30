@@ -9,12 +9,11 @@ Manages the 4 daily time slots for hibachi bookings:
 """
 
 from datetime import date, time
-from typing import List, Optional, Dict
-from uuid import UUID
 from enum import IntEnum
+from typing import Dict, List, Optional
+from uuid import UUID
 
 from pydantic import BaseModel
-
 
 # ============================================================
 # Constants & Enums
@@ -48,7 +47,8 @@ class SlotConfiguration(BaseModel):
     min_time_60: time
     max_time_60: time
     # Buffer times
-    setup_minutes: int = 30
+    # NOTE: Increased from 30 to 60 min to account for traffic between venues
+    setup_minutes: int = 60
     cleanup_minutes: int = 15
     is_active: bool = True
 
@@ -174,6 +174,68 @@ class SlotManager:
                 return slot_num
         return None
 
+    def snap_to_nearest_slot(self, requested_time: time) -> tuple[int, time]:
+        """
+        Snap any customer-requested time to the nearest slot.
+
+        Option C+E Hybrid Implementation:
+        - Customer picks ANY time (flexible UX)
+        - System snaps to nearest slot internally (chef scheduling)
+        - Used for conflict detection and chef assignment
+
+        Time Ranges (midpoint-based snapping):
+        - Before 10:30 AM → LUNCH (12:00 PM)
+        - 10:30 AM - 1:30 PM → LUNCH (12:00 PM)
+        - 1:31 PM - 4:30 PM → AFTERNOON (3:00 PM)
+        - 4:31 PM - 7:30 PM → EARLY_EVENING (6:00 PM)
+        - 7:31 PM - 10:30 PM → PRIME_TIME (9:00 PM)
+        - After 10:30 PM → PRIME_TIME (9:00 PM)
+
+        Args:
+            requested_time: Any time the customer requested
+
+        Returns:
+            Tuple of (slot_number, slot_standard_time)
+
+        Example:
+            >>> slot_manager.snap_to_nearest_slot(time(14, 45))
+            (2, time(15, 0))  # AFTERNOON slot
+            >>> slot_manager.snap_to_nearest_slot(time(17, 0))
+            (3, time(18, 0))  # EARLY_EVENING slot
+        """
+        # Convert to minutes since midnight for easier comparison
+        minutes = requested_time.hour * 60 + requested_time.minute
+
+        # Midpoints between slots (in minutes since midnight):
+        # LUNCH center: 12:00 (720 min)
+        # AFTERNOON center: 15:00 (900 min)
+        # EARLY_EVENING center: 18:00 (1080 min)
+        # PRIME_TIME center: 21:00 (1260 min)
+
+        # Midpoint LUNCH-AFTERNOON: 13:30 (810 min)
+        # Midpoint AFTERNOON-EARLY_EVENING: 16:30 (990 min)
+        # Midpoint EARLY_EVENING-PRIME_TIME: 19:30 (1170 min)
+
+        # Before LUNCH starts (before 10:30 = 630 min) → snap to LUNCH
+        # This handles early morning requests gracefully
+        if minutes < 630:  # Before 10:30 AM
+            slot_num = TimeSlot.LUNCH
+        # LUNCH zone: 10:30 AM - 1:30 PM (630 - 810 min)
+        elif minutes <= 810:  # Until 1:30 PM
+            slot_num = TimeSlot.LUNCH
+        # AFTERNOON zone: 1:31 PM - 4:30 PM (811 - 990 min)
+        elif minutes <= 990:  # Until 4:30 PM
+            slot_num = TimeSlot.AFTERNOON
+        # EARLY_EVENING zone: 4:31 PM - 7:30 PM (991 - 1170 min)
+        elif minutes <= 1170:  # Until 7:30 PM
+            slot_num = TimeSlot.EARLY_EVENING
+        # PRIME_TIME zone: 7:31 PM onwards (1171+ min)
+        else:
+            slot_num = TimeSlot.PRIME_TIME
+
+        config = self.slots[slot_num]
+        return (slot_num, config.standard_time)
+
     def get_standard_time(self, slot_number: int) -> time:
         """Get the standard (default) time for a slot."""
         return self.get_slot_config(slot_number).standard_time
@@ -199,7 +261,9 @@ class SlotManager:
         else:
             return config.min_time_30 <= requested_time <= config.max_time_30
 
-    def calculate_adjustment(self, slot_number: int, requested_time: time) -> SlotAdjustment:
+    def calculate_adjustment(
+        self, slot_number: int, requested_time: time
+    ) -> SlotAdjustment:
         """
         Calculate adjustment needed from standard time.
 
@@ -290,7 +354,9 @@ class SlotManager:
 
         return adjustments
 
-    def can_slots_conflict(self, slot1: int, slot2: int, event_duration_minutes: int = 120) -> bool:
+    def can_slots_conflict(
+        self, slot1: int, slot2: int, event_duration_minutes: int = 120
+    ) -> bool:
         """
         Check if two slots could potentially conflict.
 

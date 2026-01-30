@@ -3,12 +3,14 @@ Booking request/response schemas with comprehensive validation
 Prevents injection attacks and validates all inputs
 """
 
-from datetime import date, datetime, time
-from enum import Enum
 import re
+from datetime import date, datetime, time, timedelta
+from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
+
+from services.business_config_service import get_business_config_sync
 
 
 class BookingStatus(str, Enum):
@@ -43,7 +45,9 @@ class BookingCreate(BaseModel):
     )
 
     event_date: date = Field(
-        ..., description="Date of the event (YYYY-MM-DD format)", examples=["2025-12-31"]
+        ...,
+        description="Date of the event (YYYY-MM-DD format)",
+        examples=["2025-12-31"],
     )
 
     event_time: str = Field(
@@ -98,20 +102,42 @@ class BookingCreate(BaseModel):
 
     # Additional booking metadata
     duration_hours: int | None = Field(
-        default=2, ge=1, le=8, description="Expected duration in hours (1-8)", examples=[2, 3, 4]
+        default=2,
+        ge=1,
+        le=8,
+        description="Expected duration in hours (1-8)",
+        examples=[2, 3, 4],
     )
 
     @field_validator("event_date")
     @classmethod
     def validate_event_date(cls, v: date) -> date:
-        """Ensure event date is not in the past"""
+        """
+        Ensure event date is valid:
+        - Not in the past
+        - Not more than max_advance_days in the future (SSoT: booking.max_advance_days)
+
+        The max_advance_days value comes from dynamic_variables table via SSoT.
+        Default is 365 days if not configured.
+        """
         if v < date.today():
             raise ValueError("Event date cannot be in the past")
 
-        # Optionally limit how far in advance bookings can be made
-        # max_future_date = date.today() + timedelta(days=365)
-        # if v > max_future_date:
-        #     raise ValueError("Event date cannot be more than 1 year in advance")
+        # Get max advance days from SSoT (defaults to 365 if not in DB)
+        try:
+            config = get_business_config_sync()
+            # max_advance_days is stored in dynamic_variables as booking.max_advance_days
+            max_days = getattr(config, "max_advance_days", 365)
+        except Exception:
+            # Fallback to 365 days if config unavailable
+            max_days = 365
+
+        max_future_date = date.today() + timedelta(days=max_days)
+        if v > max_future_date:
+            raise ValueError(
+                f"Event date cannot be more than {max_days} days in advance. "
+                f"Maximum booking date is {max_future_date.strftime('%B %d, %Y')}."
+            )
 
         return v
 
@@ -132,7 +158,9 @@ class BookingCreate(BaseModel):
             time(hour=hour, minute=minute)
 
         except (ValueError, AttributeError):
-            raise ValueError(f"Invalid time format: {v}. Use HH:MM format (e.g., '18:30')")
+            raise ValueError(
+                f"Invalid time format: {v}. Use HH:MM format (e.g., '18:30')"
+            )
 
         return v
 
@@ -197,8 +225,12 @@ class BookingUpdate(BaseModel):
     status: BookingStatus | None = None
 
     # Validators apply same rules as BookingCreate
-    _validate_date = field_validator("event_date")(BookingCreate.validate_event_date.__func__)
-    _validate_time = field_validator("event_time")(BookingCreate.validate_event_time.__func__)
+    _validate_date = field_validator("event_date")(
+        BookingCreate.validate_event_date.__func__
+    )
+    _validate_time = field_validator("event_time")(
+        BookingCreate.validate_event_time.__func__
+    )
     _sanitize_text = field_validator("special_requests", "internal_notes")(
         BookingCreate.sanitize_text_fields.__func__
     )
@@ -260,6 +292,14 @@ class BookingListResponse(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [{"bookings": [], "total": 0, "page": 1, "per_page": 20, "total_pages": 0}]
+            "examples": [
+                {
+                    "bookings": [],
+                    "total": 0,
+                    "page": 1,
+                    "per_page": 20,
+                    "total_pages": 0,
+                }
+            ]
         }
     }

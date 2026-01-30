@@ -44,11 +44,11 @@ SSoT Architecture:
     See: database/migrations/004_dynamic_variables_ssot.sql
 """
 
+import json
 import logging
 import os
-import json
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import text
@@ -68,6 +68,12 @@ CATEGORY_PRICING = "pricing"
 CATEGORY_TRAVEL = "travel"
 CATEGORY_BOOKING = "booking"
 CATEGORY_DEPOSIT = "deposit"
+CATEGORY_TIMING = "timing"
+CATEGORY_SERVICE = "service"
+CATEGORY_POLICY = "policy"
+CATEGORY_CONTACT = "contact"
+CATEGORY_CHEF_PAY = "chef_pay"
+CATEGORY_ALERTS = "alerts"
 
 
 @dataclass
@@ -98,6 +104,60 @@ class BusinessConfig:
 
     # Booking Rules
     min_advance_hours: int = 48  # Minimum 48 hours advance booking
+    max_advance_days: int = 365  # Maximum 365 days advance booking
+
+    # Urgent Booking Settings
+    urgent_window_days: int = 7  # Bookings within 7 days are urgent
+    chef_assignment_alert_interval_hours: int = 4  # Alert every 4 hours
+    chef_assignment_max_alerts: int = 3  # Max 3 alerts before escalation
+
+    # Availability Window (dual-mode booking logic)
+    # Within this window: use chef availability (chefs have set schedules)
+    # Beyond this window: use long_advance_slot_capacity from SSoT
+    chef_availability_window_days: int = 14  # 2 weeks - chefs fill availability
+    long_advance_slot_capacity: int = (
+        1  # Default 1 chef per slot for long-advance bookings
+    )
+
+    # Timing (deadlines/cutoffs in hours)
+    menu_change_cutoff_hours: int = 12  # No menu changes within 12 hours of event
+    guest_count_finalize_hours: int = (
+        24  # Guest count must be finalized 24 hours before
+    )
+    free_reschedule_hours: int = 24  # Free reschedule allowed with 24+ hours notice
+
+    # Service (duration and logistics)
+    standard_duration_minutes: int = 90  # Standard service duration
+    extended_duration_minutes: int = 150  # Max duration for large parties (20+ guests)
+    chef_arrival_minutes_before: int = 20  # Chef arrives 15-30 min early
+
+    # Policy (fees and limits)
+    reschedule_fee_cents: int = 20000  # $200 fee for late reschedules
+    free_reschedule_count: int = 1  # One free reschedule allowed
+
+    # Contact (business info)
+    business_phone: str = "(916) 740-8768"
+    business_email: str = "cs@myhibachichef.com"
+
+    # Chef Pay - Per-Tier Fixed Rates (all amounts in cents)
+    # Junior Chef (new_chef) rates
+    junior_adult_cents: int = 1000  # $10.00 per adult
+    junior_kid_cents: int = 500  # $5.00 per child (6-12)
+    junior_toddler_cents: int = 0  # $0 for toddlers (under 5)
+    # Chef rates
+    chef_adult_cents: int = 1200  # $12.00 per adult
+    chef_kid_cents: int = 600  # $6.00 per child (6-12)
+    chef_toddler_cents: int = 0  # $0 for toddlers (under 5)
+    # Senior Chef rates
+    senior_adult_cents: int = 1300  # $13.00 per adult
+    senior_kid_cents: int = 650  # $6.50 per child (6-12)
+    senior_toddler_cents: int = 0  # $0 for toddlers (under 5)
+    # Station Manager rates
+    manager_adult_cents: int = 1500  # $15.00 per adult
+    manager_kid_cents: int = 750  # $7.50 per child (6-12)
+    manager_toddler_cents: int = 0  # $0 for toddlers (under 5)
+    # Travel fee distribution
+    chef_pay_travel_pct: int = 100  # 100% of travel fee goes to chef
 
     # Default Station (Fremont, CA - Main)
     # Format: CA-FREMONT-001 (human-readable station code)
@@ -187,7 +247,9 @@ async def get_business_config(
             )
         else:
             # PRIORITY 2: Fallback to legacy business_rules table
-            logger.warning("⚠️ No dynamic_variables found, falling back to business_rules")
+            logger.warning(
+                "⚠️ No dynamic_variables found, falling back to business_rules"
+            )
             config = await _load_from_business_rules(db, config)
 
         # Cache the result for future requests
@@ -203,7 +265,9 @@ async def get_business_config(
                 logger.warning(f"Failed to cache business config: {e}")
 
     except Exception as e:
-        logger.warning(f"⚠️ Failed to load business config from DB: {e}, using environment fallback")
+        logger.warning(
+            f"⚠️ Failed to load business config from DB: {e}, using environment fallback"
+        )
         config = _load_from_environment()
 
     # Populate module-level cache for sync fallback
@@ -214,7 +278,9 @@ async def get_business_config(
     return config
 
 
-def _map_dynamic_variables_to_config(variables: list, config: BusinessConfig) -> BusinessConfig:
+def _map_dynamic_variables_to_config(
+    variables: list, config: BusinessConfig
+) -> BusinessConfig:
     """
     Map dynamic_variables rows to BusinessConfig dataclass.
 
@@ -252,6 +318,81 @@ def _map_dynamic_variables_to_config(variables: list, config: BusinessConfig) ->
         elif category == CATEGORY_BOOKING:
             if key == "min_advance_hours":
                 config.min_advance_hours = int(parsed_value)
+            elif key == "max_advance_days":
+                config.max_advance_days = int(parsed_value)
+            elif key == "urgent_window_days":
+                config.urgent_window_days = int(parsed_value)
+            elif key == "chef_availability_window_days":
+                config.chef_availability_window_days = int(parsed_value)
+            elif key == "long_advance_slot_capacity":
+                config.long_advance_slot_capacity = int(parsed_value)
+
+        elif category == CATEGORY_ALERTS:
+            if key == "chef_assignment_alert_interval_hours":
+                config.chef_assignment_alert_interval_hours = int(parsed_value)
+            elif key == "chef_assignment_max_alerts":
+                config.chef_assignment_max_alerts = int(parsed_value)
+
+        elif category == CATEGORY_TIMING:
+            if key == "menu_change_cutoff_hours":
+                config.menu_change_cutoff_hours = int(parsed_value)
+            elif key == "guest_count_finalize_hours":
+                config.guest_count_finalize_hours = int(parsed_value)
+            elif key == "free_reschedule_hours":
+                config.free_reschedule_hours = int(parsed_value)
+
+        elif category == CATEGORY_SERVICE:
+            if key == "standard_duration_minutes":
+                config.standard_duration_minutes = int(parsed_value)
+            elif key == "extended_duration_minutes":
+                config.extended_duration_minutes = int(parsed_value)
+            elif key == "chef_arrival_minutes_before":
+                config.chef_arrival_minutes_before = int(parsed_value)
+
+        elif category == CATEGORY_POLICY:
+            if key == "reschedule_fee_cents":
+                config.reschedule_fee_cents = int(parsed_value)
+            elif key == "free_reschedule_count":
+                config.free_reschedule_count = int(parsed_value)
+
+        elif category == CATEGORY_CONTACT:
+            if key == "business_phone":
+                config.business_phone = str(parsed_value)
+            elif key == "business_email":
+                config.business_email = str(parsed_value)
+
+        elif category == CATEGORY_CHEF_PAY:
+            # Junior Chef rates
+            if key == "junior_adult_cents":
+                config.junior_adult_cents = int(parsed_value)
+            elif key == "junior_kid_cents":
+                config.junior_kid_cents = int(parsed_value)
+            elif key == "junior_toddler_cents":
+                config.junior_toddler_cents = int(parsed_value)
+            # Chef rates
+            elif key == "chef_adult_cents":
+                config.chef_adult_cents = int(parsed_value)
+            elif key == "chef_kid_cents":
+                config.chef_kid_cents = int(parsed_value)
+            elif key == "chef_toddler_cents":
+                config.chef_toddler_cents = int(parsed_value)
+            # Senior Chef rates
+            elif key == "senior_adult_cents":
+                config.senior_adult_cents = int(parsed_value)
+            elif key == "senior_kid_cents":
+                config.senior_kid_cents = int(parsed_value)
+            elif key == "senior_toddler_cents":
+                config.senior_toddler_cents = int(parsed_value)
+            # Station Manager rates
+            elif key == "manager_adult_cents":
+                config.manager_adult_cents = int(parsed_value)
+            elif key == "manager_kid_cents":
+                config.manager_kid_cents = int(parsed_value)
+            elif key == "manager_toddler_cents":
+                config.manager_toddler_cents = int(parsed_value)
+            # Travel fee distribution
+            elif key == "chef_pay_travel_pct":
+                config.chef_pay_travel_pct = int(parsed_value)
 
     return config
 
@@ -285,7 +426,9 @@ def _parse_variable_value(value: Any) -> Any:
     return value
 
 
-async def _load_from_business_rules(db: AsyncSession, config: BusinessConfig) -> BusinessConfig:
+async def _load_from_business_rules(
+    db: AsyncSession, config: BusinessConfig
+) -> BusinessConfig:
     """
     Fallback: Load configuration from legacy business_rules table.
 
@@ -320,18 +463,24 @@ async def _load_from_business_rules(db: AsyncSession, config: BusinessConfig) ->
             if rule_type == "PAYMENT" and "Deposit" in title:
                 if "deposit_amount" in rule_value:
                     # Convert dollars to cents
-                    config.deposit_amount_cents = int(rule_value["deposit_amount"] * 100)
+                    config.deposit_amount_cents = int(
+                        rule_value["deposit_amount"] * 100
+                    )
 
             elif rule_type == "PRICING":
                 if "Party Minimum" in title or "minimum_amount" in rule_value:
                     if "minimum_amount" in rule_value:
-                        config.party_minimum_cents = int(rule_value["minimum_amount"] * 100)
+                        config.party_minimum_cents = int(
+                            rule_value["minimum_amount"] * 100
+                        )
 
                 if "Travel Fee" in title:
                     if "free_miles" in rule_value:
                         config.travel_free_miles = int(rule_value["free_miles"])
                     if "per_mile_rate" in rule_value:
-                        config.travel_per_mile_cents = int(rule_value["per_mile_rate"] * 100)
+                        config.travel_per_mile_cents = int(
+                            rule_value["per_mile_rate"] * 100
+                        )
 
             elif rule_type == "BOOKING":
                 if "Advance" in title and "minimum_hours" in rule_value:
@@ -417,7 +566,9 @@ def _load_from_environment() -> BusinessConfig:
         )
 
     except ValueError as e:
-        logger.error(f"❌ Invalid environment variable value: {e}, using hardcoded defaults")
+        logger.error(
+            f"❌ Invalid environment variable value: {e}, using hardcoded defaults"
+        )
         config = BusinessConfig()
         config.source = "defaults"
 

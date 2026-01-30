@@ -11,10 +11,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.deps import get_current_admin_user
+from db.models.identity import User
+
 from ...database import get_db
 from ...models.faq_settings import FAQSettings
-from ...services.faq_service import FAQService
 from ...services.faq_health_check import FAQHealthCheck
+from ...services.faq_service import FAQService
 
 router = APIRouter(prefix="/api/faq-settings", tags=["FAQ Settings"])
 
@@ -26,7 +29,9 @@ class FAQSettingsUpdate(BaseModel):
     service_area: str = Field(..., min_length=5, max_length=500)
     service_area_details: str | None = None
 
-    deposit_amount: int = Field(..., ge=0, le=1000, description="Deposit amount in dollars")
+    deposit_amount: int = Field(
+        ..., ge=0, le=1000, description="Deposit amount in dollars"
+    )
     deposit_policy: str = Field(..., min_length=10, max_length=1000)
 
     pricing_info: dict = Field(..., description="Pricing structure as JSON")
@@ -70,7 +75,10 @@ class FAQSettingsResponse(BaseModel):
 
 # API Endpoints
 @router.get("/current", response_model=FAQSettingsResponse)
-async def get_current_faq_settings(db: AsyncSession = Depends(get_db)):
+async def get_current_faq_settings(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Get currently active FAQ settings
 
@@ -80,14 +88,19 @@ async def get_current_faq_settings(db: AsyncSession = Depends(get_db)):
 
     if not faq_settings:
         raise HTTPException(
-            status_code=404, detail="No active FAQ settings found. Please create initial settings."
+            status_code=404,
+            detail="No active FAQ settings found. Please create initial settings.",
         )
 
     return faq_settings
 
 
 @router.post("/", response_model=FAQSettingsResponse, status_code=201)
-async def create_faq_settings(settings_data: FAQSettingsUpdate, db: AsyncSession = Depends(get_db)):
+async def create_faq_settings(
+    settings_data: FAQSettingsUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Create new FAQ settings
 
@@ -132,7 +145,9 @@ async def create_faq_settings(settings_data: FAQSettingsUpdate, db: AsyncSession
 
 @router.put("/current", response_model=FAQSettingsResponse)
 async def update_current_faq_settings(
-    settings_data: FAQSettingsUpdate, db: AsyncSession = Depends(get_db)
+    settings_data: FAQSettingsUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """
     Update current active FAQ settings
@@ -173,7 +188,10 @@ async def update_current_faq_settings(
 
 
 @router.get("/preview-prompt")
-async def preview_ai_prompt(db: AsyncSession = Depends(get_db)):
+async def preview_ai_prompt(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Preview what the AI system prompt looks like with current FAQ data
 
@@ -195,6 +213,7 @@ async def calculate_quote_preview(
     party_size: int = Field(..., ge=1, le=500),
     menu_type: str = Field(..., pattern="^(classic|premium)$"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """
     Calculate booking quote using current pricing
@@ -211,7 +230,11 @@ async def calculate_quote_preview(
 
 
 @router.get("/history")
-async def get_faq_settings_history(limit: int = 10, db: AsyncSession = Depends(get_db)):
+async def get_faq_settings_history(
+    limit: int = 10,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Get history of FAQ settings changes
 
@@ -239,7 +262,10 @@ async def get_faq_settings_history(limit: int = 10, db: AsyncSession = Depends(g
 
 
 @router.get("/health-check")
-async def faq_health_check(db: AsyncSession = Depends(get_db)):
+async def faq_health_check(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     🩺 **FAQ Health Check & Error Detection**
 
@@ -257,7 +283,10 @@ async def faq_health_check(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/freshness-check")
-async def check_faq_freshness(db: AsyncSession = Depends(get_db)):
+async def check_faq_freshness(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Check if FAQ data is fresh and being used by AI
 
@@ -271,7 +300,10 @@ async def check_faq_freshness(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/validate-pricing")
-async def validate_pricing(db: AsyncSession = Depends(get_db)):
+async def validate_pricing(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Validate that pricing in FAQ matches expected business rules
 
@@ -289,7 +321,11 @@ async def validate_pricing(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/compare-with-source")
-async def compare_with_source(source_data: dict, db: AsyncSession = Depends(get_db)):
+async def compare_with_source(
+    source_data: dict,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Compare FAQ database with source of truth (e.g., faqsData.ts)
 
@@ -310,7 +346,9 @@ async def compare_with_source(source_data: dict, db: AsyncSession = Depends(get_
 
 
 @router.get("/scrape-website-data")
-async def scrape_website_data():
+async def scrape_website_data(
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     🌐 **Scrape Current Website Data**
 
