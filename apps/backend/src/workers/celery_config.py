@@ -3,9 +3,11 @@ Celery Configuration
 Background task processing for escalations, SMS, and call recordings
 """
 
-from celery import Celery
-from kombu import Queue
 import os
+
+from celery import Celery
+from celery.schedules import crontab
+from kombu import Queue
 
 # Redis connection
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
@@ -25,6 +27,8 @@ celery_app = Celery(
         "workers.monitoring_tasks",  # Added monitoring tasks
         "workers.campaign_metrics_tasks",  # Added campaign metrics tasks
         "workers.slot_hold_tasks",  # Slot hold auto-cancel tasks (Batch 1)
+        "workers.chef_assignment_alert_tasks",  # Chef assignment alerts (Batch 1)
+        "workers.email_monitoring_tasks",  # Email monitoring (Gmail + IONOS) (Batch 1)
     ],
 )
 
@@ -37,9 +41,23 @@ celery_app.conf.update(
         "workers.review_worker.*": {"queue": "reviews"},
         "workers.outbox_processors.*": {"queue": "outbox"},
         "monitoring.*": {"queue": "monitoring"},  # Added monitoring queue
-        "workers.campaign_metrics_tasks.*": {"queue": "campaigns"},  # Added campaign metrics queue
-        "workers.slot_hold_tasks.*": {"queue": "holds"},  # Slot hold auto-cancel (Batch 1)
+        "workers.campaign_metrics_tasks.*": {
+            "queue": "campaigns"
+        },  # Added campaign metrics queue
+        "workers.slot_hold_tasks.*": {
+            "queue": "holds"
+        },  # Slot hold auto-cancel (Batch 1)
         "slot_holds.*": {"queue": "holds"},  # Slot hold tasks by name prefix
+        "workers.chef_assignment_alert_tasks.*": {
+            "queue": "alerts"
+        },  # Chef assignment alerts
+        "chef_alerts.*": {"queue": "alerts"},  # Chef alert tasks by name prefix
+        "workers.email_monitoring_tasks.*": {
+            "queue": "email_monitors"
+        },  # Email monitoring
+        "email_monitors.*": {
+            "queue": "email_monitors"
+        },  # Email monitor tasks by prefix
     },
     # Task queues
     task_queues=(
@@ -50,6 +68,10 @@ celery_app.conf.update(
         Queue("monitoring", routing_key="monitoring"),  # Added monitoring queue
         Queue("campaigns", routing_key="campaigns"),  # Added campaigns queue
         Queue("holds", routing_key="holds"),  # Slot hold auto-cancel queue (Batch 1)
+        Queue("alerts", routing_key="alerts"),  # Chef assignment alerts queue (Batch 1)
+        Queue(
+            "email_monitors", routing_key="email_monitors"
+        ),  # Email monitoring queue (Batch 1)
         Queue("default", routing_key="default"),
     ),
     # Task settings
@@ -143,6 +165,34 @@ celery_app.conf.beat_schedule = {
     "expire-unpaid-holds": {
         "task": "slot_holds.expire_unpaid_holds",
         "schedule": 300.0,  # Every 5 minutes
+    },
+    # ============================================================
+    # Chef Assignment Alert System (Batch 1 - FAILPROOF Alerts)
+    # Ensures every booking has a chef assigned before event date
+    # 4-level escalation: Station Manager -> Admin -> Super Admin -> Multiple Channels
+    # ============================================================
+    "update-booking-urgencies": {
+        "task": "workers.chef_assignment_alert_tasks.update_booking_urgencies",
+        "schedule": crontab(
+            hour=0, minute=0
+        ),  # Daily at midnight (venue timezone calc)
+    },
+    "check-chef-assignment-alerts": {
+        "task": "workers.chef_assignment_alert_tasks.check_and_send_chef_assignment_alerts",
+        "schedule": 1800.0,  # Every 30 minutes
+    },
+    # ============================================================
+    # Email Monitoring System (Batch 1 - Full Redundancy)
+    # Monitors both Gmail (payment notifications) and IONOS (customer support)
+    # Detects failures, validates credentials, tracks consecutive errors
+    # ============================================================
+    "check-email-monitors": {
+        "task": "workers.email_monitoring_tasks.check_all_email_monitors",
+        "schedule": 300.0,  # Every 5 minutes
+    },
+    "email-monitor-health-check": {
+        "task": "workers.email_monitoring_tasks.get_monitor_health",
+        "schedule": 600.0,  # Every 10 minutes (logs health status)
     },
 }
 

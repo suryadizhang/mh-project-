@@ -88,6 +88,7 @@ import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
 
 import { BaseLocationManager } from '@/components/BaseLocationManager';
+import { EmailMonitorTab } from '@/components/superadmin/EmailMonitorTab';
 
 // Types
 interface AdminUser {
@@ -1296,7 +1297,10 @@ function AuditLogsTab() {
                     </TableCell>
                     <TableCell>
                       {log.target_type && log.target_id
-                        ? `${log.target_type}: ${log.target_id.substring(0, 8)}...`
+                        ? `${log.target_type}: ${log.target_id.substring(
+                            0,
+                            8
+                          )}...`
                         : '-'}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -1498,7 +1502,7 @@ export default function SuperAdminPage() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
           <TabsTrigger value="dashboard" className="gap-2">
             <LayoutDashboard className="h-4 w-4" />
             <span className="hidden sm:inline">Dashboard</span>
@@ -1518,6 +1522,10 @@ export default function SuperAdminPage() {
           <TabsTrigger value="system" className="gap-2">
             <Settings className="h-4 w-4" />
             <span className="hidden sm:inline">System</span>
+          </TabsTrigger>
+          <TabsTrigger value="email" className="gap-2">
+            <Mail className="h-4 w-4" />
+            <span className="hidden sm:inline">Email</span>
           </TabsTrigger>
         </TabsList>
 
@@ -1539,6 +1547,10 @@ export default function SuperAdminPage() {
 
         <TabsContent value="system">
           <SystemTab />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <EmailMonitorTab />
         </TabsContent>
       </Tabs>
     </div>

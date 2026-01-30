@@ -15,6 +15,9 @@
 # =============================================================================
 """
 
+# TODO: Newsletter/Campaign models need migration to proper schema
+# Temporarily creating placeholder classes until newsletter schema is implemented
+import enum
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
@@ -23,10 +26,6 @@ from db.models.core import Booking, Customer
 
 # Fixed: Use unified lead schema instead of legacy models
 from db.models.crm import Lead, LeadQuality, LeadStatus
-
-# TODO: Newsletter/Campaign models need migration to proper schema
-# Temporarily creating placeholder classes until newsletter schema is implemented
-import enum
 
 
 class CampaignStatus(str, enum.Enum):
@@ -62,6 +61,9 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
+
+from api.deps import get_current_admin_user
+from db.models.identity import User
 
 router = APIRouter(prefix="/admin/analytics", tags=["admin", "analytics"])
 
@@ -112,6 +114,7 @@ async def get_dashboard_overview(
     date_from: date | None = Query(None),
     date_to: date | None = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get comprehensive dashboard overview."""
 
@@ -142,6 +145,7 @@ async def get_lead_analytics(
     date_from: date | None = Query(None),
     date_to: date | None = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get detailed lead analytics."""
 
@@ -158,6 +162,7 @@ async def get_newsletter_analytics(
     date_from: date | None = Query(None),
     date_to: date | None = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get detailed newsletter analytics."""
 
@@ -174,6 +179,7 @@ async def get_conversion_funnel(
     date_from: date | None = Query(None),
     date_to: date | None = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get conversion funnel analytics."""
 
@@ -184,7 +190,9 @@ async def get_conversion_funnel(
 
     # Count leads at each stage
     total_leads = (
-        db.query(Lead).filter(Lead.created_at >= date_from, Lead.created_at <= date_to).count()
+        db.query(Lead)
+        .filter(Lead.created_at >= date_from, Lead.created_at <= date_to)
+        .count()
     )
 
     qualified_leads = (
@@ -255,7 +263,10 @@ async def get_conversion_funnel(
 
 
 @router.get("/lead-scoring")
-async def get_lead_scoring_analysis(db: Session = Depends(get_db)):
+async def get_lead_scoring_analysis(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """Get lead scoring analysis and distribution."""
 
     # Score distribution
@@ -269,12 +280,18 @@ async def get_lead_scoring_analysis(db: Session = Depends(get_db)):
 
     score_distribution = []
     for range_name, min_score, max_score in score_ranges:
-        count = db.query(Lead).filter(Lead.score >= min_score, Lead.score <= max_score).count()
+        count = (
+            db.query(Lead)
+            .filter(Lead.score >= min_score, Lead.score <= max_score)
+            .count()
+        )
         score_distribution.append({"range": range_name, "count": count})
 
     # Quality distribution
     quality_counts = (
-        db.query(Lead.quality, func.count(Lead.id).label("count")).group_by(Lead.quality).all()
+        db.query(Lead.quality, func.count(Lead.id).label("count"))
+        .group_by(Lead.quality)
+        .all()
     )
 
     quality_distribution = [
@@ -287,9 +304,9 @@ async def get_lead_scoring_analysis(db: Session = Depends(get_db)):
         db.query(
             Lead.source,
             func.count(Lead.id).label("total_leads"),
-            func.sum(func.case([(Lead.status == LeadStatus.CONVERTED, 1)], else_=0)).label(
-                "converted_leads"
-            ),
+            func.sum(
+                func.case([(Lead.status == LeadStatus.CONVERTED, 1)], else_=0)
+            ).label("converted_leads"),
             func.avg(Lead.score).label("avg_score"),
         )
         .group_by(Lead.source)
@@ -317,7 +334,11 @@ async def get_lead_scoring_analysis(db: Session = Depends(get_db)):
 
 
 @router.get("/engagement-trends")
-async def get_engagement_trends(days: int = Query(30, le=365), db: Session = Depends(get_db)):
+async def get_engagement_trends(
+    days: int = Query(30, le=365),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """Get engagement trends over time."""
 
     start_date = datetime.now(timezone.utc) - timedelta(days=days)
@@ -372,7 +393,9 @@ async def get_engagement_trends(days: int = Query(30, le=365), db: Session = Dep
     )
 
     return {
-        "daily_leads": [{"date": date.isoformat(), "count": count} for date, count in daily_leads],
+        "daily_leads": [
+            {"date": date.isoformat(), "count": count} for date, count in daily_leads
+        ],
         "daily_signups": [
             {"date": date.isoformat(), "count": count} for date, count in daily_signups
         ],
@@ -397,6 +420,7 @@ async def get_revenue_trends(
     days: int = Query(30, le=365),
     interval: str = Query("day", pattern="^(day|week|month)$"),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """
     Get revenue trends over time with customizable intervals.
@@ -442,7 +466,9 @@ async def get_revenue_trends(
 
         result.append(
             {
-                "period": (period.isoformat() if hasattr(period, "isoformat") else str(period)),
+                "period": (
+                    period.isoformat() if hasattr(period, "isoformat") else str(period)
+                ),
                 "revenue": revenue,
                 "booking_count": booking_count,
                 "avg_order_value": float(avg_order_value_cents or 0) / 100,
@@ -454,7 +480,9 @@ async def get_revenue_trends(
     # Calculate totals and summary
     total_revenue = sum(item["revenue"] for item in result)
     total_bookings = sum(item["booking_count"] for item in result)
-    overall_avg_order_value = total_revenue / total_bookings if total_bookings > 0 else 0
+    overall_avg_order_value = (
+        total_revenue / total_bookings if total_bookings > 0 else 0
+    )
 
     return {
         "trends": result,
@@ -469,7 +497,9 @@ async def get_revenue_trends(
 
 @router.get("/customer-lifetime-value")
 async def get_customer_lifetime_value(
-    top_n: int = Query(100, le=500), db: Session = Depends(get_db)
+    top_n: int = Query(100, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """
     Calculate Customer Lifetime Value (CLV) metrics.
@@ -530,7 +560,9 @@ async def get_customer_lifetime_value(
     distribution = []
     for label, min_cents, max_cents in distribution_buckets:
         count = sum(
-            1 for val in customer_values if min_cents <= (val.total_spent_cents or 0) < max_cents
+            1
+            for val in customer_values
+            if min_cents <= (val.total_spent_cents or 0) < max_cents
         )
         distribution.append(
             {
@@ -553,7 +585,9 @@ async def get_customer_lifetime_value(
                 "total_spent": float(val.total_spent_cents or 0) / 100,
                 "booking_count": val.booking_count,
                 "customer_tenure_days": customer_tenure_days,
-                "avg_order_value": float(val.total_spent_cents or 0) / 100 / val.booking_count,
+                "avg_order_value": float(val.total_spent_cents or 0)
+                / 100
+                / val.booking_count,
             }
         )
 
@@ -574,6 +608,7 @@ async def get_booking_conversion_funnel(
     date_from: date | None = Query(None),
     date_to: date | None = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """
     Get detailed booking conversion funnel analytics.
@@ -587,7 +622,9 @@ async def get_booking_conversion_funnel(
 
     # Stage 1: Website Visits (proxy via leads created)
     total_leads = (
-        db.query(Lead).filter(Lead.created_at >= date_from, Lead.created_at <= date_to).count()
+        db.query(Lead)
+        .filter(Lead.created_at >= date_from, Lead.created_at <= date_to)
+        .count()
     )
 
     # Stage 2: Quote Requests (leads with contact info)
@@ -662,32 +699,44 @@ async def get_booking_conversion_funnel(
         {
             "stage": "Quote Requests",
             "count": quote_requests,
-            "conversion_rate": ((quote_requests / total_leads * 100) if total_leads > 0 else 0),
+            "conversion_rate": (
+                (quote_requests / total_leads * 100) if total_leads > 0 else 0
+            ),
         },
         {
             "stage": "Qualified",
             "count": qualified,
-            "conversion_rate": ((qualified / total_leads * 100) if total_leads > 0 else 0),
+            "conversion_rate": (
+                (qualified / total_leads * 100) if total_leads > 0 else 0
+            ),
         },
         {
             "stage": "Bookings Created",
             "count": bookings_created,
-            "conversion_rate": ((bookings_created / total_leads * 100) if total_leads > 0 else 0),
+            "conversion_rate": (
+                (bookings_created / total_leads * 100) if total_leads > 0 else 0
+            ),
         },
         {
             "stage": "Deposits Paid",
             "count": deposits_paid,
-            "conversion_rate": ((deposits_paid / total_leads * 100) if total_leads > 0 else 0),
+            "conversion_rate": (
+                (deposits_paid / total_leads * 100) if total_leads > 0 else 0
+            ),
         },
         {
             "stage": "Fully Paid",
             "count": fully_paid,
-            "conversion_rate": ((fully_paid / total_leads * 100) if total_leads > 0 else 0),
+            "conversion_rate": (
+                (fully_paid / total_leads * 100) if total_leads > 0 else 0
+            ),
         },
         {
             "stage": "Completed",
             "count": completed,
-            "conversion_rate": ((completed / total_leads * 100) if total_leads > 0 else 0),
+            "conversion_rate": (
+                (completed / total_leads * 100) if total_leads > 0 else 0
+            ),
         },
     ]
 
@@ -697,7 +746,9 @@ async def get_booking_conversion_funnel(
         current_count = stages[i]["count"]
         next_count = stages[i + 1]["count"]
         drop_off_count = current_count - next_count
-        drop_off_rate = (drop_off_count / current_count * 100) if current_count > 0 else 0
+        drop_off_rate = (
+            (drop_off_count / current_count * 100) if current_count > 0 else 0
+        )
 
         drop_offs.append(
             {
@@ -711,7 +762,9 @@ async def get_booking_conversion_funnel(
     return {
         "funnel_stages": stages,
         "drop_offs": drop_offs,
-        "overall_conversion_rate": ((completed / total_leads * 100) if total_leads > 0 else 0),
+        "overall_conversion_rate": (
+            (completed / total_leads * 100) if total_leads > 0 else 0
+        ),
         "date_range": {
             "from": date_from.isoformat(),
             "to": date_to.isoformat(),
@@ -724,6 +777,7 @@ async def get_menu_item_popularity(
     date_from: date | None = Query(None),
     date_to: date | None = Query(None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """
     Analyze menu item popularity and preferences.
@@ -772,7 +826,9 @@ async def get_menu_item_popularity(
                     (booking_count / total_bookings * 100) if total_bookings > 0 else 0
                 ),
                 "avg_order_value": (
-                    float(revenue_cents or 0) / 100 / booking_count if booking_count > 0 else 0
+                    float(revenue_cents or 0) / 100 / booking_count
+                    if booking_count > 0
+                    else 0
                 ),
             }
         )
@@ -792,7 +848,10 @@ async def get_menu_item_popularity(
 
 
 @router.get("/geographic-distribution")
-async def get_geographic_distribution(db: Session = Depends(get_db)):
+async def get_geographic_distribution(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Analyze customer and booking geographic distribution.
 
@@ -830,7 +889,9 @@ async def get_geographic_distribution(db: Session = Depends(get_db)):
                 "revenue": float(item.revenue_cents or 0) / 100,
                 "unique_customers": item.unique_customers,
                 "market_share_bookings": (
-                    (item.booking_count / total_bookings * 100) if total_bookings > 0 else 0
+                    (item.booking_count / total_bookings * 100)
+                    if total_bookings > 0
+                    else 0
                 ),
                 "market_share_revenue": (
                     (float(item.revenue_cents or 0) / 100 / total_revenue * 100)
@@ -857,7 +918,11 @@ async def get_geographic_distribution(db: Session = Depends(get_db)):
 
 
 @router.get("/seasonal-trends")
-async def get_seasonal_trends(years: int = Query(1, ge=1, le=5), db: Session = Depends(get_db)):
+async def get_seasonal_trends(
+    years: int = Query(1, ge=1, le=5),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Analyze seasonal booking trends and patterns.
 
@@ -972,12 +1037,16 @@ async def get_seasonal_trends(years: int = Query(1, ge=1, le=5), db: Session = D
 
 
 # Helper functions
-async def _get_lead_analytics(date_from: date, date_to: date, db: Session) -> LeadAnalytics:
+async def _get_lead_analytics(
+    date_from: date, date_to: date, db: Session
+) -> LeadAnalytics:
     """Get lead analytics for date range."""
 
     # Total leads
     total_leads = (
-        db.query(Lead).filter(Lead.created_at >= date_from, Lead.created_at <= date_to).count()
+        db.query(Lead)
+        .filter(Lead.created_at >= date_from, Lead.created_at <= date_to)
+        .count()
     )
 
     # New leads (created in period)
@@ -1035,7 +1104,8 @@ async def _get_lead_analytics(date_from: date, date_to: date, db: Session) -> Le
     )
 
     leads_by_quality = {
-        quality.value if quality else "unrated": count for quality, count in quality_counts
+        quality.value if quality else "unrated": count
+        for quality, count in quality_counts
     }
 
     # Daily lead count
@@ -1050,7 +1120,9 @@ async def _get_lead_analytics(date_from: date, date_to: date, db: Session) -> Le
         .all()
     )
 
-    daily_lead_count = [{"date": date.isoformat(), "count": count} for date, count in daily_counts]
+    daily_lead_count = [
+        {"date": date.isoformat(), "count": count} for date, count in daily_counts
+    ]
 
     return LeadAnalytics(
         total_leads=total_leads,
@@ -1211,7 +1283,9 @@ async def _get_newsletter_analytics(
     )
 
 
-async def _get_sales_analytics(date_from: date, date_to: date, db: Session) -> SalesAnalytics:
+async def _get_sales_analytics(
+    date_from: date, date_to: date, db: Session
+) -> SalesAnalytics:
     """Get sales analytics for date range."""
 
     # Get bookings in date range
@@ -1248,11 +1322,15 @@ async def _get_sales_analytics(date_from: date, date_to: date, db: Session) -> S
                 )
                 .all()
             )
-            conversion_value += sum(booking.total_cost_cents for booking in customer_bookings) / 100
+            conversion_value += (
+                sum(booking.total_cost_cents for booking in customer_bookings) / 100
+            )
 
     # Lead to booking conversion rate
     total_leads = (
-        db.query(Lead).filter(Lead.created_at >= date_from, Lead.created_at <= date_to).count()
+        db.query(Lead)
+        .filter(Lead.created_at >= date_from, Lead.created_at <= date_to)
+        .count()
     )
 
     lead_to_booking_conversion = (
@@ -1332,7 +1410,9 @@ async def _get_recent_activity(db: Session) -> list[dict[str, Any]]:
         )
 
     # Recent campaigns
-    recent_campaigns = db.query(Campaign).order_by(desc(Campaign.sent_at)).limit(3).all()
+    recent_campaigns = (
+        db.query(Campaign).order_by(desc(Campaign.sent_at)).limit(3).all()
+    )
     for campaign in recent_campaigns:
         if campaign.sent_at:
             activities.append(
@@ -1397,7 +1477,9 @@ async def _get_alerts(db: Session) -> list[dict[str, Any]]:
 
     # Low engagement subscribers
     low_engagement = (
-        db.query(Subscriber).filter(Subscriber.subscribed, Subscriber.engagement_score < 20).count()
+        db.query(Subscriber)
+        .filter(Subscriber.subscribed, Subscriber.engagement_score < 20)
+        .count()
     )
 
     if low_engagement > 0:

@@ -5,11 +5,13 @@ API endpoints for handling voice call events.
 
 import logging
 from typing import Any
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.deps import get_db
+from api.deps import get_current_admin_user, get_db
+from db.models.identity import User
 from services.ringcentral_voice import RingCentralVoiceService
 
 logger = logging.getLogger(__name__)
@@ -41,7 +43,7 @@ async def handle_inbound_call_webhook(
     - Call needs to be answered/routed
 
     Returns instructions for RingCentral on how to handle the call.
-    
+
     NEW: Initiates real-time WebSocket connection for bidirectional audio streaming.
     """
     try:
@@ -68,9 +70,9 @@ async def handle_inbound_call_webhook(
             f"&from_number={from_number}"
             f"&to_number={to_number}"
         )
-        
+
         logger.info(f"🎧 WebSocket URL for call {call_id}: {ws_url}")
-        
+
         # Return instructions to RingCentral
         # Tell it to:
         # 1. Answer the call
@@ -228,6 +230,7 @@ async def get_call_statistics(
     start_date: str | None = None,
     end_date: str | None = None,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """
     Get voice call statistics.
@@ -244,7 +247,7 @@ async def get_call_statistics(
     - Transfer rate
     """
     try:
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timedelta, timezone
 
         # Default to last 7 days
         if not start_date:
@@ -274,6 +277,7 @@ async def get_call_statistics(
 async def test_voice_ai(
     text: str,
     voice_model: str | None = None,
+    current_user: User = Depends(get_current_admin_user),
 ):
     """
     Test voice AI system.
@@ -285,8 +289,9 @@ async def test_voice_ai(
     Returns audio file.
     """
     try:
-        from services.speech_service import speech_service
         from fastapi.responses import Response
+
+        from services.speech_service import speech_service
 
         # Generate speech
         audio = await speech_service.synthesize_speech(
@@ -304,7 +309,9 @@ async def test_voice_ai(
 
 
 @router.get("/voice/health")
-async def voice_ai_health_check():
+async def voice_ai_health_check(
+    current_user: User = Depends(get_current_admin_user),
+):
     """
     Check voice AI system health.
 

@@ -1513,3 +1513,129 @@ export const configService = {
     );
   },
 };
+
+// =============================================================================
+// Customer Preferences Service (Chef Request + Allergen Capture)
+// =============================================================================
+
+import type {
+  CommonAllergen,
+  CustomerPreferences,
+  CustomerPreferencesUpdate,
+  ChefPrepAllergens,
+  ChefBonusInfo,
+} from '../types/customer-preferences';
+
+/**
+ * Service for managing customer preferences:
+ * - Chef request tracking (for 10% bonus)
+ * - Allergen disclosure and confirmation
+ *
+ * API Endpoints:
+ * - GET  /api/v1/allergens - List common allergens
+ * - GET  /api/v1/bookings/{id}/preferences - Get booking preferences
+ * - PUT  /api/v1/bookings/{id}/preferences - Update booking preferences
+ * - GET  /api/v1/bookings/{id}/prep-allergens - Chef prep view
+ * - GET  /api/v1/bookings/{id}/chef-bonus - Chef bonus calculation
+ */
+export const customerPreferencesService = {
+  /**
+   * Get list of common allergens (for multi-select)
+   */
+  async getCommonAllergens(): Promise<ApiResponse<CommonAllergen[]>> {
+    return api.get<CommonAllergen[]>('/api/v1/allergens');
+  },
+
+  /**
+   * Get customer preferences for a booking
+   */
+  async getBookingPreferences(
+    bookingId: string
+  ): Promise<ApiResponse<CustomerPreferences>> {
+    return api.get<CustomerPreferences>(
+      `/api/v1/bookings/${bookingId}/preferences`
+    );
+  },
+
+  /**
+   * Update customer preferences for a booking
+   */
+  async updateBookingPreferences(
+    bookingId: string,
+    preferences: CustomerPreferencesUpdate
+  ): Promise<ApiResponse<CustomerPreferences>> {
+    return api.put<CustomerPreferences>(
+      `/api/v1/bookings/${bookingId}/preferences`,
+      preferences as Record<string, unknown>
+    );
+  },
+
+  /**
+   * Get allergen prep info for chef (mobile app / prep checklist)
+   */
+  async getChefPrepAllergens(
+    bookingId: string
+  ): Promise<ApiResponse<ChefPrepAllergens>> {
+    return api.get<ChefPrepAllergens>(
+      `/api/v1/bookings/${bookingId}/prep-allergens`
+    );
+  },
+
+  /**
+   * Get chef bonus calculation for a booking
+   */
+  async getChefBonus(bookingId: string): Promise<ApiResponse<ChefBonusInfo>> {
+    return api.get<ChefBonusInfo>(`/api/v1/bookings/${bookingId}/chef-bonus`);
+  },
+
+  /**
+   * Mark a chef as requested for a booking
+   * Convenience method that updates chef_was_requested = true
+   */
+  async markChefRequested(
+    bookingId: string,
+    chefId: string,
+    source: string
+  ): Promise<ApiResponse<CustomerPreferences>> {
+    return api.put<CustomerPreferences>(
+      `/api/v1/bookings/${bookingId}/preferences`,
+      {
+        chef_was_requested: true,
+        requested_chef_id: chefId,
+        chef_request_source: source,
+      }
+    );
+  },
+
+  /**
+   * Clear chef request (unmark as requested)
+   * Convenience method that updates chef_was_requested = false
+   */
+  async clearChefRequest(
+    bookingId: string
+  ): Promise<ApiResponse<CustomerPreferences>> {
+    return api.put<CustomerPreferences>(
+      `/api/v1/bookings/${bookingId}/preferences`,
+      {
+        chef_was_requested: false,
+        requested_chef_id: null,
+        chef_request_source: null,
+      }
+    );
+  },
+
+  /**
+   * Confirm allergen disclosure
+   * Convenience method that updates allergen_confirmed = true
+   */
+  async confirmAllergens(
+    bookingId: string
+  ): Promise<ApiResponse<CustomerPreferences>> {
+    return api.put<CustomerPreferences>(
+      `/api/v1/bookings/${bookingId}/preferences`,
+      {
+        allergen_confirmed: true,
+      }
+    );
+  },
+};

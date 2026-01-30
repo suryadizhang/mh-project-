@@ -31,6 +31,7 @@ export interface Booking {
   userId: string;
   eventDate: Date;
   eventTime: string;
+  customerRequestedTime?: string; // Original time customer requested (Option C+E Hybrid)
   guestCount: number;
   location: BookingLocation;
   menuItems: MenuItem[];
@@ -75,7 +76,14 @@ export interface PaymentInfo {
   method: PaymentMethod;
   amount: number;
   currency: 'USD';
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  status:
+    | 'pending'
+    | 'processing'
+    | 'succeeded'
+    | 'failed'
+    | 'canceled'
+    | 'refunded'
+    | 'partially_refunded';
   transactionId?: string;
   stripeSessionId?: string;
 }
@@ -118,6 +126,10 @@ export const BookingSchema = z.object({
   userId: z.string().uuid(),
   eventDate: z.date().min(new Date()),
   eventTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  customerRequestedTime: z
+    .string()
+    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+    .optional(), // Original time customer requested
   guestCount: z.number().int().min(1).max(50),
   location: BookingLocationSchema,
   menuItems: z.array(MenuItemSchema).min(1),

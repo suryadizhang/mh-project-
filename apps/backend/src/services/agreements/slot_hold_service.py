@@ -15,6 +15,7 @@ Important:
 - Hold tokens are unique per slot hold for SMS signing links
 - Expired holds are automatically cleaned up by cron job
 - Multiple holds for same slot are prevented
+- Uses event_date + slot_time (separate columns) NOT slot_datetime
 
 Usage:
     service = SlotHoldService(db)
@@ -22,7 +23,8 @@ Usage:
     # Create hold when booking starts
     hold = await service.create_hold(
         station_id=station_id,
-        slot_datetime=slot_datetime,
+        event_date=date(2025, 1, 30),
+        slot_time=time(18, 0),  # 6 PM
         customer_email="customer@example.com",
         hold_minutes=120
     )
@@ -41,7 +43,7 @@ See: database/migrations/008_legal_agreements_system.sql
 
 import logging
 import secrets
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
@@ -73,8 +75,11 @@ class SlotHoldService:
     async def create_hold(
         self,
         station_id: UUID,
-        slot_datetime: datetime,
+        event_date: date,
+        slot_time: time,
         customer_email: str,
+        customer_name: str | None = None,
+        guest_count: int = 10,
         customer_id: UUID | None = None,
         hold_minutes: int = DEFAULT_HOLD_MINUTES,
     ) -> dict[str, Any]:
@@ -83,8 +88,11 @@ class SlotHoldService:
 
         Args:
             station_id: Station for the booking
-            slot_datetime: Date/time of the slot
+            event_date: Date of the event
+            slot_time: Time slot of the event
             customer_email: Customer's email for identification
+            customer_name: Customer's name (optional)
+            guest_count: Number of guests (default 10)
             customer_id: Customer ID if logged in (optional)
             hold_minutes: How long to hold the slot (default 2 hours)
 
@@ -96,30 +104,32 @@ class SlotHoldService:
         """
         # Generate secure token for SMS signing link
         signing_token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(minutes=hold_minutes)
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=hold_minutes)
 
         # Check if slot is already held or booked
-        if await self._is_slot_held_or_booked(station_id, slot_datetime):
+        if await self._is_slot_held_or_booked(station_id, event_date, slot_time):
             raise ValueError("This time slot is no longer available")
 
         result = await self.db.execute(
             text(
                 """
                 INSERT INTO core.slot_holds (
-                    station_id, slot_datetime, customer_email, customer_id,
-                    signing_token, status, expires_at
+                    station_id, event_date, slot_time, customer_email, customer_name,
+                    guest_count, signing_token, status, expires_at
                 ) VALUES (
-                    :station_id, :slot_datetime, :customer_email, :customer_id,
-                    :signing_token, 'pending', :expires_at
+                    :station_id, :event_date, :slot_time, :customer_email, :customer_name,
+                    :guest_count, :signing_token, 'pending', :expires_at
                 )
                 RETURNING id, signing_token, expires_at, created_at
             """
             ),
             {
                 "station_id": str(station_id),
-                "slot_datetime": slot_datetime,
+                "event_date": event_date,
+                "slot_time": slot_time,
                 "customer_email": customer_email,
-                "customer_id": str(customer_id) if customer_id else None,
+                "customer_name": customer_name,
+                "guest_count": guest_count,
                 "signing_token": signing_token,
                 "expires_at": expires_at,
             },
@@ -130,7 +140,7 @@ class SlotHoldService:
 
         logger.info(
             f"Created slot hold: station={station_id}, "
-            f"slot={slot_datetime}, expires={expires_at}"
+            f"date={event_date}, time={slot_time}, expires={expires_at}"
         )
 
         return {
@@ -139,16 +149,20 @@ class SlotHoldService:
             "expires_at": row.expires_at,
             "created_at": row.created_at,
             "station_id": station_id,
-            "slot_datetime": slot_datetime,
+            "event_date": event_date,
+            "slot_time": slot_time,
         }
 
-    async def _is_slot_held_or_booked(self, station_id: UUID, slot_datetime: datetime) -> bool:
+    async def _is_slot_held_or_booked(
+        self, station_id: UUID, event_date: date, slot_time: time
+    ) -> bool:
         """
         Check if a slot is already held or has a confirmed booking.
 
         Args:
             station_id: Station ID
-            slot_datetime: Slot date/time
+            event_date: Event date
+            slot_time: Slot time
 
         Returns:
             True if slot is unavailable
@@ -159,30 +173,41 @@ class SlotHoldService:
                 """
                 SELECT 1 FROM core.slot_holds
                 WHERE station_id = :station_id
-                AND slot_datetime = :slot_datetime
-                AND status = 'pending'
+                AND event_date = :event_date
+                AND slot_time = :slot_time
+                AND status IN ('pending', 'signed')
                 AND expires_at > NOW()
                 LIMIT 1
             """
             ),
-            {"station_id": str(station_id), "slot_datetime": slot_datetime},
+            {
+                "station_id": str(station_id),
+                "event_date": event_date,
+                "slot_time": slot_time,
+            },
         )
 
         if result.fetchone():
             return True
 
-        # Check for confirmed bookings
+        # Check for confirmed bookings (bookings use 'date' and 'slot' columns)
         result = await self.db.execute(
             text(
                 """
                 SELECT 1 FROM core.bookings
                 WHERE station_id = :station_id
-                AND event_datetime = :slot_datetime
+                AND date = :event_date
+                AND slot = :slot_time
                 AND status NOT IN ('cancelled', 'refunded')
+                AND deleted_at IS NULL
                 LIMIT 1
             """
             ),
-            {"station_id": str(station_id), "slot_datetime": slot_datetime},
+            {
+                "station_id": str(station_id),
+                "event_date": event_date,
+                "slot_time": slot_time,
+            },
         )
 
         return result.fetchone() is not None
@@ -202,11 +227,11 @@ class SlotHoldService:
         result = await self.db.execute(
             text(
                 """
-                SELECT id, station_id, slot_datetime, customer_email, customer_id,
-                       status, expires_at, created_at
+                SELECT id, station_id, event_date, slot_time, customer_email,
+                       customer_name, guest_count, status, expires_at, created_at
                 FROM core.slot_holds
                 WHERE signing_token = :signing_token
-                AND status = 'pending'
+                AND status IN ('pending', 'signed')
                 AND expires_at > NOW()
             """
             ),
@@ -220,9 +245,11 @@ class SlotHoldService:
         return {
             "id": row.id,
             "station_id": row.station_id,
-            "slot_datetime": row.slot_datetime,
+            "event_date": row.event_date,
+            "slot_time": row.slot_time,
             "customer_email": row.customer_email,
-            "customer_id": row.customer_id,
+            "customer_name": row.customer_name,
+            "guest_count": row.guest_count,
             "status": row.status,
             "expires_at": row.expires_at,
             "created_at": row.created_at,
@@ -241,8 +268,9 @@ class SlotHoldService:
         result = await self.db.execute(
             text(
                 """
-                SELECT id, station_id, slot_datetime, customer_email, customer_id,
-                       signing_token, status, expires_at, created_at, booking_id
+                SELECT id, station_id, event_date, slot_time, customer_email,
+                       customer_name, guest_count, signing_token, status,
+                       expires_at, created_at, converted_to_booking_id
                 FROM core.slot_holds
                 WHERE id = :hold_id
             """
@@ -257,14 +285,16 @@ class SlotHoldService:
         return {
             "id": row.id,
             "station_id": row.station_id,
-            "slot_datetime": row.slot_datetime,
+            "event_date": row.event_date,
+            "slot_time": row.slot_time,
             "customer_email": row.customer_email,
-            "customer_id": row.customer_id,
+            "customer_name": row.customer_name,
+            "guest_count": row.guest_count,
             "signing_token": row.signing_token,
             "status": row.status,
             "expires_at": row.expires_at,
             "created_at": row.created_at,
-            "booking_id": row.booking_id,
+            "booking_id": row.converted_to_booking_id,
         }
 
     async def convert_to_booking(self, hold_id: UUID, booking_id: UUID) -> bool:
@@ -285,9 +315,9 @@ class SlotHoldService:
                 """
                 UPDATE core.slot_holds
                 SET status = 'converted',
-                    booking_id = :booking_id
+                    converted_to_booking_id = :booking_id
                 WHERE id = :hold_id
-                AND status = 'pending'
+                AND status IN ('pending', 'signed')
                 AND expires_at > NOW()
                 RETURNING id
             """
@@ -369,7 +399,7 @@ class SlotHoldService:
         return count
 
     async def get_active_holds_for_slot(
-        self, station_id: UUID, slot_datetime: datetime
+        self, station_id: UUID, event_date: date, slot_time: time
     ) -> list[dict[str, Any]]:
         """
         Get all active holds for a specific slot.
@@ -378,7 +408,8 @@ class SlotHoldService:
 
         Args:
             station_id: Station ID
-            slot_datetime: Slot date/time
+            event_date: Event date
+            slot_time: Slot time
 
         Returns:
             List of active holds
@@ -386,29 +417,38 @@ class SlotHoldService:
         result = await self.db.execute(
             text(
                 """
-                SELECT id, customer_email, expires_at, created_at
+                SELECT id, customer_email, customer_name, guest_count, expires_at, created_at
                 FROM core.slot_holds
                 WHERE station_id = :station_id
-                AND slot_datetime = :slot_datetime
-                AND status = 'pending'
+                AND event_date = :event_date
+                AND slot_time = :slot_time
+                AND status IN ('pending', 'signed')
                 AND expires_at > NOW()
                 ORDER BY created_at
             """
             ),
-            {"station_id": str(station_id), "slot_datetime": slot_datetime},
+            {
+                "station_id": str(station_id),
+                "event_date": event_date,
+                "slot_time": slot_time,
+            },
         )
 
         return [
             {
                 "id": row.id,
                 "customer_email": row.customer_email,
+                "customer_name": row.customer_name,
+                "guest_count": row.guest_count,
                 "expires_at": row.expires_at,
                 "created_at": row.created_at,
             }
             for row in result.fetchall()
         ]
 
-    async def extend_hold(self, hold_id: UUID, additional_minutes: int = 30) -> datetime | None:
+    async def extend_hold(
+        self, hold_id: UUID, additional_minutes: int = 30
+    ) -> datetime | None:
         """
         Extend a hold's expiration time.
 
@@ -452,7 +492,9 @@ class SlotHoldService:
         logger.warning(f"Failed to extend slot hold {hold_id}")
         return None
 
-    async def record_signing_link_sent(self, hold_id: UUID, channel: str) -> dict[str, Any] | None:
+    async def record_signing_link_sent(
+        self, hold_id: UUID, channel: str
+    ) -> dict[str, Any] | None:
         """
         Record that a signing link was sent for this hold.
 
@@ -505,7 +547,9 @@ class SlotHoldService:
             await self.db.rollback()
             error_msg = str(e)
             if "Rate limit exceeded" in error_msg:
-                logger.warning(f"Rate limit exceeded for signing link on hold {hold_id}")
+                logger.warning(
+                    f"Rate limit exceeded for signing link on hold {hold_id}"
+                )
                 raise ValueError("Signing link rate limit exceeded (max 5 sends)")
             logger.exception(f"Failed to record signing link sent: {e}")
             raise

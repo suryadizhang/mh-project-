@@ -63,6 +63,18 @@ export function BookingCard({
     }).format(cents / 100);
   };
 
+  // Build tooltip text showing customer's requested time vs assigned slot
+  const buildTooltip = () => {
+    const parts = [`${booking.customer.name} - ${booking.total_guests} guests`];
+    if (booking.customer_requested_time) {
+      parts.push(`Requested: ${booking.customer_requested_time}`);
+      parts.push(`Slot: ${booking.slot}`);
+    } else {
+      parts.push(`Slot: ${booking.slot}`);
+    }
+    return parts.join('\n');
+  };
+
   if (compact) {
     return (
       <div
@@ -77,7 +89,7 @@ export function BookingCard({
           ${isDragging ? 'opacity-50' : ''}
           transition-all duration-150
         `}
-        title={`${booking.customer.name} - ${booking.total_guests} guests`}
+        title={buildTooltip()}
       >
         <div className="font-semibold truncate">{booking.customer.name}</div>
         <div className="flex items-center gap-1 text-[10px] opacity-80">
@@ -86,6 +98,17 @@ export function BookingCard({
           <span className="mx-1">•</span>
           <Clock className="w-2 h-2" />
           <span>{booking.slot}</span>
+          {booking.customer_requested_time && (
+            <>
+              <span className="mx-1">•</span>
+              <span
+                className="italic"
+                title={`Requested: ${booking.customer_requested_time}`}
+              >
+                ({booking.customer_requested_time})
+              </span>
+            </>
+          )}
         </div>
       </div>
     );
@@ -100,7 +123,11 @@ export function BookingCard({
       className={`
         ${statusStyle}
         border-2 rounded-lg p-3 shadow-sm
-        ${isDraggable ? 'cursor-move hover:shadow-lg hover:scale-[1.02]' : 'cursor-not-allowed'}
+        ${
+          isDraggable
+            ? 'cursor-move hover:shadow-lg hover:scale-[1.02]'
+            : 'cursor-not-allowed'
+        }
         ${isDragging ? 'opacity-50 scale-95' : ''}
         transition-all duration-200
       `}
@@ -130,11 +157,19 @@ export function BookingCard({
 
       {/* Details */}
       <div className="space-y-1 text-xs">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" title={buildTooltip()}>
           <Clock className="w-3 h-3 opacity-60" />
           <span>
             {format(booking.startTime, 'h:mm a')} -{' '}
             {format(booking.endTime, 'h:mm a')}
+            {booking.customer_requested_time && (
+              <span
+                className="ml-1 italic opacity-80"
+                title={`Customer requested: ${booking.customer_requested_time}`}
+              >
+                (req: {booking.customer_requested_time})
+              </span>
+            )}
           </span>
         </div>
 

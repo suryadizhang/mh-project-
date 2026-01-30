@@ -24,19 +24,30 @@ All models use SQLAlchemy 2.0 declarative mapping with full type hints.
 # Base class (required for all models) - import from parent db/ directory
 from ..base_class import Base
 
-# Core schema (7 tables) - NOTE: Chef moved to ops schema
-from .core import (
-    Booking,
-    Customer,
-    CoreMessage,  # Renamed from Message to avoid conflicts
-    MessageThread,
-    PricingTier,
-    Review,
-    SocialThread,
-)
-
 # Address model (Enterprise address management - Smart Scheduling Phase 1)
 from .address import Address
+
+# Core schema (7 tables) - NOTE: Chef moved to ops schema
+from .core import CoreMessage  # Renamed from Message to avoid conflicts
+from .core import Booking, Customer, MessageThread, PricingTier, Review, SocialThread
+
+# CRM schema (Contact, Lead, Campaign models)
+from .crm import Contact  # Unified contact record for inbox and CRM
+from .crm import (
+    Lead,  # Lead tracking with scoring and qualification (moved from lead.py)
+)
+
+# Events schema (3 tables)
+from .events import DomainEvent, Inbox, Outbox
+
+# Feedback & Marketing schemas (5 tables)
+from .feedback_marketing import (
+    CustomerReview,
+    DiscountCoupon,
+    QRCode,
+    QRScan,
+    ReviewEscalation,
+)
 
 # Identity schema (9 tables) - Using modular identity/ package
 from .identity import (
@@ -52,57 +63,19 @@ from .identity import (
     UserRole,
 )
 
-# Operations schema (Chef + operational models)
-from .ops import (
-    Chef,  # Moved from core to ops for operations management
-    NegotiationIncentive,  # Smart Scheduling - food incentive tiers
-    FoodIncentiveType,  # Enum: none, free_noodles, free_appetizer
-)
-
-# CRM schema (Contact, Lead, Campaign models)
-from .crm import (
-    Contact,  # Unified contact record for inbox and CRM
-    Lead,  # Lead tracking with scoring and qualification (moved from lead.py)
-)
-
-# Support & Communications schemas (2 tables + enums)
-from .support_communications import (
-    CallRecording,
-    Escalation,
-    # Enums for Voice AI
-    CallStatus,
-    CallDirection,
-    EscalationPriority,
-    EscalationMethod,
-    EscalationStatus,
-    RecordingType,
-    RecordingStatus,
-)
-
-# Feedback & Marketing schemas (5 tables)
-from .feedback_marketing import (
-    CustomerReview,
-    DiscountCoupon,
-    QRCode,
-    QRScan,
-    ReviewEscalation,
-)
-
-# Events schema (3 tables)
-from .events import (
-    DomainEvent,
-    Inbox,
-    Outbox,
-)
+# Integra schema (4 tables)
+from .integra import CallSession, PaymentEvent, PaymentMatch, SocialInbox
 
 # Lead schema (6 tables - Lead moved to crm.py)
+from .lead import (
+    LeadSocialThread,  # Renamed class to avoid conflict with core.SocialThread
+)
 from .lead import (
     BusinessSocialAccount,
     LeadContact,
     LeadContext,
     LeadEvent,
     SocialIdentity,
-    LeadSocialThread,  # Renamed class to avoid conflict with core.SocialThread
 )
 
 # Newsletter schema (7 tables)
@@ -116,26 +89,38 @@ from .newsletter import (
     Subscriber,
 )
 
-# Integra schema (4 tables)
-from .integra import (
-    CallSession,
-    PaymentEvent,
-    PaymentMatch,
-    SocialInbox,
-)
+# Operations schema (Chef + operational models)
+from .ops import Chef  # Moved from core to ops for operations management
+from .ops import FoodIncentiveType  # Enum: none, free_noodles, free_appetizer
+from .ops import NegotiationIncentive  # Smart Scheduling - food incentive tiers
+
+# Slot Hold (1 table + enum) - Pre-booking slot reservation system
+from .slot_hold import SlotHold, SlotHoldStatus
 
 # Stripe schema (5 tables + enums) - Payment processing
-from .stripe import (
+from .stripe import (  # Enums
     Invoice,
+    InvoiceStatus,
+    PaymentStatus,
     Refund,
+    RefundStatus,
     StripeCustomer,
     StripePayment,
     WebhookEvent,
-    # Enums
-    InvoiceStatus,
-    PaymentStatus,
-    RefundStatus,
     WebhookEventStatus,
+)
+
+# Support & Communications schemas (2 tables + enums)
+from .support_communications import (  # Enums for Voice AI
+    CallDirection,
+    CallRecording,
+    CallStatus,
+    Escalation,
+    EscalationMethod,
+    EscalationPriority,
+    EscalationStatus,
+    RecordingStatus,
+    RecordingType,
 )
 
 # Travel Cache (1 table) - Travel time API response caching
@@ -222,6 +207,9 @@ __all__ = [
     "WebhookEventStatus",
     # Travel Cache (1 model)
     "TravelCache",
+    # Slot Hold (1 model + 1 enum)
+    "SlotHold",
+    "SlotHoldStatus",
 ]
 
 # Model registry by schema (useful for reflection/introspection)
@@ -239,6 +227,7 @@ MODELS_BY_SCHEMA = {
         PricingTier,
         Review,
         SocialThread,
+        SlotHold,  # Pre-booking slot reservation system
     ],
     "ops": [
         Chef,  # Moved from core to ops
@@ -319,5 +308,6 @@ MODELS_BY_SCHEMA = {
 # - Stripe: Invoice, Refund, StripeCustomer, StripePayment, WebhookEvent (5 models)
 # - Smart Scheduling Phase 1: Address, NegotiationIncentive (2 models)
 # - Travel Cache: TravelCache (1 model) - API response caching
+# - Slot Hold: SlotHold (1 model) - Pre-booking reservations
 TOTAL_MODELS = sum(len(models) for models in MODELS_BY_SCHEMA.values())
-assert TOTAL_MODELS == 56, f"Expected 56 models, found {TOTAL_MODELS}"
+assert TOTAL_MODELS == 57, f"Expected 57 models, found {TOTAL_MODELS}"
