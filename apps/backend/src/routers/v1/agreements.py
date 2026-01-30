@@ -27,13 +27,14 @@ Flow:
 """
 
 import logging
-from datetime import datetime, date, time as time_type
+from datetime import date, datetime
+from datetime import time as time_type
 from typing import Optional
 from uuid import UUID
 
 import markdown
-from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
-from pydantic import BaseModel, Field, EmailStr, model_validator
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from pydantic import BaseModel, EmailStr, Field, model_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -86,7 +87,9 @@ class SignAgreementRequest(BaseModel):
     hold_token: Optional[str] = Field(
         None, description="Slot hold token from hold creation (pre-booking flow)"
     )
-    booking_id: Optional[UUID] = Field(None, description="Existing booking ID (post-booking flow)")
+    booking_id: Optional[UUID] = Field(
+        None, description="Existing booking ID (post-booking flow)"
+    )
 
     agreement_type: str = Field(
         ..., description="Type: 'liability_waiver' or 'allergen_disclosure'"
@@ -248,7 +251,9 @@ class ValidateSignatureResponse(BaseModel):
 @router.get("/templates/{agreement_type}", response_model=TemplateResponse)
 async def get_agreement_template(
     agreement_type: str,
-    station_id: Optional[UUID] = Query(None, description="Station for variable interpolation"),
+    station_id: Optional[UUID] = Query(
+        None, description="Station for variable interpolation"
+    ),
     agreement_service: AgreementService = Depends(get_agreement_service),
 ) -> TemplateResponse:
     """
@@ -309,16 +314,12 @@ async def create_slot_hold(
     This prevents double-booking during the signing process.
     """
     try:
-        # Combine date and time into datetime
-        from datetime import datetime as dt
-
-        slot_datetime = dt.combine(request.event_date, request.slot_time)
-
-        # Service method: create_hold(station_id, slot_datetime, customer_email, customer_id=None) -> dict
-        # Returns dict with {id, signing_token, expires_at, station_id, slot_datetime, customer_email, status, created_at}
+        # Create hold with separate event_date and slot_time
+        # Service stores them in slot_holds table columns: event_date (DATE), slot_time (TIME)
         hold_result = await slot_hold_service.create_hold(
             station_id=request.station_id,
-            slot_datetime=slot_datetime,
+            event_date=request.event_date,
+            slot_time=request.slot_time,
             customer_email=request.customer_email,
         )
 
@@ -409,7 +410,9 @@ async def get_hold_status(
         rendered_markdown = await agreement_service.render_template(template)
 
         # Convert markdown to HTML
-        content_html = markdown.markdown(rendered_markdown, extensions=["tables", "nl2br"])
+        content_html = markdown.markdown(
+            rendered_markdown, extensions=["tables", "nl2br"]
+        )
 
         # Format slot_datetime as ISO string
         slot_dt = hold["slot_datetime"]
@@ -487,7 +490,9 @@ async def release_hold(
             )
 
         # Service method: release_hold(hold_id: UUID, reason: str) -> bool
-        released = await slot_hold_service.release_hold(hold_id=hold["id"], reason="released")
+        released = await slot_hold_service.release_hold(
+            hold_id=hold["id"], reason="released"
+        )
 
         if not released:
             raise HTTPException(
@@ -535,7 +540,9 @@ async def validate_signature(
 
         # Service method: validate_signature_image(signature_bytes: bytes) -> dict
         # Returns: {valid: bool, error?: str, format?: str, size?: tuple}
-        result = signing_service.validate_signature_image(signature_bytes=signature_bytes)
+        result = signing_service.validate_signature_image(
+            signature_bytes=signature_bytes
+        )
 
         width, height = None, None
         if result.get("size"):
@@ -641,7 +648,9 @@ async def sign_agreement(
 
         # 4. Render template content with station-specific values
         additional_vars = {"station_id": str(station_id)} if station_id else None
-        rendered_content = await agreement_service.render_template(template, additional_vars)
+        rendered_content = await agreement_service.render_template(
+            template, additional_vars
+        )
 
         # 5. Create signed agreement
         # Build signer_info from request
@@ -720,7 +729,9 @@ async def get_agreement_status(
             agreements = await agreement_service.get_agreements_for_booking(booking_id)
             if agreements:
                 # Extract signed_at - agreements are dicts
-                signed_at = max(a.get("signed_at") for a in agreements if a.get("signed_at"))
+                signed_at = max(
+                    a.get("signed_at") for a in agreements if a.get("signed_at")
+                )
 
         return AgreementStatusResponse(
             booking_id=booking_id,
@@ -773,7 +784,9 @@ async def send_signing_link(
                 )
             # TODO: Integrate with SMS service (RingCentral)
             # await sms_service.send_signing_link(request.phone_number, signing_url)
-            logger.info(f"Would send SMS signing link to {request.phone_number}: {signing_url}")
+            logger.info(
+                f"Would send SMS signing link to {request.phone_number}: {signing_url}"
+            )
 
         elif channel == "email":
             if not request.email:
@@ -783,7 +796,9 @@ async def send_signing_link(
                 )
             # TODO: Integrate with email service (Resend)
             # await email_service.send_signing_link(request.email, signing_url)
-            logger.info(f"Would send email signing link to {request.email}: {signing_url}")
+            logger.info(
+                f"Would send email signing link to {request.email}: {signing_url}"
+            )
 
         else:
             raise HTTPException(

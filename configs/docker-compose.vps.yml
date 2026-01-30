@@ -1,0 +1,226 @@
+# =============================================================================
+# My Hibachi VPS Docker Deployment
+# =============================================================================
+# Purpose: Production + Staging deployment on IONOS VPS (108.175.12.154)
+#
+# Architecture:
+#   - Production API: Port 8000 (4 workers, 2G memory)
+#   - Staging API: Port 8002 (2 workers, 768M memory)
+#   - Database: EXTERNAL PostgreSQL 13.22 (native on VPS, NOT containerized)
+#   - Redis: EXTERNAL Redis (native on VPS, NOT containerized)
+#   - Cloudflare Tunnel: Handles SSL and routing
+#
+# Usage:
+#   # Deploy all services
+#   docker compose -f docker-compose.vps.yml up -d
+#
+#   # Deploy only production
+#   docker compose -f docker-compose.vps.yml up -d myhibachi-production
+#
+#   # Deploy only staging
+#   docker compose -f docker-compose.vps.yml up -d myhibachi-staging
+#
+#   # View logs
+#   docker compose -f docker-compose.vps.yml logs -f
+#
+#   # Restart production
+#   docker compose -f docker-compose.vps.yml restart myhibachi-production
+#
+# Prerequisites:
+#   - Docker 24+ installed on VPS
+#   - PostgreSQL 13.22 running natively on VPS
+#   - Redis running natively on VPS
+#   - .env.vps file with all required secrets
+#
+# Related Files:
+#   - configs/systemd/myhibachi-backend.service (current production)
+#   - configs/systemd/myhibachi-staging.service (current staging)
+#   - scripts/migrate-to-docker.sh (migration script)
+#
+# =============================================================================
+
+version: "3.8"
+
+services:
+  # ===========================================================================
+  # PRODUCTION API
+  # ===========================================================================
+  # Replaces: /etc/systemd/system/myhibachi-backend.service
+  # Port: 8000 (4 workers, matches systemd config)
+  # ===========================================================================
+  myhibachi-production:
+    container_name: myhibachi-production
+    build:
+      context: ../apps/backend
+      dockerfile: ../../Dockerfile
+      args:
+        ENVIRONMENT: production
+    image: myhibachi/backend:production
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      # Runtime
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LOG_LEVEL=info
+
+      # Database (external PostgreSQL on VPS)
+      - DATABASE_URL=${DATABASE_URL_PRODUCTION}
+      - DATABASE_URL_SYNC=${DATABASE_URL_SYNC_PRODUCTION}
+      - DB_POOL_SIZE=10
+      - DB_MAX_OVERFLOW=20
+
+      # Redis (external Redis on VPS)
+      - REDIS_URL=${REDIS_URL:-redis://host.docker.internal:6379/0}
+
+      # API Configuration
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - WORKERS=4
+
+      # Secrets (from Google Secret Manager or .env)
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID:-my-hibachi-crm}
+      - USE_SECRET_MANAGER=${USE_SECRET_MANAGER:-true}
+
+      # Feature Flags
+      - FEATURE_AI_CHAT_ENABLED=${FEATURE_AI_CHAT_ENABLED:-false}
+      - FEATURE_STRIPE_ENABLED=${FEATURE_STRIPE_ENABLED:-true}
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "0.80"
+        reservations:
+          memory: 512M
+          cpus: "0.25"
+
+    extra_hosts:
+      # Allow container to access host services (PostgreSQL, Redis)
+      - "host.docker.internal:host-gateway"
+
+    volumes:
+      # Persistent data
+      - production_data:/app/data
+      - production_logs:/app/logs
+
+      # Google Cloud credentials (for GSM access)
+      - ${GOOGLE_APPLICATION_CREDENTIALS_PATH:-/root/.config/gcloud/application_default_credentials.json}:/app/gcloud-credentials.json:ro
+
+    networks:
+      - myhibachi-vps-network
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+  # ===========================================================================
+  # STAGING API
+  # ===========================================================================
+  # Replaces: /etc/systemd/system/myhibachi-staging.service
+  # Port: 8002 (2 workers, reduced resources)
+  # ===========================================================================
+  myhibachi-staging:
+    container_name: myhibachi-staging
+    build:
+      context: ../apps/backend
+      dockerfile: ../../Dockerfile
+      args:
+        ENVIRONMENT: staging
+    image: myhibachi/backend:staging
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      # Runtime
+      - ENVIRONMENT=staging
+      - DEBUG=true
+      - LOG_LEVEL=debug
+
+      # Database (external PostgreSQL on VPS - STAGING database)
+      - DATABASE_URL=${DATABASE_URL_STAGING}
+      - DATABASE_URL_SYNC=${DATABASE_URL_SYNC_STAGING}
+      - DB_POOL_SIZE=5
+      - DB_MAX_OVERFLOW=10
+
+      # Redis (external Redis on VPS - different DB index)
+      - REDIS_URL=${REDIS_URL_STAGING:-redis://host.docker.internal:6379/1}
+
+      # API Configuration
+      - API_HOST=0.0.0.0
+      - API_PORT=8002
+      - WORKERS=2
+
+      # Secrets
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID:-my-hibachi-crm}
+      - USE_SECRET_MANAGER=${USE_SECRET_MANAGER:-true}
+
+      # Feature Flags (more enabled for testing)
+      - FEATURE_AI_CHAT_ENABLED=${FEATURE_AI_CHAT_ENABLED:-true}
+      - FEATURE_STRIPE_ENABLED=${FEATURE_STRIPE_ENABLED:-true}
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8002/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: "0.25"
+        reservations:
+          memory: 256M
+          cpus: "0.10"
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    volumes:
+      - staging_data:/app/data
+      - staging_logs:/app/logs
+      - ${GOOGLE_APPLICATION_CREDENTIALS_PATH:-/root/.config/gcloud/application_default_credentials.json}:/app/gcloud-credentials.json:ro
+
+    networks:
+      - myhibachi-vps-network
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  production_data:
+    driver: local
+  production_logs:
+    driver: local
+  staging_data:
+    driver: local
+  staging_logs:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  myhibachi-vps-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16

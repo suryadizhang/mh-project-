@@ -1,0 +1,17 @@
+# My Hibachi API Protection Filter
+# Detects unauthorized access attempts to backend API and database
+# Created: 2025-01-30
+
+[Definition]
+# Match API authentication failures and malicious access patterns
+failregex = ^<HOST> .* "(GET|POST|PUT|DELETE|PATCH) /api/v1/(admin|superadmin|auth).*" (401|403) .*$
+            ^<HOST> .* "(GET|POST|PUT|DELETE|PATCH) /api/(admin|internal|private).*" (401|403|404) .*$
+            ^<HOST> .* ".*SQL.*injection.*" .*$
+            ^<HOST> .* ".*\.\./\.\..*" .*$
+            ^<HOST> .* "(GET|POST) /(phpmyadmin|pma|mysql|sql|db|database|adminer|phpMyAdmin|pgadmin|myadmin).*" .*$
+            ^<HOST> .* "(GET|POST) /.*\.(sql|bak|backup|dump|conf|config|env|git|htpasswd).*" .*$
+            ^<HOST> .* "(GET|POST) /(wp-admin|wp-login|wordpress|joomla|drupal|magento).*" .*$
+            ^<HOST> .* "(GET|POST) /.*shell.*" .*$
+            ^<HOST> .* "(GET|POST) /(cgi-bin|.git|.env|.htaccess|xmlrpc.php).*" .*$
+
+ignoreregex =

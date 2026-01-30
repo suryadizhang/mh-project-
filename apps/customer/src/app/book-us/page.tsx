@@ -38,7 +38,7 @@ import { logger } from '@/lib/logger';
 import { usePricing } from '@/hooks/usePricing';
 
 // Infer types from schemas for type-safe responses
-type BookingSubmitResponse = z.infer<typeof BookingSubmitResponseSchema>;
+type BookingSubmitResponse = z.infer;
 
 /**
  * BookingPage - Refactored with modular components
@@ -257,7 +257,7 @@ export default function BookingPage() {
 
     try {
       // Convert timeSlot to HH:MM format
-      const timeMap: Record<string, string> = {
+      const timeMap: Record = {
         '12PM': '12:00',
         '3PM': '15:00',
         '6PM': '18:00',
@@ -534,7 +534,7 @@ export default function BookingPage() {
                         </p>
                       )}
                       <p className="mt-3 text-sm text-gray-600">
-                        Need help? Call us at{' '}
+                        Need help? Call or text us at{' '}
                         <a
                           href={`tel:${protectedTel}`}
                           className="font-semibold text-red-600 hover:underline"
@@ -734,8 +734,8 @@ function PricingSummarySection({
     total: number;
     deposit: number;
   };
-  control: ReturnType<typeof useForm<BookingFormData>>['control'];
-  watch: ReturnType<typeof useForm<BookingFormData>>['watch'];
+  control: ReturnType['control'];
+  watch: ReturnType['watch'];
   onTipChange: (tip: number) => void;
 }) {
   const [isExpanded, setIsExpanded] = useState(false); // Collapsed by default - user expands if needed
@@ -757,7 +757,9 @@ function PricingSummarySection({
         <div className="flex items-center gap-3">
           <span className="text-lg font-bold text-green-700">${totalCost.total.toFixed(2)}</span>
           <ChevronDown
-            className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+            className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${
+              isExpanded ? 'rotate-180' : ''
+            }`}
           />
         </div>
       </button>
@@ -765,7 +767,9 @@ function PricingSummarySection({
       {/* Collapsible Content */}
       <div
         id="pricing-summary-content"
-        className={`transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 overflow-hidden opacity-0'}`}
+        className={`transition-all duration-200 ease-in-out ${
+          isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 overflow-hidden opacity-0'
+        }`}
       >
         <div className="space-y-4 px-4 pb-4">
           {/* Order Summary */}

@@ -284,6 +284,65 @@
   opacity: 0.8;
 }
 
+/* Time Dropdown (Option C - Grouped Times) */
+.time-dropdown {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.time-dropdown:hover {
+  border-color: #ff6b6b;
+}
+
+.time-dropdown:focus {
+  outline: none;
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+.time-dropdown optgroup {
+  font-weight: 700;
+  color: #1f2937;
+  background-color: #f9fafb;
+  padding: 8px 0;
+}
+
+.time-dropdown option {
+  font-weight: 400;
+  padding: 8px 12px;
+  color: #374151;
+}
+
+.time-dropdown option:disabled {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Chef Arrival Note */
+.chef-arrival-note {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* Guest Count */
 .guest-count-container {
   position: relative;

@@ -17,11 +17,13 @@ import {
   Mail,
   MessageSquare,
   Percent,
+  QrCode,
   Receipt,
   Settings,
   Sparkles,
   Target,
   Users,
+  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -157,6 +159,18 @@ const sidebarItems: SidebarItem[] = [
     href: '/admin/logs',
     icon: FileText,
     roles: ['SUPER_ADMIN', 'ADMIN'],
+  },
+  {
+    title: 'SEO Automation',
+    href: '/admin/automation',
+    icon: Zap,
+    roles: ['SUPER_ADMIN'],
+  },
+  {
+    title: 'QR Codes',
+    href: '/admin/qr',
+    icon: QrCode,
+    roles: ['SUPER_ADMIN'],
   },
   {
     title: 'Super Admin',

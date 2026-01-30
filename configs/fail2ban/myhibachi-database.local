@@ -1,0 +1,19 @@
+# My Hibachi Database Access Protection Filter
+# Detects attempts to access database directly or probe for database endpoints
+# Created: 2025-01-30
+
+[Definition]
+# Match database probe attempts
+failregex = ^<HOST> .* "(GET|POST) /(pgsql|postgres|postgresql|mysql|mongodb|redis|memcached).*" .*$
+            ^<HOST> .* "(GET|POST) /.*:543[0-9].*" .*$
+            ^<HOST> .* "(GET|POST) /.*:3306.*" .*$
+            ^<HOST> .* "(GET|POST) /.*:27017.*" .*$
+            ^<HOST> .* "(GET|POST) /.*:6379.*" .*$
+            ^<HOST> .* ".*SELECT.*FROM.*" .*$
+            ^<HOST> .* ".*INSERT.*INTO.*" .*$
+            ^<HOST> .* ".*DROP.*TABLE.*" .*$
+            ^<HOST> .* ".*UNION.*SELECT.*" .*$
+            ^<HOST> .* ".*exec\(.*" .*$
+            ^<HOST> .* ".*eval\(.*" .*$
+
+ignoreregex =

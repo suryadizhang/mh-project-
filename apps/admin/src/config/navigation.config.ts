@@ -101,16 +101,6 @@ const DAILY_OPERATIONS: NavSection = {
       showInQuickBar: true,
     },
     {
-      name: 'Emails',
-      href: '/emails',
-      icon: '📧',
-      badge: 'count',
-      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT],
-      tier: 'daily',
-      description: 'Customer support & payment emails',
-      showInQuickBar: true,
-    },
-    {
       name: 'Leads',
       href: '/leads',
       icon: '🎯',
@@ -119,6 +109,20 @@ const DAILY_OPERATIONS: NavSection = {
       tier: 'daily',
       description: 'New inquiries and quotes',
       showInQuickBar: true,
+    },
+    {
+      name: 'Booking Calendar',
+      href: '/booking/calendar',
+      icon: '📆',
+      roles: [
+        UserRole.SUPER_ADMIN,
+        UserRole.ADMIN,
+        UserRole.CUSTOMER_SUPPORT,
+        UserRole.STATION_MANAGER,
+      ],
+      tier: 'daily',
+      description: 'Calendar view of all bookings',
+      showInQuickBar: false,
     },
   ],
 };
@@ -143,6 +147,15 @@ const REVENUE_MANAGEMENT: NavSection = {
       showInQuickBar: false,
     },
     {
+      name: 'Payment History',
+      href: '/payments/history',
+      icon: '📜',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT],
+      tier: 'weekly',
+      description: 'Historical payment records and reports',
+      showInQuickBar: false,
+    },
+    {
       name: 'Invoices',
       href: '/invoices',
       icon: '🧾',
@@ -160,6 +173,7 @@ const REVENUE_MANAGEMENT: NavSection = {
       description: 'Coupon and discount management',
       showInQuickBar: false,
     },
+    // NOTE: Chef Earnings moved to Station Management section
   ],
 };
 
@@ -201,14 +215,41 @@ const CUSTOMER_MANAGEMENT: NavSection = {
       description: 'Email and SMS campaigns',
       showInQuickBar: false,
     },
+    {
+      name: 'Subscribers',
+      href: '/newsletter/subscribers',
+      icon: '👤',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT],
+      tier: 'weekly',
+      description: 'Manage newsletter subscribers',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Campaigns',
+      href: '/newsletter/campaigns',
+      icon: '📨',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT],
+      tier: 'weekly',
+      description: 'Create and manage email campaigns',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Email Analytics',
+      href: '/newsletter/analytics',
+      icon: '📈',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
+      tier: 'weekly',
+      description: 'Email campaign performance',
+      showInQuickBar: false,
+    },
   ],
 };
 
 /**
- * TIER 2: Analytics & Planning (Weekly)
- * Insights and reporting
+ * TIER 2: Analytics & Reporting (Weekly)
+ * Business insights and reports only - Schedule/Stations moved to Station Management
  */
-const ANALYTICS_PLANNING: NavSection = {
+const ANALYTICS_REPORTING: NavSection = {
   title: '📊 Analytics',
   collapsible: true,
   defaultExpanded: false,
@@ -220,25 +261,7 @@ const ANALYTICS_PLANNING: NavSection = {
       icon: '📊',
       roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
       tier: 'weekly',
-      description: 'Reports and insights',
-      showInQuickBar: false,
-    },
-    {
-      name: 'Schedule',
-      href: '/schedule',
-      icon: '📅',
-      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER],
-      tier: 'weekly',
-      description: 'Staff and event calendar',
-      showInQuickBar: false,
-    },
-    {
-      name: 'Stations',
-      href: '/stations',
-      icon: '🏢',
-      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER],
-      tier: 'weekly',
-      description: 'Station management',
+      description: 'Reports and business insights',
       showInQuickBar: false,
     },
   ],
@@ -272,13 +295,125 @@ const MARKETING_TOOLS: NavSection = {
       description: 'SEO and content automation',
       showInQuickBar: false,
     },
+  ],
+};
+
+/**
+ * STATION MANAGEMENT SYSTEM
+ * ================================================================
+ * 🔄 Restructured 2025-01-30 - Combined Station Ops + Chef Portal
+ *
+ * MULTI-STATION ACCESS:
+ * - SUPER_ADMIN: Full access to ALL stations + can intervene
+ * - ADMIN: Access to ASSIGNED stations (can be multiple)
+ * - STATION_MANAGER: Access to OWN station(s) + manage chefs
+ * - CHEF: Self-service portal only (own schedule, availability, earnings)
+ *
+ * This section is the unified hub for station operations:
+ * - Station configuration (SUPER_ADMIN, ADMIN, STATION_MANAGER)
+ * - Chef roster management (SUPER_ADMIN, ADMIN, STATION_MANAGER)
+ * - Scheduling and assignments (SUPER_ADMIN, ADMIN, STATION_MANAGER)
+ * - Chef self-service portal (CHEF only)
+ * ================================================================
+ */
+const STATION_MANAGEMENT: NavSection = {
+  title: '🏢 Station Management',
+  collapsible: true,
+  defaultExpanded: true,
+  roles: [
+    UserRole.SUPER_ADMIN,
+    UserRole.ADMIN,
+    UserRole.STATION_MANAGER,
+    UserRole.CHEF,
+  ],
+  items: [
+    // ================================
+    // STATION OPERATIONS (Staff Only)
+    // ================================
     {
-      name: 'Social Media',
-      href: '/social',
-      icon: '📱',
-      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
-      tier: 'monthly',
-      description: 'Social media management',
+      name: 'Stations',
+      href: '/stations',
+      icon: '🏢',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER],
+      tier: 'weekly',
+      description: 'Manage station(s) - SA: All, ADMIN: Assigned, SM: Own',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Master Schedule',
+      href: '/schedule',
+      icon: '📅',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER],
+      tier: 'daily',
+      description: 'Station calendar and chef scheduling',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Chef Roster',
+      href: '/stations/chefs',
+      icon: '👥',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER],
+      tier: 'weekly',
+      description: '🟡 NEW - Manage station chefs (availability, assignments)',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Chef Assignments',
+      href: '/stations/assignments',
+      icon: '📋',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER],
+      tier: 'daily',
+      description: '🟡 NEW - Assign chefs to bookings',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Chef Earnings',
+      href: '/chef-earnings',
+      icon: '💰',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER],
+      tier: 'weekly',
+      description: 'Chef pay rates, earnings, and performance',
+      showInQuickBar: false,
+    },
+    // ================================
+    // CHEF SELF-SERVICE PORTAL
+    // (CHEF role sees ONLY these items)
+    // ================================
+    {
+      name: 'My Schedule',
+      href: '/chef/schedule',
+      icon: '📅',
+      roles: [UserRole.CHEF],
+      tier: 'daily',
+      description: '🟡 Batch 2-3 - Your assigned events and schedule',
+      showInQuickBar: true,
+    },
+    {
+      name: 'My Availability',
+      href: '/chef/availability',
+      icon: '🗓️',
+      roles: [UserRole.CHEF],
+      tier: 'daily',
+      description: '🟡 Batch 2-3 - Update availability and time-off requests',
+      showInQuickBar: true,
+    },
+    {
+      name: 'My Events',
+      href: '/chef/events',
+      icon: '📋',
+      roles: [UserRole.CHEF],
+      tier: 'daily',
+      description:
+        '🟡 Batch 2-3 - Assigned event details (customer, venue, menu)',
+      showInQuickBar: false,
+    },
+    {
+      name: 'My Earnings',
+      href: '/chef/earnings',
+      icon: '💵',
+      roles: [UserRole.CHEF],
+      tier: 'weekly',
+      description: '🟡 Batch 2-3 - Your earnings and payment history',
       showInQuickBar: false,
     },
   ],
@@ -330,6 +465,77 @@ const ADVANCED_FEATURES: NavSection = {
       description: 'System monitoring and logs',
       showInQuickBar: false,
     },
+    {
+      name: 'VPS Security',
+      href: '/superadmin/vps-security',
+      icon: '🛡️',
+      roles: [UserRole.SUPER_ADMIN],
+      tier: 'monthly',
+      description: 'VPS security monitoring and fail2ban management',
+      showInQuickBar: false,
+    },
+    // ================================================================
+    // 🔴 CRITICAL MISSING ROUTES - Added 2025-01-30
+    // These pages exist but were NOT in navigation. Now added!
+    // ================================================================
+    {
+      name: 'User Management',
+      href: '/superadmin/users',
+      icon: '👥',
+      roles: [UserRole.SUPER_ADMIN],
+      tier: 'monthly',
+      description: '🔴 CRITICAL - Manage system users (was MISSING from nav)',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Role Management',
+      href: '/superadmin/roles',
+      icon: '🎭',
+      roles: [UserRole.SUPER_ADMIN],
+      tier: 'monthly',
+      description:
+        '🔴 CRITICAL - Manage user roles and permissions (was MISSING from nav)',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Pricing Config',
+      href: '/superadmin/pricing',
+      icon: '💰',
+      roles: [UserRole.SUPER_ADMIN],
+      tier: 'monthly',
+      description:
+        '🔴 CRITICAL - SSoT pricing configuration (was MISSING from nav)',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Dynamic Variables',
+      href: '/superadmin/variables',
+      icon: '🔧',
+      roles: [UserRole.SUPER_ADMIN],
+      tier: 'monthly',
+      description:
+        '🔴 CRITICAL - SSoT business variables (was MISSING from nav)',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Knowledge Sync',
+      href: '/superadmin/knowledge-sync',
+      icon: '🧠',
+      roles: [UserRole.SUPER_ADMIN],
+      tier: 'monthly',
+      description: '🟡 Batch 3 - AI knowledge base sync (was MISSING from nav)',
+      showInQuickBar: false,
+    },
+    {
+      name: 'Scaling Config',
+      href: '/superadmin/scaling',
+      icon: '📈',
+      roles: [UserRole.SUPER_ADMIN],
+      tier: 'monthly',
+      description:
+        '🟢 Batch 6 - Multi-station scaling settings (was MISSING from nav)',
+      showInQuickBar: false,
+    },
   ],
 };
 
@@ -340,7 +546,8 @@ export const NAVIGATION_SECTIONS: NavSection[] = [
   DAILY_OPERATIONS,
   REVENUE_MANAGEMENT,
   CUSTOMER_MANAGEMENT,
-  ANALYTICS_PLANNING,
+  STATION_MANAGEMENT, // 🏢 Combined: Station Ops + Chef Portal with role filtering
+  ANALYTICS_REPORTING,
   MARKETING_TOOLS,
   ADVANCED_FEATURES,
 ];

@@ -14,7 +14,9 @@ File Size: ~350 lines (within 500 line limit)
 import asyncio
 import logging
 import re
-from datetime import datetime, time as time_type, timedelta, timezone
+from datetime import datetime
+from datetime import time as time_type
+from datetime import timedelta, timezone
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -24,28 +26,20 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
+from api.ai.endpoints.services.pricing_service import get_pricing_service
 from core.database import get_db
 from core.security.roles import role_matches
 from db.models.core import Booking, BookingStatus, Customer
 from services.encryption_service import SecureDataHandler
-from api.ai.endpoints.services.pricing_service import get_pricing_service
+from services.google_calendar_service import create_chef_assignment_event
+from services.scheduling.slot_manager import SlotManager
 from utils.auth import get_current_user
 from utils.pagination import paginate_query
 from utils.timezone_utils import DEFAULT_TIMEZONE
 
-from .schemas import (
-    BookingCreate,
-    BookingResponse,
-    BookingUpdate,
-    ErrorResponse,
-)
-from .constants import (
-    DEFAULT_STATION_ID,
-    DEPOSIT_FIXED_CENTS,
-    PARTY_MINIMUM_CENTS,
-)
-from .notifications import notify_new_booking, notify_booking_edit
-from services.google_calendar_service import create_chef_assignment_event
+from .constants import DEFAULT_STATION_ID, DEPOSIT_FIXED_CENTS, PARTY_MINIMUM_CENTS
+from .notifications import notify_booking_edit, notify_new_booking
+from .schemas import BookingCreate, BookingResponse, BookingUpdate, ErrorResponse
 
 router = APIRouter(tags=["bookings"])
 logger = logging.getLogger(__name__)
@@ -73,7 +67,8 @@ logger = logging.getLogger(__name__)
 )
 async def list_bookings(
     user_id: str | None = Query(None, description="Filter by customer ID"),
-    status_filter: str | None = Query(None, alias="status", description="Filter by status"),
+    status_filter: str
+    | None = Query(None, alias="status", description="Filter by status"),
     cursor: str | None = Query(None, description="Pagination cursor"),
     limit: int = Query(50, ge=1, le=100, description="Items per page"),
     db: AsyncSession = Depends(get_db),
@@ -99,7 +94,9 @@ async def list_bookings(
     if role_matches(user_role, "STATION_MANAGER", "station_manager"):
         station_ids = current_user.get("station_ids", [])
         if station_ids:
-            query = query.where(Booking.station_id.in_([UUID(sid) for sid in station_ids]))
+            query = query.where(
+                Booking.station_id.in_([UUID(sid) for sid in station_ids])
+            )
 
     # CHEF: Can only see bookings assigned to themselves
     elif role_matches(user_role, "CHEF", "chef"):
@@ -129,12 +126,73 @@ async def list_bookings(
 
 
 @router.get(
+    "/unassigned",
+    summary="Get unassigned bookings",
+    description="Retrieve all bookings that don't have a chef assigned. For station managers, "
+    "only returns unassigned bookings from their stations.",
+)
+async def list_unassigned_bookings(
+    cursor: str | None = Query(None, description="Cursor for pagination"),
+    limit: int = Query(50, ge=1, le=100, description="Max items per page"),
+    db: AsyncSession = Depends(get_db),
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
+    """
+    Get all unassigned bookings (chef_id is NULL).
+
+    RBAC:
+    - SUPER_ADMIN, ADMIN: See all unassigned bookings
+    - STATION_MANAGER: See only unassigned bookings from their stations
+    - CUSTOMER_SUPPORT: See all unassigned bookings
+    - CHEF: Not allowed (returns empty)
+    """
+    user_role = current_user.get("role", "")
+
+    # Build query for unassigned bookings (chef_id is NULL)
+    query = select(Booking).where(Booking.chef_id.is_(None))
+
+    # RBAC filtering
+    if role_matches(user_role, "SUPER_ADMIN", "super_admin"):
+        pass  # See all
+    elif role_matches(user_role, "ADMIN", "admin"):
+        pass  # See all
+    elif role_matches(user_role, "CUSTOMER_SUPPORT", "customer_support"):
+        pass  # See all
+    elif role_matches(user_role, "STATION_MANAGER", "station_manager"):
+        station_ids = current_user.get("station_ids", [])
+        if station_ids:
+            query = query.where(
+                Booking.station_id.in_([UUID(sid) for sid in station_ids])
+            )
+        else:
+            # No stations assigned, see nothing
+            query = query.where(Booking.id.is_(None))
+    else:
+        # CHEF or other roles - not authorized for this endpoint
+        return {"items": [], "next_cursor": None, "has_more": False}
+
+    # Only show confirmed bookings that need assignment
+    query = query.where(Booking.status == BookingStatus.CONFIRMED)
+
+    # Order by event date (soonest first - most urgent)
+    query = query.order_by(Booking.event_datetime.asc())
+
+    # Apply cursor pagination
+    result = await paginate_query(db, query, cursor=cursor, limit=limit)
+
+    return result
+
+
+@router.get(
     "/{booking_id}",
     summary="Get booking details",
     description="Retrieve detailed information about a specific booking.",
     responses={
         200: {"description": "Booking details", "model": BookingResponse},
-        403: {"description": "Not authorized to view this booking", "model": ErrorResponse},
+        403: {
+            "description": "Not authorized to view this booking",
+            "model": ErrorResponse,
+        },
         404: {"description": "Booking not found", "model": ErrorResponse},
     },
 )
@@ -164,7 +222,9 @@ async def get_booking(
     booking = result.unique().scalar_one_or_none()
 
     if not booking:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
+        )
 
     # Authorization check
     customer_id_str = str(booking.customer_id)
@@ -180,19 +240,32 @@ async def get_booking(
             )
 
     # Calculate payment totals
-    total_paid = sum(p.amount_cents for p in booking.payments if p.status == "completed")
-    deposit_paid = total_paid >= booking.deposit_due_cents if booking.deposit_due_cents else False
+    total_paid = sum(
+        p.amount_cents for p in booking.payments if p.status == "completed"
+    )
+    deposit_paid = (
+        total_paid >= booking.deposit_due_cents if booking.deposit_due_cents else False
+    )
 
     return {
         "id": str(booking.id),
         "user_id": str(booking.customer_id),
         "date": booking.date.strftime("%Y-%m-%d") if booking.date else None,
         "time": booking.slot.strftime("%H:%M") if booking.slot else None,
+        "customer_requested_time": (
+            booking.customer_requested_time.strftime("%H:%M")
+            if booking.customer_requested_time
+            else None
+        ),
         "guests": (booking.party_adults or 0) + (booking.party_kids or 0),
         "status": (
-            booking.status.value if hasattr(booking.status, "value") else str(booking.status)
+            booking.status.value
+            if hasattr(booking.status, "value")
+            else str(booking.status)
         ),
-        "total_amount": (booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0),
+        "total_amount": (
+            booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0
+        ),
         "deposit_paid": deposit_paid,
         "balance_due": (
             (booking.total_due_cents - booking.deposit_due_cents) / 100.0
@@ -200,7 +273,9 @@ async def get_booking(
             else 0.0
         ),
         "payment_status": (
-            booking.status.value if hasattr(booking.status, "value") else str(booking.status)
+            booking.status.value
+            if hasattr(booking.status, "value")
+            else str(booking.status)
         ),
         "menu_items": [],
         "addons": [],
@@ -255,19 +330,26 @@ async def create_booking(
 
         booking_date = date_type.fromisoformat(booking_data.date)
         hour, minute = map(int, booking_data.time.split(":"))
-        booking_slot = time_type(hour=hour, minute=minute)
+        customer_requested_time = time_type(hour=hour, minute=minute)
 
-        # Validate 48-hour advance booking
+        # Option C+E Hybrid: Snap customer's requested time to nearest slot
+        # Store both for: slot = chef scheduling, customer_requested_time = display
+        slot_manager = SlotManager()
+        _, booking_slot = slot_manager.snap_to_nearest_slot(customer_requested_time)
+
+        # Validate 48-hour advance booking (use customer's requested time for UX)
         now = datetime.now(timezone.utc)
-        booking_datetime = datetime.combine(booking_date, booking_slot, tzinfo=timezone.utc)
+        booking_datetime = datetime.combine(
+            booking_date, customer_requested_time, tzinfo=timezone.utc
+        )
         if booking_datetime < now + timedelta(hours=48):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Booking date must be at least 48 hours in the future",
             )
 
-        # Validate business hours
-        if hour < 11 or hour >= 22:
+        # Validate business hours (use customer's requested time)
+        if customer_requested_time.hour < 11 or customer_requested_time.hour >= 22:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Booking time must be between 11:00 and 22:00",
@@ -298,11 +380,19 @@ async def create_booking(
         # Encrypt PII
         email_encrypted = encryption_handler.encrypt_email(booking_data.customer_email)
         phone_encrypted = encryption_handler.encrypt_phone(booking_data.customer_phone)
-        address_encrypted = encryption_handler.encrypt_email(booking_data.location_address)
+        address_encrypted = encryption_handler.encrypt_email(
+            booking_data.location_address
+        )
 
         # Find or create customer
         customer = await _find_or_create_customer(
-            db, encryption_handler, email_encrypted, phone_encrypted, first_name, last_name, now
+            db,
+            encryption_handler,
+            email_encrypted,
+            phone_encrypted,
+            first_name,
+            last_name,
+            now,
         )
 
         # Calculate pricing
@@ -325,6 +415,7 @@ async def create_booking(
             station_id=UUID(DEFAULT_STATION_ID),
             date=booking_date,
             slot=booking_slot,
+            customer_requested_time=customer_requested_time,  # Option C+E: Store original time for display
             address_encrypted=address_encrypted,
             zone=zone,
             party_adults=booking_data.guests,
@@ -386,6 +477,7 @@ async def create_booking(
             "location_address": booking_data.location_address,
             "deposit_deadline": customer_deposit_deadline.isoformat(),
             "created_at": now.isoformat(),
+            "customer_requested_time": customer_requested_time.strftime("%H:%M"),
             "message": "Booking created successfully. Please pay deposit within 2 hours to confirm.",
         }
 
@@ -469,8 +561,16 @@ async def update_booking(
 
     if "time" in update_data:
         time_parts = update_data["time"].split(":")
-        booking.time = time_type(int(time_parts[0]), int(time_parts[1]))
-        changes.append(f"Time changed to {update_data['time']}")
+        customer_requested_time = time_type(int(time_parts[0]), int(time_parts[1]))
+
+        # Option C+E: Store original time, snap to slot for scheduling
+        booking.customer_requested_time = customer_requested_time
+        slot_num, slot_time = SlotManager.snap_to_nearest_slot(customer_requested_time)
+        booking.slot = slot_time
+
+        changes.append(
+            f"Time changed to {update_data['time']} (slot: {slot_time.strftime('%H:%M')})"
+        )
 
     if "guests" in update_data:
         booking.guests = update_data["guests"]
@@ -505,7 +605,9 @@ async def update_booking(
             booking.chef_id = None
             if old_chef_id:
                 changes.append("Chef unassigned from booking")
-                logger.info(f"🍳 Chef {old_chef_id} unassigned from booking {booking_id}")
+                logger.info(
+                    f"🍳 Chef {old_chef_id} unassigned from booking {booking_id}"
+                )
         else:
             # Assign new chef
             booking.chef_id = chef_id
@@ -547,7 +649,9 @@ async def update_booking(
         customer_phone = "+10000000000"
 
         if booking.customer:
-            customer_name = f"{booking.customer.first_name} {booking.customer.last_name}"
+            customer_name = (
+                f"{booking.customer.first_name} {booking.customer.last_name}"
+            )
             # Decrypt phone if needed
 
         asyncio.create_task(
@@ -571,6 +675,11 @@ async def update_booking(
         "guests": booking.guests,
         "status": booking.status.value,
         "chef_id": str(booking.chef_id) if booking.chef_id else None,
+        "customer_requested_time": (
+            booking.customer_requested_time.strftime("%H:%M")
+            if booking.customer_requested_time
+            else None
+        ),
         "changes": changes,
     }
 
