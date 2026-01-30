@@ -12,7 +12,7 @@ import { GROUPED_TIME_OPTIONS } from '../../data/booking/types';
 interface DateTimeSelectionProps {
   formData: BookingFormData;
   onChange: (field: keyof BookingFormData, value: string | number | Date | boolean) => void;
-  errors: Record;
+  errors: Record<string, string>;
   timeSlots: TimeSlot[];
 }
 
@@ -27,7 +27,7 @@ export function DateTimeSelection({
   const oneYearFromNow = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
 
   // Handle dropdown time selection
-  const handleTimeChange = (e: React.ChangeEvent) => {
+  const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedTime = e.target.value as EventTimeValue | '';
     onChange('eventTime', selectedTime);
   };

@@ -213,7 +213,7 @@ export const US_STATES = [
 ];
 
 // Default form values
-export const DEFAULT_FORM_VALUES: Partial = {
+export const DEFAULT_FORM_VALUES: Partial<BookingFormData> = {
   preferredCommunication: '',
   addressState: 'CA',
   venueState: 'CA',

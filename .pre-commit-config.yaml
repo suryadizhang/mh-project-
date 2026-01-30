@@ -1,16 +1,15 @@
 # =============================================================================
 # Pre-commit Configuration for MyHibachi Backend - Enhanced Security & Quality
 # =============================================================================
+# NOTE: All hooks are configured in CHECK-ONLY mode (no auto-fixing).
+# If a hook fails, you must manually fix the issue before committing.
+# This prevents unexpected file modifications during commit.
 
 repos:
-  # General file formatting
+  # General file formatting (CHECK-ONLY)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-      - id: trailing-whitespace
-        description: Remove trailing whitespace
-      - id: end-of-file-fixer
-        description: Ensure files end with newline
       - id: check-yaml
         description: Check YAML syntax
       - id: check-json
@@ -20,21 +19,23 @@ repos:
       - id: check-merge-conflict
         description: Check for merge conflict markers
       - id: mixed-line-ending
-        description: Ensure consistent line endings
-        args: ['--fix=lf']
+        description: Check for consistent line endings (LF required)
+        args: ['--fix=no']
       - id: check-added-large-files
         description: Check for large files
         args: ['--maxkb=1000']
       - id: check-case-conflict
         description: Check for case conflicts
+      # Removed: trailing-whitespace (auto-fixes)
+      # Removed: end-of-file-fixer (auto-fixes)
 
-  # Python formatting and linting
+  # Python formatting and linting (CHECK-ONLY)
   - repo: https://github.com/psf/black
     rev: 23.12.1
     hooks:
       - id: black
-        description: Format Python code with Black
-        args: [--line-length=88]
+        description: Check Python code formatting with Black
+        args: [--line-length=88, --check, --diff]
         language_version: python3
         files: ^apps/backend/.*\.py$
 
@@ -42,17 +43,17 @@ repos:
     rev: v0.1.8
     hooks:
       - id: ruff
-        description: Lint and fix Python code with Ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        description: Lint Python code with Ruff (no auto-fix)
+        args: []
         files: ^apps/backend/.*\.py$
 
-  # Import sorting
+  # Import sorting (CHECK-ONLY)
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
-        description: Sort Python imports
-        args: [--profile, black, --line-length, "88"]
+        description: Check Python import sorting
+        args: [--profile, black, --line-length, "88", --check-only, --diff]
         files: ^apps/backend/.*\.py$
 
   # Security scanning
@@ -82,12 +83,13 @@ repos:
         description: Lint Dockerfiles
         args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
 
-  # TypeScript/JavaScript formatting
+  # TypeScript/JavaScript formatting (CHECK-ONLY)
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
       - id: prettier
-        description: Format TypeScript/JavaScript with Prettier
+        description: Check TypeScript/JavaScript formatting with Prettier
+        args: ['--check']
         files: \.(ts|tsx|js|jsx|json|css|scss|md)$
         exclude: ^(package-lock\.json|\.next/)
 
@@ -112,6 +114,6 @@ repos:
         files: requirements\.txt$
 
 # Configuration
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: false
 minimum_pre_commit_version: '3.6.0'

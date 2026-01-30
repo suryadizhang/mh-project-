@@ -38,7 +38,7 @@ import { logger } from '@/lib/logger';
 import { usePricing } from '@/hooks/usePricing';
 
 // Infer types from schemas for type-safe responses
-type BookingSubmitResponse = z.infer;
+type BookingSubmitResponse = z.infer<typeof BookingSubmitResponseSchema>;
 
 /**
  * BookingPage - Refactored with modular components
@@ -257,7 +257,7 @@ export default function BookingPage() {
 
     try {
       // Convert timeSlot to HH:MM format
-      const timeMap: Record = {
+      const timeMap: Record<string, string> = {
         '12PM': '12:00',
         '3PM': '15:00',
         '6PM': '18:00',
@@ -734,8 +734,8 @@ function PricingSummarySection({
     total: number;
     deposit: number;
   };
-  control: ReturnType['control'];
-  watch: ReturnType['watch'];
+  control: ReturnType<typeof useForm<BookingFormData>>['control'];
+  watch: ReturnType<typeof useForm<BookingFormData>>['watch'];
   onTipChange: (tip: number) => void;
 }) {
   const [isExpanded, setIsExpanded] = useState(false); // Collapsed by default - user expands if needed
