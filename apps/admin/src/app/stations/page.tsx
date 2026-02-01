@@ -5,6 +5,7 @@ import {
   CheckCircle,
   Edit,
   Filter,
+  Loader2,
   Mail,
   MapPin,
   MoreVertical,
@@ -17,13 +18,18 @@ import {
   Users,
   XCircle,
 } from 'lucide-react';
-import { useCallback, useEffect,useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ConfirmModal,Modal } from '@/components/ui/modal';
+import { ConfirmModal, Modal } from '@/components/ui/modal';
 import { useAuth } from '@/contexts/AuthContext';
-import { type Station, stationService, type StationUser } from '@/services/api';
+import {
+  type Station,
+  staffService,
+  stationService,
+  type StationUser,
+} from '@/services/api';
 
 export default function StationsPage() {
   const { stationContext } = useAuth();
@@ -802,6 +808,9 @@ function StationManagerModal({
 }: StationManagerModalProps) {
   const [users, setUsers] = useState<StationUser[]>([]);
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<StationUser | null>(null);
 
   useEffect(() => {
     if (isOpen && station) {
@@ -823,6 +832,58 @@ function StationManagerModal({
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Handle staff deletion (soft-delete: sets status to INACTIVE)
+   */
+  const handleDeleteStaff = async () => {
+    if (!userToDelete) return;
+
+    try {
+      setActionLoading(String(userToDelete.user_id));
+      const response = await staffService.deleteStaff(
+        String(userToDelete.user_id)
+      );
+      if (response.success) {
+        // Reload users to reflect status change
+        await loadUsers();
+        onSuccess();
+      }
+    } catch (err) {
+      console.error('Failed to delete staff:', err);
+    } finally {
+      setActionLoading(null);
+      setShowDeleteConfirm(false);
+      setUserToDelete(null);
+    }
+  };
+
+  /**
+   * Handle staff reactivation
+   */
+  const handleReactivateStaff = async (user: StationUser) => {
+    try {
+      setActionLoading(String(user.user_id));
+      const response = await staffService.reactivateStaff(String(user.user_id));
+      if (response.success) {
+        // Reload users to reflect status change
+        await loadUsers();
+        onSuccess();
+      }
+    } catch (err) {
+      console.error('Failed to reactivate staff:', err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  /**
+   * Open delete confirmation modal
+   */
+  const confirmDelete = (user: StationUser) => {
+    setUserToDelete(user);
+    setShowDeleteConfirm(true);
   };
 
   return (
@@ -922,10 +983,39 @@ function StationManagerModal({
                         ? new Date(user.last_login).toLocaleDateString()
                         : 'Never'}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right space-x-2">
                       <Button variant="outline" size="sm">
                         Edit
                       </Button>
+                      {user.is_active ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => confirmDelete(user)}
+                          disabled={actionLoading === String(user.user_id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          {actionLoading === String(user.user_id) ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleReactivateStaff(user)}
+                          disabled={actionLoading === String(user.user_id)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        >
+                          {actionLoading === String(user.user_id) ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            'Reactivate'
+                          )}
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -934,6 +1024,20 @@ function StationManagerModal({
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setUserToDelete(null);
+        }}
+        onConfirm={handleDeleteStaff}
+        title="Delete Staff Member"
+        message={`Are you sure you want to deactivate ${userToDelete?.user_name || userToDelete?.user_email || 'this user'}? They will no longer be able to access the system.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </Modal>
   );
 }

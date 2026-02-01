@@ -13,13 +13,13 @@ Configuration:
 - RESEND_API_KEY, RESEND_FROM_EMAIL for Resend
 """
 
-from datetime import datetime, timezone
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import logging
 import os
 import smtplib
 import ssl
+from datetime import datetime, timezone
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import Optional
 from urllib.parse import quote
 
@@ -424,6 +424,297 @@ View in admin portal: {admin_url}/bookings/{booking_id}
 This is an automated notification from My Hibachi Chef booking system.
         """,
     },
+    # ============================================
+    # ROLE-SPECIFIC ADMIN INVITATION TEMPLATES
+    # ============================================
+    "chef_invite": {
+        "subject": "🍳 You've Been Invited as a Chef - My Hibachi Chef",
+        "html": """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .button {{ background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: bold; }}
+        .footer {{ text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }}
+        .highlight {{ background-color: #fff7ed; padding: 15px; border-radius: 6px; border-left: 4px solid #f7931e; margin: 20px 0; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍳 Welcome to the Chef Team!</h1>
+        </div>
+        <div class="content">
+            <h2>Hello {user_name},</h2>
+            <p><strong>{invited_by}</strong> has invited you to join My Hibachi Chef as a <strong>Chef</strong>!</p>
+
+            <div class="highlight">
+                <h3>🎯 As a Chef, you'll be able to:</h3>
+                <ul>
+                    <li>View your assigned events and schedules</li>
+                    <li>Update your availability</li>
+                    <li>Access event details and customer information</li>
+                    <li>Manage your chef profile</li>
+                </ul>
+            </div>
+
+            <p style="text-align: center;">
+                <a href="{setup_url}" class="button">Set Up Your Account</a>
+            </p>
+
+            <p><strong>⏰ This link expires in {expires_in_minutes} minutes.</strong></p>
+            <p>If you didn't expect this invitation or have questions, please contact our team.</p>
+        </div>
+        <div class="footer">
+            <p>© 2025 My Hibachi Chef. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+        """,
+        "text": """
+🍳 Welcome to the Chef Team!
+
+Hello {user_name},
+
+{invited_by} has invited you to join My Hibachi Chef as a Chef!
+
+As a Chef, you'll be able to:
+- View your assigned events and schedules
+- Update your availability
+- Access event details and customer information
+- Manage your chef profile
+
+Set up your account here: {setup_url}
+
+⏰ This link expires in {expires_in_minutes} minutes.
+
+If you didn't expect this invitation or have questions, please contact our team.
+
+© 2025 My Hibachi Chef. All rights reserved.
+        """,
+    },
+    "station_manager_invite": {
+        "subject": "📍 You've Been Invited as a Station Manager - My Hibachi Chef",
+        "html": """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .button {{ background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: bold; }}
+        .footer {{ text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }}
+        .highlight {{ background-color: #fff7ed; padding: 15px; border-radius: 6px; border-left: 4px solid #f7931e; margin: 20px 0; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📍 Welcome, Station Manager!</h1>
+        </div>
+        <div class="content">
+            <h2>Hello {user_name},</h2>
+            <p><strong>{invited_by}</strong> has invited you to join My Hibachi Chef as a <strong>Station Manager</strong>!</p>
+
+            <div class="highlight">
+                <h3>🎯 As a Station Manager, you'll be able to:</h3>
+                <ul>
+                    <li>Manage chef schedules for your station</li>
+                    <li>Assign chefs to bookings</li>
+                    <li>View and manage station bookings</li>
+                    <li>Oversee station operations and performance</li>
+                    <li>Invite chefs to your station</li>
+                </ul>
+            </div>
+
+            <p style="text-align: center;">
+                <a href="{setup_url}" class="button">Set Up Your Account</a>
+            </p>
+
+            <p><strong>⏰ This link expires in {expires_in_minutes} minutes.</strong></p>
+            <p>If you didn't expect this invitation or have questions, please contact our team.</p>
+        </div>
+        <div class="footer">
+            <p>© 2025 My Hibachi Chef. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+        """,
+        "text": """
+📍 Welcome, Station Manager!
+
+Hello {user_name},
+
+{invited_by} has invited you to join My Hibachi Chef as a Station Manager!
+
+As a Station Manager, you'll be able to:
+- Manage chef schedules for your station
+- Assign chefs to bookings
+- View and manage station bookings
+- Oversee station operations and performance
+- Invite chefs to your station
+
+Set up your account here: {setup_url}
+
+⏰ This link expires in {expires_in_minutes} minutes.
+
+If you didn't expect this invitation or have questions, please contact our team.
+
+© 2025 My Hibachi Chef. All rights reserved.
+        """,
+    },
+    "customer_support_invite": {
+        "subject": "🎧 You've Been Invited as Customer Support - My Hibachi Chef",
+        "html": """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .button {{ background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: bold; }}
+        .footer {{ text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }}
+        .highlight {{ background-color: #fff7ed; padding: 15px; border-radius: 6px; border-left: 4px solid #f7931e; margin: 20px 0; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎧 Welcome to Customer Support!</h1>
+        </div>
+        <div class="content">
+            <h2>Hello {user_name},</h2>
+            <p><strong>{invited_by}</strong> has invited you to join My Hibachi Chef as <strong>Customer Support</strong>!</p>
+
+            <div class="highlight">
+                <h3>🎯 As Customer Support, you'll be able to:</h3>
+                <ul>
+                    <li>View and manage customer bookings</li>
+                    <li>Handle customer inquiries and issues</li>
+                    <li>Access customer reviews and feedback</li>
+                    <li>Manage leads and customer communications</li>
+                </ul>
+            </div>
+
+            <p style="text-align: center;">
+                <a href="{setup_url}" class="button">Set Up Your Account</a>
+            </p>
+
+            <p><strong>⏰ This link expires in {expires_in_minutes} minutes.</strong></p>
+            <p>If you didn't expect this invitation or have questions, please contact our team.</p>
+        </div>
+        <div class="footer">
+            <p>© 2025 My Hibachi Chef. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+        """,
+        "text": """
+🎧 Welcome to Customer Support!
+
+Hello {user_name},
+
+{invited_by} has invited you to join My Hibachi Chef as Customer Support!
+
+As Customer Support, you'll be able to:
+- View and manage customer bookings
+- Handle customer inquiries and issues
+- Access customer reviews and feedback
+- Manage leads and customer communications
+
+Set up your account here: {setup_url}
+
+⏰ This link expires in {expires_in_minutes} minutes.
+
+If you didn't expect this invitation or have questions, please contact our team.
+
+© 2025 My Hibachi Chef. All rights reserved.
+        """,
+    },
+    "admin_invite": {
+        "subject": "👔 You've Been Invited as an Admin - My Hibachi Chef",
+        "html": """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .button {{ background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; font-weight: bold; }}
+        .footer {{ text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }}
+        .highlight {{ background-color: #fff7ed; padding: 15px; border-radius: 6px; border-left: 4px solid #f7931e; margin: 20px 0; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👔 Welcome, Admin!</h1>
+        </div>
+        <div class="content">
+            <h2>Hello {user_name},</h2>
+            <p><strong>{invited_by}</strong> has invited you to join My Hibachi Chef as an <strong>Admin</strong>!</p>
+
+            <div class="highlight">
+                <h3>🎯 As an Admin, you'll have access to:</h3>
+                <ul>
+                    <li>Full booking management for your assigned stations</li>
+                    <li>Chef and staff management</li>
+                    <li>Pricing and settings configuration</li>
+                    <li>Reports and analytics</li>
+                    <li>Customer and lead management</li>
+                </ul>
+            </div>
+
+            <p style="text-align: center;">
+                <a href="{setup_url}" class="button">Set Up Your Account</a>
+            </p>
+
+            <p><strong>⏰ This link expires in {expires_in_minutes} minutes.</strong></p>
+            <p>If you didn't expect this invitation or have questions, please contact our team.</p>
+        </div>
+        <div class="footer">
+            <p>© 2025 My Hibachi Chef. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+        """,
+        "text": """
+👔 Welcome, Admin!
+
+Hello {user_name},
+
+{invited_by} has invited you to join My Hibachi Chef as an Admin!
+
+As an Admin, you'll have access to:
+- Full booking management for your assigned stations
+- Chef and staff management
+- Pricing and settings configuration
+- Reports and analytics
+- Customer and lead management
+
+Set up your account here: {setup_url}
+
+⏰ This link expires in {expires_in_minutes} minutes.
+
+If you didn't expect this invitation or have questions, please contact our team.
+
+© 2025 My Hibachi Chef. All rights reserved.
+        """,
+    },
 }
 
 
@@ -484,7 +775,9 @@ def generate_google_calendar_url(
                 continue
 
         if parsed_time:
-            parsed_date = parsed_date.replace(hour=parsed_time.hour, minute=parsed_time.minute)
+            parsed_date = parsed_date.replace(
+                hour=parsed_time.hour, minute=parsed_time.minute
+            )
 
         # Event duration: 2 hours for hibachi
         end_datetime = parsed_date + timedelta(hours=2)
@@ -531,14 +824,18 @@ class EmailService:
         self.enabled = getattr(settings, "EMAIL_ENABLED", False)
         if isinstance(self.enabled, str):
             self.enabled = self.enabled.lower() == "true"
-        self.provider = getattr(settings, "EMAIL_PROVIDER", "smtp").lower()  # smtp or resend
+        self.provider = getattr(
+            settings, "EMAIL_PROVIDER", "smtp"
+        ).lower()  # smtp or resend
         self.from_name = getattr(settings, "EMAIL_FROM_NAME", "My Hibachi Chef")
         self.frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3001")
 
         # SMTP Configuration (IONOS) - from GSM settings
         self.smtp_host = getattr(settings, "SMTP_HOST", "smtp.ionos.com")
         self.smtp_port = int(getattr(settings, "SMTP_PORT", 465))
-        self.smtp_from_email = getattr(settings, "SMTP_USER", "internal@myhibachichef.com")
+        self.smtp_from_email = getattr(
+            settings, "SMTP_USER", "internal@myhibachichef.com"
+        )
         self.smtp_password = getattr(settings, "SMTP_PASSWORD", "")
 
         # Resend Configuration (fallback)
@@ -568,13 +865,19 @@ class EmailService:
         elif self.provider == "resend":
             if self.resend_api_key and resend:
                 resend.api_key = self.resend_api_key
-                logger.info(f"✅ Resend email service initialized (from: {self.from_email})")
+                logger.info(
+                    f"✅ Resend email service initialized (from: {self.from_email})"
+                )
             elif not self.resend_api_key:
                 logger.error("❌ EMAIL_PROVIDER=resend but RESEND_API_KEY not found")
             elif not resend:
-                logger.error("❌ EMAIL_PROVIDER=resend but resend library not installed")
+                logger.error(
+                    "❌ EMAIL_PROVIDER=resend but resend library not installed"
+                )
         else:
-            logger.warning(f"⚠️ Unknown EMAIL_PROVIDER={self.provider}, defaulting to smtp")
+            logger.warning(
+                f"⚠️ Unknown EMAIL_PROVIDER={self.provider}, defaulting to smtp"
+            )
             self.provider = "smtp"
 
     def _format_sender(self) -> str:
@@ -608,7 +911,9 @@ class EmailService:
             logger.exception(f"Failed to send approval email to {email}: {e}")
             return False
 
-    def send_rejection_email(self, email: str, full_name: str, reason: str | None = None) -> bool:
+    def send_rejection_email(
+        self, email: str, full_name: str, reason: str | None = None
+    ) -> bool:
         """Send rejection notification email"""
         try:
             template = EMAIL_TEMPLATES["rejection"]
@@ -619,8 +924,12 @@ class EmailService:
                 reason_html = f"<p><strong>Reason:</strong> {reason}</p>"
                 reason_text = f"Reason: {reason}\n"
 
-            html_body = template["html"].format(full_name=full_name, reason_html=reason_html)
-            text_body = template["text"].format(full_name=full_name, reason_text=reason_text)
+            html_body = template["html"].format(
+                full_name=full_name, reason_html=reason_html
+            )
+            text_body = template["text"].format(
+                full_name=full_name, reason_text=reason_text
+            )
 
             return self._send_email(
                 to_email=email,
@@ -632,7 +941,9 @@ class EmailService:
             logger.exception(f"Failed to send rejection email to {email}: {e}")
             return False
 
-    def send_suspension_email(self, email: str, full_name: str, reason: str | None = None) -> bool:
+    def send_suspension_email(
+        self, email: str, full_name: str, reason: str | None = None
+    ) -> bool:
         """Send suspension notification email"""
         try:
             template = EMAIL_TEMPLATES["suspension"]
@@ -643,8 +954,12 @@ class EmailService:
                 reason_html = f"<p><strong>Reason:</strong> {reason}</p>"
                 reason_text = f"Reason: {reason}\n"
 
-            html_body = template["html"].format(full_name=full_name, reason_html=reason_html)
-            text_body = template["text"].format(full_name=full_name, reason_text=reason_text)
+            html_body = template["html"].format(
+                full_name=full_name, reason_html=reason_html
+            )
+            text_body = template["text"].format(
+                full_name=full_name, reason_text=reason_text
+            )
 
             return self._send_email(
                 to_email=email,
@@ -722,7 +1037,9 @@ class EmailService:
                 tags=[{"name": "type", "value": "booking_confirmation"}],
             )
         except Exception as e:
-            logger.exception(f"Failed to send booking confirmation email to {customer_email}: {e}")
+            logger.exception(
+                f"Failed to send booking confirmation email to {customer_email}: {e}"
+            )
             return False
 
     def send_new_booking_email_to_admin(
@@ -780,7 +1097,9 @@ class EmailService:
                 tags=[{"name": "type", "value": "booking_admin_alert"}],
             )
         except Exception as e:
-            logger.exception(f"Failed to send booking alert email to admin {admin_email}: {e}")
+            logger.exception(
+                f"Failed to send booking alert email to admin {admin_email}: {e}"
+            )
             return False
 
     def send_quote_email(
@@ -820,7 +1139,9 @@ class EmailService:
                 if qty and qty > 0:
                     upgrade_lines.append(f"  - {name}: {qty}")
 
-            upgrades_text = "\n".join(upgrade_lines) if upgrade_lines else "  - None selected"
+            upgrades_text = (
+                "\n".join(upgrade_lines) if upgrade_lines else "  - None selected"
+            )
 
             # Build the plain text email
             text_body = f"""
@@ -968,7 +1289,9 @@ Bringing the hibachi experience to you!
 
             # Connect and send - Port 465 uses SMTP_SSL (implicit TLS), others use STARTTLS
             if self.smtp_port == 465:
-                with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, context=context) as server:
+                with smtplib.SMTP_SSL(
+                    self.smtp_host, self.smtp_port, context=context
+                ) as server:
                     server.login(self.smtp_from_email, self.smtp_password)
                     server.sendmail(self.smtp_from_email, to_email, msg.as_string())
             else:
@@ -981,7 +1304,9 @@ Bringing the hibachi experience to you!
             return True
 
         except smtplib.SMTPAuthenticationError as e:
-            logger.error(f"❌ SMTP authentication failed for {self.smtp_from_email}: {e}")
+            logger.error(
+                f"❌ SMTP authentication failed for {self.smtp_from_email}: {e}"
+            )
             return False
         except smtplib.SMTPException as e:
             logger.exception(f"❌ SMTP error sending to {to_email}: {e}")
