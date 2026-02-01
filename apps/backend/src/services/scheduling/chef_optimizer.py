@@ -19,19 +19,20 @@ Full implementation completed: 2025-12-21
 Updated with TravelTimeService integration: 2025-01-27
 """
 
-from datetime import date, time, datetime
+import logging
+from datetime import date, datetime, time
 from decimal import Decimal
+from math import atan2, cos, radians, sin, sqrt
 from typing import List, Optional, Tuple
 from uuid import UUID
-import logging
-from math import radians, sin, cos, sqrt, atan2
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select, func, and_
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models.ops import Chef, ChefStatus
+from db.models.address import Address
 from db.models.core import Booking
+from db.models.ops import Chef, ChefStatus
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,31 @@ USE_GOOGLE_MAPS_THRESHOLD = 5
 # Haversine constants
 AVERAGE_SPEED_MPH = 30  # Average speed for Haversine estimation
 RUSH_HOUR_MULTIPLIER = 1.5  # Rush hour travel time multiplier
+CONGESTED_AREA_MULTIPLIER = 1.3  # Additional multiplier for known congested areas
+
+# Rush hour window (2:30 PM - 7:30 PM expressed in decimal hours)
+RUSH_HOUR_START = 14.5  # 2:30 PM
+RUSH_HOUR_END = 19.5  # 7:30 PM
+
+# Dynamic buffer between consecutive bookings (minutes)
+# Buffer = base buffer + travel time (calculated dynamically)
+# Base buffer covers: 15-25 min setup + 20 min break = ~30-45 min
+BASE_BUFFER_MINUTES = 30  # Minimum buffer for close venues (setup + break)
+
+# Known congested areas (lat/lng bounding boxes)
+# Format: (min_lat, max_lat, min_lng, max_lng, area_name)
+CONGESTED_AREAS = [
+    # San Francisco downtown/SOMA
+    (37.74, 37.82, -122.43, -122.38, "San Francisco Downtown"),
+    # San Jose downtown
+    (37.32, 37.35, -121.90, -121.87, "San Jose Downtown"),
+    # Oakland downtown
+    (37.79, 37.82, -122.28, -122.25, "Oakland Downtown"),
+    # Berkeley downtown
+    (37.86, 37.88, -122.27, -122.25, "Berkeley Downtown"),
+    # Fremont Warm Springs/BART area (rush hour congestion)
+    (37.49, 37.52, -121.95, -121.92, "Fremont BART Area"),
+]
 
 
 # ============================================================================
@@ -118,7 +144,9 @@ class ChefScore(BaseModel):
     skill_score: float = Field(ge=0.0, le=100.0)
     workload_score: float = Field(ge=0.0, le=100.0)
     rating_score: float = Field(ge=0.0, le=100.0)
-    history_score: float = Field(ge=0.0, le=100.0, default=0.0)  # Future: customer history
+    history_score: float = Field(
+        ge=0.0, le=100.0, default=0.0
+    )  # Future: customer history
     preference_score: float = Field(ge=0.0, le=100.0)
     travel_time_minutes: int
     travel_distance_miles: float
@@ -212,7 +240,9 @@ class ChefOptimizer:
 
         # 2. If preference is required, check if preferred chef is available
         if is_preference_required and preferred_chef_id:
-            preferred_available = any(c.chef_id == preferred_chef_id for c in available_chefs)
+            preferred_available = any(
+                c.chef_id == preferred_chef_id for c in available_chefs
+            )
             if not preferred_available:
                 return OptimalAssignment(
                     booking_id=booking_id,
@@ -222,15 +252,42 @@ class ChefOptimizer:
                 )
 
         # 3. Get daily workload for each chef
-        workloads = await self._get_chef_workloads([c.chef_id for c in available_chefs], event_date)
+        workloads = await self._get_chef_workloads(
+            [c.chef_id for c in available_chefs], event_date
+        )
 
-        # 4. Score all available chefs
+        # 4. Validate consecutive travel feasibility for each chef
+        # Filters out chefs who cannot physically travel between venues
+        feasible_chefs: List = []
+        for chef in available_chefs:
+            is_feasible, reason = await self._validate_consecutive_travel(
+                chef_id=chef.chef_id,
+                event_date=event_date,
+                event_time=event_time,
+                venue_lat=venue_lat,
+                venue_lng=venue_lng,
+            )
+            if is_feasible:
+                feasible_chefs.append(chef)
+            else:
+                logger.info(f"Chef {chef.name} excluded: {reason}")
+
+        # If no chefs have feasible travel, return early
+        if not feasible_chefs and available_chefs:
+            return OptimalAssignment(
+                booking_id=booking_id,
+                confidence_score=0,
+                reason="No chefs available with feasible travel between consecutive bookings",
+                is_optimal=False,
+            )
+
+        # 5. Score all feasible chefs
         # Pass chef_count to enable smart travel time strategy:
         # - Few chefs (≤5): Use Google Maps for accuracy
         # - Many chefs (>5): Use Haversine for fast scoring
-        chef_count = len(available_chefs)
+        chef_count = len(feasible_chefs)
         scored_chefs: List[ChefScore] = []
-        for chef in available_chefs:
+        for chef in feasible_chefs:
             score = await self._score_chef(
                 chef=chef,
                 venue_lat=venue_lat,
@@ -245,10 +302,10 @@ class ChefOptimizer:
             )
             scored_chefs.append(score)
 
-        # 5. Sort by total score (highest first)
+        # 6. Sort by total score (highest first)
         scored_chefs.sort(key=lambda x: x.total_score, reverse=True)
 
-        # 6. Build response
+        # 7. Build response
         if not scored_chefs:
             return OptimalAssignment(
                 booking_id=booking_id,
@@ -384,6 +441,136 @@ class ChefOptimizer:
         rows = result.all()
 
         return {row[0]: row[1] for row in rows}
+
+    async def _get_chef_bookings_with_venues(
+        self,
+        chef_id: UUID,
+        event_date: date,
+    ) -> List[dict]:
+        """
+        Get a chef's bookings for a date WITH venue coordinates.
+
+        Returns list of dicts with slot time and venue lat/lng,
+        ordered by slot time for consecutive travel validation.
+        """
+        # Query bookings with venue coordinates via Address join
+        query = (
+            select(
+                Booking.id,
+                Booking.slot,
+                Address.lat,
+                Address.lng,
+            )
+            .join(Address, Booking.venue_address_id == Address.id, isouter=True)
+            .where(
+                and_(
+                    Booking.chef_id == chef_id,
+                    Booking.date == event_date,
+                    Booking.status.notin_(["cancelled", "rejected"]),
+                )
+            )
+            .order_by(Booking.slot)
+        )
+
+        result = await self.db.execute(query)
+        rows = result.all()
+
+        return [
+            {
+                "booking_id": row[0],
+                "slot": row[1],
+                "lat": float(row[2]) if row[2] else None,
+                "lng": float(row[3]) if row[3] else None,
+            }
+            for row in rows
+        ]
+
+    async def _validate_consecutive_travel(
+        self,
+        chef_id: UUID,
+        event_date: date,
+        event_time: time,
+        venue_lat: Decimal,
+        venue_lng: Decimal,
+    ) -> Tuple[bool, str]:
+        """
+        Validate if a chef can feasibly travel between consecutive venues.
+
+        Inserts the proposed booking into chef's schedule chronologically,
+        then validates that all consecutive venue-to-venue travel is feasible.
+
+        Args:
+            chef_id: Chef to validate
+            event_date: Date of proposed booking
+            event_time: Time of proposed booking (slot time)
+            venue_lat: Venue latitude of proposed booking
+            venue_lng: Venue longitude of proposed booking
+
+        Returns:
+            (is_feasible, reason) tuple
+            - True if travel between all venues is feasible
+            - False with reason if any gap is too short
+        """
+        # Get existing bookings with venue coordinates
+        existing_bookings = await self._get_chef_bookings_with_venues(
+            chef_id, event_date
+        )
+
+        # Create proposed booking entry
+        proposed = {
+            "booking_id": None,
+            "slot": event_time,
+            "lat": float(venue_lat) if venue_lat else None,
+            "lng": float(venue_lng) if venue_lng else None,
+        }
+
+        # Insert proposed booking into schedule chronologically
+        all_bookings = existing_bookings + [proposed]
+        all_bookings.sort(key=lambda b: b["slot"])
+
+        # Validate each consecutive pair
+        for i in range(len(all_bookings) - 1):
+            current = all_bookings[i]
+            next_booking = all_bookings[i + 1]
+
+            # Skip if either booking has no coordinates
+            if not current["lat"] or not current["lng"]:
+                continue
+            if not next_booking["lat"] or not next_booking["lng"]:
+                continue
+
+            # Calculate time gap between slots (in minutes)
+            current_dt = datetime.combine(event_date, current["slot"])
+            next_dt = datetime.combine(event_date, next_booking["slot"])
+            time_gap_minutes = (next_dt - current_dt).total_seconds() / 60
+
+            # Calculate venue-to-venue travel time using Haversine
+            # (with rush hour and congested area multipliers applied)
+            travel_minutes, travel_miles = self._calculate_travel_haversine(
+                origin_lat=current["lat"],
+                origin_lng=current["lng"],
+                dest_lat=next_booking["lat"],
+                dest_lng=next_booking["lng"],
+                event_date=event_date,
+                event_time=next_booking["slot"],
+            )
+
+            # Dynamic buffer: base buffer (30 min for setup/break) + travel time
+            # This replaces the old fixed 60 min buffer for all scenarios
+            # Close venues (10 mi, 20 min travel): 30 + 20 = 50 min required
+            # Far venues (40 mi, 60 min travel): 30 + 60 = 90 min required
+            required_minutes = travel_minutes + BASE_BUFFER_MINUTES
+
+            if time_gap_minutes < required_minutes:
+                reason = (
+                    f"Insufficient travel time: {time_gap_minutes:.0f} min gap, "
+                    f"but need {travel_minutes:.0f} min travel + {BASE_BUFFER_MINUTES} min buffer "
+                    f"({travel_miles:.1f} miles between venues)"
+                )
+                logger.debug(f"Chef {chef_id} failed consecutive travel: {reason}")
+                return False, reason
+
+        return True, "All consecutive travel feasible"
 
     async def _score_chef(
         self,
@@ -580,21 +767,52 @@ class ChefOptimizer:
 
         # Apply rush hour multiplier using EVENT datetime (not now!)
         event_dt = datetime.combine(event_date, event_time)
-        if self._is_rush_hour(event_dt):
+        is_rush_hour = self._is_rush_hour(event_dt)
+        if is_rush_hour:
             travel_minutes = int(travel_minutes * RUSH_HOUR_MULTIPLIER)
+
+        # Apply congested area multiplier (stacks with rush hour)
+        is_congested_origin, origin_area = self._is_congested_area(
+            origin_lat, origin_lng
+        )
+        is_congested_dest, dest_area = self._is_congested_area(dest_lat, dest_lng)
+        congested_area = origin_area or dest_area
+
+        if is_congested_origin or is_congested_dest:
+            travel_minutes = int(travel_minutes * CONGESTED_AREA_MULTIPLIER)
+            logger.debug(
+                f"ChefOptimizer: Congested area detected ({congested_area}) - "
+                f"applied {CONGESTED_AREA_MULTIPLIER}x multiplier"
+            )
 
         logger.debug(
             f"ChefOptimizer: Using Haversine estimation - "
             f"{travel_minutes} min, {round(distance_miles, 1)} mi"
+            f"{' (rush hour)' if is_rush_hour else ''}"
+            f"{' (congested)' if congested_area else ''}"
         )
 
         return travel_minutes, round(distance_miles, 1)
 
     def _is_rush_hour(self, dt: datetime) -> bool:
-        """Check if datetime is during rush hour (Mon-Fri 3-7 PM)."""
+        """Check if datetime is during rush hour (Mon-Fri 2:30-7:30 PM)."""
         if dt.weekday() >= 5:  # Weekend
             return False
-        return 15 <= dt.hour < 19
+        # Convert time to decimal hours (e.g., 2:30 PM = 14.5)
+        decimal_hour = dt.hour + dt.minute / 60
+        return RUSH_HOUR_START <= decimal_hour < RUSH_HOUR_END
+
+    def _is_congested_area(self, lat: float, lng: float) -> Tuple[bool, str]:
+        """
+        Check if coordinates are in a known congested area.
+
+        Returns:
+            (is_congested, area_name) tuple
+        """
+        for min_lat, max_lat, min_lng, max_lng, area_name in CONGESTED_AREAS:
+            if min_lat <= lat <= max_lat and min_lng <= lng <= max_lng:
+                return True, area_name
+        return False, ""
 
     def _score_travel(self, travel_minutes: int) -> float:
         """

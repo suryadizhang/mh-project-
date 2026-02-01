@@ -1,6 +1,6 @@
 {
-  "*.{js,jsx,ts,tsx}": ["prettier --write --ignore-unknown", "eslint --cache --cache-location .eslintcache --fix"],
-  "*.{json,md,yml,yaml}": ["prettier --write --ignore-unknown"],
-  "*.py": ["ruff check --fix --exit-zero", "black --quiet"],
-  "*.{css,scss}": ["prettier --write --ignore-unknown"]
+  "*.{js,jsx,ts,tsx}": ["prettier --check --ignore-unknown", "eslint --cache --cache-location .eslintcache"],
+  "*.{json,md,yml,yaml}": ["prettier --check --ignore-unknown"],
+  "*.py": ["ruff check", "black --check --quiet"],
+  "*.{css,scss}": ["prettier --check --ignore-unknown"]
 }

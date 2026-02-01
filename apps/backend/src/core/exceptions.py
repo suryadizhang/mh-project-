@@ -3,10 +3,10 @@ Centralized Exception Handling
 Custom exceptions and error handling middleware for consistent error responses
 """
 
-from datetime import datetime, timezone
-from enum import Enum
 import logging
 import traceback
+from datetime import datetime, timezone
+from enum import Enum
 from typing import Any
 
 from fastapi import Request
@@ -141,7 +141,9 @@ class ValidationException(AppException):
 class NotFoundException(AppException):
     """Resource not found exception"""
 
-    def __init__(self, resource: str, identifier: str, details: dict[str, Any] | None = None):
+    def __init__(
+        self, resource: str, identifier: str, details: dict[str, Any] | None = None
+    ):
         message = f"{resource} with identifier '{identifier}' not found"
         super().__init__(
             message=message,
@@ -155,10 +157,15 @@ class UnauthorizedException(AppException):
     """Authentication required exception"""
 
     def __init__(
-        self, message: str = "Authentication required", details: dict[str, Any] | None = None
+        self,
+        message: str = "Authentication required",
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(
-            message=message, error_code=ErrorCode.UNAUTHORIZED, status_code=401, details=details
+            message=message,
+            error_code=ErrorCode.UNAUTHORIZED,
+            status_code=401,
+            details=details,
         )
 
 
@@ -285,13 +292,29 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
     if isinstance(exc, UnauthorizedException):
         headers["WWW-Authenticate"] = "Bearer"
 
-    return JSONResponse(status_code=exc.status_code, content=response_data, headers=headers)
+    return JSONResponse(
+        status_code=exc.status_code, content=response_data, headers=headers
+    )
 
 
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
     """Handle Pydantic validation errors"""
+    # FILE-BASED DEBUG LOGGING - Write validation errors to file
+    import os
+    import time
+    import traceback as tb
+
+    debug_file = os.path.join(os.path.dirname(__file__), "..", "validation_debug.log")
+    with open(debug_file, "a") as f:
+        f.write(f"\n{'='*60}\n")
+        f.write(f"VALIDATION ERROR at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Request: {request.method} {request.url}\n")
+        f.write(f"Errors: {exc.errors()}\n")
+        f.write(f"Body: {getattr(exc, 'body', 'NO BODY')}\n")
+        f.write(f"{'='*60}\n")
+
     field_errors = {}
 
     for error in exc.errors():
@@ -323,7 +346,9 @@ async def validation_exception_handler(
     return await app_exception_handler(request, validation_exc)
 
 
-async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+async def http_exception_handler(
+    request: Request, exc: StarletteHTTPException
+) -> JSONResponse:
     """Handle standard HTTP exceptions"""
     # Convert HTTPException to AppException
     error_code_map = {
@@ -338,7 +363,9 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
 
     error_code = error_code_map.get(exc.status_code, ErrorCode.INTERNAL_SERVER_ERROR)
 
-    app_exc = AppException(message=exc.detail, error_code=error_code, status_code=exc.status_code)
+    app_exc = AppException(
+        message=exc.detail, error_code=error_code, status_code=exc.status_code
+    )
 
     return await app_exception_handler(request, app_exc)
 
@@ -373,7 +400,9 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 # Utility Functions
 
 
-def raise_not_found(resource: str, identifier: str, details: dict[str, Any] | None = None):
+def raise_not_found(
+    resource: str, identifier: str, details: dict[str, Any] | None = None
+):
     """Convenience function to raise NotFoundException"""
     raise NotFoundException(resource, identifier, details)
 
@@ -422,7 +451,9 @@ def raise_external_service_error(
     details: dict[str, Any] | None = None,
 ):
     """Convenience function to raise ExternalServiceException"""
-    raise ExternalServiceException(service_name, message, error_code, service_error_code, details)
+    raise ExternalServiceException(
+        service_name, message, error_code, service_error_code, details
+    )
 
 
 # Error Response Helper
@@ -447,7 +478,9 @@ def create_error_response(
 
 
 def create_success_response(
-    data: Any = None, message: str = "Operation successful", meta: dict[str, Any] | None = None
+    data: Any = None,
+    message: str = "Operation successful",
+    meta: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create standardized success response"""
     response = {"success": True, "message": message}

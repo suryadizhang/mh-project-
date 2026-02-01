@@ -31,7 +31,8 @@ export interface Booking {
     phone?: string;
   };
   date: string; // ISO date string
-  slot: string;
+  slot: string; // The assigned slot time (12PM, 3PM, 6PM, 9PM)
+  customer_requested_time?: string; // The exact time the customer requested (e.g., "5:30 PM")
   total_guests: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   payment_status: 'unpaid' | 'partial' | 'paid' | 'refunded';

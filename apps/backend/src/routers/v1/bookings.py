@@ -2005,26 +2005,31 @@ async def check_availability(
                 "bookings_count": 0,
             }
 
-        # Query bookings for this date
-        query = select(func.count(Booking.id)).where(
-            Booking.date == parsed_date,
-            Booking.status.in_(["pending", "confirmed"]),
+        # Use AvailabilityEngine for dual-mode availability checking
+        # - Short-term (≤ 14 days): Uses actual chef availability
+        # - Long-term (> 14 days): Uses SSoT long_advance_slot_capacity
+        from services.scheduling.availability_engine import AvailabilityEngine
+
+        availability_engine = AvailabilityEngine(db)
+        slots = await availability_engine.get_available_slots_for_date(
+            event_date=parsed_date,
+            guest_count=10,  # Default guest count for availability check
         )
 
-        result = await db.execute(query)
-        booking_count = result.scalar() or 0
+        # Count total available slots and bookings
+        available_slots = [s for s in slots if s.is_available]
+        total_bookings = sum(s.booking_count for s in slots)
 
-        # Simple availability logic: max 2 bookings per day
-        max_bookings_per_day = 2
-        available = booking_count < max_bookings_per_day
+        # Date is available if at least one slot is available
+        available = len(available_slots) > 0
 
         return {
             "success": True,
             "date": date,
             "available": available,
-            "bookings_count": booking_count,
-            "max_bookings": max_bookings_per_day,
-            "slots_remaining": max(0, max_bookings_per_day - booking_count),
+            "bookings_count": total_bookings,
+            "available_slots_count": len(available_slots),
+            "total_slots": len(slots),
         }
 
     except HTTPException:

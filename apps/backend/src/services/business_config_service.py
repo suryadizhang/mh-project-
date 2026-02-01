@@ -72,6 +72,8 @@ CATEGORY_TIMING = "timing"
 CATEGORY_SERVICE = "service"
 CATEGORY_POLICY = "policy"
 CATEGORY_CONTACT = "contact"
+CATEGORY_CHEF_PAY = "chef_pay"
+CATEGORY_ALERTS = "alerts"
 
 
 @dataclass
@@ -94,7 +96,7 @@ class BusinessConfig:
 
     # Deposit
     deposit_amount_cents: int = 10000  # $100.00 fixed deposit
-    deposit_refundable_days: int = 4  # Refundable if canceled 4+ days before
+    deposit_refundable_days: int = 7  # Refundable if canceled 7+ days before
 
     # Travel
     travel_free_miles: int = 30  # First 30 miles free
@@ -102,6 +104,20 @@ class BusinessConfig:
 
     # Booking Rules
     min_advance_hours: int = 48  # Minimum 48 hours advance booking
+    max_advance_days: int = 365  # Maximum 365 days advance booking
+
+    # Urgent Booking Settings
+    urgent_window_days: int = 7  # Bookings within 7 days are urgent
+    chef_assignment_alert_interval_hours: int = 4  # Alert every 4 hours
+    chef_assignment_max_alerts: int = 3  # Max 3 alerts before escalation
+
+    # Availability Window (dual-mode booking logic)
+    # Within this window: use chef availability (chefs have set schedules)
+    # Beyond this window: use long_advance_slot_capacity from SSoT
+    chef_availability_window_days: int = 14  # 2 weeks - chefs fill availability
+    long_advance_slot_capacity: int = (
+        1  # Default 1 chef per slot for long-advance bookings
+    )
 
     # Timing (deadlines/cutoffs in hours)
     menu_change_cutoff_hours: int = 12  # No menu changes within 12 hours of event
@@ -122,6 +138,26 @@ class BusinessConfig:
     # Contact (business info)
     business_phone: str = "(916) 740-8768"
     business_email: str = "cs@myhibachichef.com"
+
+    # Chef Pay - Per-Tier Fixed Rates (all amounts in cents)
+    # Junior Chef (new_chef) rates
+    junior_adult_cents: int = 1000  # $10.00 per adult
+    junior_kid_cents: int = 500  # $5.00 per child (6-12)
+    junior_toddler_cents: int = 0  # $0 for toddlers (under 5)
+    # Chef rates
+    chef_adult_cents: int = 1200  # $12.00 per adult
+    chef_kid_cents: int = 600  # $6.00 per child (6-12)
+    chef_toddler_cents: int = 0  # $0 for toddlers (under 5)
+    # Senior Chef rates
+    senior_adult_cents: int = 1300  # $13.00 per adult
+    senior_kid_cents: int = 650  # $6.50 per child (6-12)
+    senior_toddler_cents: int = 0  # $0 for toddlers (under 5)
+    # Station Manager rates
+    manager_adult_cents: int = 1500  # $15.00 per adult
+    manager_kid_cents: int = 750  # $7.50 per child (6-12)
+    manager_toddler_cents: int = 0  # $0 for toddlers (under 5)
+    # Travel fee distribution
+    chef_pay_travel_pct: int = 100  # 100% of travel fee goes to chef
 
     # Default Station (Fremont, CA - Main)
     # Format: CA-FREMONT-001 (human-readable station code)
@@ -282,6 +318,20 @@ def _map_dynamic_variables_to_config(
         elif category == CATEGORY_BOOKING:
             if key == "min_advance_hours":
                 config.min_advance_hours = int(parsed_value)
+            elif key == "max_advance_days":
+                config.max_advance_days = int(parsed_value)
+            elif key == "urgent_window_days":
+                config.urgent_window_days = int(parsed_value)
+            elif key == "chef_availability_window_days":
+                config.chef_availability_window_days = int(parsed_value)
+            elif key == "long_advance_slot_capacity":
+                config.long_advance_slot_capacity = int(parsed_value)
+
+        elif category == CATEGORY_ALERTS:
+            if key == "chef_assignment_alert_interval_hours":
+                config.chef_assignment_alert_interval_hours = int(parsed_value)
+            elif key == "chef_assignment_max_alerts":
+                config.chef_assignment_max_alerts = int(parsed_value)
 
         elif category == CATEGORY_TIMING:
             if key == "menu_change_cutoff_hours":
@@ -310,6 +360,39 @@ def _map_dynamic_variables_to_config(
                 config.business_phone = str(parsed_value)
             elif key == "business_email":
                 config.business_email = str(parsed_value)
+
+        elif category == CATEGORY_CHEF_PAY:
+            # Junior Chef rates
+            if key == "junior_adult_cents":
+                config.junior_adult_cents = int(parsed_value)
+            elif key == "junior_kid_cents":
+                config.junior_kid_cents = int(parsed_value)
+            elif key == "junior_toddler_cents":
+                config.junior_toddler_cents = int(parsed_value)
+            # Chef rates
+            elif key == "chef_adult_cents":
+                config.chef_adult_cents = int(parsed_value)
+            elif key == "chef_kid_cents":
+                config.chef_kid_cents = int(parsed_value)
+            elif key == "chef_toddler_cents":
+                config.chef_toddler_cents = int(parsed_value)
+            # Senior Chef rates
+            elif key == "senior_adult_cents":
+                config.senior_adult_cents = int(parsed_value)
+            elif key == "senior_kid_cents":
+                config.senior_kid_cents = int(parsed_value)
+            elif key == "senior_toddler_cents":
+                config.senior_toddler_cents = int(parsed_value)
+            # Station Manager rates
+            elif key == "manager_adult_cents":
+                config.manager_adult_cents = int(parsed_value)
+            elif key == "manager_kid_cents":
+                config.manager_kid_cents = int(parsed_value)
+            elif key == "manager_toddler_cents":
+                config.manager_toddler_cents = int(parsed_value)
+            # Travel fee distribution
+            elif key == "chef_pay_travel_pct":
+                config.chef_pay_travel_pct = int(parsed_value)
 
     return config
 
