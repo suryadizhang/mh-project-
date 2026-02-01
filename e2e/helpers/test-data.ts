@@ -63,8 +63,8 @@ export const testPayment = {
 };
 
 export const testAdmin = {
-  email: process.env.TEST_ADMIN_EMAIL || 'admin@myhibachi.com',
-  password: process.env.TEST_ADMIN_PASSWORD || 'test-password',
+  email: process.env.TEST_ADMIN_EMAIL || 'suryadizhang.swe@gmail.com',
+  password: process.env.TEST_ADMIN_PASSWORD || '13Agustus!',
 };
 
 /**
@@ -89,16 +89,19 @@ export function generateBookingId(): string {
 /**
  * Calculate expected totals with fees
  */
-export function calculateTotal(subtotal: number, paymentMethod: 'stripe' | 'venmo' | 'zelle') {
+export function calculateTotal(
+  subtotal: number,
+  paymentMethod: 'stripe' | 'venmo' | 'zelle'
+) {
   const fees = {
     stripe: 0.08, // 8%
-    venmo: 0.03,  // 3%
-    zelle: 0,     // 0%
+    venmo: 0.03, // 3%
+    zelle: 0, // 0%
   };
-  
+
   const fee = subtotal * fees[paymentMethod];
   const total = subtotal + fee;
-  
+
   return {
     subtotal,
     fee: Math.round(fee * 100) / 100,
