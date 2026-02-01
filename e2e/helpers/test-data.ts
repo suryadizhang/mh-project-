@@ -63,8 +63,8 @@ export const testPayment = {
 };
 
 export const testAdmin = {
-  email: process.env.TEST_ADMIN_EMAIL || 'admin@myhibachi.com',
-  password: process.env.TEST_ADMIN_PASSWORD || 'test-password',
+  email: process.env.TEST_ADMIN_EMAIL || 'suryadizhang.swe@gmail.com',
+  password: process.env.TEST_ADMIN_PASSWORD || '***REDACTED***',
 };
 
 /**
@@ -88,20 +88,15 @@ export function generateBookingId(): string {
 
 /**
  * Calculate expected totals with fees
- *
- * Fee Structure (2025):
- * - Stripe (card): 3% processing fee
- * - Venmo: 3% processing fee
- * - Zelle: FREE (0%)
  */
 export function calculateTotal(
   subtotal: number,
   paymentMethod: 'stripe' | 'venmo' | 'zelle'
 ) {
   const fees = {
-    stripe: 0.03, // 3% - enterprise-grade Stripe fee
+    stripe: 0.08, // 8%
     venmo: 0.03, // 3%
-    zelle: 0, // 0% - FREE
+    zelle: 0, // 0%
   };
 
   const fee = subtotal * fees[paymentMethod];

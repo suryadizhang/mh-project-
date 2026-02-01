@@ -48,15 +48,6 @@ from sqlalchemy.sql import func
 # This ensures all models share the same metadata registry (enterprise single-source-of-truth)
 from core.database import Base
 
-# CRITICAL: Use shared enums from single source of truth
-# These enums are now centralized in db.models.enums package
-from db.models.enums import (
-    PaymentStatus,
-    PaymentType,
-    SocialPlatform,
-    SocialThreadStatus,
-)
-
 # ==================== ENUMS ====================
 
 
@@ -107,11 +98,23 @@ class ThreadStatus(str, enum.Enum):
     SPAM = "spam"
 
 
-# SocialPlatform - REMOVED: Now imported from db.models.enums
-# See: apps/backend/src/db/models/enums/social.py
+class SocialPlatform(str, enum.Enum):
+    """Social media platforms"""
 
-# SocialThreadStatus - REMOVED: Now imported from db.models.enums
-# See: apps/backend/src/db/models/enums/social.py
+    INSTAGRAM = "instagram"
+    FACEBOOK = "facebook"
+    TWITTER = "twitter"
+    TIKTOK = "tiktok"
+    LINKEDIN = "linkedin"
+
+
+class SocialThreadStatus(str, enum.Enum):
+    """Social thread status"""
+
+    OPEN = "open"
+    PENDING = "pending"
+    REPLIED = "replied"
+    CLOSED = "closed"
 
 
 class ReviewStatus(str, enum.Enum):
@@ -141,11 +144,12 @@ class Booking(Base):
 
     ⚠️ SCHEMA UPDATED (Nov 2025): Now matches actual database schema
     - Uses date/slot (not event_date/event_start_time)
-    - Uses party_adults/party_kids (not guest_count)
+    - Uses party_adults/party_kids/party_toddlers (not guest_count)
     - Uses deposit_due_cents/total_due_cents (not deposit_amount/total_amount)
     - Uses address_encrypted/zone (not location fields)
     - Added: sms_consent, sms_consent_timestamp, version, hold_on_request
     - Added: customer_deposit_deadline, internal_deadline, deposit_confirmed_at
+    - Added (Jan 2025): party_toddlers for chef pay calculation
     """
 
     __tablename__ = "bookings"
@@ -153,6 +157,9 @@ class Booking(Base):
         CheckConstraint("deposit_due_cents >= 0", name="check_deposit_non_negative"),
         CheckConstraint("party_adults > 0", name="check_party_adults_positive"),
         CheckConstraint("party_kids >= 0", name="check_party_kids_non_negative"),
+        CheckConstraint(
+            "party_toddlers >= 0", name="check_party_toddlers_non_negative"
+        ),
         CheckConstraint(
             "total_due_cents >= deposit_due_cents", name="check_total_gte_deposit"
         ),
@@ -231,6 +238,9 @@ class Booking(Base):
     # Event Details (UPDATED - match database)
     date: Mapped[date] = mapped_column(Date, nullable=False)
     slot: Mapped[time] = mapped_column(Time, nullable=False)
+    # Customer's originally requested time (Option C+E Hybrid)
+    # slot = system-snapped time for scheduling, customer_requested_time = display
+    customer_requested_time: Mapped[Optional[time]] = mapped_column(Time, nullable=True)
 
     # Location (UPDATED - match database)
     address_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
@@ -239,6 +249,10 @@ class Booking(Base):
     # Party Composition (UPDATED - match database)
     party_adults: Mapped[int] = mapped_column(Integer, nullable=False)
     party_kids: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Toddlers (under 5) - free, but tracked for chef pay calculation
+    party_toddlers: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
 
     # Pricing (UPDATED - match database)
     deposit_due_cents: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -341,6 +355,27 @@ class Booking(Base):
 
     # Soft Delete
     deleted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    # Urgent Booking Tracking (NEW - Station Manager Proactive Scheduling)
+    # See: database/migrations/021_urgent_booking_system.sql
+    is_urgent: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
+    days_until_event: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    booking_window: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default=text("'standard'")
+    )  # urgent/standard/advance/long_term
+
+    # Urgency Alert Tracking (FAILPROOF Chef Assignment System)
+    urgency_alert_sent_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    urgency_alert_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
+    urgency_escalated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
@@ -631,12 +666,25 @@ class BookingReminder(Base):
 
 # ==================== PAYMENTS ====================
 
-# PaymentStatus - REMOVED: Now imported from db.models.enums
-# CRITICAL FIX: Old enum used 'completed', Stripe uses 'succeeded'
-# See: apps/backend/src/db/models/enums/payment.py
 
-# PaymentType - REMOVED: Now imported from db.models.enums
-# See: apps/backend/src/db/models/enums/payment.py
+class PaymentStatus(str, enum.Enum):
+    """Payment status workflow"""
+
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+    PARTIALLY_REFUNDED = "partially_refunded"
+
+
+class PaymentType(str, enum.Enum):
+    """Payment types"""
+
+    DEPOSIT = "deposit"
+    FULL_PAYMENT = "full_payment"
+    PARTIAL_PAYMENT = "partial_payment"
+    REFUND = "refund"
 
 
 class Payment(Base):

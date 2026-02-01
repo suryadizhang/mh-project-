@@ -10,52 +10,47 @@ Provides:
 
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from schemas.scheduling import (
-    # Availability
+from schemas.scheduling import (  # Availability; Travel; Chef Assignment; Negotiation; Config; Address
+    AddressInput,
+    AllSlotsConfigResponse,
     AvailabilityCheckRequest,
-    SuggestionResponse,
-    SlotAvailabilityResponse,
+    AvailableChefResponse,
     CalendarAvailabilityRequest,
     CalendarAvailabilityResponse,
     CalendarDayAvailability,
-    # Travel
-    TravelTimeRequest,
-    TravelTimeResponse,
-    # Chef Assignment
     ChefAssignmentRequest,
     ChefAssignmentResponse,
     ChefScoreResponse,
-    # Negotiation
     CreateNegotiationRequest,
-    NegotiationResponse,
-    RespondToNegotiationRequest,
-    NegotiationDetailResponse,
-    PendingNegotiationsResponse,
-    NegotiationStatusEnum,
-    # Config
-    SlotConfigResponse,
-    AllSlotsConfigResponse,
     EventDurationRequest,
     EventDurationResponse,
-    # Address
-    AddressInput,
     GeocodedAddressResponse,
+    NegotiationDetailResponse,
+    NegotiationResponse,
+    NegotiationStatusEnum,
+    PendingNegotiationsResponse,
+    RespondToNegotiationRequest,
+    SlotAvailabilityResponse,
+    SlotConfigResponse,
+    SuggestionResponse,
+    TravelTimeRequest,
+    TravelTimeResponse,
 )
 from services.scheduling import (
+    ChefOptimizerService,
+    GeocodingService,
+    NegotiationReason,
+    NegotiationService,
     SlotManagerService,
     SuggestionEngine,
     TravelTimeService,
-    GeocodingService,
-    ChefOptimizerService,
-    NegotiationService,
-    NegotiationReason,
 )
 from services.scheduling.travel_time_service import Coordinates
 
@@ -398,6 +393,68 @@ async def get_top_chef_recommendations(
         )
         for s in scores
     ]
+
+
+# ============================================================================
+# Available Chefs Endpoint (for assignment dropdown)
+# ============================================================================
+
+
+@router.get("/available-chefs", response_model=List[AvailableChefResponse])
+async def get_available_chefs(
+    date: date = Query(..., description="Event date"),
+    time: time = Query(..., description="Event start time"),
+    station_id: Optional[UUID] = Query(None, description="Station to check chefs for"),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Get available chefs for a specific date/time slot at a station.
+
+    Used by admin UI for booking assignment dropdown.
+    Returns all chefs at the station with availability status.
+    """
+    from sqlalchemy import and_, or_
+
+    from db.models.ops import Chef, ChefAssignment
+
+    # Build base query for chefs at the station (or all if no station)
+    query = select(Chef).where(Chef.is_active == True)
+    if station_id:
+        query = query.where(Chef.station_id == station_id)
+
+    result = await db.execute(query)
+    chefs = result.scalars().all()
+
+    # Check each chef's availability for this slot
+    available_chefs = []
+    for chef in chefs:
+        # Check for conflicting assignments on this date/time
+        event_datetime = datetime.combine(date, time)
+        conflict_query = select(ChefAssignment).where(
+            and_(
+                ChefAssignment.chef_id == chef.id,
+                ChefAssignment.event_date == date,
+                ChefAssignment.status.in_(["assigned", "confirmed"]),
+            )
+        )
+        conflict_result = await db.execute(conflict_query)
+        conflicting = conflict_result.scalar_one_or_none()
+
+        available_chefs.append(
+            AvailableChefResponse(
+                id=chef.id,
+                name=chef.name,
+                pay_rate_class=chef.pay_rate_class or "chef",
+                is_available=conflicting is None,
+                distance_miles=None,  # Could calculate from station if needed
+                conflicting_event=str(conflicting.booking_id) if conflicting else None,
+            )
+        )
+
+    # Sort by availability (available first) then by name
+    available_chefs.sort(key=lambda c: (not c.is_available, c.name))
+
+    return available_chefs
 
 
 # ============================================================================

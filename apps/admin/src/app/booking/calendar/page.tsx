@@ -8,6 +8,8 @@
 import { AlertCircle, CalendarIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { useAuth } from '@/contexts/AuthContext';
+
 import { Button } from '@/components/ui/button';
 
 import { CalendarHeader } from './components/CalendarHeader';
@@ -27,11 +29,28 @@ export default function CalendarPage() {
     useState<CalendarBooking | null>(null);
   const [selectedDay, setSelectedDay] = useState<DayColumn | null>(null);
 
-  // Fetch calendar data
+  // Get auth context for role-based filtering
+  const { stationContext } = useAuth();
+
+  // Determine filters based on user role
+  // STATION_MANAGER/ADMIN: See only their station's bookings
+  // CHEF: See only their assigned events
+  // SUPER_ADMIN/CUSTOMER_SUPPORT: See all bookings (no filter)
+  const stationId =
+    stationContext?.role === 'STATION_MANAGER' ||
+    stationContext?.role === 'ADMIN'
+      ? stationContext.station_id
+      : null;
+  const chefId =
+    stationContext?.role === 'CHEF' ? stationContext.chef_id : null;
+
+  // Fetch calendar data with role-based filters
   const { bookings, weekView, monthView, loading, error, refetch } =
     useCalendarData({
       view,
       currentDate,
+      stationId,
+      chefId,
     });
 
   // Handle booking click - could open modal/sidebar

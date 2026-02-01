@@ -9,13 +9,13 @@ Checks if slots are available considering:
 - Setup/cleanup buffers
 """
 
+import logging
 from datetime import date, time
 from typing import List, Optional
-import logging
 
 from pydantic import BaseModel
+from sqlalchemy import and_, func, not_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, not_
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +80,10 @@ class AvailabilityEngine:
 
     def __init__(self, db: Optional[AsyncSession] = None):
         self.db = db
-        # Max bookings per slot (usually 1 for hibachi - chef can only be at one place)
-        self.max_bookings_per_slot = 1
+        # Note: Capacity is now determined dynamically via SSoT (BusinessConfig)
+        # See check_slot_availability() for dual-mode logic:
+        #   - Short-term (≤ chef_availability_window_days): Use actual chef availability
+        #   - Long-term (> chef_availability_window_days): Use long_advance_slot_capacity from SSoT
 
     async def check_slot_availability(
         self,
@@ -92,10 +94,25 @@ class AvailabilityEngine:
         """
         Check if a specific slot is available.
 
+        Uses DUAL-MODE CAPACITY LOGIC (SSoT compliant):
+        - Short-term bookings (≤ chef_availability_window_days):
+          Uses actual chef availability from ChefAvailability table
+        - Long-term bookings (> chef_availability_window_days):
+          Uses long_advance_slot_capacity from SSoT (default 0 = no long-term bookings)
+
+        This allows customers to book ahead even when chefs haven't filled
+        their availability yet, controlled by admin via SSoT settings.
+
         Returns:
-            dict with is_available, available_chefs, conflict_reason
+            dict with is_available, available_chefs, conflict_reason, booking_count, capacity_mode
         """
+        from services.business_config_service import get_business_config
+
         from .slot_manager import DEFAULT_SLOTS
+
+        # Get SSoT configuration for capacity logic
+        config = await get_business_config(self.db)
+        days_until_event = (event_date - date.today()).days
 
         # Find the slot that matches this time
         slot_number = None
@@ -113,28 +130,65 @@ class AvailabilityEngine:
                 "is_available": False,
                 "available_chefs": 0,
                 "conflict_reason": "Time is outside valid slot ranges",
+                "capacity_mode": "invalid_slot",
             }
 
         # Check database for existing bookings
-        booking_count = await self._get_booking_count_for_slot(event_date, slot_time, slot_number)
+        booking_count = await self._get_booking_count_for_slot(
+            event_date, slot_time, slot_number
+        )
 
-        is_available = booking_count < self.max_bookings_per_slot
-        conflict_reason = None if is_available else "Slot is already booked"
+        # DUAL-MODE CAPACITY LOGIC (SSoT Compliant)
+        if days_until_event > config.chef_availability_window_days:
+            # LONG-TERM BOOKING: Use SSoT capacity (chefs haven't set availability yet)
+            capacity_mode = "long_term_ssot"
+            max_capacity = config.long_advance_slot_capacity
 
-        # Get real available chef count from database
-        # This replaces the hardcoded "available_chefs = 3"
-        available_chefs = await self._get_available_chef_count(event_date, slot_time)
+            # If SSoT capacity is 0, no long-term bookings allowed
+            if max_capacity == 0:
+                return {
+                    "is_available": False,
+                    "available_chefs": 0,
+                    "conflict_reason": f"Bookings more than {config.chef_availability_window_days} days ahead are not currently available",
+                    "booking_count": booking_count,
+                    "capacity_mode": capacity_mode,
+                    "days_until_event": days_until_event,
+                }
 
-        # If no chefs available, mark slot as unavailable
-        if available_chefs == 0 and is_available:
-            is_available = False
-            conflict_reason = "No chefs available for this time slot"
+            is_available = booking_count < max_capacity
+            conflict_reason = (
+                None if is_available else "Slot capacity reached for this date"
+            )
+            available_chefs = max_capacity - booking_count if is_available else 0
+
+        else:
+            # SHORT-TERM BOOKING: Use actual chef availability from database
+            capacity_mode = "short_term_chef_availability"
+
+            # Get real available chef count from ChefAvailability table
+            available_chefs = await self._get_available_chef_count(
+                event_date, slot_time
+            )
+
+            # Capacity = number of available chefs (1 chef = 1 booking per slot)
+            max_capacity = available_chefs
+
+            is_available = booking_count < max_capacity and available_chefs > 0
+            if not is_available:
+                if available_chefs == 0:
+                    conflict_reason = "No chefs available for this time slot"
+                else:
+                    conflict_reason = "Slot is already booked"
+            else:
+                conflict_reason = None
 
         return {
             "is_available": is_available,
             "available_chefs": available_chefs,
             "conflict_reason": conflict_reason,
             "booking_count": booking_count,
+            "capacity_mode": capacity_mode,
+            "days_until_event": days_until_event,
         }
 
     async def _get_available_chef_count(
@@ -162,8 +216,8 @@ class AvailabilityEngine:
             from db.models.ops import (
                 Chef,
                 ChefAvailability,
-                ChefTimeOff,
                 ChefStatus,
+                ChefTimeOff,
                 DayOfWeek,
                 TimeOffStatus,
             )
@@ -219,9 +273,13 @@ class AvailabilityEngine:
             result = await self.db.execute(final_query)
             available_chef_ids = result.scalars().all()
 
-            chef_count = len(set(available_chef_ids))  # Dedupe in case of multiple entries
+            chef_count = len(
+                set(available_chef_ids)
+            )  # Dedupe in case of multiple entries
 
-            logger.debug(f"Found {chef_count} available chefs for {event_date} at {slot_time}")
+            logger.debug(
+                f"Found {chef_count} available chefs for {event_date} at {slot_time}"
+            )
 
             return chef_count
 
@@ -236,15 +294,29 @@ class AvailabilityEngine:
         slot_time: time,
         slot_number: int,
     ) -> int:
-        """Get count of bookings for a specific date and slot."""
+        """
+        Get count of bookings AND active slot holds for a specific date and slot.
+
+        This prevents race conditions by counting:
+        1. Confirmed/pending bookings that occupy the slot
+        2. Active SlotHolds (pending agreement or signed awaiting deposit)
+
+        SlotHolds are counted if:
+        - Status is PENDING (customer viewing/signing agreement)
+        - Status is SIGNED (customer signed, awaiting deposit payment)
+        - NOT expired (expires_at > current time)
+        """
         if not self.db:
             return 0
 
+        booking_count = 0
+        hold_count = 0
+
         try:
+            # 1. Count confirmed/pending bookings
             from db.models.core import Booking
 
-            # Query bookings for this date and slot
-            query = select(Booking).where(
+            booking_query = select(Booking).where(
                 and_(
                     Booking.date == event_date,
                     Booking.slot == slot_time,
@@ -253,13 +325,51 @@ class AvailabilityEngine:
                 )
             )
 
-            result = await self.db.execute(query)
+            result = await self.db.execute(booking_query)
             bookings = result.scalars().all()
-            return len(bookings)
+            booking_count = len(bookings)
 
         except Exception as e:
             logger.warning(f"Error checking bookings: {e}")
-            return 0
+            # Continue to check holds even if booking check fails
+
+        try:
+            # 2. Count active slot holds (prevents race conditions)
+            from db.models.slot_hold import SlotHold, SlotHoldStatus
+
+            # Active holds are: (PENDING or SIGNED) AND not expired
+            hold_query = select(SlotHold).where(
+                and_(
+                    SlotHold.event_date == event_date,
+                    SlotHold.slot_time == slot_time,
+                    SlotHold.status.in_(
+                        [
+                            SlotHoldStatus.PENDING.value,
+                            SlotHoldStatus.SIGNED.value,
+                        ]
+                    ),
+                    SlotHold.expires_at > func.now(),  # Not expired
+                )
+            )
+
+            hold_result = await self.db.execute(hold_query)
+            holds = hold_result.scalars().all()
+            hold_count = len(holds)
+
+            if hold_count > 0:
+                logger.debug(
+                    f"Found {hold_count} active slot holds for {event_date} at {slot_time}"
+                )
+
+        except Exception as e:
+            logger.warning(f"Error checking slot holds: {e}")
+            # Don't fail completely - return booking count even if hold check fails
+
+        total_count = booking_count + hold_count
+        logger.debug(
+            f"Slot {event_date} at {slot_time}: {booking_count} bookings + {hold_count} holds = {total_count} total"
+        )
+        return total_count
 
     async def get_available_slots_for_date(
         self,

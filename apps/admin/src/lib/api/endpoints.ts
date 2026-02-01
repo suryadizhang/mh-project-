@@ -40,11 +40,29 @@ export const API_ENDPOINTS = {
     CUSTOMER_DETAIL: (id: string) => `${V1}/customers/${id}`,
     CUSTOMER_BOOKINGS: (id: string) => `${V1}/customers/${id}/bookings`,
 
-    // Chefs
-    CHEFS: `${V1}/chefs`,
-    CHEF_DETAIL: (id: string) => `${V1}/chefs/${id}`,
-    CHEF_AVAILABILITY: (id: string) => `${V1}/chefs/${id}/availability`,
-    CHEF_SCHEDULE: (id: string) => `${V1}/chefs/${id}/schedule`,
+    // Chefs (Admin view - all chefs)
+    CHEFS: `${V1}/chef-portal/station/chefs`,
+    CHEF_DETAIL: (id: string) => `${V1}/chef-portal/station/chefs/${id}`,
+    CHEF_AVAILABILITY: (id: string) =>
+      `${V1}/chef-portal/station/chefs/${id}/availability`,
+    // Note: CHEF_SCHEDULE is for admin to view a chef's schedule (not yet implemented)
+    CHEF_SCHEDULE: (id: string) =>
+      `${V1}/chef-portal/station/chefs/${id}/schedule`,
+
+    // Chef Portal (Chef self-service endpoints)
+    CHEF_PORTAL: {
+      ME: `${V1}/chef-portal/me`,
+      MY_AVAILABILITY: `${V1}/chef-portal/me/availability`,
+      MY_AVAILABILITY_BULK: `${V1}/chef-portal/me/availability/bulk`,
+      MY_AVAILABILITY_SLOT: (slotId: string) =>
+        `${V1}/chef-portal/me/availability/${slotId}`,
+      MY_TIMEOFF: `${V1}/chef-portal/me/timeoff`,
+      MY_TIMEOFF_REQUEST: (requestId: string) =>
+        `${V1}/chef-portal/me/timeoff/${requestId}`,
+      MY_SCHEDULE: `${V1}/chef-portal/me/schedule`,
+      MY_EVENTS: `${V1}/chef-portal/me/events`,
+      MY_EARNINGS: `${V1}/chef-portal/me/earnings`,
+    },
 
     // Stations
     STATIONS: `${V1}/stations`,
@@ -148,6 +166,17 @@ export const API_ENDPOINTS = {
     USER_DETAIL: (id: string) => `${ADMIN}/users/${id}/`,
     USER_ROLES: (id: string) => `${ADMIN}/users/${id}/roles/`,
     ADMIN_INVITATIONS: `${ADMIN}/invitations/`,
+
+    // VPS Security Monitoring
+    VPS_SECURITY_STATUS: `${ADMIN}/vps-security/status`,
+    VPS_SECURITY_JAILS: `${ADMIN}/vps-security/jails`,
+    VPS_SECURITY_BANNED_IPS: `${ADMIN}/vps-security/banned-ips`,
+    VPS_SECURITY_FIREWALL_RULES: `${ADMIN}/vps-security/firewall-rules`,
+    VPS_SECURITY_ATTACK_LOG: `${ADMIN}/vps-security/attack-log`,
+    VPS_SECURITY_STATS: `${ADMIN}/vps-security/stats`,
+    VPS_SECURITY_REPORT: `${ADMIN}/vps-security/report`,
+    VPS_SECURITY_UNBAN: `${ADMIN}/vps-security/unban`,
+    VPS_SECURITY_KNOWN_ATTACKERS: `${ADMIN}/vps-security/known-attackers`,
   },
 } as const;
 

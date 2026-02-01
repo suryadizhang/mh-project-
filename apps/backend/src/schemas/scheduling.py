@@ -17,7 +17,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
-
 # ============================================================================
 # Enums
 # ============================================================================
@@ -63,9 +62,15 @@ class AddressInput(BaseModel):
 class AddressCreateRequest(BaseModel):
     """Request to create/cache an address with geocoding."""
 
-    raw_address: str = Field(..., min_length=10, max_length=500, description="Full street address")
-    customer_id: Optional[UUID] = Field(None, description="Link to customer for saved addresses")
-    label: Optional[str] = Field(None, max_length=50, description="Label like 'Home', 'Work'")
+    raw_address: str = Field(
+        ..., min_length=10, max_length=500, description="Full street address"
+    )
+    customer_id: Optional[UUID] = Field(
+        None, description="Link to customer for saved addresses"
+    )
+    label: Optional[str] = Field(
+        None, max_length=50, description="Label like 'Home', 'Work'"
+    )
     is_default: bool = Field(False, description="Set as customer's default address")
 
 
@@ -92,7 +97,9 @@ class GeocodedAddressResponse(BaseModel):
     """Response from geocoding endpoint."""
 
     original_address: str
-    formatted_address: Optional[str] = Field(None, description="Normalized address from geocoder")
+    formatted_address: Optional[str] = Field(
+        None, description="Normalized address from geocoder"
+    )
     lat: Optional[Decimal]
     lng: Optional[Decimal]
     city: Optional[str]
@@ -205,6 +212,31 @@ class TravelTimeResponse(BaseModel):
 
 
 # ============================================================================
+# Available Chefs Schemas
+# ============================================================================
+
+
+class AvailableChefResponse(BaseModel):
+    """Response for individual available chef for assignment lookup."""
+
+    id: UUID
+    name: str
+    pay_rate_class: str = Field(
+        ..., description="Chef tier: new_chef, chef, senior_chef, station_manager"
+    )
+    is_available: bool
+    distance_miles: Optional[float] = Field(
+        None, description="Distance from station in miles"
+    )
+    conflicting_event: Optional[str] = Field(
+        None, description="Conflicting booking ID if unavailable"
+    )
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================================================
 # Chef Assignment Schemas
 # ============================================================================
 
@@ -233,7 +265,9 @@ class ChefScoreResponse(BaseModel):
     travel_score: float = Field(ge=0.0, le=100.0)
     skill_score: float = Field(ge=0.0, le=100.0)
     workload_score: float = Field(ge=0.0, le=100.0)
-    history_score: float = Field(ge=0.0, le=100.0, default=0.0)  # For future customer history
+    history_score: float = Field(
+        ge=0.0, le=100.0, default=0.0
+    )  # For future customer history
     travel_time_minutes: int
     is_preferred: bool = False
     notes: str = ""

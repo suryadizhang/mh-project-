@@ -3,6 +3,21 @@ FastAPI Main Application - Enhanced with Dependency Injection
 Unified API with operational and AI endpoints, enterprise architecture patterns
 """
 
+# ==============================================
+# STARTUP DEBUG LOGGING - Confirm module loaded
+# This file write happens at module import time
+# ==============================================
+import os as _os_debug
+import time as _time_debug
+
+_startup_debug_file = _os_debug.path.join(
+    _os_debug.path.dirname(__file__), "STARTUP_DEBUG.log"
+)
+with open(_startup_debug_file, "w") as _f:
+    _f.write(f"MAIN.PY LOADED AT: {_time_debug.strftime('%Y-%m-%d %H:%M:%S')}\n")
+    _f.write("This file proves the server loaded the latest main.py code\n")
+# ==============================================
+
 import asyncio
 import logging
 import os
@@ -161,6 +176,46 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(
             f"⚠️ GSM initialization error: {e} - using environment variables"
+        )
+
+    # ============================================================
+    # Email Credential Validation (Batch 1 - Full Redundancy)
+    # Validates email credentials on startup to catch configuration
+    # issues EARLY before email monitors fail silently
+    # ============================================================
+    email_config_issues = []
+
+    # Gmail credentials (payment email notifications)
+    gmail_user = os.getenv("GMAIL_USER")
+    gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")
+    if not gmail_user:
+        email_config_issues.append(
+            "GMAIL_USER is missing - payment email monitor will fail"
+        )
+    if not gmail_app_password:
+        email_config_issues.append(
+            "GMAIL_APP_PASSWORD is missing - payment email monitor will fail"
+        )
+
+    # IONOS credentials (customer support email)
+    ionos_password = os.getenv("SMTP_PASSWORD")
+    if not ionos_password:
+        email_config_issues.append(
+            "SMTP_PASSWORD is missing - IONOS email monitor will fail"
+        )
+
+    # Log validation results
+    if email_config_issues:
+        for issue in email_config_issues:
+            logger.warning(f"⚠️ EMAIL CONFIG: {issue}")
+        logger.warning(
+            "⚠️ EMAIL MONITORS MAY NOT FUNCTION CORRECTLY - "
+            f"Found {len(email_config_issues)} configuration issue(s). "
+            "Check .env file and restart after fixing."
+        )
+    else:
+        logger.info(
+            "✅ Email credentials validated: Gmail (payment) + IONOS (support) ready"
         )
 
     # Initialize Cache Service with timeout (non-blocking)
@@ -498,6 +553,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+# ============================================================================
+# ASGI debug middleware temporarily disabled - was causing RuntimeError
+# See: asgi_exception.log for previous logs
+logger.info("⚠️ ASGI exception logger middleware DISABLED (was causing RuntimeError)")
+
 # SlowAPI rate limiting integration (secondary layer)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -520,6 +581,19 @@ app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 async def enhanced_global_exception_handler(request: Request, exc: Exception):
     """Global exception handler with Sentry integration"""
     request_id = request.headers.get("X-Request-ID", "unknown")
+
+    # FILE-BASED DEBUG LOGGING - Write exception to file for debugging
+    import traceback
+
+    debug_file = os.path.join(os.path.dirname(__file__), "exception_debug.log")
+    with open(debug_file, "a") as f:
+        f.write(f"\n{'='*60}\n")
+        f.write(f"EXCEPTION at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Request: {request.method} {request.url}\n")
+        f.write(f"Exception: {type(exc).__name__}: {exc}\n")
+        f.write(f"Traceback:\n{traceback.format_exc()}\n")
+        f.write(f"{'='*60}\n")
+
     logger.error(
         f"Unhandled error on {request.method} {request.url}: {exc}",
         extra={"request_id": request_id},
@@ -616,7 +690,9 @@ try:
     from middleware.rate_limit import RateLimitMiddleware
 
     app.add_middleware(RateLimitMiddleware, redis_url=settings.redis_url)
-    logger.info("✅ Login rate limit middleware registered (3 attempts, 1-hour lockout)")
+    logger.info(
+        "✅ Login rate limit middleware registered (3 attempts, 1-hour lockout)"
+    )
 except ImportError as e:
     logger.warning(f"⚠️ Login rate limit middleware not available: {e}")
 except Exception as e:
@@ -987,7 +1063,9 @@ try:
     from routers.v1.scheduling import router as scheduling_router
 
     app.include_router(scheduling_router, prefix="/api/v1", tags=["scheduling"])
-    logger.info("✅ Smart Scheduling endpoints included (availability, chef assignment)")
+    logger.info(
+        "✅ Smart Scheduling endpoints included (availability, chef assignment)"
+    )
 except ImportError as e:
     logger.warning(f"Smart Scheduling endpoints not available: {e}")
 
@@ -1001,6 +1079,30 @@ try:
     )
 except ImportError as e:
     logger.warning(f"Chef Portal endpoints not available: {e}")
+
+# Include Chef Pay endpoints (Chef earnings calculation + Station Manager/Admin oversight)
+try:
+    from routers.v1.chef_pay import router as chef_pay_router
+
+    app.include_router(chef_pay_router, prefix="/api/v1", tags=["chef-pay"])
+    logger.info(
+        "✅ Chef Pay endpoints included (earnings calculation, pay rate management)"
+    )
+except ImportError as e:
+    logger.warning(f"Chef Pay endpoints not available: {e}")
+
+# Include Customer Preferences endpoints (Chef request tracking + Allergen capture)
+try:
+    from routers.v1.customer_preferences import router as customer_preferences_router
+
+    app.include_router(
+        customer_preferences_router, prefix="/api/v1", tags=["customer-preferences"]
+    )
+    logger.info(
+        "✅ Customer Preferences endpoints included (chef request, allergen disclosure)"
+    )
+except ImportError as e:
+    logger.warning(f"Customer Preferences endpoints not available: {e}")
 
 # Include Legal Agreements endpoints (Batch 1.x - Liability waiver, allergen disclosure)
 try:
@@ -1089,7 +1191,7 @@ try:
     )
     app.include_router(
         station_admin_router,
-        prefix="/api/admin/stations",
+        prefix="/api/v1/admin/stations",
         tags=["station-admin"],
     )
     logger.info(
@@ -1169,12 +1271,25 @@ try:
 
     app.include_router(
         audit_logs_router,
-        prefix="/api/admin/audit-logs",
+        prefix="/api/v1/admin/audit-logs",
         tags=["admin", "audit-logs", "superadmin"],
     )
     logger.info("✅ Admin Audit Logs endpoints included")
 except ImportError as e:
     logger.error(f"❌ Admin Audit Logs endpoints not available: {e}")
+
+# Staff Invitations (role-based invitation system)
+try:
+    from routers.v1.admin.invitations import router as invitations_router
+
+    app.include_router(
+        invitations_router,
+        prefix="/api/v1/admin/invitations",
+        tags=["admin", "invitations", "staff"],
+    )
+    logger.info("✅ Staff Invitations endpoints included")
+except ImportError as e:
+    logger.error(f"❌ Staff Invitations endpoints not available: {e}")
 
 # Notification Groups Admin - NEW location
 try:
@@ -1184,7 +1299,7 @@ try:
 
     app.include_router(
         notification_groups_router,
-        prefix="/api/admin/notification-groups",
+        prefix="/api/v1/admin/notification-groups",
         tags=["admin", "notifications"],
     )
     logger.info("✅ Notification Groups Admin included from NEW location")
@@ -1201,6 +1316,17 @@ try:
     logger.info("✅ Admin Analytics endpoints included from NEW location")
 except ImportError as e:
     logger.error(f"❌ Admin Analytics endpoints not available: {e}")
+
+# VPS Security Monitoring (fail2ban/firewalld status, banned IPs) - NEW
+try:
+    from routers.v1.vps_security import router as vps_security_router
+
+    app.include_router(
+        vps_security_router, prefix="/api/admin", tags=["admin", "vps-security"]
+    )
+    logger.info("✅ VPS Security Monitoring endpoints included (fail2ban/firewalld)")
+except ImportError as e:
+    logger.error(f"❌ VPS Security Monitoring endpoints not available: {e}")
 
 # Admin Email Management (Gmail-style interface for 2 inboxes) - NEW
 try:
@@ -1459,7 +1585,7 @@ try:
 
     app.include_router(
         analytics_router,
-        prefix="/api/admin/analytics",
+        prefix="/api/v1/admin/analytics",
         tags=["Admin Analytics"],
     )
     logger.info("✅ Admin Analytics endpoints included (6 composite endpoints)")
@@ -1510,7 +1636,7 @@ try:
 
     app.include_router(
         email_review_router,
-        prefix="/api/admin/emails",
+        prefix="/api/v1/admin/emails",
         tags=["Admin Email Review"],
     )
     logger.info(

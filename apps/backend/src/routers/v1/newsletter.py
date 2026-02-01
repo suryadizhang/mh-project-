@@ -15,40 +15,38 @@
 # =============================================================================
 """
 
-from datetime import datetime, timedelta, timezone
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
-from core.database import get_db
-
-# FIXED: Import from db.models (NEW system) instead of models (OLD system)
-from db.models.newsletter import (
-    Campaign,
-    CampaignEvent,
-    Subscriber,
-    CampaignChannel,
-    CampaignEventType,
-    CampaignStatus,
-)
-from services.ai_lead_management import get_social_media_ai
-from fastapi import (
-    APIRouter,
-    BackgroundTasks,
-    Depends,
-    HTTPException,
-    Query,
-    status,
-)
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import and_, desc, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from api.deps import get_current_admin_user
+from core.database import get_db
+from db.models.identity import User
+
+# FIXED: Import from db.models (NEW system) instead of models (OLD system)
+from db.models.newsletter import (
+    Campaign,
+    CampaignChannel,
+    CampaignEvent,
+    CampaignEventType,
+    CampaignStatus,
+    Subscriber,
+)
+from services.ai_lead_management import get_social_media_ai
+
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/newsletter", tags=["newsletter"])
-analytics_router = APIRouter(prefix="/newsletter/analytics", tags=["newsletter-analytics"])
+analytics_router = APIRouter(
+    prefix="/newsletter/analytics", tags=["newsletter-analytics"]
+)
 
 
 # Pydantic models
@@ -165,7 +163,11 @@ class CampaignEventResponse(BaseModel):
 
 # Subscriber endpoints
 @router.post("/subscribers", response_model=SubscriberResponse)
-async def create_subscriber(subscriber_data: SubscriberCreate, db: AsyncSession = Depends(get_db)):
+async def create_subscriber(
+    subscriber_data: SubscriberCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """Create a new newsletter subscriber."""
 
     # Check if subscriber already exists
@@ -207,6 +209,7 @@ async def list_subscribers(
     limit: int = Query(50, le=100),
     offset: int = Query(0),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """List newsletter subscribers with filtering."""
 
@@ -232,7 +235,11 @@ async def list_subscribers(
 
 
 @router.get("/subscribers/{subscriber_id}", response_model=SubscriberResponse)
-async def get_subscriber(subscriber_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_subscriber(
+    subscriber_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """Get subscriber details."""
 
     stmt = select(Subscriber).where(Subscriber.id == subscriber_id)
@@ -253,6 +260,7 @@ async def update_subscriber(
     subscriber_id: UUID,
     subscriber_update: SubscriberUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Update subscriber information."""
 
@@ -295,7 +303,11 @@ async def update_subscriber(
 
 
 @router.delete("/subscribers/{subscriber_id}")
-async def unsubscribe_subscriber(subscriber_id: UUID, db: AsyncSession = Depends(get_db)):
+async def unsubscribe_subscriber(
+    subscriber_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """Unsubscribe a subscriber."""
 
     subscriber = (
@@ -345,8 +357,8 @@ async def public_unsubscribe_email(
     """
     from core.compliance import get_compliance_validator
     from core.config import get_settings
-    from services.newsletter_service import SubscriberService
     from services.event_service import EventService
+    from services.newsletter_service import SubscriberService
 
     settings = get_settings()
     compliance = get_compliance_validator()
@@ -556,8 +568,8 @@ async def public_unsubscribe_email(
 @router.post("/campaigns", response_model=CampaignResponse)
 async def create_campaign(
     campaign_data: CampaignCreate,
-    current_user: str = "system",  # TODO: Get from auth
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Create a new marketing campaign."""
 
@@ -584,6 +596,7 @@ async def list_campaigns(
     limit: int = Query(50, le=100),
     offset: int = Query(0),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """List marketing campaigns."""
 
@@ -595,20 +608,30 @@ async def list_campaigns(
     if channel:
         query = query.where(Campaign.channel == channel)
 
-    campaigns = query.order_by(desc(Campaign.created_at)).offset(offset).limit(limit).all()
+    campaigns = (
+        query.order_by(desc(Campaign.created_at)).offset(offset).limit(limit).all()
+    )
 
     return campaigns
 
 
 @router.get("/campaigns/{campaign_id}", response_model=CampaignResponse)
-async def get_campaign(campaign_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_campaign(
+    campaign_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """Get campaign details."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+        .scalars()
+        .first()
     )
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     return campaign
 
@@ -618,14 +641,19 @@ async def update_campaign(
     campaign_id: UUID,
     campaign_update: CampaignUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Update campaign information."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+        .scalars()
+        .first()
     )
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     if campaign.status in [CampaignStatus.SENT, CampaignStatus.SENDING]:
         raise HTTPException(
@@ -646,14 +674,19 @@ async def send_campaign(
     campaign_id: UUID,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Send campaign to subscribers."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+        .scalars()
+        .first()
     )
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     if campaign.status != CampaignStatus.DRAFT:
         raise HTTPException(
@@ -675,14 +708,22 @@ async def send_campaign(
 
 
 @router.get("/campaigns/{campaign_id}/stats", response_model=CampaignStatsResponse)
-async def get_campaign_stats(campaign_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_campaign_stats(
+    campaign_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """Get campaign performance statistics."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+        .scalars()
+        .first()
     )
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     # Count events by type
     stmt = (
@@ -724,6 +765,7 @@ async def get_campaign_events(
     limit: int = Query(100, le=500),
     offset: int = Query(0),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get campaign events."""
 
@@ -732,7 +774,12 @@ async def get_campaign_events(
     if event_type:
         query = query.where(CampaignEvent.type == event_type)
 
-    events = query.order_by(desc(CampaignEvent.occurred_at)).offset(offset).limit(limit).all()
+    events = (
+        query.order_by(desc(CampaignEvent.occurred_at))
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
     return events
 
@@ -742,6 +789,7 @@ async def generate_campaign_content(
     campaign_type: str,
     target_audience: str,
     additional_context: dict[str, Any] | None = None,
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Generate AI-powered campaign content."""
 
@@ -757,7 +805,11 @@ async def generate_campaign_content(
 
 # Segmentation endpoints
 @router.get("/segments/preview")
-async def preview_segment(filter_criteria: dict[str, Any], db: AsyncSession = Depends(get_db)):
+async def preview_segment(
+    filter_criteria: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+):
     """Preview subscribers matching segment criteria."""
 
     query = select(Subscriber).where(Subscriber.subscribed)
@@ -767,10 +819,14 @@ async def preview_segment(filter_criteria: dict[str, Any], db: AsyncSession = De
         query = query.where(Subscriber.tags.overlap(filter_criteria["tags"]))
 
     if "engagement_min" in filter_criteria:
-        query = query.where(Subscriber.engagement_score >= filter_criteria["engagement_min"])
+        query = query.where(
+            Subscriber.engagement_score >= filter_criteria["engagement_min"]
+        )
 
     if "engagement_max" in filter_criteria:
-        query = query.where(Subscriber.engagement_score <= filter_criteria["engagement_max"])
+        query = query.where(
+            Subscriber.engagement_score <= filter_criteria["engagement_max"]
+        )
 
     if "last_opened_days" in filter_criteria:
         cutoff_date = datetime.now(timezone.utc) - timedelta(
@@ -868,8 +924,8 @@ async def _send_campaign_async(campaign_id: UUID):
             # Initialize services
             from core.compliance import get_compliance_validator
             from core.config import get_settings
-            from services.ringcentral_sms import RingCentralSMSService
             from services.newsletter.sms_service import NewsletterSMSService
+            from services.ringcentral_sms import RingCentralSMSService
 
             settings = get_settings()
             compliance_validator = get_compliance_validator()
@@ -884,7 +940,9 @@ async def _send_campaign_async(campaign_id: UUID):
                     )
 
                     # Send to SMS subscribers
-                    sms_content = campaign.content.get("text", campaign.content.get("html", ""))
+                    sms_content = campaign.content.get(
+                        "text", campaign.content.get("html", "")
+                    )
 
                     for subscriber in subscribers:
                         if not subscriber.sms_consent or not subscriber.phone_enc:
@@ -924,8 +982,12 @@ async def _send_campaign_async(campaign_id: UUID):
                                 db.add(delivery_event)
 
                                 # Update subscriber stats
-                                subscriber.total_sms_sent = (subscriber.total_sms_sent or 0) + 1
-                                subscriber.last_sms_sent_date = datetime.now(timezone.utc)
+                                subscriber.total_sms_sent = (
+                                    subscriber.total_sms_sent or 0
+                                ) + 1
+                                subscriber.last_sms_sent_date = datetime.now(
+                                    timezone.utc
+                                )
 
                                 logger.info(
                                     f"✅ SMS campaign sent: {phone[-4:]}",
@@ -985,6 +1047,7 @@ async def _send_campaign_async(campaign_id: UUID):
 async def get_analytics_dashboard(
     days: int = Query(30, ge=1, le=365, description="Number of days to look back"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get comprehensive analytics dashboard overview.
 
@@ -1018,6 +1081,7 @@ async def get_analytics_dashboard(
 async def get_campaign_analytics(
     campaign_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get detailed analytics for a specific campaign.
 
@@ -1057,6 +1121,7 @@ async def get_campaign_analytics(
 async def get_subscriber_analytics(
     subscriber_id: UUID,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get lifetime analytics for a specific subscriber.
 
@@ -1096,8 +1161,10 @@ async def get_subscriber_analytics(
 @analytics_router.get("/trend")
 async def get_unsubscribe_trend(
     days: int = Query(30, ge=1, le=365, description="Number of days to look back"),
-    channel: str | None = Query(None, description="Filter by channel: EMAIL, SMS, or BOTH"),
+    channel: str
+    | None = Query(None, description="Filter by channel: EMAIL, SMS, or BOTH"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get daily unsubscribe trend for the past N days.
 
@@ -1147,6 +1214,7 @@ async def get_compliance_report(
     start_date: datetime | None = Query(None, description="Start date (ISO format)"),
     end_date: datetime | None = Query(None, description="End date (ISO format)"),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
 ):
     """Get comprehensive compliance report.
 
