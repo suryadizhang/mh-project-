@@ -4,17 +4,18 @@ Runs daily to send review SMS 1 day after booking completion.
 """
 
 import asyncio
-from datetime import datetime, timedelta, timezone
 import logging
+from datetime import datetime, timedelta, timezone
 
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.config import get_settings
 from core.database import AsyncSessionLocal
 from db.models.core import Booking, Customer
 
-# MIGRATED: from models.legacy_feedback → db.models.legacy_feedback
-from db.models.legacy_feedback import CustomerReview
-from core.config import get_settings
-from sqlalchemy import and_, select
-from sqlalchemy.ext.asyncio import AsyncSession
+# FIXED: Import from correct module (feedback_marketing, not legacy_feedback)
+from db.models.feedback_marketing import CustomerReview, DiscountCoupon
 
 settings = get_settings()
 
@@ -72,7 +73,9 @@ class ReviewRequestWorker:
                 result = await db.execute(query)
                 bookings = result.scalars().all()
 
-                logger.info(f"Found {len(bookings)} bookings eligible for review requests")
+                logger.info(
+                    f"Found {len(bookings)} bookings eligible for review requests"
+                )
 
                 sent_count = 0
                 for booking in bookings:
@@ -101,16 +104,17 @@ class ReviewRequestWorker:
                 return False
 
             # Decrypt customer data (assuming you have encryption)
-            from utils.encryption import (
-                decrypt_field,
-                get_field_encryption,
-            )
+            from utils.encryption import decrypt_field, get_field_encryption
 
             field_encryption = get_field_encryption()
 
             try:
-                customer_phone = decrypt_field(customer.phone_encrypted, field_encryption.key)
-                customer_name = decrypt_field(customer.name_encrypted, field_encryption.key)
+                customer_phone = decrypt_field(
+                    customer.phone_encrypted, field_encryption.key
+                )
+                customer_name = decrypt_field(
+                    customer.name_encrypted, field_encryption.key
+                )
             except Exception as e:
                 logger.exception(f"Error decrypting customer data: {e}")
                 return False
@@ -122,7 +126,9 @@ class ReviewRequestWorker:
 
             # Create review record
             review = await review_service.create_review_request(
-                booking_id=booking.id, customer_id=customer.id, station_id=booking.station_id
+                booking_id=booking.id,
+                customer_id=customer.id,
+                station_id=booking.station_id,
             )
 
             if not review:
@@ -138,7 +144,9 @@ class ReviewRequestWorker:
             )
 
             if success:
-                logger.info(f"Successfully sent review request for booking {booking.id}")
+                logger.info(
+                    f"Successfully sent review request for booking {booking.id}"
+                )
                 return True
             else:
                 logger.error(f"Failed to send SMS for booking {booking.id}")
@@ -146,7 +154,8 @@ class ReviewRequestWorker:
 
         except Exception as e:
             logger.error(
-                f"Error sending review request for booking {booking.id}: {e}", exc_info=True
+                f"Error sending review request for booking {booking.id}: {e}",
+                exc_info=True,
             )
             return False
 
@@ -186,7 +195,9 @@ class ReviewRequestWorker:
                 logger.error(f"Error sending review reminders: {e}", exc_info=True)
                 return 0
 
-    async def _send_review_reminder(self, db: AsyncSession, review: CustomerReview) -> bool:
+    async def _send_review_reminder(
+        self, db: AsyncSession, review: CustomerReview
+    ) -> bool:
         """Send reminder SMS for pending review."""
         try:
             # Get customer details
@@ -199,14 +210,13 @@ class ReviewRequestWorker:
                 return False
 
             # Decrypt customer data
-            from utils.encryption import (
-                decrypt_field,
-                get_field_encryption,
-            )
+            from utils.encryption import decrypt_field, get_field_encryption
 
             field_encryption = get_field_encryption()
 
-            customer_phone = decrypt_field(customer.phone_encrypted, field_encryption.key)
+            customer_phone = decrypt_field(
+                customer.phone_encrypted, field_encryption.key
+            )
             customer_name = decrypt_field(customer.name_encrypted, field_encryption.key)
 
             # Send reminder SMS
@@ -220,13 +230,17 @@ class ReviewRequestWorker:
             )
 
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(to_number=customer_phone, message=message)
+                response = await sms_service.send_sms(
+                    to_number=customer_phone, message=message
+                )
 
             if response.success:
                 # Update metadata to track reminder sent
                 if not review.metadata:
                     review.metadata = {}
-                review.metadata["reminder_sent_at"] = datetime.now(timezone.utc).isoformat()
+                review.metadata["reminder_sent_at"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
                 await db.commit()
 
                 logger.info(f"Sent reminder for review {review.id}")
@@ -242,7 +256,8 @@ class ReviewRequestWorker:
         """Mark expired coupons as expired. Returns number of coupons updated."""
         async with AsyncSessionLocal() as db:
             try:
-                from models.legacy_feedback import DiscountCoupon
+                # FIXED: Import from correct module (already imported at top, using local import for lazy loading)
+                from db.models.feedback_marketing import DiscountCoupon
 
                 # Find active coupons past expiration
                 query = select(DiscountCoupon).where(
@@ -293,7 +308,8 @@ async def run_review_worker():
 # For running as standalone script
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     asyncio.run(run_review_worker())

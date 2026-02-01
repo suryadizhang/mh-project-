@@ -1,0 +1,95 @@
+# =============================================================================
+# Docker Compose - Staging Environment
+# =============================================================================
+# Lightweight compose for staging API on VPS.
+# Does NOT include PostgreSQL (uses VPS native database).
+#
+# Usage:
+#   docker compose -f docker-compose.staging.yml up -d
+#   docker compose -f docker-compose.staging.yml logs -f
+#   docker compose -f docker-compose.staging.yml down
+#
+# Environment:
+#   Create .env.staging with production-like values before running.
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =========================================================================
+  # Staging API (Port 8002)
+  # =========================================================================
+  staging-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        COMPONENT: backend
+      target: backend
+    container_name: myhibachi-staging-api
+    restart: unless-stopped
+    ports:
+      - "8002:8000" # Maps container port 8000 to host port 8002
+    environment:
+      - ENVIRONMENT=staging
+      # Database: Connect to VPS PostgreSQL (NOT containerized)
+      - DATABASE_URL=${DATABASE_URL_STAGING}
+      - DATABASE_URL_SYNC=${DATABASE_URL_SYNC_STAGING}
+      # Redis: Optional (can use VPS Redis or skip)
+      - REDIS_URL=${REDIS_URL:-redis://localhost:6379/0}
+      # Security
+      - SECRET_KEY=${SECRET_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      # Stripe (use test keys for staging)
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      # CORS
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-["https://staging.myhibachichef.com","https://admin-staging.mysticdatanode.net"]}
+    volumes:
+      - staging_logs:/app/logs
+    networks:
+      - myhibachi-staging-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.myhibachi.environment=staging"
+      - "com.myhibachi.service=api"
+
+  # =========================================================================
+  # Optional: Redis for Staging (if not using VPS Redis)
+  # =========================================================================
+  staging-redis:
+    image: redis:7-alpine
+    container_name: myhibachi-staging-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - staging_redis_data:/data
+    networks:
+      - myhibachi-staging-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  staging_logs:
+    driver: local
+  staging_redis_data:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  myhibachi-staging-network:
+    driver: bridge

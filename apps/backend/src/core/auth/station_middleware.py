@@ -3,31 +3,39 @@ Station-Aware Middleware and Permission Enforcement
 Implements multi-tenant permission checking with station context.
 """
 
+import logging
 from collections.abc import Callable
 from functools import wraps
-import logging
 from typing import Any
 from uuid import UUID
 
-from db.models.identity import StationUser  # Junction table for station-user relationships
-from db.models.identity.users import User  # User model for auth checks
-from core.auth.models import UserSession, UserStatus  # Phase 2C: Updated from api.app.auth.models
-from core.auth.station_auth import (  # Phase 2C: Updated from api.app.auth.station_auth
-    StationAuthenticationService,
-    StationContext,
-)
-
-# Import enums from canonical identity models (migrated from deprecated station_models)
-from db.models.identity import (
-    StationPermission,
-    StationRole,
-)
-from core.database import get_db_session  # Phase 2C: Updated from api.app.database
-from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
+    UserSession,
+    UserStatus,
+)
+from core.auth.station_auth import (  # Phase 2C: Updated from api.app.auth.station_auth
+    StationAuthenticationService,
+    StationContext,
+)
+from core.database import get_db_session  # Phase 2C: Updated from api.app.database
+
+# Import enums from canonical identity models (migrated from deprecated station_models)
+from db.models.identity import (
+    StationUser,  # Junction table for station-user relationships
+)
+from db.models.identity import (
+    StationPermission,
+    StationRole,
+)
+from db.models.identity.users import User  # User model for auth checks
+from utils.encryption import (
+    FieldEncryption,  # Phase 2C: Updated from api.app.utils.encryption
+)
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +71,8 @@ class AuthenticatedUser:
         try:
             from core.config import get_settings
 
-            settings = get_settings()
-            encryption = FieldEncryption(settings.field_encryption_key)
+            # Use FieldEncryption() without args - it auto-loads and base64-decodes from settings
+            encryption = FieldEncryption()
             return encryption.decrypt(self.user.email_encrypted)
         except Exception:
             return None
@@ -83,7 +91,9 @@ class AuthenticatedUser:
         if not target_station:
             return False
 
-        return self.station_context.has_permission_in_station(permission, target_station)
+        return self.station_context.has_permission_in_station(
+            permission, target_station
+        )
 
     def can_access_station(self, station_id: UUID) -> bool:
         """Check if user can access a specific station."""
@@ -99,7 +109,9 @@ class AuthenticatedUser:
 
 
 async def get_current_station_user(
-    request: Request, credentials=Depends(security), db: AsyncSession = Depends(get_db_session)
+    request: Request,
+    credentials=Depends(security),
+    db: AsyncSession = Depends(get_db_session),
 ) -> AuthenticatedUser:
     """Enhanced dependency to get current authenticated user with station context."""
 
@@ -113,16 +125,18 @@ async def get_current_station_user(
 
         settings = get_settings()
         # Initialize services
-        encryption = FieldEncryption(settings.field_encryption_key)
+        # Use FieldEncryption() without args - it auto-loads and base64-decodes from settings
+        encryption = FieldEncryption()
         auth_service = StationAuthenticationService(
-            encryption=encryption, jwt_secret=settings.jwt_secret_key
+            encryption=encryption, jwt_secret=settings.JWT_SECRET or settings.SECRET_KEY
         )
 
         # Verify JWT token
         token_payload = auth_service.verify_jwt_token(credentials.credentials, "access")
         if not token_payload:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token",
             )
 
         user_id = UUID(token_payload["sub"])
@@ -146,7 +160,8 @@ async def get_current_station_user(
 
         if not session or session.status != "active":
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Session not found or inactive"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session not found or inactive",
             )
 
         # Extract station context from token
@@ -190,7 +205,8 @@ async def get_current_station_user(
     except Exception as e:
         logger.exception(f"Authentication error: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Authentication service error"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authentication service error",
         )
 
 
@@ -226,7 +242,8 @@ def require_station_permission(
         target_station = station_id or auth_user.current_station_id
         if not target_station:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="No station context available"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No station context available",
             )
 
         # Check cross-station permission if needed
@@ -249,7 +266,9 @@ def require_station_permission(
     return permission_checker
 
 
-def require_station_role(minimum_role: StationRole | str, station_id: UUID | None = None):
+def require_station_role(
+    minimum_role: StationRole | str, station_id: UUID | None = None
+):
     """
     FastAPI dependency to require minimum station role.
 
@@ -274,7 +293,8 @@ def require_station_role(minimum_role: StationRole | str, station_id: UUID | Non
                 min_role = StationRole(minimum_role)
             except ValueError:
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid role: {minimum_role}"
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Invalid role: {minimum_role}",
                 )
         else:
             min_role = minimum_role
@@ -283,14 +303,16 @@ def require_station_role(minimum_role: StationRole | str, station_id: UUID | Non
         target_station = station_id or auth_user.current_station_id
         if not target_station:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="No station context available"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No station context available",
             )
 
         # Check user's role in target station
         user_role = auth_user.station_context.get_role_for_station(target_station)
         if not user_role:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="No role assigned for this station"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No role assigned for this station",
             )
 
         # Check role hierarchy
@@ -342,7 +364,8 @@ def require_station_access(station_id_param: UUID | str | Callable):
         # Check access
         if not auth_user.can_access_station(target_station_id):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Access to this station not permitted"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access to this station not permitted",
             )
 
         return auth_user
@@ -365,17 +388,22 @@ async def audit_log_action(
         from core.config import get_settings
 
         settings = get_settings()
-        encryption = FieldEncryption(settings.field_encryption_key)
+        # Use FieldEncryption() without args - it auto-loads and base64-decodes from settings
+        encryption = FieldEncryption()
         auth_service = StationAuthenticationService(
-            encryption=encryption, jwt_secret=settings.jwt_secret_key
+            encryption=encryption, jwt_secret=settings.JWT_SECRET or settings.SECRET_KEY
         )
 
         # Get current role for logging
-        current_role = auth_user.station_context.get_role_for_station(auth_user.current_station_id)
+        current_role = auth_user.station_context.get_role_for_station(
+            auth_user.current_station_id
+        )
 
         # Get permissions used (from station context)
         permissions_used = list(
-            auth_user.station_context.get_permissions_for_station(auth_user.current_station_id)
+            auth_user.station_context.get_permissions_for_station(
+                auth_user.current_station_id
+            )
         )
 
         await auth_service.log_station_action(
@@ -389,7 +417,9 @@ async def audit_log_action(
             user_role=current_role.value if current_role else None,
             permissions_used=permissions_used,
             details=details,
-            ip_address=auth_user.request.client.host if auth_user.request.client else None,
+            ip_address=(
+                auth_user.request.client.host if auth_user.request.client else None
+            ),
             user_agent=auth_user.request.headers.get("user-agent"),
             success=success,
             error_message=error_message,

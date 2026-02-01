@@ -3,15 +3,16 @@ Comprehensive health check endpoints for MyHibachi Backend.
 Provides detailed system status, database connectivity, and external service checks.
 """
 
-from datetime import datetime, timezone
 import time
+from datetime import datetime, timezone
 from typing import Any
 
-from core.database import get_db_context
-from sqlalchemy import text
-from schemas.health import HealthResponse, ReadinessResponse
-from core.config import get_settings
 from fastapi import APIRouter, HTTPException
+from sqlalchemy import text
+
+from core.config import get_settings
+from core.database import get_db_context
+from schemas.health import HealthResponse, ReadinessResponse
 
 settings = get_settings()
 import logging
@@ -160,6 +161,98 @@ async def liveness_check():
     }
 
 
+@router.get("/email-monitors")
+async def email_monitors_health():
+    """
+    Health check for email monitoring systems (Gmail + IONOS).
+
+    Returns status of both email monitors including:
+    - Last check timestamp
+    - Last successful check
+    - Consecutive failure count
+    - Last error message (if any)
+
+    Used by admin dashboard to display email monitor status.
+    Part of Batch 1: Full Redundancy email monitoring system.
+    """
+    import os
+    from datetime import timezone
+
+    try:
+        # Try to get status from Celery task
+        # Import here to avoid circular imports at module level
+        from workers.email_monitoring_tasks import (
+            EMAIL_MONITOR_STATUS,
+            get_monitor_health,
+            validate_email_credentials,
+        )
+
+        # Get current credentials status
+        creds = validate_email_credentials()
+
+        # Get monitor status from the shared state
+        health = get_monitor_health.delay().get(timeout=5)
+
+        # Determine overall health
+        gmail_healthy = (
+            health["gmail"]["consecutive_failures"] == 0 and creds["gmail"]["valid"]
+        )
+        ionos_healthy = (
+            health["ionos"]["consecutive_failures"] == 0 and creds["ionos"]["valid"]
+        )
+
+        overall_status = "healthy" if (gmail_healthy and ionos_healthy) else "degraded"
+        if (
+            health["gmail"]["consecutive_failures"] >= 3
+            or health["ionos"]["consecutive_failures"] >= 3
+        ):
+            overall_status = "unhealthy"
+
+        return {
+            "status": overall_status,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "monitors": {
+                "gmail": {
+                    **health["gmail"],
+                    "credentials_valid": creds["gmail"]["valid"],
+                    "credentials_missing": creds["gmail"]["missing"],
+                    "healthy": gmail_healthy,
+                    "description": "Payment email notifications (myhibachichef@gmail.com)",
+                },
+                "ionos": {
+                    **health["ionos"],
+                    "credentials_valid": creds["ionos"]["valid"],
+                    "credentials_missing": creds["ionos"]["missing"],
+                    "healthy": ionos_healthy,
+                    "description": "Customer support emails (cs@myhibachichef.com)",
+                },
+            },
+            "configuration": {
+                "gmail_user_set": bool(os.getenv("GMAIL_USER")),
+                "gmail_password_set": bool(os.getenv("GMAIL_APP_PASSWORD")),
+                "ionos_password_set": bool(os.getenv("SMTP_PASSWORD")),
+            },
+        }
+
+    except Exception as e:
+        # Celery task failed or not available - return what we can
+        import os
+
+        logger.warning(f"Email monitor health check degraded: {e}")
+
+        return {
+            "status": "unknown",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "error": f"Could not retrieve monitor status: {str(e)}",
+            "configuration": {
+                "gmail_user_set": bool(os.getenv("GMAIL_USER")),
+                "gmail_password_set": bool(os.getenv("GMAIL_APP_PASSWORD")),
+                "ionos_password_set": bool(os.getenv("SMTP_PASSWORD")),
+            },
+            "hint": "Celery worker may not be running. Check with: celery -A workers.celery_config status",
+        }
+
+
 @router.get("/detailed")
 async def detailed_health_check():
     """
@@ -203,4 +296,6 @@ async def detailed_health_check():
         }
     except Exception as e:
         logger.exception(f"Detailed health check failed: {e}")
-        raise HTTPException(status_code=503, detail=f"Detailed health check failed: {e!s}")
+        raise HTTPException(
+            status_code=503, detail=f"Detailed health check failed: {e!s}"
+        )

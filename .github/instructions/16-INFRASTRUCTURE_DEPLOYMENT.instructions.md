@@ -182,19 +182,19 @@ postgresql+asyncpg://myhibachi_user:<PASSWORD>@localhost:5432/myhibachi_producti
 
 ### Staging Database (VPS - ACTIVE)
 
-| Property     | Value                                        |
-| ------------ | -------------------------------------------- |
-| **Type**     | PostgreSQL 13.22                             |
-| **Host**     | `localhost` (from VPS)                       |
-| **Port**     | `5432`                                       |
-| **Database** | `myhibachi_staging`                          |
-| **User**     | `myhibachi_staging_user`                     |
-| **Password** | `<STAGING_DB_PASSWORD>` (get from team lead) |
+| Property     | Value                    |
+| ------------ | ------------------------ |
+| **Type**     | PostgreSQL 13.22         |
+| **Host**     | `localhost` (from VPS)   |
+| **Port**     | `5432`                   |
+| **Database** | `myhibachi_staging`      |
+| **User**     | `myhibachi_staging_user` |
+| **Password** | `***REMOVED***`          |
 
 **Connection String (on VPS):**
 
 ```
-postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@localhost:5432/myhibachi_staging
+postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@localhost:5432/myhibachi_staging
 ```
 
 ### Local Development (SSH Tunnel to Staging) ⭐ PREFERRED
@@ -202,13 +202,13 @@ postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@localhost:5432
 **🚫 DEPRECATED:** Supabase and local SQLite are NO LONGER USED. We
 now use an SSH tunnel to connect to the VPS staging database.
 
-| Property       | Value                                        |
-| -------------- | -------------------------------------------- |
-| **Type**       | PostgreSQL 13.22 (VPS via SSH)               |
-| **Local Port** | `5433` (tunneled to VPS:5432)                |
-| **Database**   | `myhibachi_staging`                          |
-| **User**       | `myhibachi_staging_user`                     |
-| **Password**   | `<STAGING_DB_PASSWORD>` (get from team lead) |
+| Property       | Value                          |
+| -------------- | ------------------------------ |
+| **Type**       | PostgreSQL 13.22 (VPS via SSH) |
+| **Local Port** | `5433` (tunneled to VPS:5432)  |
+| **Database**   | `myhibachi_staging`            |
+| **User**       | `myhibachi_staging_user`       |
+| **Password**   | `***REMOVED***`                |
 
 **Why SSH Tunnel:**
 
@@ -234,9 +234,8 @@ ssh -f -N -L 5433:localhost:5432 root@108.175.12.154
 **Local .env Configuration:**
 
 ```dotenv
-# Get <STAGING_DB_PASSWORD> from team lead or secure password manager
-DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging
-DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
+DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
 ```
 
 **Verify Connection:**
@@ -245,8 +244,8 @@ DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:<STAGING_DB_PASSW
 # Check tunnel is running
 netstat -an | Select-String "5433.*LISTENING"
 
-# Test database connection (replace <STAGING_DB_PASSWORD> with actual password)
-python -c "from sqlalchemy import create_engine; e = create_engine('postgresql+psycopg2://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging'); print('Connected to:', e.execute('SELECT current_database()').scalar())"
+# Test database connection
+python -c "from sqlalchemy import create_engine; e = create_engine('postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging'); print('Connected to:', e.execute('SELECT current_database()').scalar())"
 ```
 
 **⚠️ Important:** Always start the SSH tunnel before running:
@@ -955,11 +954,64 @@ curl http://127.0.0.1:8002/health
 curl -v http://127.0.0.1:8000/health
 ```
 
-### 🔄 Service Management (Run on VPS after SSH)
+### � Service Management with Docker (PRIMARY - Run on VPS after SSH)
 
 ```bash
 # ═══════════════════════════════════════════════════════════
-# PRODUCTION SERVICE (myhibachi-backend.service)
+# DOCKER DEPLOYMENT (RECOMMENDED)
+# We now use Docker for all environments
+# ═══════════════════════════════════════════════════════════
+
+# Navigate to project directory
+cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend/api
+
+# ═══════════════════════════════════════════════════════════
+# PRODUCTION SERVICE (docker-compose.prod.yml)
+# ═══════════════════════════════════════════════════════════
+
+# Check production status
+docker compose -f docker-compose.prod.yml ps
+
+# Start/restart production (rebuilds if needed)
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Restart production only
+docker compose -f docker-compose.prod.yml restart production-api
+
+# Stop production
+docker compose -f docker-compose.prod.yml stop production-api
+
+# View production logs (last 50 lines)
+docker compose -f docker-compose.prod.yml logs --tail=50 production-api
+
+# Follow production logs live
+docker compose -f docker-compose.prod.yml logs -f production-api
+
+# ═══════════════════════════════════════════════════════════
+# STAGING SERVICE (docker-compose.yml with profile)
+# ═══════════════════════════════════════════════════════════
+
+# Check staging status
+docker compose ps
+
+# Start/restart staging
+docker compose --profile development up -d --build
+
+# Restart staging only
+docker compose restart unified-backend
+
+# View staging logs
+docker compose logs --tail=50 unified-backend
+
+# Follow staging logs live
+docker compose logs -f unified-backend
+```
+
+### 🔧 Legacy Service Management (FALLBACK ONLY - If Docker unavailable)
+
+```bash
+# ═══════════════════════════════════════════════════════════
+# PRODUCTION SERVICE (myhibachi-backend.service) - LEGACY
 # ═══════════════════════════════════════════════════════════
 
 # Check production status
@@ -975,7 +1027,7 @@ sudo journalctl -u myhibachi-backend.service -n 50
 sudo journalctl -u myhibachi-backend.service -f
 
 # ═══════════════════════════════════════════════════════════
-# STAGING SERVICE (myhibachi-staging.service)
+# STAGING SERVICE (myhibachi-staging.service) - LEGACY
 # ═══════════════════════════════════════════════════════════
 
 # Check staging status
@@ -991,7 +1043,24 @@ sudo journalctl -u myhibachi-staging.service -n 50
 sudo journalctl -u myhibachi-staging.service -f
 ```
 
-### 📦 Git Deployment (Run on VPS after SSH)
+### 📦 Git Deployment with Docker (PRIMARY - Run on VPS after SSH)
+
+```bash
+# Navigate to backend directory
+cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend/api
+
+# Pull latest code from main
+git pull origin main
+
+# Rebuild and restart with Docker (preferred)
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Verify health after restart
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8002/health
+```
+
+### 📦 Git Deployment with systemd (LEGACY FALLBACK)
 
 ```bash
 # Navigate to backend directory
@@ -1030,14 +1099,36 @@ sudo -u postgres psql -d myhibachi_staging -f /path/to/migration.sql
 # Run migration on production (after staging verified)
 sudo -u postgres psql -d myhibachi_production -f /path/to/migration.sql
 
-# Check PostgreSQL status
+# Check PostgreSQL status (NOTE: PostgreSQL stays VPS-native for data safety)
 sudo systemctl status postgresql
 
-# Check Redis status
-redis-cli ping
+# Check Redis status (Docker or VPS-native)
+docker compose -f docker-compose.prod.yml exec redis redis-cli ping  # Docker
+redis-cli ping  # VPS-native fallback
 ```
 
-### 🔥 Emergency Commands
+### 🔥 Emergency Commands with Docker (PRIMARY)
+
+```bash
+# Quick restart production service
+docker compose -f docker-compose.prod.yml restart production-api
+
+# Check if container is running
+docker compose -f docker-compose.prod.yml ps
+
+# View last errors in production
+docker compose -f docker-compose.prod.yml logs --tail=50 production-api | grep -i error
+
+# Kill and restart if frozen
+docker compose -f docker-compose.prod.yml stop production-api
+docker compose -f docker-compose.prod.yml up -d production-api
+
+# Full stack restart (nuclear option)
+docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+### 🔥 Emergency Commands with systemd (LEGACY FALLBACK)
 
 ```bash
 # Quick restart both services
@@ -1055,7 +1146,7 @@ sudo systemctl stop myhibachi-backend.service
 sudo systemctl start myhibachi-backend.service
 ```
 
-### 📋 Full Deployment Workflow (Copy-Paste)
+### 📋 Full Deployment Workflow with Docker (RECOMMENDED)
 
 **Step 1: From Local Machine (PowerShell)**
 
@@ -1070,16 +1161,13 @@ git commit -m "feat(batch-X): your message"
 git push origin main
 ```
 
-**Step 2: On VPS (After SSH)**
+**Step 2: On VPS (After SSH) - Docker Deployment**
 
 ```bash
-# Full deployment sequence
+# Full Docker deployment sequence
 cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend/api
 git pull origin main
-source .venv/bin/activate
-pip install -r requirements.txt
-sudo systemctl restart myhibachi-backend.service
-sudo systemctl restart myhibachi-staging.service
+docker compose -f docker-compose.prod.yml up -d --build
 curl http://127.0.0.1:8000/health
 curl http://127.0.0.1:8002/health
 ```
@@ -1092,5 +1180,11 @@ Invoke-RestMethod -Uri "https://mhapi.mysticdatanode.net/health" -Method GET
 
 ---
 
-**Remember:** Always test on staging first. Never deploy directly to
-production without staging verification.
+**Remember:**
+
+- Always test on staging first. Never deploy directly to production
+  without staging verification.
+- **Docker is now the PRIMARY deployment method.** systemd commands
+  are kept as fallback only.
+- PostgreSQL remains VPS-native (not containerized) for production
+  data safety.

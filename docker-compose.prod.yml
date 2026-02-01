@@ -1,0 +1,119 @@
+# =============================================================================
+# Docker Compose - Production API (VPS Deployment)
+# =============================================================================
+# Production compose for API on VPS.
+# Does NOT include PostgreSQL (uses VPS native database for data safety).
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose -f docker-compose.prod.yml logs -f
+#   docker compose -f docker-compose.prod.yml down
+#
+# IMPORTANT:
+#   - Uses VPS-native PostgreSQL (NOT containerized) for data safety
+#   - Create .env.production with real production values before running
+#   - Database backups are handled by VPS backup system
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =========================================================================
+  # Production API (Port 8000)
+  # =========================================================================
+  production-api:
+    image: ${DOCKER_REGISTRY:-}myhibachi-api:${VERSION:-latest}
+    container_name: myhibachi-production-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      # Database: VPS PostgreSQL (NOT containerized for data safety)
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL_SYNC=${DATABASE_URL_SYNC}
+      # Redis
+      - REDIS_URL=${REDIS_URL:-redis://production-redis:6379/0}
+      # Security
+      - SECRET_KEY=${SECRET_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      # Stripe (LIVE keys)
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      # RingCentral
+      - RC_CLIENT_ID=${RC_CLIENT_ID}
+      - RC_CLIENT_SECRET=${RC_CLIENT_SECRET}
+      - RC_JWT_TOKEN=${RC_JWT_TOKEN}
+      # OpenAI
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # CORS
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-["https://myhibachichef.com","https://admin.myhibachichef.com"]}
+      # Performance
+      - WORKERS=4
+    volumes:
+      - production_logs:/app/logs
+      - recordings:/app/recordings
+    networks:
+      - myhibachi-production-network
+    depends_on:
+      production-redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    labels:
+      - "com.myhibachi.environment=production"
+      - "com.myhibachi.service=api"
+
+  # =========================================================================
+  # Production Redis
+  # =========================================================================
+  production-redis:
+    image: redis:7-alpine
+    container_name: myhibachi-production-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - production_redis_data:/data
+    networks:
+      - myhibachi-production-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  production_logs:
+    driver: local
+  production_redis_data:
+    driver: local
+  recordings:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  myhibachi-production-network:
+    driver: bridge

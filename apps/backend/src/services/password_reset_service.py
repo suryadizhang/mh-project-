@@ -39,7 +39,7 @@ import logging
 import secrets
 from datetime import datetime, timedelta
 
-from sqlalchemy import text, select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import settings
@@ -73,9 +73,15 @@ class PasswordResetService:
             db: Database session for token storage
         """
         self.db = db
-        self.token_expiry_minutes = getattr(settings, "PASSWORD_RESET_EXPIRE_MINUTES", 60)
-        self.max_attempts = getattr(settings, "PASSWORD_RESET_MAX_ATTEMPTS", 30)  # 30 per minute
-        self.frontend_url = getattr(settings, "FRONTEND_URL", "https://admin.mysticdatanode.net")
+        self.token_expiry_minutes = getattr(
+            settings, "PASSWORD_RESET_EXPIRE_MINUTES", 60
+        )
+        self.max_attempts = getattr(
+            settings, "PASSWORD_RESET_MAX_ATTEMPTS", 30
+        )  # 30 per minute
+        self.frontend_url = getattr(
+            settings, "FRONTEND_URL", "https://admin.myhibachichef.com"
+        )
 
     async def request_reset(self, email: str) -> bool:
         """
@@ -94,17 +100,23 @@ class PasswordResetService:
 
         try:
             # Check if user exists
-            result = await self.db.execute(select(User).where(User.email == email_lower))
+            result = await self.db.execute(
+                select(User).where(User.email == email_lower)
+            )
             user = result.scalar_one_or_none()
 
             if not user:
-                logger.info(f"📧 Reset requested for non-existent email: {email_lower[:3]}***")
+                logger.info(
+                    f"📧 Reset requested for non-existent email: {email_lower[:3]}***"
+                )
                 return True  # Don't reveal if email exists
 
             # Check rate limiting
             rate_limited = await self._is_rate_limited(email_lower)
             if rate_limited:
-                logger.warning(f"🚫 Rate limit exceeded for password reset: {email_lower}")
+                logger.warning(
+                    f"🚫 Rate limit exceeded for password reset: {email_lower}"
+                )
                 return True  # Still return True - don't reveal rate limiting
 
             # Generate secure token
@@ -112,7 +124,9 @@ class PasswordResetService:
             token_hash = self._hash_token(raw_token)
 
             # Store token in database
-            expires_at = datetime.utcnow() + timedelta(minutes=self.token_expiry_minutes)
+            expires_at = datetime.utcnow() + timedelta(
+                minutes=self.token_expiry_minutes
+            )
 
             await self.db.execute(
                 text(
@@ -142,7 +156,9 @@ class PasswordResetService:
             if email_sent:
                 logger.info(f"✅ Password reset email sent to {email_lower[:3]}***")
             else:
-                logger.error(f"❌ Failed to send password reset email to {email_lower[:3]}***")
+                logger.error(
+                    f"❌ Failed to send password reset email to {email_lower[:3]}***"
+                )
 
             return True
 
@@ -150,7 +166,9 @@ class PasswordResetService:
             logger.exception(f"❌ Error in password reset request: {e}")
             return True  # Always return True for security
 
-    async def request_invite(self, email: str, invited_by: str = "Admin") -> bool:
+    async def request_invite(
+        self, email: str, invited_by: str = "Admin", role: str = "ADMIN"
+    ) -> bool:
         """
         Send admin invitation email with one-time password setup link.
 
@@ -160,6 +178,7 @@ class PasswordResetService:
         Args:
             email: New admin's email address
             invited_by: Name of the admin who sent the invitation
+            role: Role of the invited user (CHEF, STATION_MANAGER, etc.)
 
         Returns:
             True (always, for security - don't reveal if email exists)
@@ -170,7 +189,9 @@ class PasswordResetService:
 
             # Find user (should exist - created by super admin)
             result = await self.db.execute(
-                text("SELECT id, full_name, email FROM identity.users WHERE email = :email"),
+                text(
+                    "SELECT id, full_name, email FROM identity.users WHERE email = :email"
+                ),
                 {"email": email_lower},
             )
             user = result.fetchone()
@@ -183,13 +204,17 @@ class PasswordResetService:
 
             # Check rate limiting
             if await self._is_rate_limited(email_lower):
-                logger.warning(f"⚠️ Rate limit exceeded for invitation: {email_lower[:3]}***")
+                logger.warning(
+                    f"⚠️ Rate limit exceeded for invitation: {email_lower[:3]}***"
+                )
                 return True
 
             # Generate secure token (256 bits of entropy)
             raw_token = secrets.token_urlsafe(32)
             token_hash = self._hash_token(raw_token)
-            expires_at = datetime.utcnow() + timedelta(minutes=self.token_expiry_minutes)
+            expires_at = datetime.utcnow() + timedelta(
+                minutes=self.token_expiry_minutes
+            )
 
             # Store token hash (never the raw token)
             await self.db.execute(
@@ -215,12 +240,15 @@ class PasswordResetService:
                 setup_url=setup_url,
                 expires_in_minutes=self.token_expiry_minutes,
                 invited_by=invited_by,
+                role=role,
             )
 
             if email_sent:
                 logger.info(f"✅ Admin invitation email sent to {email_lower[:3]}***")
             else:
-                logger.error(f"❌ Failed to send admin invitation email to {email_lower[:3]}***")
+                logger.error(
+                    f"❌ Failed to send admin invitation email to {email_lower[:3]}***"
+                )
 
             return True
 
@@ -265,8 +293,13 @@ class PasswordResetService:
 
             # Check if already used
             if used_at is not None:
-                logger.warning(f"🔒 Attempt to reuse password reset token for user {user_id}")
-                return False, "This reset link has already been used. Please request a new one."
+                logger.warning(
+                    f"🔒 Attempt to reuse password reset token for user {user_id}"
+                )
+                return (
+                    False,
+                    "This reset link has already been used. Please request a new one.",
+                )
 
             # Check expiration
             if datetime.utcnow() > expires_at:
@@ -485,9 +518,10 @@ For security, all your active sessions will be logged out after you reset your p
         setup_url: str,
         expires_in_minutes: int,
         invited_by: str,
+        role: str = "ADMIN",
     ) -> bool:
         """
-        Send admin invitation email with one-time password setup link.
+        Send role-specific admin invitation email with one-time password setup link.
 
         Args:
             to_email: Recipient email address
@@ -495,74 +529,104 @@ For security, all your active sessions will be logged out after you reset your p
             setup_url: One-time password setup URL
             expires_in_minutes: Link expiration time
             invited_by: Name of the admin who sent the invitation
+            role: User role (CHEF, STATION_MANAGER, CUSTOMER_SUPPORT, ADMIN, SUPER_ADMIN)
 
         Returns:
             True if email sent successfully
         """
-        from services.email_service import EmailService
+        from services.email_service import EMAIL_TEMPLATES, EmailService
 
         try:
             email_service = EmailService()
 
-            subject = "You've Been Invited to My Hibachi Admin"
+            # Map role to template key
+            role_template_map = {
+                "CHEF": "chef_invite",
+                "STATION_MANAGER": "station_manager_invite",
+                "CUSTOMER_SUPPORT": "customer_support_invite",
+                "ADMIN": "admin_invite",
+                "SUPER_ADMIN": "admin_invite",  # Super Admin uses same template as Admin
+            }
 
-            html_body = f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
-                <div style="background-color: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <h1 style="color: #1a1a1a; margin: 0; font-size: 28px;">🎉 Welcome to My Hibachi Chef!</h1>
-                    </div>
+            template_key = role_template_map.get(role.upper(), "admin_invite")
+            template = EMAIL_TEMPLATES.get(template_key)
 
-                    <p style="font-size: 16px; color: #333; line-height: 1.6;">
-                        Hello <strong>{user_name}</strong>,
-                    </p>
+            if template:
+                # Use role-specific template from EMAIL_TEMPLATES
+                subject = template["subject"]
+                html_body = template["html"].format(
+                    user_name=user_name,
+                    invited_by=invited_by,
+                    setup_url=setup_url,
+                    expires_in_minutes=expires_in_minutes,
+                )
+                text_body = template["text"].format(
+                    user_name=user_name,
+                    invited_by=invited_by,
+                    setup_url=setup_url,
+                    expires_in_minutes=expires_in_minutes,
+                )
+                logger.info(f"📧 Using {template_key} template for {role} invitation")
+            else:
+                # Fallback to generic template if somehow template not found
+                logger.warning(f"⚠️ Template {template_key} not found, using fallback")
+                subject = "You've Been Invited to My Hibachi Admin"
+                html_body = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                </head>
+                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+                    <div style="background-color: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #1a1a1a; margin: 0; font-size: 28px;">🎉 Welcome to My Hibachi Chef!</h1>
+                        </div>
 
-                    <p style="font-size: 16px; color: #333; line-height: 1.6;">
-                        <strong>{invited_by}</strong> has invited you to join the My Hibachi Admin team!
-                    </p>
+                        <p style="font-size: 16px; color: #333; line-height: 1.6;">
+                            Hello <strong>{user_name}</strong>,
+                        </p>
 
-                    <p style="font-size: 16px; color: #333; line-height: 1.6;">
-                        Click the button below to set up your password and access the admin dashboard:
-                    </p>
+                        <p style="font-size: 16px; color: #333; line-height: 1.6;">
+                            <strong>{invited_by}</strong> has invited you to join the My Hibachi Admin team!
+                        </p>
 
-                    <div style="text-align: center; margin: 35px 0;">
-                        <a href="{setup_url}"
-                           style="display: inline-block; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);">
-                            Set Up Your Password
-                        </a>
-                    </div>
+                        <p style="font-size: 16px; color: #333; line-height: 1.6;">
+                            Click the button below to set up your password and access the admin dashboard:
+                        </p>
 
-                    <div style="background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 15px 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
-                        <p style="margin: 0; color: #e65100; font-size: 14px;">
-                            <strong>⏰ Important:</strong> This link will expire in <strong>{expires_in_minutes} minutes</strong>.
+                        <div style="text-align: center; margin: 35px 0;">
+                            <a href="{setup_url}"
+                               style="display: inline-block; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);">
+                                Set Up Your Password
+                            </a>
+                        </div>
+
+                        <div style="background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 15px 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+                            <p style="margin: 0; color: #e65100; font-size: 14px;">
+                                <strong>⏰ Important:</strong> This link will expire in <strong>{expires_in_minutes} minutes</strong>.
+                            </p>
+                        </div>
+
+                        <p style="font-size: 14px; color: #666; line-height: 1.6;">
+                            If the button doesn't work, copy and paste this URL into your browser:
+                        </p>
+                        <p style="font-size: 12px; color: #888; word-break: break-all; background: #f8f9fa; padding: 12px; border-radius: 6px;">
+                            {setup_url}
+                        </p>
+
+                        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+                        <p style="font-size: 12px; color: #999; text-align: center; margin: 0;">
+                            If you didn't expect this invitation, please contact the My Hibachi team.<br>
+                            This is an automated message from My Hibachi Chef.
                         </p>
                     </div>
-
-                    <p style="font-size: 14px; color: #666; line-height: 1.6;">
-                        If the button doesn't work, copy and paste this URL into your browser:
-                    </p>
-                    <p style="font-size: 12px; color: #888; word-break: break-all; background: #f8f9fa; padding: 12px; border-radius: 6px;">
-                        {setup_url}
-                    </p>
-
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-
-                    <p style="font-size: 12px; color: #999; text-align: center; margin: 0;">
-                        If you didn't expect this invitation, please contact the My Hibachi team.<br>
-                        This is an automated message from My Hibachi Chef.
-                    </p>
-                </div>
-            </body>
-            </html>
-            """
-
-            text_body = f"""
+                </body>
+                </html>
+                """
+                text_body = f"""
 Welcome to My Hibachi Chef!
 
 Hello {user_name},
@@ -579,14 +643,14 @@ If you didn't expect this invitation, please contact the My Hibachi team.
 
 ---
 This is an automated message from My Hibachi Chef.
-            """
+                """
 
             return email_service._send_email(
                 to_email=to_email,
                 subject=subject,
                 html_body=html_body,
                 text_body=text_body,
-                tags=["admin-invite", "onboarding"],
+                tags=["admin-invite", "onboarding", role.lower()],
             )
 
         except Exception as e:

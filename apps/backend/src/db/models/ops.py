@@ -84,35 +84,31 @@ Chef scheduling integrates with booking system for availability checking.
 Equipment tracking ensures quality control and maintenance compliance.
 """
 
-from datetime import datetime, date, time
-from typing import Optional, List
-from uuid import UUID
+from datetime import date, datetime, time
 from decimal import Decimal
 from enum import Enum
+from typing import List, Optional
+from uuid import UUID
 
+from sqlalchemy import ARRAY, Boolean, CheckConstraint, Date, DateTime
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
-    String,
-    Text,
-    Integer,
-    Boolean,
-    DateTime,
-    Date,
-    Time,
-    Numeric,
     ForeignKey,
     Index,
-    CheckConstraint,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    Time,
     UniqueConstraint,
-    Enum as SQLEnum,
-    ARRAY,
 )
-from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
 # MIGRATED: from models.base → ..base_class (NEW unified architecture)
 from ..base_class import Base
-
 
 # ============================================================================
 # ENUMS - Chef Management
@@ -166,6 +162,59 @@ class TimeOffStatus(str, Enum):
     APPROVED = "approved"
     DENIED = "denied"
     CANCELLED = "cancelled"
+
+
+class PayRateClass(str, Enum):
+    """
+    Chef pay rate classification for earnings calculation.
+
+    Each tier has FIXED per-person rates (NOT a multiplier system):
+    - NEW_CHEF (Junior): $10/adult, $5/kid, $0/toddler
+    - CHEF (Standard): $12/adult, $6/kid, $0/toddler
+    - SENIOR_CHEF (Senior): $13/adult, $6.50/kid, $0/toddler
+    - STATION_MANAGER (Backup): $15/adult, $7.50/kid, $0/toddler
+
+    Managed by super admin via SSoT UI (dynamic_variables table).
+    """
+
+    NEW_CHEF = "new_chef"  # Junior: $10/adult, $5/kid
+    CHEF = "chef"  # Standard: $12/adult, $6/kid
+    SENIOR_CHEF = "senior_chef"  # Senior: $13/adult, $6.50/kid
+    STATION_MANAGER = "station_manager"  # Manager: $15/adult, $7.50/kid
+
+
+class SeniorityLevel(str, Enum):
+    """
+    Chef seniority level for performance tracking.
+
+    Performance-based rating assigned by admin after reviewing scores.
+    Does NOT affect pay directly - only pay_rate_class affects pay.
+    Used for reporting, skill matching, and manual level assignment.
+    """
+
+    JUNIOR = "junior"
+    STANDARD = "standard"
+    SENIOR = "senior"
+    EXPERT = "expert"
+
+
+class ScoreRaterType(str, Enum):
+    """Who rated the chef"""
+
+    CUSTOMER = "customer"
+    ADMIN = "admin"
+    STATION_MANAGER = "station_manager"
+    SYSTEM = "system"  # Auto-generated scores
+
+
+class EarningsStatus(str, Enum):
+    """Status of chef earnings record"""
+
+    PENDING = "pending"  # Event not yet completed
+    CALCULATED = "calculated"  # Auto-calculated after event
+    ADJUSTED = "adjusted"  # Manually adjusted by admin
+    PAID = "paid"  # Payment processed
+    DISPUTED = "disputed"  # Under review
 
 
 # ============================================================================
@@ -269,11 +318,15 @@ class Chef(Base):
 
     # Professional Info
     specialty: Mapped[ChefSpecialty] = mapped_column(
-        SQLEnum(ChefSpecialty, name="chef_specialty", schema="public", create_type=False),
+        SQLEnum(
+            ChefSpecialty, name="chef_specialty", schema="public", create_type=False
+        ),
         nullable=False,
     )
     years_experience: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    certifications: Mapped[Optional[List[str]]] = mapped_column(ARRAY(String), nullable=True)
+    certifications: Mapped[Optional[List[str]]] = mapped_column(
+        ARRAY(String), nullable=True
+    )
 
     # Status & Performance
     status: Mapped[ChefStatus] = mapped_column(
@@ -283,6 +336,24 @@ class Chef(Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     rating: Mapped[Optional[Decimal]] = mapped_column(Numeric(3, 2), nullable=True)
+
+    # Pay Rate System (SSoT: chef_pay category)
+    pay_rate_class: Mapped[PayRateClass] = mapped_column(
+        SQLEnum(
+            PayRateClass, name="pay_rate_class", schema="public", create_type=False
+        ),
+        nullable=False,
+        default=PayRateClass.NEW_CHEF,
+        comment="Pay multiplier: NEW_CHEF=80%, CHEF=100%, SENIOR_CHEF=115%",
+    )
+    seniority_level: Mapped[SeniorityLevel] = mapped_column(
+        SQLEnum(
+            SeniorityLevel, name="seniority_level", schema="public", create_type=False
+        ),
+        nullable=False,
+        default=SeniorityLevel.JUNIOR,
+        comment="Performance-based level assigned by admin after reviewing scores",
+    )
 
     # Statistics
     total_bookings: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -294,7 +365,10 @@ class Chef(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -316,7 +390,9 @@ class ChefAvailability(Base):
     __tablename__ = "chef_availability"
     __table_args__ = (
         Index("idx_ops_chef_availability_chef", "chef_id", "day_of_week"),
-        UniqueConstraint("chef_id", "day_of_week", "start_time", name="uq_chef_day_time"),
+        UniqueConstraint(
+            "chef_id", "day_of_week", "start_time", name="uq_chef_day_time"
+        ),
         {"schema": "ops"},
     )
 
@@ -327,12 +403,15 @@ class ChefAvailability(Base):
 
     # Foreign Key
     chef_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("ops.chefs.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("ops.chefs.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     # Schedule
     day_of_week: Mapped[DayOfWeek] = mapped_column(
-        SQLEnum(DayOfWeek, name="day_of_week", schema="public", create_type=False), nullable=False
+        SQLEnum(DayOfWeek, name="day_of_week", schema="public", create_type=False),
+        nullable=False,
     )
     start_time: Mapped[time] = mapped_column(Time, nullable=False)
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
@@ -373,7 +452,9 @@ class ChefTimeOff(Base):
 
     # Foreign Key
     chef_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("ops.chefs.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("ops.chefs.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     # Time Off Details
@@ -384,7 +465,9 @@ class ChefTimeOff(Base):
         nullable=False,
     )
     status: Mapped[TimeOffStatus] = mapped_column(
-        SQLEnum(TimeOffStatus, name="timeoff_status", schema="public", create_type=False),
+        SQLEnum(
+            TimeOffStatus, name="timeoff_status", schema="public", create_type=False
+        ),
         nullable=False,
         default=TimeOffStatus.PENDING,
     )
@@ -397,7 +480,246 @@ class ChefTimeOff(Base):
     requested_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-    processed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    processed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+
+# ============================================================================
+# CHEF PAY SYSTEM MODELS
+# ============================================================================
+
+
+class ChefScore(Base):
+    """
+    Individual chef performance scores - Operations schema
+
+    Stores every score from every rater for complete history.
+    Admin views all scores, then manually assigns seniority level.
+
+    Schema: ops.chef_scores
+
+    Business Logic:
+    - Track individual ratings from customers, admin, station managers
+    - Used for performance review and seniority level decisions
+    - Does NOT auto-calculate level - admin decides manually
+    - Immutable records (no updates, only inserts)
+    """
+
+    __tablename__ = "chef_scores"
+    __table_args__ = (
+        Index("idx_chef_scores_chef_id", "chef_id"),
+        Index("idx_chef_scores_booking_id", "booking_id"),
+        Index("idx_chef_scores_rater_type", "rater_type"),
+        Index("idx_chef_scores_scored_at", "scored_at"),
+        CheckConstraint("score >= 1 AND score <= 5", name="check_score_range"),
+        {"schema": "ops"},
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+
+    # Foreign Keys
+    chef_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("ops.chefs.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    booking_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("core.bookings.id", ondelete="SET NULL"),
+        nullable=True,
+        comment="Optional - some scores may be admin-assigned without booking",
+    )
+
+    # Score Details
+    score: Mapped[Decimal] = mapped_column(
+        Numeric(3, 2),
+        nullable=False,
+        comment="Score from 1.00 to 5.00",
+    )
+    rater_type: Mapped[ScoreRaterType] = mapped_column(
+        SQLEnum(
+            ScoreRaterType, name="score_rater_type", schema="public", create_type=False
+        ),
+        nullable=False,
+    )
+    rater_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True),
+        nullable=True,
+        comment="User ID of rater (if authenticated)",
+    )
+    rater_name: Mapped[Optional[str]] = mapped_column(
+        String(200),
+        nullable=True,
+        comment="Name for display (customer name or admin name)",
+    )
+
+    # Feedback
+    comment: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        comment="Optional feedback text",
+    )
+    categories: Mapped[Optional[dict]] = mapped_column(
+        JSONB,
+        nullable=True,
+        comment="Breakdown scores: {food_quality: 5, presentation: 4, timeliness: 5}",
+    )
+
+    # Timestamps (immutable - no updated_at)
+    scored_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+
+class ChefEarnings(Base):
+    """
+    Chef earnings per booking - Operations schema
+
+    Detailed breakdown of chef payment for each event.
+    Formula: (adults × $13) + (kids × $6.50) + (toddlers × $0) + travel_fee
+    Pay rate multiplier applied based on pay_rate_class.
+
+    Schema: ops.chef_earnings
+
+    Business Logic:
+    - Auto-calculated after event completion
+    - Shows detailed breakdown: cooking_fee, travel_fee, base_total, multiplier, final_amount
+    - Headcount-based split when multiple chefs assigned
+    - Status tracks payment lifecycle: pending → calculated → paid
+    - Only station manager and admin can view pay details
+    """
+
+    __tablename__ = "chef_earnings"
+    __table_args__ = (
+        Index("idx_chef_earnings_chef_id", "chef_id"),
+        Index("idx_chef_earnings_booking_id", "booking_id"),
+        Index("idx_chef_earnings_status", "status"),
+        Index("idx_chef_earnings_calculated_at", "calculated_at"),
+        UniqueConstraint("chef_id", "booking_id", name="uq_chef_booking_earnings"),
+        {"schema": "ops"},
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+
+    # Foreign Keys
+    chef_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("ops.chefs.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    booking_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("core.bookings.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    # Headcount at time of event (snapshot for historical accuracy)
+    adults_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        comment="Number of adults (13+) at event",
+    )
+    children_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        comment="Number of children (6-12) at event",
+    )
+    toddlers_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        comment="Number of toddlers (under 6) at event - $0 rate",
+    )
+    total_chefs: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=1,
+        comment="Total chefs assigned - for split calculation",
+    )
+
+    # Earnings Breakdown (all amounts in cents)
+    cooking_fee_cents: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        comment="(adults × adult_rate + kids × kid_rate) / total_chefs",
+    )
+    travel_fee_cents: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        comment="100% of travel fee to chef (not split)",
+    )
+    base_total_cents: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        comment="cooking_fee + travel_fee before multiplier",
+    )
+
+    # Pay Rate Applied
+    pay_rate_class: Mapped[PayRateClass] = mapped_column(
+        SQLEnum(
+            PayRateClass, name="pay_rate_class", schema="public", create_type=False
+        ),
+        nullable=False,
+        comment="Chef's pay rate class at time of event",
+    )
+    rate_multiplier: Mapped[Decimal] = mapped_column(
+        Numeric(4, 2),
+        nullable=False,
+        comment="Multiplier applied: 0.80, 1.00, or 1.15",
+    )
+    final_amount_cents: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        comment="base_total × rate_multiplier = final chef payment",
+    )
+
+    # Status
+    status: Mapped[EarningsStatus] = mapped_column(
+        SQLEnum(
+            EarningsStatus, name="earnings_status", schema="public", create_type=False
+        ),
+        nullable=False,
+        default=EarningsStatus.PENDING,
+    )
+
+    # Adjustment tracking
+    adjustment_reason: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        comment="Reason for manual adjustment if status=ADJUSTED",
+    )
+    adjusted_by: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True),
+        nullable=True,
+        comment="Admin/manager who made adjustment",
+    )
+
+    # Timestamps
+    calculated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    paid_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
 
 # ============================================================================
@@ -435,14 +757,18 @@ class Equipment(Base):
     # Equipment Details
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     type: Mapped[EquipmentType] = mapped_column(
-        SQLEnum(EquipmentType, name="equipment_type", schema="public", create_type=False),
+        SQLEnum(
+            EquipmentType, name="equipment_type", schema="public", create_type=False
+        ),
         nullable=False,
     )
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Status
     status: Mapped[EquipmentStatus] = mapped_column(
-        SQLEnum(EquipmentStatus, name="equipment_status", schema="public", create_type=False),
+        SQLEnum(
+            EquipmentStatus, name="equipment_status", schema="public", create_type=False
+        ),
         nullable=False,
         default=EquipmentStatus.AVAILABLE,
     )
@@ -452,7 +778,9 @@ class Equipment(Base):
     next_maintenance_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Cost Tracking
-    purchase_cost: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
+    purchase_cost: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(10, 2), nullable=True
+    )
     purchase_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Timestamps
@@ -460,7 +788,10 @@ class Equipment(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -493,12 +824,16 @@ class EquipmentMaintenance(Base):
 
     # Foreign Key
     equipment_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("ops.equipment.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("ops.equipment.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     # Maintenance Details
     type: Mapped[MaintenanceType] = mapped_column(
-        SQLEnum(MaintenanceType, name="maintenance_type", schema="public", create_type=False),
+        SQLEnum(
+            MaintenanceType, name="maintenance_type", schema="public", create_type=False
+        ),
         nullable=False,
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
@@ -551,7 +886,12 @@ class Inventory(Base):
     # Item Details
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     category: Mapped[InventoryCategory] = mapped_column(
-        SQLEnum(InventoryCategory, name="inventory_category", schema="public", create_type=False),
+        SQLEnum(
+            InventoryCategory,
+            name="inventory_category",
+            schema="public",
+            create_type=False,
+        ),
         nullable=False,
     )
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -561,7 +901,9 @@ class Inventory(Base):
         Numeric(10, 2), nullable=False, default=Decimal("0")
     )
     unit_of_measure: Mapped[str] = mapped_column(String(20), nullable=False)
-    reorder_point: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
+    reorder_point: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(10, 2), nullable=True
+    )
 
     # Cost
     unit_cost: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
@@ -571,7 +913,10 @@ class Inventory(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -604,12 +949,16 @@ class InventoryTransaction(Base):
 
     # Foreign Key
     inventory_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("ops.inventory.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("ops.inventory.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     # Transaction Details
     type: Mapped[TransactionType] = mapped_column(
-        SQLEnum(TransactionType, name="transaction_type", schema="public", create_type=False),
+        SQLEnum(
+            TransactionType, name="transaction_type", schema="public", create_type=False
+        ),
         nullable=False,
     )
     quantity: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
@@ -663,7 +1012,9 @@ class ShiftSchedule(Base):
 
     # Foreign Key
     chef_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("ops.chefs.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True),
+        ForeignKey("ops.chefs.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     # Shift Details
@@ -672,7 +1023,9 @@ class ShiftSchedule(Base):
     end_time: Mapped[time] = mapped_column(Time, nullable=False)
 
     # Booking Reference (optional - actual event assignment)
-    booking_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
+    booking_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), nullable=True
+    )
 
     # Status
     is_completed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -719,7 +1072,9 @@ class TravelZone(Base):
     )
 
     # Zone Details
-    name: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., "Downtown Phoenix"
+    name: Mapped[str] = mapped_column(
+        String(100), nullable=False
+    )  # e.g., "Downtown Phoenix"
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Coverage (JSONB for flexible zip code lists)
@@ -746,7 +1101,10 @@ class TravelZone(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -784,7 +1142,9 @@ class MenuItem(Base):
     )
 
     # Item Details
-    name: Mapped[str] = mapped_column(String(200), nullable=False)  # e.g., "Hibachi Chicken"
+    name: Mapped[str] = mapped_column(
+        String(200), nullable=False
+    )  # e.g., "Hibachi Chicken"
     description: Mapped[str] = mapped_column(Text, nullable=False)
     category: Mapped[str] = mapped_column(
         String(50), nullable=False
@@ -812,7 +1172,10 @@ class MenuItem(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -879,7 +1242,10 @@ class PricingRule(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 
@@ -898,7 +1264,9 @@ class FoodIncentiveType(str, Enum):
 
     NONE = "none"  # 0-15 min shift - no incentive needed
     FREE_NOODLES = "free_noodles"  # 16-30 min shift - yakisoba noodles for party
-    FREE_APPETIZER = "free_appetizer"  # 31+ min shift - edamame or gyoza (customer choice)
+    FREE_APPETIZER = (
+        "free_appetizer"  # 31+ min shift - edamame or gyoza (customer choice)
+    )
 
 
 # ============================================================================
@@ -981,6 +1349,13 @@ __all__ = [
     "DayOfWeek",
     "TimeOffType",
     "TimeOffStatus",
+    # Chef Pay System
+    "PayRateClass",
+    "SeniorityLevel",
+    "ScoreRaterType",
+    "EarningsStatus",
+    "ChefScore",
+    "ChefEarnings",
     # Equipment Models
     "Equipment",
     "EquipmentMaintenance",
@@ -1007,4 +1382,6 @@ __all__ = [
 __schema__ = "ops"
 __table_args__ = {"schema": "ops"}
 __version__ = "1.0.0"
-__description__ = "Operations Schema Models - Chef management, equipment, inventory, scheduling"
+__description__ = (
+    "Operations Schema Models - Chef management, equipment, inventory, scheduling"
+)

@@ -22,16 +22,16 @@ keeping the core business logic in dedicated routers.
 - customer_id -> FK to Customer table for name/email/phone
 """
 
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, List, Optional
 from uuid import UUID
-import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import select, func, and_, or_
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
 
 from core.database import get_db
 from db.models.core import Booking, BookingStatus, Customer
@@ -142,15 +142,9 @@ async def get_crm_bookings(
     status_filter: Optional[str] = Query(
         None, alias="status", description="Filter by status"
     ),
-    payment_status: Optional[str] = Query(
-        None, description="Filter by payment status"
-    ),
-    date_from: Optional[str] = Query(
-        None, description="Filter from date (YYYY-MM-DD)"
-    ),
-    date_to: Optional[str] = Query(
-        None, description="Filter to date (YYYY-MM-DD)"
-    ),
+    payment_status: Optional[str] = Query(None, description="Filter by payment status"),
+    date_from: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    date_to: Optional[str] = Query(None, description="Filter to date (YYYY-MM-DD)"),
     customer_search: Optional[str] = Query(
         None, description="Search customer name/email"
     ),
@@ -258,20 +252,12 @@ async def get_crm_bookings(
             customer_phone = None
 
             if customer:
-                customer_name = (
-                    f"{customer.first_name} {customer.last_name}".strip()
-                )
-                customer_email = (
-                    customer.email_encrypted
-                )  # Note: This is encrypted
-                customer_phone = (
-                    customer.phone_encrypted
-                )  # Note: This is encrypted
+                customer_name = f"{customer.first_name} {customer.last_name}".strip()
+                customer_email = customer.email_encrypted  # Note: This is encrypted
+                customer_phone = customer.phone_encrypted  # Note: This is encrypted
 
             # Calculate total guests
-            total_guests = (booking.party_adults or 0) + (
-                booking.party_kids or 0
-            )
+            total_guests = (booking.party_adults or 0) + (booking.party_kids or 0)
 
             # Determine if deposit is paid
             deposit_paid = booking.deposit_confirmed_at is not None
@@ -283,6 +269,11 @@ async def get_crm_bookings(
                     "time": (
                         booking.slot.isoformat() if booking.slot else None
                     ),  # slot -> time for frontend
+                    "customer_requested_time": (
+                        booking.customer_requested_time.strftime("%H:%M")
+                        if booking.customer_requested_time
+                        else None
+                    ),
                     "guests": total_guests,  # party_adults + party_kids
                     "adults": booking.party_adults or 0,
                     "kids": booking.party_kids or 0,
@@ -293,8 +284,7 @@ async def get_crm_bookings(
                     ),
                     "total_amount": float(booking.total_due_cents or 0)
                     / 100,  # cents to dollars
-                    "deposit_amount": float(booking.deposit_due_cents or 0)
-                    / 100,
+                    "deposit_amount": float(booking.deposit_due_cents or 0) / 100,
                     "deposit_paid": deposit_paid,
                     "deposit_confirmed_at": booking.deposit_confirmed_at,
                     "customer_name": customer_name,
@@ -358,9 +348,7 @@ async def get_crm_booking(
         customer_phone = None
 
         if customer:
-            customer_name = (
-                f"{customer.first_name} {customer.last_name}".strip()
-            )
+            customer_name = f"{customer.first_name} {customer.last_name}".strip()
             customer_email = customer.email_encrypted
             customer_phone = customer.phone_encrypted
 
@@ -377,6 +365,11 @@ async def get_crm_booking(
                 "time": (
                     booking.slot.isoformat() if booking.slot else None
                 ),  # slot -> time
+                "customer_requested_time": (
+                    booking.customer_requested_time.strftime("%H:%M")
+                    if booking.customer_requested_time
+                    else None
+                ),
                 "guests": total_guests,
                 "adults": booking.party_adults or 0,
                 "kids": booking.party_kids or 0,
@@ -567,11 +560,7 @@ async def get_crm_customer(
         result = await db.execute(
             select(Customer)
             .options(selectinload(Customer.bookings))
-            .where(
-                and_(
-                    Customer.id == customer_uuid, Customer.deleted_at.is_(None)
-                )
-            )
+            .where(and_(Customer.id == customer_uuid, Customer.deleted_at.is_(None)))
         )
         customer = result.unique().scalar_one_or_none()
 
@@ -582,12 +571,8 @@ async def get_crm_customer(
             )
 
         # Calculate totals from bookings
-        total_spent_cents = sum(
-            b.total_due_cents or 0 for b in customer.bookings
-        )
-        last_booking = max(
-            (b.created_at for b in customer.bookings), default=None
-        )
+        total_spent_cents = sum(b.total_due_cents or 0 for b in customer.bookings)
+        last_booking = max((b.created_at for b in customer.bookings), default=None)
 
         # Get recent bookings for display
         recent_bookings = sorted(
@@ -659,9 +644,7 @@ async def get_customer_bookings(
         # Verify customer exists
         customer_result = await db.execute(
             select(Customer).where(
-                and_(
-                    Customer.id == customer_uuid, Customer.deleted_at.is_(None)
-                )
+                and_(Customer.id == customer_uuid, Customer.deleted_at.is_(None))
             )
         )
         customer = customer_result.scalar_one_or_none()
@@ -689,9 +672,7 @@ async def get_customer_bookings(
                 "adults": b.party_adults or 0,
                 "kids": b.party_kids or 0,
                 "status": (
-                    b.status.value
-                    if hasattr(b.status, "value")
-                    else str(b.status)
+                    b.status.value if hasattr(b.status, "value") else str(b.status)
                 ),
                 "total_amount": float(b.total_due_cents or 0) / 100,
                 "deposit_amount": float(b.deposit_due_cents or 0) / 100,
@@ -743,9 +724,7 @@ async def get_dashboard_stats(
         status_counts = {}
         for booking_status in BookingStatus:
             result = await db.execute(
-                select(func.count(Booking.id)).where(
-                    Booking.status == booking_status
-                )
+                select(func.count(Booking.id)).where(Booking.status == booking_status)
             )
             status_counts[booking_status.value] = result.scalar() or 0
 
@@ -779,9 +758,7 @@ async def get_dashboard_stats(
 
         # Total unique customers (from Customer table)
         customer_result = await db.execute(
-            select(func.count(Customer.id)).where(
-                Customer.deleted_at.is_(None)
-            )
+            select(func.count(Customer.id)).where(Customer.deleted_at.is_(None))
         )
         total_customers = customer_result.scalar() or 0
 

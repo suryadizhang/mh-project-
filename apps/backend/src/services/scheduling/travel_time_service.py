@@ -31,17 +31,20 @@ Note: Haversine is ONLY used for:
 - NOT for travel fee calculations shown to customers
 """
 
-from datetime import datetime, time, timedelta
-from typing import Optional, Tuple, NamedTuple
-from uuid import UUID
 import asyncio
 import logging
+from datetime import datetime, time, timedelta
+from typing import NamedTuple, Optional, Tuple
+from uuid import UUID
 
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.scheduling.travel_cache_service import TravelCacheService, TravelCacheEntry
 from services.scheduling.openroute_service import OpenRouteService
+from services.scheduling.travel_cache_service import (
+    TravelCacheEntry,
+    TravelCacheService,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -315,7 +318,9 @@ class TravelTimeService:
             return int(base_minutes * RUSH_HOUR_MULTIPLIER)
         return base_minutes
 
-    def calculate_distance_miles(self, lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    def calculate_distance_miles(
+        self, lat1: float, lng1: float, lat2: float, lng2: float
+    ) -> float:
         """
         Calculate distance between two points using Haversine formula.
 
@@ -461,7 +466,9 @@ class TravelTimeService:
                     await asyncio.sleep(delay)
                     delay *= RETRY_BACKOFF_MULTIPLIER
                 else:
-                    logger.error(f"❌ Google Maps failed after {MAX_RETRIES + 1} attempts: {e}")
+                    logger.error(
+                        f"❌ Google Maps failed after {MAX_RETRIES + 1} attempts: {e}"
+                    )
 
         return None
 
@@ -530,7 +537,9 @@ class TravelTimeService:
 
         return None
 
-    async def _save_to_cache(self, result: TravelTimeResult, is_rush_hour: bool) -> None:
+    async def _save_to_cache(
+        self, result: TravelTimeResult, is_rush_hour: bool
+    ) -> None:
         """
         Save travel time result to cache (both LRU and DB).
 
@@ -590,9 +599,12 @@ class TravelTimeService:
         try:
             import googlemaps
         except ImportError:
-            logger.error("❌ googlemaps package not installed - cannot calculate travel fee")
+            logger.error(
+                "❌ googlemaps package not installed - cannot calculate travel fee"
+            )
             raise ImportError(
-                "googlemaps package not installed. " "Install with: pip install googlemaps"
+                "googlemaps package not installed. "
+                "Install with: pip install googlemaps"
             )
 
         if not self._client:
@@ -664,7 +676,9 @@ class TravelTimeService:
         - Geographic region characteristics
         """
         # Calculate straight-line distance (Haversine)
-        distance = self.calculate_distance_miles(origin_lat, origin_lng, dest_lat, dest_lng)
+        distance = self.calculate_distance_miles(
+            origin_lat, origin_lng, dest_lat, dest_lng
+        )
 
         # Apply road factor (roads aren't straight)
         # Typical factor is 1.3-1.5 for urban areas
@@ -722,13 +736,13 @@ def calculate_event_duration(guest_count: int) -> int:
         return 120
 
 
-def calculate_arrival_time(event_start: datetime, setup_minutes: int = 30) -> datetime:
+def calculate_arrival_time(event_start: datetime, setup_minutes: int = 60) -> datetime:
     """
     Calculate when chef should arrive (before event start).
 
     Args:
         event_start: When the event begins
-        setup_minutes: Time needed for setup (default 30 min)
+        setup_minutes: Time needed for setup (default 60 min - accounts for traffic)
 
     Returns:
         Required arrival time
@@ -736,7 +750,9 @@ def calculate_arrival_time(event_start: datetime, setup_minutes: int = 30) -> da
     return event_start - timedelta(minutes=setup_minutes)
 
 
-def calculate_departure_time(event_end: datetime, cleanup_minutes: int = 15) -> datetime:
+def calculate_departure_time(
+    event_end: datetime, cleanup_minutes: int = 15
+) -> datetime:
     """
     Calculate when chef can leave for next booking.
 

@@ -97,7 +97,7 @@ escalation_radius_miles = 150 miles
 
 ### Security Tasks (Cloudflare)
 
-```markdown
+````markdown
 CLOUDFLARE TUNNEL □ Install cloudflared on VPS □ Create tunnel:
 cloudflared tunnel create myhibachi □ Configure tunnel routing
 (config.yml) □ Set up tunnel as systemd service □ Verify VPS IP is
@@ -117,7 +117,28 @@ WAF blocks XSS attempts
 SSL/TLS □ Enable Full (Strict) SSL mode □ Enable Always Use HTTPS □
 Enable HSTS □ Set minimum TLS version to 1.2 □ Verify certificate is
 valid
+
+API ENDPOINT SECURITY ✅ COMPLETE (2025-01-30) All admin API endpoints
+now require authentication via get_current_admin_user:
+
+□ websocket_handler.py - 2 except:pass fixed with proper logging ✅ □
+faq_settings.py - 11 endpoints secured ✅ □
+ringcentral_voice_webhooks.py - 3 endpoints secured ✅ □
+newsletter.py - 15 endpoints secured ✅ □ admin_analytics.py - 12
+endpoints secured ✅
+
+**Total: 41 endpoints + 2 code quality fixes**
+
+Pattern applied to all admin endpoints:
+
+```python
+from api.deps import get_current_admin_user
+from db.models.identity import User
+current_user: User = Depends(get_current_admin_user)
 ```
+````
+
+````
 
 ### Testing Checklist
 
@@ -136,7 +157,7 @@ working □ RBAC prevents unauthorized operations
 
 LOAD TESTS □ 50 concurrent users - API <200ms □ 100 concurrent users -
 API <500ms □ No memory leaks after 1000 requests
-```
+````
 
 ### Pre-Merge Checklist (feature → dev)
 
@@ -210,8 +231,8 @@ capturing all changes □ No critical bugs for 48 hours
 
 ## 🗓️ SMART SCHEDULING SYSTEM
 
-> **Spec File:**
-> `.github/instructions/17-SMART_SCHEDULING_SYSTEM.instructions.md`
+> **Spec File:** >
+> `.github/instructions/17-SMART_SCHEDULING_SYSTEM.instructions.md` >
 > **Last Updated:** 2025-12-21
 
 ### Overview
@@ -409,6 +430,22 @@ AUTOMATED REFUND RULES (NEW) □ Cancellation >72 hours: Full refund
 (auto) □ Cancellation 24-72 hours: 50% refund (manual approval) □
 Cancellation <24 hours: No refund (manual exception possible) □ Refund
 audit trail with reason codes
+
+AKAUNTING INTEGRATION (Phase 5 from SSOT) □ Deploy Akaunting via
+Docker on VPS □ Configure Cloudflare tunnel for secure access □ Create
+Akaunting company per station (multi-station support) □ Create
+apps/backend/src/services/akaunting/akaunting_client.py □ Create
+apps/backend/src/services/akaunting/invoice_sync_service.py □ Create
+apps/backend/src/services/akaunting/payment_sync_service.py □ Create
+apps/backend/src/services/akaunting/vendor_sync_service.py □ Sync
+completed bookings → Akaunting invoices □ Sync Stripe payments →
+Akaunting transactions □ Chef Payroll via Akaunting Vendors: □ Create
+vendor record when chef onboarded □ Create bill for completed booking
+(base pay + travel + tips) □ Generate payroll summary report □ Admin
+UI: Chef payment history □ Enable "Download Statement" button in
+apps/admin/src/app/chef/earnings/page.tsx:224 □ Integration tests for
+invoice/payment/vendor sync □ Acceptance: Akaunting deployed,
+auto-sync working, chefs as vendors
 ```
 
 ### Testing Checklist
@@ -430,6 +467,12 @@ updates reflected in quotes
 EDGE CASES □ Double payment prevention □ Partial refund □ Full refund
 □ Payment timeout handling □ Webhook retry handling □ Price update
 during checkout
+
+AKAUNTING INTEGRATION TESTS □ Akaunting API connection works □ Booking
+→ Invoice sync creates invoice □ Stripe payment → Akaunting
+transaction sync □ Chef onboard → Vendor record created □ Completed
+booking → Chef bill generated □ Chef payment history displays
+correctly □ Download Statement generates valid PDF
 ```
 
 ### Pre-Production Checklist

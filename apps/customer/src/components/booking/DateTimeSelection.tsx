@@ -6,7 +6,8 @@ import React from 'react';
 import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { usePricing } from '@/hooks/usePricing';
 
-import type { BookingFormData, TimeSlot } from '../../data/booking/types';
+import type { BookingFormData, EventTimeValue, TimeSlot } from '../../data/booking/types';
+import { GROUPED_TIME_OPTIONS } from '../../data/booking/types';
 
 interface DateTimeSelectionProps {
   formData: BookingFormData;
@@ -24,6 +25,12 @@ export function DateTimeSelection({
   const { adultPrice, childPrice, childFreeUnderAge, isLoading } = usePricing();
   const today = new Date();
   const oneYearFromNow = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+
+  // Handle dropdown time selection
+  const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedTime = e.target.value as EventTimeValue | '';
+    onChange('eventTime', selectedTime);
+  };
 
   return (
     <div className="form-section">
@@ -56,30 +63,35 @@ export function DateTimeSelection({
         </div>
 
         <div className="form-group">
-          <label className="form-label">
-            Event Time <span className="required">*</span>
+          <label htmlFor="eventTime" className="form-label">
+            Event Start Time <span className="required">*</span>
           </label>
-          <div className="time-slots">
-            {timeSlots.map((slot) => (
-              <button
-                key={slot.time}
-                type="button"
-                className={`time-slot ${formData.eventTime === slot.time ? 'selected' : ''} ${
-                  !slot.isAvailable ? 'unavailable' : ''
-                }`}
-                onClick={() =>
-                  slot.isAvailable &&
-                  onChange('eventTime', slot.time as '12PM' | '3PM' | '6PM' | '9PM')
-                }
-                disabled={!slot.isAvailable}
-              >
-                <span className="time-label">{slot.label}</span>
-                <span className="availability">
-                  {slot.isAvailable ? `${slot.available} spots` : 'Booked'}
-                </span>
-              </button>
+          <select
+            id="eventTime"
+            value={formData.eventTime}
+            onChange={handleTimeChange}
+            className={`form-input time-dropdown ${errors.eventTime ? 'error' : ''}`}
+            required
+          >
+            <option value="">Select a time</option>
+            {GROUPED_TIME_OPTIONS.map((group) => (
+              <optgroup key={group.slot} label={group.label}>
+                {group.times.map((timeOption) => {
+                  // Check availability from slot data if provided
+                  const slotInfo = timeSlots?.find((s) => s.time === group.slot);
+                  const isAvailable = slotInfo ? slotInfo.isAvailable : true;
+
+                  return (
+                    <option key={timeOption.value} value={timeOption.value} disabled={!isAvailable}>
+                      {timeOption.label}
+                      {!isAvailable ? ' (Booked)' : ''}
+                    </option>
+                  );
+                })}
+              </optgroup>
             ))}
-          </div>
+          </select>
+          <p className="chef-arrival-note">👨‍🍳 Chef arrives 15-30 min early for setup</p>
           {errors.eventTime && <span className="error-message">{errors.eventTime}</span>}
         </div>
 

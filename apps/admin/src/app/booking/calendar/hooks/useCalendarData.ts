@@ -25,6 +25,10 @@ import type {
 interface UseCalendarDataProps {
   view: CalendarView;
   currentDate: Date;
+  /** Filter by station ID (for Station Managers) */
+  stationId?: string | null;
+  /** Filter by chef ID (for Chef role viewing own events) */
+  chefId?: string | null;
 }
 
 interface UseCalendarDataReturn {
@@ -42,6 +46,8 @@ interface UseCalendarDataReturn {
 export function useCalendarData({
   view,
   currentDate,
+  stationId,
+  chefId,
 }: UseCalendarDataProps): UseCalendarDataReturn {
   const [bookings, setBookings] = useState<CalendarBooking[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,6 +78,14 @@ export function useCalendarData({
         date_from: format(dateRange.start, 'yyyy-MM-dd'),
         date_to: format(dateRange.end, 'yyyy-MM-dd'),
       });
+
+      // Add role-based filters
+      if (stationId) {
+        params.append('station_id', stationId);
+      }
+      if (chefId) {
+        params.append('chef_id', chefId);
+      }
 
       const endpoint =
         view === 'week'
@@ -120,7 +134,7 @@ export function useCalendarData({
     } finally {
       setLoading(false);
     }
-  }, [view, dateRange]);
+  }, [view, dateRange, stationId, chefId]);
 
   // Fetch on mount and when dependencies change
   useEffect(() => {
