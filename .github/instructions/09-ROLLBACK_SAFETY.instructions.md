@@ -74,14 +74,27 @@ git checkout -b hotfix/rollback-<date>
 ### Method 4: Database Restore (Last Resort)
 
 ```bash
+# 1. Stop application with Docker (PRIMARY)
+docker compose -f docker-compose.prod.yml stop production-api
+
+# 2. Restore from backup (PostgreSQL is VPS-native)
+pg_restore -d myhibachi_production backup_YYYYMMDD.sql
+
+# 3. Restart application with Docker
+docker compose -f docker-compose.prod.yml up -d production-api
+```
+
+**LEGACY FALLBACK (if Docker unavailable):**
+
+```bash
 # 1. Stop application
-sudo systemctl stop myhibachi-api
+sudo systemctl stop myhibachi-backend.service
 
 # 2. Restore from backup
-pg_restore -d myhibachi_prod backup_YYYYMMDD.sql
+pg_restore -d myhibachi_production backup_YYYYMMDD.sql
 
 # 3. Restart application
-sudo systemctl start myhibachi-api
+sudo systemctl start myhibachi-backend.service
 ```
 
 ---
@@ -187,14 +200,20 @@ curl https://api.myhibachi.com/health
 ### Check System Health:
 
 ```bash
-# Backend health
-curl https://api.myhibachi.com/health
+# Backend health (production)
+curl https://mhapi.mysticdatanode.net/health
+
+# Backend health (staging)
+curl https://staging-api.mysticdatanode.net/health
+
+# Docker container status (PRIMARY)
+docker compose -f docker-compose.prod.yml ps
 
 # Database connections
 psql -c "SELECT count(*) FROM pg_stat_activity;"
 
-# Redis status
-redis-cli ping
+# Redis status (Docker)
+docker compose -f docker-compose.prod.yml exec redis redis-cli ping
 
 # Disk space
 df -h
@@ -206,8 +225,11 @@ free -m
 ### View Logs:
 
 ```bash
-# Backend logs
-sudo journalctl -u myhibachi-api -f
+# Backend logs (Docker - PRIMARY)
+docker compose -f docker-compose.prod.yml logs -f production-api
+
+# Backend logs (systemd - LEGACY FALLBACK)
+sudo journalctl -u myhibachi-backend.service -f
 
 # Nginx logs
 sudo tail -f /var/log/nginx/error.log
@@ -219,16 +241,19 @@ sudo tail -f /var/log/postgresql/postgresql-15-main.log
 ### Restart Services:
 
 ```bash
-# Backend
-sudo systemctl restart myhibachi-api
+# Backend with Docker (PRIMARY)
+docker compose -f docker-compose.prod.yml restart production-api
+
+# Backend with systemd (LEGACY FALLBACK)
+sudo systemctl restart myhibachi-backend.service
 
 # Nginx
 sudo systemctl restart nginx
 
-# Redis
-sudo systemctl restart redis
+# Redis (Docker)
+docker compose -f docker-compose.prod.yml restart redis
 
-# PostgreSQL
+# PostgreSQL (VPS-native - NOT containerized)
 sudo systemctl restart postgresql
 ```
 

@@ -3,6 +3,21 @@ FastAPI Main Application - Enhanced with Dependency Injection
 Unified API with operational and AI endpoints, enterprise architecture patterns
 """
 
+# ==============================================
+# STARTUP DEBUG LOGGING - Confirm module loaded
+# This file write happens at module import time
+# ==============================================
+import os as _os_debug
+import time as _time_debug
+
+_startup_debug_file = _os_debug.path.join(
+    _os_debug.path.dirname(__file__), "STARTUP_DEBUG.log"
+)
+with open(_startup_debug_file, "w") as _f:
+    _f.write(f"MAIN.PY LOADED AT: {_time_debug.strftime('%Y-%m-%d %H:%M:%S')}\n")
+    _f.write("This file proves the server loaded the latest main.py code\n")
+# ==============================================
+
 import asyncio
 import logging
 import os
@@ -159,9 +174,7 @@ async def lifespan(app: FastAPI):
                 f"{gsm_status.get('error', 'unknown')}"
             )
     except Exception as e:
-        logger.warning(
-            f"⚠️ GSM initialization error: {e} - using environment variables"
-        )
+        logger.warning(f"⚠️ GSM initialization error: {e} - using environment variables")
 
     # ============================================================
     # Email Credential Validation (Batch 1 - Full Redundancy)
@@ -538,6 +551,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+# ============================================================================
+# ASGI debug middleware temporarily disabled - was causing RuntimeError
+# See: asgi_exception.log for previous logs
+logger.info("⚠️ ASGI exception logger middleware DISABLED (was causing RuntimeError)")
+
 # SlowAPI rate limiting integration (secondary layer)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -560,6 +579,19 @@ app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 async def enhanced_global_exception_handler(request: Request, exc: Exception):
     """Global exception handler with Sentry integration"""
     request_id = request.headers.get("X-Request-ID", "unknown")
+
+    # FILE-BASED DEBUG LOGGING - Write exception to file for debugging
+    import traceback
+
+    debug_file = os.path.join(os.path.dirname(__file__), "exception_debug.log")
+    with open(debug_file, "a") as f:
+        f.write(f"\n{'='*60}\n")
+        f.write(f"EXCEPTION at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Request: {request.method} {request.url}\n")
+        f.write(f"Exception: {type(exc).__name__}: {exc}\n")
+        f.write(f"Traceback:\n{traceback.format_exc()}\n")
+        f.write(f"{'='*60}\n")
+
     logger.error(
         f"Unhandled error on {request.method} {request.url}: {exc}",
         extra={"request_id": request_id},
@@ -656,7 +688,9 @@ try:
     from middleware.rate_limit import RateLimitMiddleware
 
     app.add_middleware(RateLimitMiddleware, redis_url=settings.redis_url)
-    logger.info("✅ Login rate limit middleware registered (3 attempts, 1-hour lockout)")
+    logger.info(
+        "✅ Login rate limit middleware registered (3 attempts, 1-hour lockout)"
+    )
 except ImportError as e:
     logger.warning(f"⚠️ Login rate limit middleware not available: {e}")
 except Exception as e:
@@ -1027,7 +1061,9 @@ try:
     from routers.v1.scheduling import router as scheduling_router
 
     app.include_router(scheduling_router, prefix="/api/v1", tags=["scheduling"])
-    logger.info("✅ Smart Scheduling endpoints included (availability, chef assignment)")
+    logger.info(
+        "✅ Smart Scheduling endpoints included (availability, chef assignment)"
+    )
 except ImportError as e:
     logger.warning(f"Smart Scheduling endpoints not available: {e}")
 
@@ -1129,9 +1165,7 @@ except ImportError as e:
 #     logger.info("✅ Stripe router included from NEW location with customer compatibility endpoints")
 # except ImportError as e_stripe:
 #     logger.error(f"❌ Stripe router not available: {e_stripe}")
-logger.info(
-    "⚠️  Stripe router temporarily disabled (StripeCustomer model not migrated)"
-)
+logger.info("⚠️  Stripe router temporarily disabled (StripeCustomer model not migrated)")
 
 # CRM Router - Admin Panel Integration Layer (re-enabled for admin frontend sync)
 try:
@@ -1152,7 +1186,7 @@ try:
     )
     app.include_router(
         station_admin_router,
-        prefix="/api/admin/stations",
+        prefix="/api/v1/admin/stations",
         tags=["station-admin"],
     )
     logger.info(
@@ -1232,12 +1266,25 @@ try:
 
     app.include_router(
         audit_logs_router,
-        prefix="/api/admin/audit-logs",
+        prefix="/api/v1/admin/audit-logs",
         tags=["admin", "audit-logs", "superadmin"],
     )
     logger.info("✅ Admin Audit Logs endpoints included")
 except ImportError as e:
     logger.error(f"❌ Admin Audit Logs endpoints not available: {e}")
+
+# Staff Invitations (role-based invitation system)
+try:
+    from routers.v1.admin.invitations import router as invitations_router
+
+    app.include_router(
+        invitations_router,
+        prefix="/api/v1/admin/invitations",
+        tags=["admin", "invitations", "staff"],
+    )
+    logger.info("✅ Staff Invitations endpoints included")
+except ImportError as e:
+    logger.error(f"❌ Staff Invitations endpoints not available: {e}")
 
 # Notification Groups Admin - NEW location
 try:
@@ -1247,7 +1294,7 @@ try:
 
     app.include_router(
         notification_groups_router,
-        prefix="/api/admin/notification-groups",
+        prefix="/api/v1/admin/notification-groups",
         tags=["admin", "notifications"],
     )
     logger.info("✅ Notification Groups Admin included from NEW location")
@@ -1533,7 +1580,7 @@ try:
 
     app.include_router(
         analytics_router,
-        prefix="/api/admin/analytics",
+        prefix="/api/v1/admin/analytics",
         tags=["Admin Analytics"],
     )
     logger.info("✅ Admin Analytics endpoints included (6 composite endpoints)")
@@ -1584,7 +1631,7 @@ try:
 
     app.include_router(
         email_review_router,
-        prefix="/api/admin/emails",
+        prefix="/api/v1/admin/emails",
         tags=["Admin Email Review"],
     )
     logger.info(

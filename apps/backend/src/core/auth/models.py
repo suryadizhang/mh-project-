@@ -3,22 +3,25 @@ OAuth 2.1 + OIDC + MFA Identity System with RBAC.
 Implements modern authentication with proper security controls.
 """
 
-from datetime import datetime, timezone, timedelta
-from enum import Enum
 import hashlib
-from io import BytesIO
 import secrets
-from typing import Any, TYPE_CHECKING
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from io import BytesIO
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 # Import unified Base (avoid circular import)
 # Fixed: Import from core.database instead of missing legacy_declarative_base
 from core.database import Base
-from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
+from utils.encryption import (
+    FieldEncryption,  # Phase 2C: Updated from api.app.utils.encryption
+)
 
 # Type checking imports to avoid circular dependencies
 if TYPE_CHECKING:
     from db.models.identity import StationUser, User
+
 import bcrypt
 import jwt
 import pyotp
@@ -148,7 +151,11 @@ ROLE_PERMISSIONS: dict[Role, set[Permission]] = {
         Permission.MESSAGE_READ,
         Permission.MESSAGE_SEND,
     },
-    Role.VIEWER: {Permission.BOOKING_READ, Permission.CUSTOMER_READ, Permission.MESSAGE_READ},
+    Role.VIEWER: {
+        Permission.BOOKING_READ,
+        Permission.CUSTOMER_READ,
+        Permission.MESSAGE_READ,
+    },
     Role.AI_SYSTEM: {
         Permission.BOOKING_CREATE,
         Permission.BOOKING_READ,
@@ -178,16 +185,27 @@ class UserSession(Base):
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
+        PostgresUUID(as_uuid=True),
+        ForeignKey("identity.users.id"),
+        nullable=False,
+        index=True,
     )
 
     # Session identification
-    session_token = Column(String(64), nullable=False, unique=True)  # Secure random token
-    refresh_token_hash = Column(String(100), nullable=False, unique=True)  # Hashed refresh token
+    session_token = Column(
+        String(64), nullable=False, unique=True
+    )  # Secure random token
+    refresh_token_hash = Column(
+        String(100), nullable=False, unique=True
+    )  # Hashed refresh token
 
     # JWT details
-    access_token_jti = Column(String(36), nullable=False, unique=True)  # JWT ID for access token
-    refresh_token_jti = Column(String(36), nullable=False, unique=True)  # JWT ID for refresh token
+    access_token_jti = Column(
+        String(36), nullable=False, unique=True
+    )  # JWT ID for access token
+    refresh_token_jti = Column(
+        String(36), nullable=False, unique=True
+    )  # JWT ID for refresh token
 
     # Session metadata
     device_fingerprint = Column(String(64), nullable=True)  # Device identification
@@ -225,15 +243,24 @@ class AuditLog(Base):
 
     # Who
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True, index=True
+        PostgresUUID(as_uuid=True),
+        ForeignKey("identity.users.id"),
+        nullable=True,
+        index=True,
     )
     session_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.user_sessions.id"), nullable=True
+        PostgresUUID(as_uuid=True),
+        ForeignKey("identity.user_sessions.id"),
+        nullable=True,
     )
 
     # What
-    action = Column(String(50), nullable=False, index=True)  # LOGIN, LOGOUT, CREATE_BOOKING, etc.
-    resource_type = Column(String(50), nullable=True)  # booking, customer, payment, etc.
+    action = Column(
+        String(50), nullable=False, index=True
+    )  # LOGIN, LOGOUT, CREATE_BOOKING, etc.
+    resource_type = Column(
+        String(50), nullable=True
+    )  # booking, customer, payment, etc.
     resource_id = Column(String(50), nullable=True)  # ID of affected resource
 
     # Context
@@ -261,7 +288,10 @@ class PasswordResetToken(Base):
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
+        PostgresUUID(as_uuid=True),
+        ForeignKey("identity.users.id"),
+        nullable=False,
+        index=True,
     )
 
     token_hash = Column(String(100), nullable=False, unique=True)
@@ -279,7 +309,10 @@ class AuthenticationService:
     """Core authentication service with comprehensive security."""
 
     def __init__(
-        self, encryption: FieldEncryption, jwt_secret: str, jwt_issuer: str = "myhibachi-crm"
+        self,
+        encryption: FieldEncryption,
+        jwt_secret: str,
+        jwt_issuer: str = "myhibachi-crm",
     ):
         self.encryption = encryption
         self.jwt_secret = jwt_secret
@@ -302,17 +335,21 @@ class AuthenticationService:
         salted_password = f"{password}{additional_salt}"
 
         # Bcrypt hash (includes its own salt)
-        bcrypt_hash = bcrypt.hashpw(salted_password.encode("utf-8"), bcrypt.gensalt()).decode(
-            "utf-8"
-        )
+        bcrypt_hash = bcrypt.hashpw(
+            salted_password.encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8")
 
         return bcrypt_hash, additional_salt
 
-    def verify_password(self, password: str, password_hash: str, password_salt: str) -> bool:
+    def verify_password(
+        self, password: str, password_hash: str, password_salt: str
+    ) -> bool:
         """Verify password against hash."""
         try:
             salted_password = f"{password}{password_salt}"
-            return bcrypt.checkpw(salted_password.encode("utf-8"), password_hash.encode("utf-8"))
+            return bcrypt.checkpw(
+                salted_password.encode("utf-8"), password_hash.encode("utf-8")
+            )
         except Exception:
             return False
 
@@ -338,7 +375,9 @@ class AuthenticationService:
             encrypted_email = self.encryption.encrypt(email)
 
             # Query user by encrypted email
-            stmt = select(StationUser).where(StationUser.email_encrypted == encrypted_email)
+            stmt = select(StationUser).where(
+                StationUser.email_encrypted == encrypted_email
+            )
             result = await db.execute(stmt)
             user = result.scalar_one_or_none()
 
@@ -346,7 +385,9 @@ class AuthenticationService:
                 return None
 
             # Verify password
-            if not self.verify_password(password, user.password_hash, user.password_salt):
+            if not self.verify_password(
+                password, user.password_hash, user.password_salt
+            ):
                 return None
 
             # Check if user is active
@@ -389,7 +430,9 @@ class AuthenticationService:
     def generate_mfa_qr_code(self, email: str, secret: str) -> bytes:
         """Generate QR code for MFA setup."""
         totp = pyotp.TOTP(secret)
-        provisioning_uri = totp.provisioning_uri(name=email, issuer_name="My Hibachi CRM")
+        provisioning_uri = totp.provisioning_uri(
+            name=email, issuer_name="My Hibachi CRM"
+        )
 
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(provisioning_uri)
@@ -413,7 +456,9 @@ class AuthenticationService:
         codes = []
         for _ in range(count):
             # Generate 8-character alphanumeric codes
-            code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
+            code = "".join(
+                secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(8)
+            )
             codes.append(f"{code[:4]}-{code[4:]}")
         return codes
 
@@ -446,7 +491,9 @@ class AuthenticationService:
 
         return False, hashed_codes
 
-    def create_jwt_tokens(self, user: "StationUser", session_id: UUID) -> tuple[str, str]:
+    def create_jwt_tokens(
+        self, user: "StationUser", session_id: UUID
+    ) -> tuple[str, str]:
         """Create access and refresh JWT tokens."""
         now = datetime.now(timezone.utc)
 
@@ -478,12 +525,18 @@ class AuthenticationService:
             "session_id": str(session_id),
         }
 
-        access_token = jwt.encode(access_payload, self.jwt_secret, algorithm=self.jwt_algorithm)
-        refresh_token = jwt.encode(refresh_payload, self.jwt_secret, algorithm=self.jwt_algorithm)
+        access_token = jwt.encode(
+            access_payload, self.jwt_secret, algorithm=self.jwt_algorithm
+        )
+        refresh_token = jwt.encode(
+            refresh_payload, self.jwt_secret, algorithm=self.jwt_algorithm
+        )
 
         return access_token, refresh_token, access_jti, refresh_jti
 
-    def verify_jwt_token(self, token: str, token_type: str = "access") -> dict[str, Any] | None:
+    def verify_jwt_token(
+        self, token: str, token_type: str = "access"
+    ) -> dict[str, Any] | None:
         """Verify JWT token and return payload."""
         try:
             payload = jwt.decode(
@@ -494,7 +547,8 @@ class AuthenticationService:
                 issuer=self.jwt_issuer,
             )
 
-            if payload.get("typ") != token_type:
+            # Note: tokens.py creates tokens with "type" claim, not "typ"
+            if payload.get("type") != token_type:
                 return None
 
             return payload
@@ -534,7 +588,9 @@ class AuthenticationService:
         errors = []
 
         if len(password) < self.password_min_length:
-            errors.append(f"Password must be at least {self.password_min_length} characters long")
+            errors.append(
+                f"Password must be at least {self.password_min_length} characters long"
+            )
 
         if not any(c.isupper() for c in password):
             errors.append("Password must contain at least one uppercase letter")

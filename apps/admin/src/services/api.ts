@@ -639,6 +639,71 @@ export const stationService = {
 };
 
 /**
+ * Staff management service
+ * Handles staff listing, deactivation, and reactivation
+ *
+ * RBAC Rules:
+ * - SUPER_ADMIN: Can manage all staff
+ * - STATION_MANAGER: Can only manage CHEFs at their assigned station
+ */
+export interface StaffMember {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+  status: string;
+  station_id: string | null;
+  station_name: string | null;
+  created_at: string;
+  last_login: string | null;
+}
+
+export const staffService = {
+  /**
+   * Get all staff members (RBAC filtered)
+   */
+  async getStaff(filters?: { status?: string; station_id?: string }) {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.station_id) params.append('station_id', filters.station_id);
+
+    const query = params.toString();
+    const url = query
+      ? `/api/v1/admin/invitations/staff?${query}`
+      : '/api/v1/admin/invitations/staff';
+
+    return api.get<StaffMember[]>(url);
+  },
+
+  /**
+   * Soft-delete a staff member (sets status to INACTIVE)
+   *
+   * RBAC:
+   * - SUPER_ADMIN: Can delete any staff
+   * - STATION_MANAGER: Can only delete CHEFs at their station
+   */
+  async deleteStaff(userId: string) {
+    return api.delete<{ message: string; user_id: string }>(
+      `/api/v1/admin/invitations/staff/${userId}`
+    );
+  },
+
+  /**
+   * Reactivate an inactive staff member
+   *
+   * RBAC:
+   * - SUPER_ADMIN: Can reactivate any staff
+   * - STATION_MANAGER: Can only reactivate CHEFs at their station
+   */
+  async reactivateStaff(userId: string) {
+    return api.post<{ message: string; user_id: string }>(
+      `/api/v1/admin/invitations/staff/${userId}/reactivate`,
+      {}
+    );
+  },
+};
+
+/**
  * Token management utilities with station context
  *
  * SECURITY: Uses sessionStorage instead of localStorage
