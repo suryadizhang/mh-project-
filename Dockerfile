@@ -62,8 +62,12 @@ RUN cd apps/customer && npm run build
 # Unified Backend Build Stage
 # =============================================================================
 FROM python-base AS backend-builder
-COPY requirements.txt .
+
+# Install Python dependencies first (for better caching)
+COPY apps/backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend source code
 COPY apps/backend/ .
 RUN chown -R appuser:appgroup /app
 
@@ -105,16 +109,27 @@ CMD ["node", "server.js"]
 # Unified Backend Runtime
 FROM python:${PYTHON_VERSION}-alpine@sha256:e75de178bc15e72f3f16bf75a6b484e33d39a456f03fc771a2b3abb9146b75f8 AS backend
 WORKDIR /app
-RUN apk add --no-cache curl && rm -rf /var/cache/apk/*
+
+# Install runtime dependencies (libpq for psycopg2, curl for healthcheck)
+RUN apk add --no-cache curl libpq && rm -rf /var/cache/apk/*
+
+# Create non-root user
 RUN addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 -G appgroup
-COPY --from=backend-builder --chown=appuser:appgroup /app .
+
+# CRITICAL: Copy Python packages from builder (site-packages contains all installed packages)
+COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=backend-builder /usr/local/bin /usr/local/bin
+
+# Copy application source code
+COPY --from=backend-builder --chown=appuser:appgroup /app ./
+
 USER appuser
 EXPOSE 8000
 ENV PYTHONPATH=/app/src
 ENV PYTHONUNBUFFERED=1
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
-CMD ["python", "src/main.py"]
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # =============================================================================
 # Final Stage - Select Component Based on Build Arg
