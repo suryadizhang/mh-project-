@@ -83,8 +83,12 @@ numpy>=1.26.2
 scikit-learn>=1.3.2  # ML for intent clustering, lead scoring
 plotly>=5.18.0  # Interactive charts for admin dashboard
 seaborn>=0.13.0  # Statistical data visualization
-torch>=2.0.0  # Required by sentence-transformers (CPU-only via Dockerfile)
-sentence-transformers>=2.2.2  # Embeddings for semantic search
+# NOTE: torch and sentence-transformers disabled for Alpine compatibility
+# The code has graceful fallback (ENHANCED_NLP_AVAILABLE = False)
+# See: ai_pipeline.py, customer_booking_ai.py for fallback pattern
+# To re-enable: Switch Dockerfile from python:3.11-alpine to python:3.11-slim
+# torch>=2.0.0  # Required by sentence-transformers (CPU-only) - DISABLED: No Alpine wheels
+# sentence-transformers>=2.2.2  # Embeddings for semantic search - DISABLED: Requires torch
 # spacy is optional - install separately if needed for NLP features
 # spacy>=3.7.0  # NLP for entity extraction, better tone detection
 # After install, run: python -m spacy download en_core_web_sm
