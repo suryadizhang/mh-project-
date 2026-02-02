@@ -37,6 +37,8 @@ passlib[bcrypt]>=1.7.4
 python-multipart>=0.0.20  # Fixed DoS vulnerability
 cryptography>=44.0.0
 pyotp>=2.8.0  # TOTP/HOTP for 2FA authentication
+qrcode>=7.4.0  # QR code generation for 2FA setup
+pillow>=10.0.0  # Image processing (required by qrcode)
 
 # HTTP client for integrations
 httpx>=0.28.0

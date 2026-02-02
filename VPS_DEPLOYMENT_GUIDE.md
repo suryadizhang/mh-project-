@@ -1,43 +1,179 @@
 # MyHibachi Backend VPS Deployment Guide
 
-> **⚠️ IMPORTANT - Actual VPS Configuration (January 2025)**
+> **⚠️ IMPORTANT - VPS Configuration (February 2026)**
 >
-> The VPS uses **Apache httpd (RHEL/CentOS style)**, NOT nginx or
-> Debian-style Apache.
+> **We now use Docker for all deployments (production & staging).**
 >
-> - Config location: `/etc/httpd/conf.d/`
-> - Service name: `httpd` (not `apache2` or `nginx`)
-> - SSL: Handled by Cloudflare (VirtualHosts listen on port 80 only)
-> - Production API: Port 8000 → `/etc/httpd/conf.d/myhibachi-api.conf`
-> - Staging API: Port 8002 → `/etc/httpd/conf.d/staging-api.conf`
+> - Production API: Port 8000 → `docker-compose.prod.yml`
+> - Staging API: Port 8002 → `docker-compose.staging.yml`
+> - Apache httpd handles reverse proxy: `/etc/httpd/conf.d/`
+> - SSL: Handled by Cloudflare Tunnel (Zero Trust)
+> - CI/CD: GitHub Actions with Cloudflare Access SSH
 >
-> Some sections below may reference Plesk/nginx which is outdated.
+> **LEGACY NOTICE**: Sections mentioning systemctl/venv are deprecated.
+> Docker is the current deployment method.
 
 ## Quick Reference
 
 ### Domains & Hosting
 
-| Service           | Domain                           | Hosting                |
-| ----------------- | -------------------------------- | ---------------------- |
-| **Backend API**   | `mhapi.mysticdatanode.net`       | VPS (`108.175.12.154`) |
-| **Staging API**   | `staging-api.mysticdatanode.net` | VPS (`108.175.12.154`) |
-| **Admin Panel**   | `admin.mysticdatanode.net`       | Vercel (auto)          |
-| **Customer Site** | `myhibachichef.com`              | Vercel (auto)          |
-
-> **Note**: Admin panel domain currently points to `74.208.236.184`
-> temporarily. Once Vercel is configured, update DNS to point to
-> Vercel's servers.
+| Service           | Domain                           | Hosting                | Port |
+| ----------------- | -------------------------------- | ---------------------- | ---- |
+| **Production API**| `mhapi.mysticdatanode.net`       | VPS Docker (8000)      | 8000 |
+| **Staging API**   | `staging-api.mysticdatanode.net` | VPS Docker (8002)      | 8002 |
+| **Admin Panel**   | `admin.mysticdatanode.net`       | Vercel (auto)          | -    |
+| **Customer Site** | `myhibachichef.com`              | Vercel (auto)          | -    |
 
 ### Backend VPS Configuration
 
-| Item         | Value          |
-| ------------ | -------------- |
-| VPS Provider | Plesk          |
-| Backend Port | 8001, 8002     |
-| Database     | PostgreSQL 15  |
-| Cache        | Redis          |
-| Python       | 3.11+          |
-| GSM Project  | my-hibachi-crm |
+| Item             | Value                    |
+| ---------------- | ------------------------ |
+| VPS Provider     | IONOS                    |
+| IP Address       | `108.175.12.154`         |
+| SSH Access       | Cloudflare Tunnel (Zero Trust) |
+| Container Runtime| Docker + Compose         |
+| Database         | PostgreSQL 13.22 (native)|
+| Cache            | Redis (Docker container) |
+| Python           | 3.11 (in container)      |
+
+---
+
+## 🐳 Docker Deployment (Current Method)
+
+### Container Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    VPS (108.175.12.154)                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  docker-compose.prod.yml (Production)                    ││
+│  │  ├── myhibachi-production-api (8000)                     ││
+│  │  └── myhibachi-production-redis                          ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  docker-compose.staging.yml (Staging)                    ││
+│  │  ├── myhibachi-staging-api (8002)                        ││
+│  │  └── myhibachi-staging-redis                             ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  PostgreSQL 13.22 (Native - NOT containerized)              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Docker Commands
+
+```bash
+# SSH into VPS
+ssh root@108.175.12.154
+
+# Navigate to backend directory
+cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend
+
+# ========== PRODUCTION ==========
+# View status
+docker compose -f docker-compose.prod.yml ps
+
+# Start/rebuild
+docker compose -f docker-compose.prod.yml up -d --build
+
+# View logs
+docker compose -f docker-compose.prod.yml logs -f production-api
+
+# Restart
+docker compose -f docker-compose.prod.yml restart production-api
+
+# Stop
+docker compose -f docker-compose.prod.yml down
+
+# ========== STAGING ==========
+# View status
+docker compose -f docker-compose.staging.yml ps
+
+# Start/rebuild
+docker compose -f docker-compose.staging.yml up -d --build
+
+# View logs
+docker compose -f docker-compose.staging.yml logs -f staging-api
+
+# Restart
+docker compose -f docker-compose.staging.yml restart staging-api
+
+# Stop
+docker compose -f docker-compose.staging.yml down
+```
+
+### Health Checks
+
+```bash
+# Production health
+curl http://localhost:8000/health
+
+# Staging health
+curl http://localhost:8002/health
+
+# All containers
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "staging|production|NAMES"
+```
+
+---
+
+## 🚀 CI/CD Deployment (Recommended)
+
+**GitHub Actions automatically deploys on push:**
+
+| Branch | Environment | Workflow File |
+|--------|-------------|---------------|
+| `dev`  | Staging     | `.github/workflows/deploy-backend-staging.yml` |
+| `main` | Production  | `.github/workflows/deploy-backend-production.yml` |
+
+### Required GitHub Secrets
+
+Configure these in **GitHub → Settings → Secrets and variables → Actions**:
+
+| Secret                   | Description                              | Example                                                                 |
+| ------------------------ | ---------------------------------------- | ----------------------------------------------------------------------- |
+| `CF_ACCESS_CLIENT_ID`    | Cloudflare Access Service Token ID       | `abc123.access`                                                         |
+| `CF_ACCESS_CLIENT_SECRET`| Cloudflare Access Service Token Secret   | `xxxxxxxxxxxxx`                                                         |
+| `CF_SSH_HOSTNAME`        | SSH hostname via Cloudflare              | `ssh.mhapi.mysticdatanode.net`                                          |
+| `VPS_USER`               | SSH user                                 | `root`                                                                  |
+| `VPS_STAGING_PATH`       | Staging backend path                     | `/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend`    |
+| `VPS_PRODUCTION_PATH`    | Production backend path                  | `/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend`    |
+| `STAGING_API_URL`        | Staging API URL for E2E tests            | `https://staging-api.mysticdatanode.net`                                |
+
+### CI/CD Workflow
+
+```
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│  Push to dev │───▶│  Run Tests   │───▶│  Deploy to   │
+│   branch     │    │  (pytest)    │    │   Staging    │
+└──────────────┘    └──────────────┘    └──────────────┘
+                                               │
+                                               ▼
+                                        ┌──────────────┐
+                                        │  E2E Tests   │
+                                        │  on Staging  │
+                                        └──────────────┘
+
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│ Push to main │───▶│  Run Tests   │───▶│   Manual     │───▶│  Deploy to   │
+│   branch     │    │  (pytest)    │    │  Approval    │    │  Production  │
+└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+                                                                   │
+                                                                   ▼
+                                                            ┌──────────────┐
+                                                            │ Smoke Tests  │
+                                                            └──────────────┘
+```
+
+### Manual Trigger
+
+1. Go to GitHub → Actions
+2. Select "Deploy Backend to Staging" or "Deploy Backend to Production"
+3. Click "Run workflow"
 
 ---
 
@@ -45,59 +181,21 @@
 
 ### On Your Local Machine
 
-- [ ] All code committed to `nuclear-refactor-clean-architecture`
-      branch
-- [ ] GSM secrets created (14 automated + manual ones after this)
-- [ ] `.env.production` reviewed
+- [ ] All code committed to correct branch (`dev` for staging, `main` for production)
+- [ ] Tests passing locally: `cd apps/backend && pytest tests/unit -v`
+- [ ] Docker builds locally: `docker build -f Dockerfile.vps -t test-build .`
+- [ ] GitHub Secrets configured (see table above)
 
-### On VPS (Plesk)
+### On VPS (First-Time Setup Only)
 
-- [ ] SSH access configured
-- [ ] Python 3.11+ installed
-- [ ] PostgreSQL installed
-- [ ] Redis installed
-- [ ] Google Cloud SDK installed
+- [ ] Docker installed
+- [ ] PostgreSQL 13+ installed (native, not containerized)
+- [ ] Git repository cloned
+- [ ] `.env.production` and `.env.staging` files created
+- [ ] Cloudflare Tunnel configured for SSH access
 
 ---
 
-## Step-by-Step Deployment
-
-### Step 1: SSH into VPS
-
-```bash
-ssh root@your-vps-ip
-# Or via Plesk SSH terminal
-```
-
-### Step 2: Install Prerequisites
-
-```bash
-# Update system
-apt update && apt upgrade -y
-
-# Install Python 3.11
-apt install -y python3.11 python3.11-venv python3.11-dev
-
-# Install PostgreSQL
-apt install -y postgresql postgresql-contrib
-
-# Install Redis
-apt install -y redis-server
-systemctl enable redis-server
-systemctl start redis-server
-
-# Install Git
-apt install -y git
-
-# Install Google Cloud SDK
-curl https://sdk.cloud.google.com | bash
-exec -l $SHELL
-gcloud init
-```
-
-### Step 3: Authenticate with Google Cloud
-
-```bash
 # Login to Google Cloud
 gcloud auth login
 
@@ -366,7 +464,95 @@ In Plesk:
 
 ---
 
-## Useful Commands
+## Useful Commands (Docker)
+
+```bash
+# View all running containers
+docker ps
+
+# View logs (follow)
+docker compose -f docker-compose.prod.yml logs -f production-api
+
+# Check container resource usage
+docker stats
+
+# Prune old images (cleanup)
+docker system prune -a --volumes
+
+# Full deploy (after code changes) - MANUAL
+cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend
+git pull origin main
+docker compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml up -d --build
+
+# View database
+sudo -u postgres psql -d myhibachi_production
+```
+
+---
+
+## 🗃️ LEGACY: Systemd Deployment (Deprecated)
+
+> **⚠️ DEPRECATED**: The following sections describe the old systemd-based
+> deployment. We now use Docker. These are kept for reference only.
+
+<details>
+<summary>Click to expand legacy systemd documentation</summary>
+
+### Legacy Step: Setup Python Environment
+
+```bash
+# Create virtual environment
+python3.11 -m venv .venv
+
+# Activate
+source .venv/bin/activate
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Deactivate
+deactivate
+```
+
+### Legacy Step: Setup Systemd Services
+
+```bash
+# Create backend service template
+cat > /etc/systemd/system/myhibachi-backend@.service << 'EOF'
+[Unit]
+Description=MyHibachi Backend API (Instance %i)
+After=network.target postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/vhosts/mhapi.mysticdatanode.net/backend
+Environment="PORT=800%i"
+EnvironmentFile=/var/www/vhosts/mhapi.mysticdatanode.net/backend/.env
+
+ExecStart=/var/www/vhosts/mhapi.mysticdatanode.net/backend/.venv/bin/uvicorn src.main:app \
+    --host 127.0.0.1 \
+    --port 800%i \
+    --workers 2 \
+    --log-level info
+
+Restart=always
+RestartSec=10s
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Reload and enable
+systemctl daemon-reload
+systemctl enable myhibachi-backend@1.service
+```
+
+### Legacy Commands
 
 ```bash
 # View logs
@@ -377,17 +563,9 @@ systemctl restart myhibachi-backend@1
 
 # Check all services
 systemctl status myhibachi-backend@*
-
-# Full deploy (after code changes)
-cd /var/www/vhosts/mhapi.mysticdatanode.net/backend
-git pull origin nuclear-refactor-clean-architecture
-source .venv/bin/activate
-pip install -r requirements.txt
-alembic upgrade head
-deactivate
-systemctl restart myhibachi-backend@1
-systemctl restart myhibachi-backend@2
 ```
+
+</details>
 
 ---
 
