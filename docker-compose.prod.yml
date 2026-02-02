@@ -36,27 +36,11 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
+      # ONLY override values that need Docker-specific settings
+      # ALL other values come from env_file: .env.production
       - ENVIRONMENT=production
-      # Database: VPS PostgreSQL (NOT containerized for data safety)
-      - DATABASE_URL=${DATABASE_URL}
-      - DATABASE_URL_SYNC=${DATABASE_URL_SYNC}
-      # Redis
-      - REDIS_URL=${REDIS_URL:-redis://production-redis:6379/0}
-      # Security
-      - SECRET_KEY=${SECRET_KEY}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      # Stripe (LIVE keys)
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
-      # RingCentral
-      - RC_CLIENT_ID=${RC_CLIENT_ID}
-      - RC_CLIENT_SECRET=${RC_CLIENT_SECRET}
-      - RC_JWT_TOKEN=${RC_JWT_TOKEN}
-      # OpenAI
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      # CORS
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-["https://myhibachichef.com","https://admin.myhibachichef.com"]}
+      # Redis: Use Docker container name (not localhost)
+      - REDIS_URL=redis://production-redis:6379/0
       # Performance
       - WORKERS=4
     volumes:
