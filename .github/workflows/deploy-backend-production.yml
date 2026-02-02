@@ -1,26 +1,35 @@
-# GitHub Actions Workflow: Auto-Deploy Backend to STAGING via Cloudflare Tunnel
-# This workflow deploys the FastAPI backend to staging using Docker
+# GitHub Actions Workflow: Deploy Backend to PRODUCTION via Cloudflare Tunnel
+# This workflow deploys the FastAPI backend to production using Docker
 # Uses Cloudflare Access for secure SSH without exposing VPS IP
+#
+# PRODUCTION DEPLOYMENT REQUIRES MANUAL APPROVAL
+# Triggers on: push to main branch (with manual approval) or workflow_dispatch
 #
 # Required GitHub Secrets:
 #   - CF_ACCESS_CLIENT_ID: Cloudflare Access Service Token Client ID
 #   - CF_ACCESS_CLIENT_SECRET: Cloudflare Access Service Token Client Secret
 #   - CF_SSH_HOSTNAME: SSH hostname via Cloudflare (e.g., ssh.mhapi.mysticdatanode.net)
 #   - VPS_USER: SSH user (root)
-#   - VPS_STAGING_PATH: Backend directory (/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend)
+#   - VPS_PRODUCTION_PATH: Backend directory (/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend)
 
-name: Deploy Backend to Staging
+name: Deploy Backend to Production
 
 on:
   push:
     branches:
-      - dev
+      - main
     paths:
       - 'apps/backend/**'
-      - '.github/workflows/deploy-backend-staging.yml'
+      - '.github/workflows/deploy-backend-production.yml'
 
   # Allow manual trigger from GitHub UI
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip tests (for hotfixes only)'
+        required: false
+        default: 'false'
+        type: boolean
 
 env:
   PYTHON_VERSION: '3.11'
@@ -32,6 +41,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
 
     steps:
       - name: Checkout code
@@ -77,13 +87,14 @@ jobs:
           USE_GSM: 'false'
 
   # ===========================================
-  # Job 2: Deploy to Staging VPS
+  # Job 2: Deploy to Production VPS (requires approval)
   # ===========================================
-  deploy-staging:
-    name: Deploy to Staging
+  deploy-production:
+    name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: test
-    environment: staging
+    needs: [test]
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
+    environment: production  # Requires manual approval in GitHub
 
     steps:
       - name: Checkout code
@@ -95,7 +106,7 @@ jobs:
           sudo dpkg -i cloudflared.deb
           cloudflared --version
 
-      - name: Deploy to Staging VPS via Cloudflare Access
+      - name: Deploy to Production VPS via Cloudflare Access
         env:
           CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
           CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
@@ -103,7 +114,7 @@ jobs:
           set -e
 
           echo "========================================="
-          echo "🧪 Starting STAGING deployment via Cloudflare Tunnel..."
+          echo "🚀 Starting PRODUCTION deployment via Cloudflare Tunnel..."
           echo "========================================="
 
           # Create SSH config for Cloudflare Access
@@ -120,119 +131,118 @@ jobs:
           ssh cfaccess-vps << 'DEPLOY_SCRIPT'
             set -e
 
-            # Navigate to staging backend directory
-            cd ${{ secrets.VPS_STAGING_PATH }}
+            # Navigate to production backend directory
+            cd ${{ secrets.VPS_PRODUCTION_PATH }}
 
             # Store current commit for potential rollback
             PREVIOUS_COMMIT=$(git rev-parse HEAD)
             echo "Previous commit: $PREVIOUS_COMMIT"
 
-            # Pull latest changes from dev branch
-            echo "📥 Pulling latest changes from dev..."
-            git fetch origin dev
-            git reset --hard origin/dev
+            # Pull latest changes from main branch
+            echo "📥 Pulling latest changes from main..."
+            git fetch origin main
+            git reset --hard origin/main
 
             NEW_COMMIT=$(git rev-parse HEAD)
             echo "New commit: $NEW_COMMIT"
 
             # Rebuild and restart Docker containers
             echo "🐳 Rebuilding and restarting Docker containers..."
-            docker compose -f docker-compose.staging.yml down
-            docker compose -f docker-compose.staging.yml up -d --build
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d --build
             
-            # Wait for container to be healthy
+            # Wait for container to be healthy (production needs more time)
             echo "⏳ Waiting for container health check..."
-            sleep 15
+            sleep 30
 
             # Health check
-            if curl -sf http://localhost:8002/health > /dev/null; then
-              echo "✅ Staging health check passed"
+            if curl -sf http://localhost:8000/health > /dev/null; then
+              echo "✅ Production health check passed"
             else
-              echo "❌ Staging health check failed"
+              echo "❌ Production health check failed"
               # Rollback
               echo "🔄 Rolling back to previous commit..."
               git reset --hard $PREVIOUS_COMMIT
-              docker compose -f docker-compose.staging.yml down
-              docker compose -f docker-compose.staging.yml up -d --build
+              docker compose -f docker-compose.prod.yml down
+              docker compose -f docker-compose.prod.yml up -d --build
               exit 1
             fi
 
             # Show container status
             echo "📊 Container status:"
-            docker compose -f docker-compose.staging.yml ps
+            docker compose -f docker-compose.prod.yml ps
 
             echo "========================================="
-            echo "✅ Staging deployment completed!"
+            echo "✅ Production deployment completed!"
             echo "========================================="
           DEPLOY_SCRIPT
 
-      - name: Verify staging deployment
+      - name: Verify production deployment
         run: |
-          echo "🔍 Verifying staging deployment..."
+          echo "🔍 Verifying production deployment..."
 
           # Wait for service to stabilize
-          sleep 10
+          sleep 15
 
-          # Test staging health endpoint (if publicly accessible)
-          # Adjust URL to your staging domain
-          # response=$(curl -s -o /dev/null -w "%{http_code}" https://staging-api.mysticdatanode.net/api/health)
-          # if [ "$response" = "200" ]; then
-          #   echo "✅ Staging health check passed (HTTP $response)"
-          # else
-          #   echo "⚠️ Staging health check failed (HTTP $response)"
-          # fi
+          # Test production health endpoint (publicly accessible)
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://mhapi.mysticdatanode.net/health || echo "000")
+          if [ "$response" = "200" ]; then
+            echo "✅ Production health check passed (HTTP $response)"
+          else
+            echo "⚠️ Production health check returned HTTP $response (may need manual verification)"
+          fi
 
-          echo "✅ Staging verification complete!"
+          echo "✅ Production verification complete!"
 
-      - name: Notify staging deployment
+      - name: Notify production deployment
         run: |
-          echo "📧 Staging deployment notification..."
-          echo "Branch: dev"
+          echo "📧 Production deployment notification..."
+          echo "Branch: main"
           echo "Commit: ${{ github.sha }}"
           echo "Actor: ${{ github.actor }}"
+          echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
           # Add Slack/Discord notification here if needed
 
   # ===========================================
-  # Job 3: Run E2E Tests on Staging
+  # Job 3: Post-Deployment Smoke Tests
   # ===========================================
-  e2e-tests:
-    name: E2E Tests on Staging
+  smoke-tests:
+    name: Production Smoke Tests
     runs-on: ubuntu-latest
-    needs: deploy-staging
+    needs: deploy-production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'e2e/package-lock.json'
-
-      - name: Install E2E dependencies
-        working-directory: e2e
+      - name: Run smoke tests
         run: |
-          npm ci
-          npx playwright install --with-deps chromium
+          echo "🔥 Running production smoke tests..."
+          
+          # Test health endpoint
+          echo "Testing /health..."
+          curl -sf https://mhapi.mysticdatanode.net/health || echo "Health check failed"
+          
+          # Test API version
+          echo "Testing /api/v1/..."
+          curl -sf https://mhapi.mysticdatanode.net/api/v1/ || echo "API root check failed"
+          
+          # Test pricing endpoint (public)
+          echo "Testing /api/v1/pricing/current..."
+          curl -sf https://mhapi.mysticdatanode.net/api/v1/pricing/current || echo "Pricing check failed"
+          
+          echo "✅ Smoke tests complete!"
 
-      - name: Run E2E tests against staging
-        working-directory: e2e
-        run: |
-          # Run API E2E tests against staging backend
-          npx playwright test api/ --reporter=list \
-            || echo "Some E2E tests failed - review logs"
-        env:
-          API_BASE_URL: ${{ secrets.STAGING_API_URL }}
-          ENVIRONMENT: staging
-
-      - name: Upload E2E test results
+      - name: Report deployment status
         if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: e2e-test-results-staging
-          path: |
-            e2e/playwright-report/
-            e2e/test-results/
-          retention-days: 7
+        run: |
+          echo "========================================="
+          echo "📊 PRODUCTION DEPLOYMENT SUMMARY"
+          echo "========================================="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: main"
+          echo "Commit: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "========================================="

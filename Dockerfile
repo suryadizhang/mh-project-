@@ -27,7 +27,7 @@ COPY packages/*/package*.json ./packages/
 RUN npm ci --only=production --ignore-scripts
 
 # =============================================================================
-# Base Python Image (for backend components)  
+# Base Python Image (for backend components)
 # =============================================================================
 FROM python:${PYTHON_VERSION}-alpine@sha256:e75de178bc15e72f3f16bf75a6b484e33d39a456f03fc771a2b3abb9146b75f8 AS python-base
 WORKDIR /app
