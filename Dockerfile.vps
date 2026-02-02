@@ -1,0 +1,62 @@
+# =============================================================================
+# VPS-specific Dockerfile for MyHibachi Backend
+# =============================================================================
+# Uses apps/backend/src structure (full monorepo clone on VPS)
+# Build: docker build --no-cache --target backend -t myhibachi-api:latest .
+
+FROM python:3.11-slim AS builder
+
+ENV PYTHONUNBUFFERED=1 \
+  PYTHONDONTWRITEBYTECODE=1 \
+  PIP_NO_CACHE_DIR=1
+
+RUN apt-get update && apt-get install -y \
+  build-essential \
+  libpq-dev \
+  curl \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --create-home --shell /bin/bash appuser
+USER appuser
+WORKDIR /home/appuser
+
+RUN python -m venv /home/appuser/venv
+ENV PATH="/home/appuser/venv/bin:$PATH"
+
+# Use VPS monorepo path to requirements
+COPY --chown=appuser:appuser apps/backend/requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# =============================================================================
+# Backend target (for docker-compose target: backend)
+# =============================================================================
+FROM python:3.11-slim AS backend
+
+ENV PYTHONUNBUFFERED=1 \
+  PYTHONDONTWRITEBYTECODE=1 \
+  PATH="/home/appuser/venv/bin:$PATH" \
+  ENVIRONMENT=production \
+  PYTHONPATH=/app/src
+
+RUN apt-get update && apt-get install -y \
+  libpq5 \
+  curl \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --create-home --shell /bin/bash appuser
+USER appuser
+WORKDIR /app
+
+COPY --from=builder --chown=appuser:appuser /home/appuser/venv /home/appuser/venv
+
+# Use VPS monorepo path (apps/backend/src -> /app/src)
+COPY --chown=appuser:appuser apps/backend/src ./src
+
+RUN mkdir -p /app/logs /app/data /app/recordings
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

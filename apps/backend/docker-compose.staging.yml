@@ -1,0 +1,57 @@
+# Docker Compose - Staging Environment
+# Usage: docker compose -f docker-compose.staging.yml up -d
+
+services:
+  staging-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        COMPONENT: backend
+      target: backend
+    container_name: myhibachi-staging-api
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    env_file:
+      - .env.staging
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - staging_logs:/app/logs
+    networks:
+      - myhibachi-staging-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.myhibachi.environment=staging"
+      - "com.myhibachi.service=api"
+
+  staging-redis:
+    image: redis:7-alpine
+    container_name: myhibachi-staging-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - staging_redis_data:/data
+    networks:
+      - myhibachi-staging-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  staging_logs:
+    driver: local
+  staging_redis_data:
+    driver: local
+
+networks:
+  myhibachi-staging-network:
+    driver: bridge
