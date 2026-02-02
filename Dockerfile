@@ -9,7 +9,7 @@
 
 ARG COMPONENT=customer
 ARG NODE_VERSION=20.11.1
-ARG PYTHON_VERSION=3.11.8
+ARG PYTHON_VERSION=3.12.7
 
 # =============================================================================
 # Base Node.js Image (for frontend components)
@@ -119,7 +119,7 @@ RUN apk add --no-cache curl libpq && rm -rf /var/cache/apk/*
 RUN addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 -G appgroup
 
 # CRITICAL: Copy Python packages from builder (site-packages contains all installed packages)
-COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=backend-builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
 # Copy application source code
