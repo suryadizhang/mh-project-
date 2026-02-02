@@ -2,6 +2,7 @@
 fastapi>=0.128.0  # Fixed starlette vulnerability
 uvicorn[standard]>=0.32.0
 gunicorn>=23.0.0  # Fixed HTTP Request/Response Smuggling vulnerability
+itsdangerous>=2.0.0  # Required by starlette SessionMiddleware
 
 # Pydantic for data validation and settings
 pydantic>=2.10.0
