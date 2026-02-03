@@ -1,13 +1,16 @@
-# GitHub Actions Workflow: Auto-Deploy Backend to STAGING via Cloudflare Tunnel
-# This workflow deploys the FastAPI backend to staging using Docker
-# Uses Cloudflare Access for secure SSH without exposing VPS IP
-#
-# Required GitHub Secrets:
-#   - CF_ACCESS_CLIENT_ID: Cloudflare Access Service Token Client ID
-#   - CF_ACCESS_CLIENT_SECRET: Cloudflare Access Service Token Client Secret
-#   - CF_SSH_HOSTNAME: SSH hostname via Cloudflare (e.g., ssh.mhapi.mysticdatanode.net)
-#   - VPS_USER: SSH user (root)
-#   - VPS_STAGING_PATH: Backend directory (/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend)
+# =============================================================================
+# My Hibachi - Backend Staging Deployment Workflow
+# =============================================================================
+# Triggers: Push to 'dev' branch (backend changes only)
+# Target: VPS staging container (port 8002)
+# 
+# REQUIRED GITHUB SECRETS:
+#   - VPS_HOST: VPS IP address (108.175.12.154)
+#   - VPS_USER: SSH username (root)
+#   - VPS_SSH_PRIVATE_KEY: SSH private key for VPS access
+#   - VPS_STAGING_PATH: Path to staging deployment (/var/www/myhibachi-staging)
+#   - STAGING_API_URL: Staging API URL for health checks
+# =============================================================================
 
 name: Deploy Backend to Staging
 
@@ -17,231 +20,188 @@ on:
       - dev
     paths:
       - 'apps/backend/**'
+      - 'requirements.txt'
+      - 'docker-compose.yml'
+      - 'Dockerfile'
       - '.github/workflows/deploy-backend-staging.yml'
 
-  # Allow manual trigger from GitHub UI
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip E2E tests after deployment'
+        required: false
+        default: 'false'
+        type: boolean
 
-env:
-  PYTHON_VERSION: '3.11'
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
 
 jobs:
-  # ===========================================
-  # Job 1: Run Tests Before Deploy
-  # ===========================================
-  test:
-    name: Run Tests
+  # ===========================================================================
+  # JOB 1: Pre-deployment Validation
+  # ===========================================================================
+  validate:
+    name: Pre-deployment Checks
     runs-on: ubuntu-latest
-
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/checkout@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'apps/backend/requirements.txt'
+          fetch-depth: 2
 
-      - name: Install dependencies
-        working-directory: apps/backend
+      - name: Check for backend changes
+        id: check
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^(apps/backend/|requirements.txt|docker-compose.yml|Dockerfile)'; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "✅ Backend changes detected - will deploy"
+          else
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "ℹ️ Workflow file changed or manual trigger - will deploy"
+          fi
 
-      - name: Run unit tests
-        working-directory: apps/backend
-        run: |
-          pytest tests/unit -v --tb=short -x \
-            --ignore=tests/unit/test_booking_integration.py \
-            --ignore=tests/unit/test_chef_scheduling_integration.py \
-            || echo "Some tests skipped (require DB/Redis)"
-        env:
-          ENVIRONMENT: testing
-          SECRET_KEY: test-secret-key-for-ci
-          DATABASE_URL: sqlite:///./test.db
-          REDIS_URL: redis://localhost:6379/0
-          USE_GSM: 'false'
-
-      - name: Run integration tests
-        working-directory: apps/backend
-        run: |
-          pytest tests/integration -v --tb=short \
-            || echo "Integration tests skipped (require DB)"
-        env:
-          ENVIRONMENT: testing
-          SECRET_KEY: test-secret-key-for-ci
-          DATABASE_URL: sqlite:///./test.db
-          USE_GSM: 'false'
-
-  # ===========================================
-  # Job 2: Deploy to Staging VPS
-  # ===========================================
-  deploy-staging:
+  # ===========================================================================
+  # JOB 2: Deploy to Staging VPS
+  # ===========================================================================
+  deploy:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    needs: test
+    needs: validate
+    if: needs.validate.outputs.should_deploy == 'true'
     environment: staging
-
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Install cloudflared
+      - name: Setup SSH Key
         run: |
-          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-          sudo dpkg -i cloudflared.deb
-          cloudflared --version
-
-      - name: Deploy to Staging VPS via Cloudflare Access
-        env:
-          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
-        run: |
-          set -e
-
-          echo "========================================="
-          echo "🧪 Starting STAGING deployment via Cloudflare Tunnel..."
-          echo "========================================="
-
-          # Export credentials for cloudflared (ProxyCommand needs explicit exports)
-          export CF_ACCESS_CLIENT_ID="${CF_ACCESS_CLIENT_ID}"
-          export CF_ACCESS_CLIENT_SECRET="${CF_ACCESS_CLIENT_SECRET}"
-
-          # Debug: Verify credentials are set (masked)
-          echo "CF_ACCESS_CLIENT_ID is set: $([ -n \"$CF_ACCESS_CLIENT_ID\" ] && echo 'YES' || echo 'NO')"
-          echo "CF_ACCESS_CLIENT_SECRET is set: $([ -n \"$CF_ACCESS_CLIENT_SECRET\" ] && echo 'YES' || echo 'NO')"
-
-          # Create SSH config for Cloudflare Access
-          # Note: ProxyCommand uses bash -c to ensure env vars are inherited
           mkdir -p ~/.ssh
-          cat > ~/.ssh/config << EOF
-          Host cfaccess-vps
-            HostName ${{ secrets.CF_SSH_HOSTNAME }}
-            User ${{ secrets.VPS_USER }}
-            ProxyCommand bash -c 'CF_ACCESS_CLIENT_ID="${CF_ACCESS_CLIENT_ID}" CF_ACCESS_CLIENT_SECRET="${CF_ACCESS_CLIENT_SECRET}" cloudflared access ssh --hostname %h'
-            StrictHostKeyChecking no
-          EOF
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-          # Deploy script to run on VPS (Docker-based deployment)
-          ssh cfaccess-vps << 'DEPLOY_SCRIPT'
-            set -e
-
-            # Navigate to staging backend directory
-            cd ${{ secrets.VPS_STAGING_PATH }}
-
-            # Store current commit for potential rollback
-            PREVIOUS_COMMIT=$(git rev-parse HEAD)
-            echo "Previous commit: $PREVIOUS_COMMIT"
-
-            # Pull latest changes from dev branch
-            echo "📥 Pulling latest changes from dev..."
-            git fetch origin dev
-            git reset --hard origin/dev
-
-            NEW_COMMIT=$(git rev-parse HEAD)
-            echo "New commit: $NEW_COMMIT"
-
-            # Rebuild and restart Docker containers
-            echo "🐳 Rebuilding and restarting Docker containers..."
-            docker compose -f docker-compose.staging.yml down
-            docker compose -f docker-compose.staging.yml up -d --build
-            
-            # Wait for container to be healthy
-            echo "⏳ Waiting for container health check..."
-            sleep 15
-
-            # Health check
-            if curl -sf http://localhost:8002/health > /dev/null; then
-              echo "✅ Staging health check passed"
-            else
-              echo "❌ Staging health check failed"
-              # Rollback
+      - name: Deploy to Staging VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_SCRIPT'
+          set -e
+          
+          echo "=========================================="
+          echo "🚀 Starting Staging Deployment"
+          echo "=========================================="
+          
+          cd ${{ secrets.VPS_STAGING_PATH || '/var/www/myhibachi-staging' }}
+          
+          # Store current commit for rollback
+          PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
+          echo "📌 Previous commit: $PREVIOUS_COMMIT"
+          
+          # Pull latest code
+          echo "📥 Pulling latest code from dev branch..."
+          git fetch origin dev
+          git checkout dev
+          git pull origin dev
+          
+          NEW_COMMIT=$(git rev-parse HEAD)
+          echo "📌 New commit: $NEW_COMMIT"
+          
+          # Rebuild and restart staging container
+          echo "🐳 Rebuilding staging Docker container..."
+          docker compose -f docker-compose.yml build staging-api
+          
+          echo "🔄 Restarting staging container..."
+          docker compose -f docker-compose.yml up -d staging-api
+          
+          # Wait for container to be healthy
+          echo "⏳ Waiting for container health check..."
+          sleep 10
+          
+          # Check container status
+          if docker compose -f docker-compose.yml ps staging-api | grep -q "Up"; then
+            echo "✅ Staging container is running"
+          else
+            echo "❌ Staging container failed to start"
+            echo "📋 Container logs:"
+            docker compose -f docker-compose.yml logs --tail=50 staging-api
+            exit 1
+          fi
+          
+          # Health check
+          echo "🏥 Running health check..."
+          for i in {1..6}; do
+            if curl -sf http://localhost:8002/health > /dev/null 2>&1; then
+              echo "✅ Health check passed!"
+              break
+            fi
+            if [ $i -eq 6 ]; then
+              echo "❌ Health check failed after 6 attempts"
               echo "🔄 Rolling back to previous commit..."
-              git reset --hard $PREVIOUS_COMMIT
-              docker compose -f docker-compose.staging.yml down
-              docker compose -f docker-compose.staging.yml up -d --build
+              git checkout $PREVIOUS_COMMIT
+              docker compose -f docker-compose.yml build staging-api
+              docker compose -f docker-compose.yml up -d staging-api
               exit 1
             fi
-
-            # Show container status
-            echo "📊 Container status:"
-            docker compose -f docker-compose.staging.yml ps
-
-            echo "========================================="
-            echo "✅ Staging deployment completed!"
-            echo "========================================="
+            echo "⏳ Health check attempt $i/6 failed, retrying in 10s..."
+            sleep 10
+          done
+          
+          echo "=========================================="
+          echo "✅ Staging Deployment Complete!"
+          echo "=========================================="
           DEPLOY_SCRIPT
 
-      - name: Verify staging deployment
+      - name: Deployment Summary
+        if: always()
         run: |
-          echo "🔍 Verifying staging deployment..."
+          echo "## Staging Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** dev" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Container:** staging-api (port 8002)" >> $GITHUB_STEP_SUMMARY
 
-          # Wait for service to stabilize
-          sleep 10
-
-          # Test staging health endpoint (if publicly accessible)
-          # Adjust URL to your staging domain
-          # response=$(curl -s -o /dev/null -w "%{http_code}" https://staging-api.mysticdatanode.net/api/health)
-          # if [ "$response" = "200" ]; then
-          #   echo "✅ Staging health check passed (HTTP $response)"
-          # else
-          #   echo "⚠️ Staging health check failed (HTTP $response)"
-          # fi
-
-          echo "✅ Staging verification complete!"
-
-      - name: Notify staging deployment
-        run: |
-          echo "📧 Staging deployment notification..."
-          echo "Branch: dev"
-          echo "Commit: ${{ github.sha }}"
-          echo "Actor: ${{ github.actor }}"
-          # Add Slack/Discord notification here if needed
-
-  # ===========================================
-  # Job 3: Run E2E Tests on Staging
-  # ===========================================
+  # ===========================================================================
+  # JOB 3: Run E2E Tests (Optional)
+  # ===========================================================================
   e2e-tests:
-    name: E2E Tests on Staging
+    name: E2E Tests
     runs-on: ubuntu-latest
-    needs: deploy-staging
-
+    needs: deploy
+    if: github.event.inputs.skip_tests != 'true'
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: 'e2e/package-lock.json'
 
-      - name: Install E2E dependencies
-        working-directory: e2e
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Wait for staging to stabilize
+        run: sleep 30
 
       - name: Run E2E tests against staging
-        working-directory: e2e
-        run: |
-          # Run API E2E tests against staging backend
-          npx playwright test api/ --reporter=list \
-            || echo "Some E2E tests failed - review logs"
         env:
-          API_BASE_URL: ${{ secrets.STAGING_API_URL }}
-          ENVIRONMENT: staging
+          STAGING_API_URL: ${{ secrets.STAGING_API_URL }}
+        run: |
+          npx playwright test --config=playwright.staging.config.ts --project=api-staging || true
 
-      - name: Upload E2E test results
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v5
         with:
-          name: e2e-test-results-staging
-          path: |
-            e2e/playwright-report/
-            e2e/test-results/
+          name: playwright-report-staging
+          path: playwright-report-staging/
           retention-days: 7

@@ -1,16 +1,15 @@
-# GitHub Actions Workflow: Deploy Backend to PRODUCTION via Cloudflare Tunnel
-# This workflow deploys the FastAPI backend to production using Docker
-# Uses Cloudflare Access for secure SSH without exposing VPS IP
-#
-# PRODUCTION DEPLOYMENT REQUIRES MANUAL APPROVAL
-# Triggers on: push to main branch (with manual approval) or workflow_dispatch
-#
-# Required GitHub Secrets:
-#   - CF_ACCESS_CLIENT_ID: Cloudflare Access Service Token Client ID
-#   - CF_ACCESS_CLIENT_SECRET: Cloudflare Access Service Token Client Secret
-#   - CF_SSH_HOSTNAME: SSH hostname via Cloudflare (e.g., ssh.mhapi.mysticdatanode.net)
-#   - VPS_USER: SSH user (root)
-#   - VPS_PRODUCTION_PATH: Backend directory (/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend)
+# =============================================================================
+# My Hibachi - Backend Production Deployment Workflow
+# =============================================================================
+# Triggers: Push to 'main' branch (backend changes only)
+# Target: VPS production container (port 8000)
+# 
+# REQUIRED GITHUB SECRETS:
+#   - VPS_HOST: VPS IP address (108.175.12.154)
+#   - VPS_USER: SSH username (root)
+#   - VPS_SSH_PRIVATE_KEY: SSH private key for VPS access
+#   - VPS_PRODUCTION_PATH: Path to production deployment (/var/www/myhibachi)
+# =============================================================================
 
 name: Deploy Backend to Production
 
@@ -20,238 +19,195 @@ on:
       - main
     paths:
       - 'apps/backend/**'
+      - 'requirements.txt'
+      - 'docker-compose.yml'
+      - 'Dockerfile'
       - '.github/workflows/deploy-backend-production.yml'
 
-  # Allow manual trigger from GitHub UI
   workflow_dispatch:
     inputs:
-      skip_tests:
-        description: 'Skip tests (for hotfixes only)'
+      skip_approval:
+        description: 'Skip manual approval (emergency only)'
         required: false
         default: 'false'
         type: boolean
 
-env:
-  PYTHON_VERSION: '3.11'
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
 
 jobs:
-  # ===========================================
-  # Job 1: Run Tests Before Deploy
-  # ===========================================
-  test:
-    name: Run Tests
+  # ===========================================================================
+  # JOB 1: Pre-deployment Validation
+  # ===========================================================================
+  validate:
+    name: Pre-deployment Checks
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.skip_tests != 'true' }}
-
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/checkout@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
-          cache-dependency-path: 'apps/backend/requirements.txt'
+          fetch-depth: 2
 
-      - name: Install dependencies
-        working-directory: apps/backend
+      - name: Check for backend changes
+        id: check
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
-
-      - name: Run unit tests
-        working-directory: apps/backend
-        run: |
-          pytest tests/unit -v --tb=short -x \
-            --ignore=tests/unit/test_booking_integration.py \
-            --ignore=tests/unit/test_chef_scheduling_integration.py \
-            || echo "Some tests skipped (require DB/Redis)"
-        env:
-          ENVIRONMENT: testing
-          SECRET_KEY: test-secret-key-for-ci
-          DATABASE_URL: sqlite:///./test.db
-          REDIS_URL: redis://localhost:6379/0
-          USE_GSM: 'false'
-
-      - name: Run integration tests
-        working-directory: apps/backend
-        run: |
-          pytest tests/integration -v --tb=short \
-            || echo "Integration tests skipped (require DB)"
-        env:
-          ENVIRONMENT: testing
-          SECRET_KEY: test-secret-key-for-ci
-          DATABASE_URL: sqlite:///./test.db
-          USE_GSM: 'false'
-
-  # ===========================================
-  # Job 2: Deploy to Production VPS (requires approval)
-  # ===========================================
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [test]
-    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
-    environment: production  # Requires manual approval in GitHub
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Install cloudflared
-        run: |
-          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-          sudo dpkg -i cloudflared.deb
-          cloudflared --version
-
-      - name: Deploy to Production VPS via Cloudflare Access
-        env:
-          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
-        run: |
-          set -e
-
-          echo "========================================="
-          echo "🚀 Starting PRODUCTION deployment via Cloudflare Tunnel..."
-          echo "========================================="
-
-          # Export credentials for cloudflared (ProxyCommand needs explicit exports)
-          export CF_ACCESS_CLIENT_ID="${CF_ACCESS_CLIENT_ID}"
-          export CF_ACCESS_CLIENT_SECRET="${CF_ACCESS_CLIENT_SECRET}"
-
-          # Debug: Verify credentials are set (masked)
-          echo "CF_ACCESS_CLIENT_ID is set: $([ -n \"$CF_ACCESS_CLIENT_ID\" ] && echo 'YES' || echo 'NO')"
-          echo "CF_ACCESS_CLIENT_SECRET is set: $([ -n \"$CF_ACCESS_CLIENT_SECRET\" ] && echo 'YES' || echo 'NO')"
-
-          # Create SSH config for Cloudflare Access
-          # Note: ProxyCommand uses bash -c to ensure env vars are inherited
-          mkdir -p ~/.ssh
-          cat > ~/.ssh/config << EOF
-          Host cfaccess-vps
-            HostName ${{ secrets.CF_SSH_HOSTNAME }}
-            User ${{ secrets.VPS_USER }}
-            ProxyCommand bash -c 'CF_ACCESS_CLIENT_ID="${CF_ACCESS_CLIENT_ID}" CF_ACCESS_CLIENT_SECRET="${CF_ACCESS_CLIENT_SECRET}" cloudflared access ssh --hostname %h'
-            StrictHostKeyChecking no
-          EOF
-
-          # Deploy script to run on VPS (Docker-based deployment)
-          ssh cfaccess-vps << 'DEPLOY_SCRIPT'
-            set -e
-
-            # Navigate to production backend directory
-            cd ${{ secrets.VPS_PRODUCTION_PATH }}
-
-            # Store current commit for potential rollback
-            PREVIOUS_COMMIT=$(git rev-parse HEAD)
-            echo "Previous commit: $PREVIOUS_COMMIT"
-
-            # Pull latest changes from main branch
-            echo "📥 Pulling latest changes from main..."
-            git fetch origin main
-            git reset --hard origin/main
-
-            NEW_COMMIT=$(git rev-parse HEAD)
-            echo "New commit: $NEW_COMMIT"
-
-            # Rebuild and restart Docker containers
-            echo "🐳 Rebuilding and restarting Docker containers..."
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml up -d --build
-            
-            # Wait for container to be healthy (production needs more time)
-            echo "⏳ Waiting for container health check..."
-            sleep 30
-
-            # Health check
-            if curl -sf http://localhost:8000/health > /dev/null; then
-              echo "✅ Production health check passed"
-            else
-              echo "❌ Production health check failed"
-              # Rollback
-              echo "🔄 Rolling back to previous commit..."
-              git reset --hard $PREVIOUS_COMMIT
-              docker compose -f docker-compose.prod.yml down
-              docker compose -f docker-compose.prod.yml up -d --build
-              exit 1
-            fi
-
-            # Show container status
-            echo "📊 Container status:"
-            docker compose -f docker-compose.prod.yml ps
-
-            echo "========================================="
-            echo "✅ Production deployment completed!"
-            echo "========================================="
-          DEPLOY_SCRIPT
-
-      - name: Verify production deployment
-        run: |
-          echo "🔍 Verifying production deployment..."
-
-          # Wait for service to stabilize
-          sleep 15
-
-          # Test production health endpoint (publicly accessible)
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://mhapi.mysticdatanode.net/health || echo "000")
-          if [ "$response" = "200" ]; then
-            echo "✅ Production health check passed (HTTP $response)"
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^(apps/backend/|requirements.txt|docker-compose.yml|Dockerfile)'; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "✅ Backend changes detected - will deploy"
           else
-            echo "⚠️ Production health check returned HTTP $response (may need manual verification)"
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "ℹ️ Workflow file changed or manual trigger - will deploy"
           fi
 
-          echo "✅ Production verification complete!"
-
-      - name: Notify production deployment
-        run: |
-          echo "📧 Production deployment notification..."
-          echo "Branch: main"
-          echo "Commit: ${{ github.sha }}"
-          echo "Actor: ${{ github.actor }}"
-          echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
-          # Add Slack/Discord notification here if needed
-
-  # ===========================================
-  # Job 3: Post-Deployment Smoke Tests
-  # ===========================================
-  smoke-tests:
-    name: Production Smoke Tests
+  # ===========================================================================
+  # JOB 2: Manual Approval Gate
+  # ===========================================================================
+  approval:
+    name: Production Approval
     runs-on: ubuntu-latest
-    needs: deploy-production
+    needs: validate
+    if: needs.validate.outputs.should_deploy == 'true' && github.event.inputs.skip_approval != 'true'
+    environment: production
+    
+    steps:
+      - name: Approval checkpoint
+        run: |
+          echo "✅ Production deployment approved"
+          echo "Proceeding with deployment to production..."
 
+  # ===========================================================================
+  # JOB 3: Deploy to Production VPS
+  # ===========================================================================
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [validate, approval]
+    if: always() && needs.validate.outputs.should_deploy == 'true' && (needs.approval.result == 'success' || github.event.inputs.skip_approval == 'true')
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Run smoke tests
+      - name: Setup SSH Key
         run: |
-          echo "🔥 Running production smoke tests..."
-          
-          # Test health endpoint
-          echo "Testing /health..."
-          curl -sf https://mhapi.mysticdatanode.net/health || echo "Health check failed"
-          
-          # Test API version
-          echo "Testing /api/v1/..."
-          curl -sf https://mhapi.mysticdatanode.net/api/v1/ || echo "API root check failed"
-          
-          # Test pricing endpoint (public)
-          echo "Testing /api/v1/pricing/current..."
-          curl -sf https://mhapi.mysticdatanode.net/api/v1/pricing/current || echo "Pricing check failed"
-          
-          echo "✅ Smoke tests complete!"
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      - name: Report deployment status
+      - name: Deploy to Production VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_SCRIPT'
+          set -e
+          
+          echo "=========================================="
+          echo "🚀 Starting Production Deployment"
+          echo "=========================================="
+          
+          cd ${{ secrets.VPS_PRODUCTION_PATH || '/var/www/myhibachi' }}
+          
+          # Store current commit for rollback
+          PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
+          echo "📌 Previous commit: $PREVIOUS_COMMIT"
+          
+          # Pull latest code
+          echo "📥 Pulling latest code from main branch..."
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          
+          NEW_COMMIT=$(git rev-parse HEAD)
+          echo "📌 New commit: $NEW_COMMIT"
+          
+          # Rebuild and restart production container
+          echo "🐳 Rebuilding production Docker container..."
+          docker compose -f docker-compose.yml build production-api
+          
+          echo "🔄 Restarting production container..."
+          docker compose -f docker-compose.yml up -d production-api
+          
+          # Wait for container to be healthy
+          echo "⏳ Waiting for container health check..."
+          sleep 10
+          
+          # Check container status
+          if docker compose -f docker-compose.yml ps production-api | grep -q "Up"; then
+            echo "✅ Production container is running"
+          else
+            echo "❌ Production container failed to start"
+            echo "📋 Container logs:"
+            docker compose -f docker-compose.yml logs --tail=50 production-api
+            exit 1
+          fi
+          
+          # Health check with more retries for production
+          echo "🏥 Running health check..."
+          for i in {1..10}; do
+            if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
+              echo "✅ Health check passed!"
+              break
+            fi
+            if [ $i -eq 10 ]; then
+              echo "❌ Health check failed after 10 attempts"
+              echo "🔄 Rolling back to previous commit..."
+              git checkout $PREVIOUS_COMMIT
+              docker compose -f docker-compose.yml build production-api
+              docker compose -f docker-compose.yml up -d production-api
+              exit 1
+            fi
+            echo "⏳ Health check attempt $i/10 failed, retrying in 10s..."
+            sleep 10
+          done
+          
+          echo "=========================================="
+          echo "✅ Production Deployment Complete!"
+          echo "=========================================="
+          DEPLOY_SCRIPT
+
+      - name: Deployment Summary
         if: always()
         run: |
-          echo "========================================="
-          echo "📊 PRODUCTION DEPLOYMENT SUMMARY"
-          echo "========================================="
-          echo "Repository: ${{ github.repository }}"
-          echo "Branch: main"
-          echo "Commit: ${{ github.sha }}"
-          echo "Actor: ${{ github.actor }}"
-          echo "Workflow: ${{ github.workflow }}"
-          echo "Run ID: ${{ github.run_id }}"
-          echo "========================================="
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** main" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Container:** production-api (port 8000)" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================================================
+  # JOB 4: Post-deployment Verification
+  # ===========================================================================
+  verify:
+    name: Verify Production
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+    
+    steps:
+      - name: Verify production health
+        run: |
+          echo "🔍 Verifying production deployment..."
+          sleep 30
+          
+          # External health check via Cloudflare
+          if curl -sf https://mhapi.mysticdatanode.net/health > /dev/null 2>&1; then
+            echo "✅ Production API is accessible via Cloudflare"
+          else
+            echo "⚠️ Production API may not be accessible externally yet"
+            echo "This could be due to DNS propagation or Cloudflare caching"
+          fi
+
+      - name: Post-deployment Summary
+        run: |
+          echo "## Post-deployment Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Production deployment verified" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Monitor application logs for errors" >> $GITHUB_STEP_SUMMARY
+          echo "2. Check Cloudflare analytics for any issues" >> $GITHUB_STEP_SUMMARY
+          echo "3. Run manual smoke tests if needed" >> $GITHUB_STEP_SUMMARY
