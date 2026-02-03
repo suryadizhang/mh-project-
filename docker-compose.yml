@@ -8,8 +8,6 @@
 #   Monitoring:  docker-compose --profile monitoring up
 #   All:         docker-compose --profile development --profile monitoring up
 
-version: '3.8'
-
 services:
   # =============================================================================
   # Unified Backend Service (API + AI)

@@ -8,8 +8,12 @@
 #   - VPS_HOST: VPS IP address (108.175.12.154)
 #   - VPS_USER: SSH username (root)
 #   - VPS_SSH_PRIVATE_KEY: SSH private key for VPS access
-#   - VPS_STAGING_PATH: Path to staging deployment (/var/www/myhibachi-staging)
+#   - VPS_STAGING_PATH: /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend
 #   - STAGING_API_URL: Staging API URL for health checks
+#
+# VPS DOCKER SETUP:
+#   - Staging uses: docker-compose.staging.yml (staging-api on port 8002)
+#   - Production uses: docker-compose.prod.yml (production-api on port 8000)
 # =============================================================================
 
 name: Deploy Backend to Staging
@@ -21,7 +25,7 @@ on:
     paths:
       - 'apps/backend/**'
       - 'requirements.txt'
-      - 'docker-compose.yml'
+      - 'docker-compose.staging.yml'
       - 'Dockerfile'
       - '.github/workflows/deploy-backend-staging.yml'
 
@@ -56,7 +60,7 @@ jobs:
       - name: Check for backend changes
         id: check
         run: |
-          if git diff --name-only HEAD~1 HEAD | grep -qE '^(apps/backend/|requirements.txt|docker-compose.yml|Dockerfile)'; then
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^(apps/backend/|requirements.txt|docker-compose.staging.yml|Dockerfile)'; then
             echo "should_deploy=true" >> $GITHUB_OUTPUT
             echo "✅ Backend changes detected - will deploy"
           else
@@ -94,7 +98,14 @@ jobs:
           echo "🚀 Starting Staging Deployment"
           echo "=========================================="
           
-          cd ${{ secrets.VPS_STAGING_PATH || '/var/www/myhibachi-staging' }}
+          # Use the correct VPS path (hardcoded as backup if secret fails)
+          DEPLOY_PATH="/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend"
+          cd "$DEPLOY_PATH"
+          
+          # Compose file for staging
+          COMPOSE_FILE="docker-compose.staging.yml"
+          SERVICE_NAME="staging-api"
+          HEALTH_PORT="8002"
           
           # Store current commit for rollback
           PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
@@ -111,38 +122,38 @@ jobs:
           
           # Rebuild and restart staging container
           echo "🐳 Rebuilding staging Docker container..."
-          docker compose -f docker-compose.yml build staging-api
+          docker compose -f "$COMPOSE_FILE" build "$SERVICE_NAME"
           
           echo "🔄 Restarting staging container..."
-          docker compose -f docker-compose.yml up -d staging-api
+          docker compose -f "$COMPOSE_FILE" up -d "$SERVICE_NAME"
           
           # Wait for container to be healthy
           echo "⏳ Waiting for container health check..."
-          sleep 10
+          sleep 15
           
           # Check container status
-          if docker compose -f docker-compose.yml ps staging-api | grep -q "Up"; then
+          if docker compose -f "$COMPOSE_FILE" ps "$SERVICE_NAME" | grep -q "Up"; then
             echo "✅ Staging container is running"
           else
             echo "❌ Staging container failed to start"
             echo "📋 Container logs:"
-            docker compose -f docker-compose.yml logs --tail=50 staging-api
+            docker compose -f "$COMPOSE_FILE" logs --tail=50 "$SERVICE_NAME"
             exit 1
           fi
           
           # Health check
           echo "🏥 Running health check..."
           for i in {1..6}; do
-            if curl -sf http://localhost:8002/health > /dev/null 2>&1; then
+            if curl -sf "http://localhost:$HEALTH_PORT/health" > /dev/null 2>&1; then
               echo "✅ Health check passed!"
               break
             fi
             if [ $i -eq 6 ]; then
               echo "❌ Health check failed after 6 attempts"
               echo "🔄 Rolling back to previous commit..."
-              git checkout $PREVIOUS_COMMIT
-              docker compose -f docker-compose.yml build staging-api
-              docker compose -f docker-compose.yml up -d staging-api
+              git checkout "$PREVIOUS_COMMIT"
+              docker compose -f "$COMPOSE_FILE" build "$SERVICE_NAME"
+              docker compose -f "$COMPOSE_FILE" up -d "$SERVICE_NAME"
               exit 1
             fi
             echo "⏳ Health check attempt $i/6 failed, retrying in 10s..."
@@ -163,6 +174,7 @@ jobs:
           echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Container:** staging-api (port 8002)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Compose File:** docker-compose.staging.yml" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================================================
   # JOB 3: Run E2E Tests (Optional)
