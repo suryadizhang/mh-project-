@@ -74,6 +74,7 @@ resend>=2.19.0  # Resend API for email delivery (replaces SMTP)
 
 # Text processing
 markdown>=3.7  # Markdown to HTML conversion for agreements
+bleach>=6.0  # HTML sanitization for user content and agreements
 
 # Environment and configuration
 python-dotenv>=1.0.0
