@@ -97,14 +97,9 @@ class RateLimiter:
         if "/ai/" in path:
             return self.settings.get_ai_rate_limit()
 
-        # Webhook endpoints
+        # Webhook endpoints (use environment-aware method)
         if path.startswith("/webhooks/"):
-            return {
-                "per_minute": self.settings.RATE_LIMIT_WEBHOOK_PER_MINUTE,
-                "per_hour": self.settings.RATE_LIMIT_WEBHOOK_PER_HOUR,
-                "burst": self.settings.RATE_LIMIT_WEBHOOK_BURST,
-                "tier": "webhook",
-            }
+            return self.settings.get_webhook_rate_limit()
 
         # User-based limits
         return self.settings.get_rate_limit_for_user(user_role)

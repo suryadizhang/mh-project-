@@ -138,12 +138,20 @@ if settings.sentry_dsn:
 else:
     logger.debug("Sentry DSN not configured - monitoring disabled (OK for development)")
 
-# Set up SlowAPI rate limiter (secondary layer)
+# Set up SlowAPI rate limiter (secondary layer) - Environment-aware
+# Staging/Dev gets 10x/50x limits respectively, Production gets 1x
+_rate_multiplier = 1
+if settings.ENVIRONMENT.value == "staging":
+    _rate_multiplier = 10
+elif settings.ENVIRONMENT.value == "development":
+    _rate_multiplier = 50
+
+_default_rate_limit = getattr(settings, 'RATE_LIMIT_REQUESTS', 100) * _rate_multiplier
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=[f"{getattr(settings, 'RATE_LIMIT_REQUESTS', 100)}/minute"],
+    default_limits=[f"{_default_rate_limit}/minute"],
 )
-logger.info("✅ SlowAPI rate limiter configured")
+logger.info(f"✅ SlowAPI rate limiter configured (env: {settings.ENVIRONMENT.value}, multiplier: {_rate_multiplier}x, limit: {_default_rate_limit}/min)")
 
 
 @asynccontextmanager

@@ -953,37 +953,84 @@ class Settings(BaseSettings):
             )
         return v
 
+    def _get_environment_rate_multiplier(self) -> int:
+        """
+        Get rate limit multiplier based on environment.
+        
+        BEST PRACTICE: Different environments have different rate limits:
+        - Production: Strict limits (1x) for security
+        - Staging: Relaxed limits (10x) for E2E testing
+        - Development: Very relaxed (50x) for local development
+        
+        This allows E2E tests to run without hitting 429 errors while
+        keeping production protected from abuse.
+        """
+        if self.ENVIRONMENT == Environment.DEVELOPMENT:
+            return 50  # 50x limits for local dev
+        elif self.ENVIRONMENT == Environment.STAGING:
+            return 10  # 10x limits for staging/E2E tests
+        else:
+            return 1  # Normal strict limits for production
+    
+    def is_rate_limiting_enabled(self) -> bool:
+        """Check if rate limiting is enabled for current environment."""
+        return self.FEATURE_FLAG_ENABLE_RATE_LIMITING
+
     def get_rate_limit_for_user(self, user_role: UserRole | None = None) -> dict:
-        """Get rate limit configuration based on user role"""
+        """Get rate limit configuration based on user role and environment."""
+        multiplier = self._get_environment_rate_multiplier()
+        
         if user_role in [UserRole.SUPER_ADMIN]:
             return {
-                "per_minute": self.RATE_LIMIT_ADMIN_SUPER_PER_MINUTE,
-                "per_hour": self.RATE_LIMIT_ADMIN_SUPER_PER_HOUR,
-                "burst": self.RATE_LIMIT_ADMIN_SUPER_BURST,
+                "per_minute": self.RATE_LIMIT_ADMIN_SUPER_PER_MINUTE * multiplier,
+                "per_hour": self.RATE_LIMIT_ADMIN_SUPER_PER_HOUR * multiplier,
+                "burst": self.RATE_LIMIT_ADMIN_SUPER_BURST * multiplier,
                 "tier": "admin_super",
+                "environment": self.ENVIRONMENT.value,
+                "multiplier": multiplier,
             }
         elif user_role in [UserRole.ADMIN, UserRole.STATION_MANAGER]:
             return {
-                "per_minute": self.RATE_LIMIT_ADMIN_PER_MINUTE,
-                "per_hour": self.RATE_LIMIT_ADMIN_PER_HOUR,
-                "burst": self.RATE_LIMIT_ADMIN_BURST,
+                "per_minute": self.RATE_LIMIT_ADMIN_PER_MINUTE * multiplier,
+                "per_hour": self.RATE_LIMIT_ADMIN_PER_HOUR * multiplier,
+                "burst": self.RATE_LIMIT_ADMIN_BURST * multiplier,
                 "tier": "admin",
+                "environment": self.ENVIRONMENT.value,
+                "multiplier": multiplier,
             }
         else:
             return {
-                "per_minute": self.RATE_LIMIT_PUBLIC_PER_MINUTE,
-                "per_hour": self.RATE_LIMIT_PUBLIC_PER_HOUR,
-                "burst": self.RATE_LIMIT_PUBLIC_BURST,
+                "per_minute": self.RATE_LIMIT_PUBLIC_PER_MINUTE * multiplier,
+                "per_hour": self.RATE_LIMIT_PUBLIC_PER_HOUR * multiplier,
+                "burst": self.RATE_LIMIT_PUBLIC_BURST * multiplier,
                 "tier": "public",
+                "environment": self.ENVIRONMENT.value,
+                "multiplier": multiplier,
             }
 
     def get_ai_rate_limit(self) -> dict:
-        """Get AI-specific rate limits (same for all users due to cost)"""
+        """Get AI-specific rate limits (environment-aware, but more conservative due to cost)"""
+        # AI rate limits are multiplied less aggressively due to API costs
+        multiplier = min(self._get_environment_rate_multiplier(), 5)  # Max 5x even in dev
         return {
-            "per_minute": self.RATE_LIMIT_AI_PER_MINUTE,
-            "per_hour": self.RATE_LIMIT_AI_PER_HOUR,
-            "burst": self.RATE_LIMIT_AI_BURST,
+            "per_minute": self.RATE_LIMIT_AI_PER_MINUTE * multiplier,
+            "per_hour": self.RATE_LIMIT_AI_PER_HOUR * multiplier,
+            "burst": self.RATE_LIMIT_AI_BURST * multiplier,
             "tier": "ai",
+            "environment": self.ENVIRONMENT.value,
+            "multiplier": multiplier,
+        }
+    
+    def get_webhook_rate_limit(self) -> dict:
+        """Get webhook-specific rate limits (environment-aware)"""
+        multiplier = self._get_environment_rate_multiplier()
+        return {
+            "per_minute": self.RATE_LIMIT_WEBHOOK_PER_MINUTE * multiplier,
+            "per_hour": self.RATE_LIMIT_WEBHOOK_PER_HOUR * multiplier,
+            "burst": self.RATE_LIMIT_WEBHOOK_BURST * multiplier,
+            "tier": "webhook",
+            "environment": self.ENVIRONMENT.value,
+            "multiplier": multiplier,
         }
 
     # ========================================
