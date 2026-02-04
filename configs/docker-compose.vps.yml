@@ -39,8 +39,6 @@
 #
 # =============================================================================
 
-version: "3.8"
-
 services:
   # ===========================================================================
   # PRODUCTION API
@@ -140,7 +138,7 @@ services:
     image: myhibachi/backend:staging
     restart: always
     ports:
-      - "8002:8002"
+      - "8002:8000"  # Maps container port 8000 to host port 8002
     environment:
       # Runtime
       - ENVIRONMENT=staging
@@ -170,7 +168,7 @@ services:
       - FEATURE_STRIPE_ENABLED=${FEATURE_STRIPE_ENABLED:-true}
 
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8002/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3

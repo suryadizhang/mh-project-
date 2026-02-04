@@ -23,6 +23,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        COMPONENT: backend
       target: backend
     image: myhibachi-api:latest
     container_name: myhibachi-production-api
