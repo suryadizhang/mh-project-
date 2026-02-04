@@ -3,7 +3,7 @@
 # =============================================================================
 # Triggers: Push to 'main' branch (backend changes only)
 # Target: VPS production container (port 8000)
-# 
+#
 # REQUIRED GITHUB SECRETS:
 #   - VPS_HOST: VPS IP address (108.175.12.154)
 #   - VPS_USER: SSH username (root)
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_deploy: ${{ steps.check.outputs.should_deploy }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,7 +76,7 @@ jobs:
     needs: validate
     if: needs.validate.outputs.should_deploy == 'true' && github.event.inputs.skip_approval != 'true'
     environment: production
-    
+
     steps:
       - name: Approval checkpoint
         run: |
@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate, approval]
     if: always() && needs.validate.outputs.should_deploy == 'true' && (needs.approval.result == 'success' || github.event.inputs.skip_approval == 'true')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -107,44 +107,44 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_SCRIPT'
           set -e
-          
+
           echo "=========================================="
           echo "🚀 Starting Production Deployment"
           echo "=========================================="
-          
+
           # Use the correct VPS path (hardcoded as backup if secret fails)
           DEPLOY_PATH="/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend"
           cd "$DEPLOY_PATH"
-          
+
           # Compose file for production
           COMPOSE_FILE="docker-compose.prod.yml"
           SERVICE_NAME="production-api"
           HEALTH_PORT="8000"
-          
+
           # Store current commit for rollback
           PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
           echo "📌 Previous commit: $PREVIOUS_COMMIT"
-          
+
           # Pull latest code
           echo "📥 Pulling latest code from main branch..."
           git fetch origin main
           git checkout main
           git pull origin main
-          
+
           NEW_COMMIT=$(git rev-parse HEAD)
           echo "📌 New commit: $NEW_COMMIT"
-          
+
           # Rebuild and restart production container
           echo "🐳 Rebuilding production Docker container..."
           docker compose -f "$COMPOSE_FILE" build "$SERVICE_NAME"
-          
+
           echo "🔄 Restarting production container..."
           docker compose -f "$COMPOSE_FILE" up -d "$SERVICE_NAME"
-          
+
           # Wait for container to be healthy
           echo "⏳ Waiting for container health check..."
           sleep 15
-          
+
           # Check container status
           if docker compose -f "$COMPOSE_FILE" ps "$SERVICE_NAME" | grep -q "Up"; then
             echo "✅ Production container is running"
@@ -154,7 +154,7 @@ jobs:
             docker compose -f "$COMPOSE_FILE" logs --tail=50 "$SERVICE_NAME"
             exit 1
           fi
-          
+
           # Health check with more retries for production
           echo "🏥 Running health check..."
           for i in {1..10}; do
@@ -173,7 +173,7 @@ jobs:
             echo "⏳ Health check attempt $i/10 failed, retrying in 10s..."
             sleep 10
           done
-          
+
           echo "=========================================="
           echo "✅ Production Deployment Complete!"
           echo "=========================================="
@@ -198,13 +198,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy
     if: success()
-    
+
     steps:
       - name: Verify production health
         run: |
           echo "🔍 Verifying production deployment..."
           sleep 30
-          
+
           # External health check via Cloudflare
           if curl -sf https://mhapi.mysticdatanode.net/health > /dev/null 2>&1; then
             echo "✅ Production API is accessible via Cloudflare"

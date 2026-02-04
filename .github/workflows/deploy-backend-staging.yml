@@ -3,7 +3,7 @@
 # =============================================================================
 # Triggers: Push to 'dev' branch (backend changes only)
 # Target: VPS staging container (port 8002)
-# 
+#
 # REQUIRED GITHUB SECRETS:
 #   - VPS_HOST: VPS IP address (108.175.12.154)
 #   - VPS_USER: SSH username (root)
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_deploy: ${{ steps.check.outputs.should_deploy }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -77,7 +77,7 @@ jobs:
     needs: validate
     if: needs.validate.outputs.should_deploy == 'true'
     environment: staging
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -93,44 +93,44 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_SCRIPT'
           set -e
-          
+
           echo "=========================================="
           echo "🚀 Starting Staging Deployment"
           echo "=========================================="
-          
+
           # Use the correct VPS path (hardcoded as backup if secret fails)
           DEPLOY_PATH="/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend"
           cd "$DEPLOY_PATH"
-          
+
           # Compose file for staging
           COMPOSE_FILE="docker-compose.staging.yml"
           SERVICE_NAME="staging-api"
           HEALTH_PORT="8002"
-          
+
           # Store current commit for rollback
           PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
           echo "📌 Previous commit: $PREVIOUS_COMMIT"
-          
+
           # Pull latest code
           echo "📥 Pulling latest code from dev branch..."
           git fetch origin dev
           git checkout dev
           git pull origin dev
-          
+
           NEW_COMMIT=$(git rev-parse HEAD)
           echo "📌 New commit: $NEW_COMMIT"
-          
+
           # Rebuild and restart staging container
           echo "🐳 Rebuilding staging Docker container..."
           docker compose -f "$COMPOSE_FILE" build "$SERVICE_NAME"
-          
+
           echo "🔄 Restarting staging container..."
           docker compose -f "$COMPOSE_FILE" up -d "$SERVICE_NAME"
-          
+
           # Wait for container to be healthy
           echo "⏳ Waiting for container health check..."
           sleep 15
-          
+
           # Check container status
           if docker compose -f "$COMPOSE_FILE" ps "$SERVICE_NAME" | grep -q "Up"; then
             echo "✅ Staging container is running"
@@ -140,7 +140,7 @@ jobs:
             docker compose -f "$COMPOSE_FILE" logs --tail=50 "$SERVICE_NAME"
             exit 1
           fi
-          
+
           # Health check
           echo "🏥 Running health check..."
           for i in {1..6}; do
@@ -159,7 +159,7 @@ jobs:
             echo "⏳ Health check attempt $i/6 failed, retrying in 10s..."
             sleep 10
           done
-          
+
           echo "=========================================="
           echo "✅ Staging Deployment Complete!"
           echo "=========================================="
@@ -184,7 +184,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy
     if: github.event.inputs.skip_tests != 'true'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

@@ -138,7 +138,7 @@ services:
     image: myhibachi/backend:staging
     restart: always
     ports:
-      - "8002:8000"  # Maps container port 8000 to host port 8002
+      - "8002:8000" # Maps container port 8000 to host port 8002
     environment:
       # Runtime
       - ENVIRONMENT=staging

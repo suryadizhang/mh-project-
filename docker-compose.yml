@@ -4,7 +4,7 @@
 # Unified stack with profiles for development, production, and monitoring
 # Usage:
 #   Development: docker-compose --profile development up
-#   Production:  docker-compose --profile production up  
+#   Production:  docker-compose --profile production up
 #   Monitoring:  docker-compose --profile monitoring up
 #   All:         docker-compose --profile development --profile monitoring up
 
@@ -13,7 +13,7 @@ services:
   # Unified Backend Service (API + AI)
   # =============================================================================
   unified-backend:
-    profiles: ["development", "production"]
+    profiles: [ "development", "production" ]
     build:
       context: .
       dockerfile: Dockerfile
@@ -48,7 +48,7 @@ services:
     networks:
       - myhibachi-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -58,7 +58,7 @@ services:
   # PostgreSQL Database
   # =============================================================================
   postgres:
-    profiles: ["development", "production"]
+    profiles: [ "development", "production" ]
     image: postgres:15-alpine
     container_name: myhibachi-postgres
     restart: unless-stopped
@@ -75,7 +75,7 @@ services:
     networks:
       - myhibachi-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d myhibachi"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d myhibachi" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -84,7 +84,7 @@ services:
   # Redis Cache & Session Store
   # =============================================================================
   redis:
-    profiles: ["development", "production"]
+    profiles: [ "development", "production" ]
     image: redis:7-alpine
     container_name: myhibachi-redis
     restart: unless-stopped
@@ -96,7 +96,7 @@ services:
     networks:
       - myhibachi-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -126,7 +126,7 @@ services:
   # Prometheus Monitoring
   # =============================================================================
   prometheus:
-    profiles: ["monitoring"]
+    profiles: [ "monitoring" ]
     image: prom/prometheus:latest
     container_name: myhibachi-prometheus
     restart: unless-stopped
@@ -149,7 +149,7 @@ services:
   # Grafana Dashboards
   # =============================================================================
   grafana:
-    profiles: ["monitoring"]
+    profiles: [ "monitoring" ]
     image: grafana/grafana:latest
     container_name: myhibachi-grafana
     restart: unless-stopped
@@ -173,7 +173,7 @@ services:
   # PgAdmin Database Management
   # =============================================================================
   pgadmin:
-    profiles: ["development", "monitoring"]
+    profiles: [ "development", "monitoring" ]
     image: dpage/pgadmin4:latest
     container_name: myhibachi-pgadmin
     restart: unless-stopped
