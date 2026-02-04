@@ -115,6 +115,35 @@ ssh root@108.175.12.154 "cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatano
 docker compose -f configs/docker-compose.vps.yml restart production-api
 ```
 
+## 🛡️ FAIL2BAN (SSH Protection)
+
+| Setting         | Value                      |
+| --------------- | -------------------------- |
+| **1st Ban**     | 1 week                     |
+| **2nd Ban**     | 2 weeks                    |
+| **3rd+ Ban**    | Permanent                  |
+| **Max Retry**   | 3 failed attempts          |
+| **Config File** | `/etc/fail2ban/jail.local` |
+
+**Quick Commands:**
+
+```bash
+# Check banned IPs
+fail2ban-client status sshd
+
+# Unban an IP
+fail2ban-client set sshd unbanip 1.2.3.4
+
+# View whitelist
+fail2ban-client get sshd ignoreip
+```
+
+**🔓 If Locked Out:**
+
+1. **GitHub Actions:** Actions → "Unban IP from VPS" → Enter your IP
+2. **Plesk Console:** `https://108.175.12.154:8443` → SSH Terminal
+3. **Find your IP:** https://whatismyip.com
+
 ---
 
 **For detailed info:** Read

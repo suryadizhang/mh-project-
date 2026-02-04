@@ -1,0 +1,95 @@
+# =============================================================================
+# My Hibachi - Emergency IP Unban Workflow
+# =============================================================================
+# Use this if you get locked out of the VPS by Fail2ban
+# 
+# How to use:
+#   1. Go to GitHub Actions → "Unban IP from VPS"
+#   2. Click "Run workflow"
+#   3. Enter your banned IP address
+#   4. Wait ~30 seconds, then try SSH again
+#
+# SECURITY NOTES:
+#   - Uses GitHub Secrets for all credentials (VPS_HOST, VPS_USER, VPS_SSH_PRIVATE_KEY)
+#   - No secrets are hardcoded in this file
+#   - Only repository collaborators can run this workflow
+#   - All executions are logged in GitHub Actions history
+# =============================================================================
+
+name: Unban IP from VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      ip_address:
+        description: 'IP address to unban (e.g., 1.2.3.4)'
+        required: true
+        type: string
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'unban'
+        type: choice
+        options:
+          - unban
+          - check-status
+          - list-banned
+
+jobs:
+  manage-ban:
+    name: Manage Fail2ban
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Unban IP Address
+        if: ${{ github.event.inputs.action == 'unban' }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << EOF
+          echo "🔓 Unbanning IP: ${{ github.event.inputs.ip_address }}"
+          
+          # Check if IP is currently banned
+          if fail2ban-client status sshd | grep -q "${{ github.event.inputs.ip_address }}"; then
+            fail2ban-client set sshd unbanip ${{ github.event.inputs.ip_address }}
+            echo "✅ Successfully unbanned ${{ github.event.inputs.ip_address }}"
+          else
+            echo "ℹ️ IP ${{ github.event.inputs.ip_address }} is not currently banned"
+          fi
+          
+          # Show current status
+          echo ""
+          echo "=== Current Ban Status ==="
+          fail2ban-client status sshd | tail -5
+          EOF
+
+      - name: Check Ban Status
+        if: ${{ github.event.inputs.action == 'check-status' }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << EOF
+          echo "🔍 Checking status for IP: ${{ github.event.inputs.ip_address }}"
+          
+          if fail2ban-client status sshd | grep -q "${{ github.event.inputs.ip_address }}"; then
+            echo "❌ IP ${{ github.event.inputs.ip_address }} IS BANNED"
+            fail2ban-client get sshd banip --with-time | grep "${{ github.event.inputs.ip_address }}" || true
+          else
+            echo "✅ IP ${{ github.event.inputs.ip_address }} is NOT banned"
+          fi
+          EOF
+
+      - name: List All Banned IPs
+        if: ${{ github.event.inputs.action == 'list-banned' }}
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << EOF
+          echo "📋 Currently Banned IPs:"
+          echo ""
+          fail2ban-client status sshd
+          echo ""
+          echo "=== Last 20 Banned (with expiry) ==="
+          fail2ban-client get sshd banip --with-time 2>/dev/null | tail -20 || echo "Detailed ban info not available"
+          EOF

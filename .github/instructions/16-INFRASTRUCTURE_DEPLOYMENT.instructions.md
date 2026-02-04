@@ -497,7 +497,12 @@ Hostname equals mhapi.mysticdatanode.net
 │  Layer 3: Cloudflare Tunnel                                     │
 │  └── VPS IP hidden, traffic via encrypted tunnel               │
 │                                                                  │
-│  Layer 4: Application (FastAPI)                                 │
+│  Layer 4: Fail2ban (SSH Protection)                             │
+│  ├── Progressive banning: 1 week → 2 weeks → permanent         │
+│  ├── 3 failed attempts triggers ban                            │
+│  └── Localhost whitelisted (127.0.0.0/8)                       │
+│                                                                  │
+│  Layer 5: Application (FastAPI)                                 │
 │  ├── JWT Authentication                                        │
 │  ├── RBAC (5-tier: Super Admin → Admin → Customer Support     │
 │  │        → Station Manager → Chef) with role-specific views  │
@@ -505,6 +510,121 @@ Hostname equals mhapi.mysticdatanode.net
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 🛡️ Fail2ban SSH Protection
+
+**Last Updated:** 2026-02-04
+
+### Configuration
+
+| Setting             | Value                      | Description                     |
+| ------------------- | -------------------------- | ------------------------------- |
+| **Config File**     | `/etc/fail2ban/jail.local` | Custom configuration            |
+| **Ban Time (1st)**  | 1 week                     | First offense                   |
+| **Ban Time (2nd)**  | 2 weeks                    | Repeat offender (2x multiplier) |
+| **Ban Time (3rd+)** | Permanent                  | Persistent attackers (-1)       |
+| **Max Retry**       | 3 attempts                 | Failed logins before ban        |
+| **Find Time**       | 10 minutes                 | Window to count failures        |
+| **Whitelisted IPs** | `127.0.0.0/8, ::1`         | Never banned                    |
+
+### Current Configuration File
+
+**Location:** `/etc/fail2ban/jail.local`
+
+```ini
+[DEFAULT]
+bantime = 1w
+bantime.increment = true
+bantime.multiplier = 2
+bantime.maxtime = -1
+bantime.rndtime = 0
+bantime.overalljails = true
+
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/secure
+maxretry = 3
+findtime = 10m
+
+# Whitelist - NEVER ban these IPs
+ignoreip = 127.0.0.1/8 ::1
+```
+
+### Common Commands
+
+```bash
+# Check jail status
+fail2ban-client status sshd
+
+# View currently banned IPs
+fail2ban-client status sshd | grep "Banned IP"
+
+# View banned IPs with expiry times
+fail2ban-client get sshd banip --with-time | tail -20
+
+# Unban a specific IP
+fail2ban-client set sshd unbanip 1.2.3.4
+
+# Check if specific IP is banned
+fail2ban-client status sshd | grep "1.2.3.4"
+
+# Add IP to permanent whitelist
+fail2ban-client set sshd addignoreip 1.2.3.4
+
+# View current whitelist
+fail2ban-client get sshd ignoreip
+
+# Restart fail2ban (after config changes)
+systemctl restart fail2ban
+
+# Check fail2ban service status
+systemctl status fail2ban
+```
+
+### Emergency Recovery (If Locked Out)
+
+**⚠️ IMPORTANT: Multiple recovery options available if you get
+banned**
+
+| Method             | How to Access                 | Steps                                                     |
+| ------------------ | ----------------------------- | --------------------------------------------------------- |
+| **GitHub Actions** | From phone or any device      | Actions → "Unban IP from VPS" → Enter your IP             |
+| **Plesk Console**  | `https://108.175.12.154:8443` | SSH Terminal → `fail2ban-client set sshd unbanip YOUR_IP` |
+| **Team Member**    | Ask colleague with SSH access | They run unban command                                    |
+| **IONOS Console**  | IONOS control panel           | Emergency VNC/console access                              |
+
+**Find Your Current IP:**
+
+- Visit: https://whatismyip.com
+- Or run: `curl ifconfig.me`
+
+**GitHub Actions Unban Workflow:**
+
+1. Go to GitHub → Actions → "Unban IP from VPS"
+2. Click "Run workflow"
+3. Enter your banned IP address
+4. Select action: `unban`, `check-status`, or `list-banned`
+5. Wait ~30 seconds → SSH works again
+
+### Adding Team Members to Whitelist
+
+If a team member has a **static IP**, add them to the whitelist:
+
+```bash
+# Add to whitelist (immediate, non-persistent)
+fail2ban-client set sshd addignoreip TEAM_MEMBER_IP
+
+# Add to persistent whitelist (survives restart)
+# Edit /etc/fail2ban/jail.local and add to ignoreip line:
+ignoreip = 127.0.0.1/8 ::1 TEAM_MEMBER_IP
+```
+
+**⚠️ NEVER whitelist dynamic IPs** - use the recovery methods above
+instead.
 
 ---
 

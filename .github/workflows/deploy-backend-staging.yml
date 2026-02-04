@@ -111,11 +111,11 @@ jobs:
           PREVIOUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
           echo "📌 Previous commit: $PREVIOUS_COMMIT"
 
-          # Pull latest code
+          # Pull latest code (force reset to handle divergent branches)
           echo "📥 Pulling latest code from dev branch..."
           git fetch origin dev
           git checkout dev
-          git pull origin dev
+          git reset --hard origin/dev
 
           NEW_COMMIT=$(git rev-parse HEAD)
           echo "📌 New commit: $NEW_COMMIT"
