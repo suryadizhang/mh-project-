@@ -3,12 +3,12 @@ Centralized configuration using Pydantic Settings
 All environment variables validated here
 """
 
+import logging
+import os
 from enum import Enum
 from functools import lru_cache
-import os
 from pathlib import Path
-from typing import Optional, Dict, Any
-import logging
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 from pydantic import field_validator
@@ -69,8 +69,12 @@ class UserRole(str, Enum):
 
     SUPER_ADMIN = "SUPER_ADMIN"  # Full system access - manage all stations, admins
     ADMIN = "ADMIN"  # Station owner - manage assigned stations
-    CUSTOMER_SUPPORT = "CUSTOMER_SUPPORT"  # Customer needs - view ALL, delete needs approval
-    STATION_MANAGER = "STATION_MANAGER"  # Chef scheduling + station view, can work as chef
+    CUSTOMER_SUPPORT = (
+        "CUSTOMER_SUPPORT"  # Customer needs - view ALL, delete needs approval
+    )
+    STATION_MANAGER = (
+        "STATION_MANAGER"  # Chef scheduling + station view, can work as chef
+    )
     CHEF = "CHEF"  # Chef portal - own schedule, assigned events, payment info
     # Note: Regular customers don't have accounts - they book as guests
 
@@ -143,7 +147,11 @@ class Settings(BaseSettings):
                 ("backend-api", "GOOGLE_REDIRECT_URI", "GOOGLE_REDIRECT_URI"),
                 # Cloudflare R2 Storage secrets (for media uploads)
                 ("backend-api", "cloudflare-r2-account-id", "CLOUDFLARE_R2_ACCOUNT_ID"),
-                ("backend-api", "cloudflare-r2-access-key-id", "CLOUDFLARE_R2_ACCESS_KEY_ID"),
+                (
+                    "backend-api",
+                    "cloudflare-r2-access-key-id",
+                    "CLOUDFLARE_R2_ACCESS_KEY_ID",
+                ),
                 (
                     "backend-api",
                     "cloudflare-r2-secret-access-key",
@@ -169,7 +177,9 @@ class Settings(BaseSettings):
                         # Also export to os.environ for services using os.getenv()
                         os.environ[env_var] = loaded_secrets[key]
                         gsm_count += 1
-                        logger.debug(f"✅ Loaded {env_var} from GSM (Settings + os.environ)")
+                        logger.debug(
+                            f"✅ Loaded {env_var} from GSM (Settings + os.environ)"
+                        )
                 else:
                     # Fallback to environment variable (already loaded by Pydantic)
                     env_count += 1
@@ -191,7 +201,9 @@ class Settings(BaseSettings):
             }
 
         except Exception as e:
-            logger.warning(f"⚠️ GSM initialization failed: {e} - using environment variables")
+            logger.warning(
+                f"⚠️ GSM initialization failed: {e} - using environment variables"
+            )
             self._gsm_initialized = True
             self._secrets_loaded_from_gsm = False
             return {
@@ -365,7 +377,9 @@ class Settings(BaseSettings):
     FEATURE_FLAG_V2_TRAVEL_FEE_CALCULATOR: bool = (
         False  # New travel fee calculation with improved accuracy
     )
-    FEATURE_FLAG_BETA_DYNAMIC_PRICING: bool = False  # Dynamic pricing based on demand/season
+    FEATURE_FLAG_BETA_DYNAMIC_PRICING: bool = (
+        False  # Dynamic pricing based on demand/season
+    )
     FEATURE_FLAG_NEW_BOOKING_VALIDATION: bool = (
         False  # Enhanced booking validation with race condition fixes
     )
@@ -375,26 +389,40 @@ class Settings(BaseSettings):
     FEATURE_FLAG_SHARED_MULTI_CHEF_SCHEDULING: bool = (
         False  # Multi-chef scheduling system (shared with frontends)
     )
-    FEATURE_FLAG_BETA_SMART_AVAILABILITY: bool = False  # AI-powered availability suggestions
+    FEATURE_FLAG_BETA_SMART_AVAILABILITY: bool = (
+        False  # AI-powered availability suggestions
+    )
 
     # AI Feature Flags
     FEATURE_FLAG_ADMIN_AI_INSIGHTS: bool = (
         False  # AI-powered admin insights (shared with admin panel)
     )
-    FEATURE_FLAG_BETA_AI_CUSTOMER_TONE: bool = False  # Adaptive AI tone based on customer profile
+    FEATURE_FLAG_BETA_AI_CUSTOMER_TONE: bool = (
+        False  # Adaptive AI tone based on customer profile
+    )
     FEATURE_FLAG_V2_AI_BOOKING_ASSISTANT: bool = False  # Enhanced AI booking assistance
 
     # Integration Feature Flags
-    FEATURE_FLAG_SHARED_ONEDRIVE_SYNC: bool = False  # OneDrive Excel sync (shared with admin panel)
-    FEATURE_FLAG_BETA_STRIPE_CONNECT: bool = False  # Stripe Connect for multi-chef payments
-    FEATURE_FLAG_NEW_RINGCENTRAL_INTEGRATION: bool = False  # Enhanced RingCentral SMS integration
+    FEATURE_FLAG_SHARED_ONEDRIVE_SYNC: bool = (
+        False  # OneDrive Excel sync (shared with admin panel)
+    )
+    FEATURE_FLAG_BETA_STRIPE_CONNECT: bool = (
+        False  # Stripe Connect for multi-chef payments
+    )
+    FEATURE_FLAG_NEW_RINGCENTRAL_INTEGRATION: bool = (
+        False  # Enhanced RingCentral SMS integration
+    )
 
     # Infrastructure Feature Flags
     FEATURE_FLAG_ENABLE_RATE_LIMITING: bool = (
         True  # Rate limiting for API endpoints (enabled by default for security)
     )
-    FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION: bool = False  # Field-level encryption for sensitive data
-    FEATURE_FLAG_ENABLE_AUDIT_LOGGING: bool = False  # Detailed audit logging for compliance
+    FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION: bool = (
+        False  # Field-level encryption for sensitive data
+    )
+    FEATURE_FLAG_ENABLE_AUDIT_LOGGING: bool = (
+        False  # Detailed audit logging for compliance
+    )
 
     # Legacy Feature Flags (Deprecated - kept for backwards compatibility)
     # TODO: Remove after migrating to FEATURE_FLAG_* pattern
@@ -403,7 +431,9 @@ class Settings(BaseSettings):
     EMAIL_WORKER_ENABLED: bool = False
     STRIPE_WORKER_ENABLED: bool = False
     RATE_LIMIT_ENABLED: bool = True  # Use FEATURE_FLAG_ENABLE_RATE_LIMITING instead
-    ENABLE_FIELD_ENCRYPTION: bool = False  # Use FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION instead
+    ENABLE_FIELD_ENCRYPTION: bool = (
+        False  # Use FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION instead
+    )
     ENABLE_AUDIT_LOGGING: bool = False  # Use FEATURE_FLAG_ENABLE_AUDIT_LOGGING instead
     RINGCENTRAL_ENABLED: bool = False
     EMAIL_ENABLED: bool = False
@@ -779,12 +809,18 @@ class Settings(BaseSettings):
 
     # Email Monitoring (IMAP IDLE Fallback)
     # Intelligent adaptive polling when IMAP IDLE not supported
-    EMAIL_POLL_INTERVAL_BUSINESS_HOURS: int = 30  # 30s during business hours (120 checks/hour max)
+    EMAIL_POLL_INTERVAL_BUSINESS_HOURS: int = (
+        30  # 30s during business hours (120 checks/hour max)
+    )
     EMAIL_POLL_INTERVAL_OFF_HOURS: int = 300  # 5min during off-hours (12 checks/hour)
-    EMAIL_POLL_INTERVAL_IDLE: int = 600  # 10min when no activity detected (6 checks/hour)
+    EMAIL_POLL_INTERVAL_IDLE: int = (
+        600  # 10min when no activity detected (6 checks/hour)
+    )
     EMAIL_BUSINESS_START_HOUR: int = 11  # 11 AM (actual restaurant business hours)
     EMAIL_BUSINESS_END_HOUR: int = 21  # 9 PM
-    EMAIL_IDLE_THRESHOLD_MINUTES: int = 120  # 2 hours of no activity = switch to idle mode
+    EMAIL_IDLE_THRESHOLD_MINUTES: int = (
+        120  # 2 hours of no activity = switch to idle mode
+    )
 
     # Stripe Worker
     STRIPE_WORKER_ENABLED: bool = False
@@ -799,7 +835,9 @@ class Settings(BaseSettings):
     ENABLE_WEBSOCKETS: bool = True
     ENABLE_RATE_LIMITING: bool = True  # Use FEATURE_FLAG_ENABLE_RATE_LIMITING instead
     ENABLE_AUDIT_LOGGING: bool = True  # Use FEATURE_FLAG_ENABLE_AUDIT_LOGGING instead
-    ENABLE_FIELD_ENCRYPTION: bool = True  # Use FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION instead
+    ENABLE_FIELD_ENCRYPTION: bool = (
+        True  # Use FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION instead
+    )
 
     # AI Settings
     ENABLE_AI_AUTO_REPLY: bool = True
@@ -893,7 +931,8 @@ class Settings(BaseSettings):
         """Ensure SECRET_KEY is at least 32 characters for security"""
         if len(v) < 32:
             raise ValueError(
-                "SECRET_KEY must be at least 32 characters long " "for cryptographic security"
+                "SECRET_KEY must be at least 32 characters long "
+                "for cryptographic security"
             )
         return v
 
@@ -903,7 +942,8 @@ class Settings(BaseSettings):
         """Ensure ENCRYPTION_KEY is at least 32 characters"""
         if len(v) < 32:
             raise ValueError(
-                "ENCRYPTION_KEY must be at least 32 characters long " "for proper encryption"
+                "ENCRYPTION_KEY must be at least 32 characters long "
+                "for proper encryption"
             )
         return v
 
@@ -928,7 +968,8 @@ class Settings(BaseSettings):
         # Production webhook secrets must start with whsec_
         if not v.startswith("whsec_"):
             raise ValueError(
-                "STRIPE_WEBHOOK_SECRET must start with whsec_ " "(Stripe webhook signing secret)"
+                "STRIPE_WEBHOOK_SECRET must start with whsec_ "
+                "(Stripe webhook signing secret)"
             )
         return v
 
@@ -949,19 +990,20 @@ class Settings(BaseSettings):
         """Validate Redis URL format"""
         if not v.startswith("redis://"):
             raise ValueError(
-                "REDIS_URL must be a valid Redis connection " "string starting with redis://"
+                "REDIS_URL must be a valid Redis connection "
+                "string starting with redis://"
             )
         return v
 
     def _get_environment_rate_multiplier(self) -> int:
         """
         Get rate limit multiplier based on environment.
-        
+
         BEST PRACTICE: Different environments have different rate limits:
         - Production: Strict limits (1x) for security
         - Staging: Relaxed limits (10x) for E2E testing
         - Development: Very relaxed (50x) for local development
-        
+
         This allows E2E tests to run without hitting 429 errors while
         keeping production protected from abuse.
         """
@@ -971,7 +1013,7 @@ class Settings(BaseSettings):
             return 10  # 10x limits for staging/E2E tests
         else:
             return 1  # Normal strict limits for production
-    
+
     def is_rate_limiting_enabled(self) -> bool:
         """Check if rate limiting is enabled for current environment."""
         return self.FEATURE_FLAG_ENABLE_RATE_LIMITING
@@ -979,7 +1021,7 @@ class Settings(BaseSettings):
     def get_rate_limit_for_user(self, user_role: UserRole | None = None) -> dict:
         """Get rate limit configuration based on user role and environment."""
         multiplier = self._get_environment_rate_multiplier()
-        
+
         if user_role in [UserRole.SUPER_ADMIN]:
             return {
                 "per_minute": self.RATE_LIMIT_ADMIN_SUPER_PER_MINUTE * multiplier,
@@ -1011,7 +1053,9 @@ class Settings(BaseSettings):
     def get_ai_rate_limit(self) -> dict:
         """Get AI-specific rate limits (environment-aware, but more conservative due to cost)"""
         # AI rate limits are multiplied less aggressively due to API costs
-        multiplier = min(self._get_environment_rate_multiplier(), 5)  # Max 5x even in dev
+        multiplier = min(
+            self._get_environment_rate_multiplier(), 5
+        )  # Max 5x even in dev
         return {
             "per_minute": self.RATE_LIMIT_AI_PER_MINUTE * multiplier,
             "per_hour": self.RATE_LIMIT_AI_PER_HOUR * multiplier,
@@ -1020,7 +1064,7 @@ class Settings(BaseSettings):
             "environment": self.ENVIRONMENT.value,
             "multiplier": multiplier,
         }
-    
+
     def get_webhook_rate_limit(self) -> dict:
         """Get webhook-specific rate limits (environment-aware)"""
         multiplier = self._get_environment_rate_multiplier()

@@ -23,7 +23,6 @@ ignore = [
     "PTH100",  # Use Path.resolve() - os.path is fine
     "PTH120",  # Use Path.parent - os.path is fine
     "PLR0912", # Too many branches - acceptable for complex logic
-    "RUF022",  # __all__ sorting - manual order is intentional
 ]
 
 [lint.per-file-ignores]

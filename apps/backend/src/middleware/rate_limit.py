@@ -13,16 +13,17 @@ Created: October 30, 2025
 Author: My Hibachi Chef Development Team
 """
 
-from datetime import datetime, timedelta, timezone
 import json
 import logging
 import time
+from datetime import datetime, timedelta, timezone
 
-from core.config import get_settings
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from redis import asyncio as aioredis
 from starlette.middleware.base import BaseHTTPMiddleware
+
+from core.config import get_settings
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -31,37 +32,37 @@ logger = logging.getLogger(__name__)
 class RateLimitConfig:
     """
     Rate limit configuration with ENVIRONMENT-AWARE multipliers.
-    
+
     Different environments have different rate limits:
     - Production: 1x (strict limits for security)
-    - Staging: 10x (relaxed for E2E testing)  
+    - Staging: 10x (relaxed for E2E testing)
     - Development: 50x (very relaxed for local dev)
     """
 
     def __init__(self):
         # Get environment multiplier from settings
         self._multiplier = settings._get_environment_rate_multiplier()
-        
+
     @property
     def CUSTOMER_LIMIT(self) -> int:
         """Customer rate limit (base 30/min)"""
         return 30 * self._multiplier
-    
+
     @property
     def ADMIN_LIMIT(self) -> int:
         """Admin rate limit (base 200/min)"""
         return 200 * self._multiplier
-    
+
     @property
     def STATION_MANAGER_LIMIT(self) -> int:
         """Station manager rate limit (base 200/min)"""
         return 200 * self._multiplier
-    
+
     @property
     def CHEF_LIMIT(self) -> int:
         """Chef rate limit (base 50/min)"""
         return 50 * self._multiplier
-    
+
     @property
     def UNAUTHENTICATED_LIMIT(self) -> int:
         """Unauthenticated/public rate limit (base 20/min)"""
@@ -147,7 +148,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.memory_store = InMemoryRateLimitStore()  # Fallback store
         self._redis_check_time = 0  # Time of last Redis check
         self._redis_retry_interval = 60  # Retry Redis every 60 seconds
-        
+
         # Log rate limiting configuration
         logger.info(
             f"✅ Rate limit middleware initialized (env: {settings.ENVIRONMENT.value}, "
@@ -238,7 +239,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Remove old entries
             window_start = current_time - self.config.RATE_LIMIT_WINDOW_SECONDS
             self.memory_store.rate_limits[identifier] = [
-                ts for ts in self.memory_store.rate_limits[identifier] if ts > window_start
+                ts
+                for ts in self.memory_store.rate_limits[identifier]
+                if ts > window_start
             ]
 
             # Count and add current request
@@ -432,7 +435,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         # Remove old attempts outside the window
         self.memory_store.login_attempts[attempt_key] = [
-            ts for ts in self.memory_store.login_attempts[attempt_key] if ts > window_start
+            ts
+            for ts in self.memory_store.login_attempts[attempt_key]
+            if ts > window_start
         ]
 
         # Add current attempt
@@ -482,7 +487,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             "warning": warning,
         }
 
-    async def _check_lockout_only(self, redis: aioredis.Redis | None, identifier: str) -> dict:
+    async def _check_lockout_only(
+        self, redis: aioredis.Redis | None, identifier: str
+    ) -> dict:
         """
         Check if account is locked out WITHOUT tracking a new attempt.
         This is used BEFORE processing a login request to reject locked accounts.
@@ -654,7 +661,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     await self._track_login_attempt(redis, identifier, success=True)
                 elif is_login_endpoint and response.status_code in [401, 403]:
                     # Failed login
-                    lockout_info = await self._track_login_attempt(redis, identifier, success=False)
+                    lockout_info = await self._track_login_attempt(
+                        redis, identifier, success=False
+                    )
 
                     # Add warning to response if present
                     if lockout_info.get("warning"):
@@ -674,7 +683,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                             try:
                                 content = json.loads(body)
                                 content["warning"] = lockout_info["warning"]
-                                content["remaining_attempts"] = lockout_info["remaining_attempts"]
+                                content["remaining_attempts"] = lockout_info[
+                                    "remaining_attempts"
+                                ]
 
                                 response = JSONResponse(
                                     status_code=response.status_code,
@@ -720,7 +731,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             )
 
             if not is_allowed:
-                response.headers["Retry-After"] = str(self.config.RATE_LIMIT_WINDOW_SECONDS)
+                response.headers["Retry-After"] = str(
+                    self.config.RATE_LIMIT_WINDOW_SECONDS
+                )
 
             return response
 
@@ -758,7 +771,9 @@ async def check_login_lockout(identifier: str, redis_url: str | None = None) -> 
     lockout_until = datetime.fromisoformat(lockout_info["lockout_until"])
 
     if datetime.now(timezone.utc) < lockout_until:
-        remaining_seconds = int((lockout_until - datetime.now(timezone.utc)).total_seconds())
+        remaining_seconds = int(
+            (lockout_until - datetime.now(timezone.utc)).total_seconds()
+        )
         return {
             "locked": True,
             "remaining_minutes": remaining_seconds // 60,

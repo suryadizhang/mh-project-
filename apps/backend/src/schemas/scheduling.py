@@ -375,3 +375,57 @@ class EventDurationResponse(BaseModel):
     guest_count: int
     duration_minutes: int
     duration_formula: str = ""  # "1-10 guests = 90 min"
+
+
+# ============================================================================
+# Travel Fee Schemas
+# ============================================================================
+
+
+class TravelFeeRequest(BaseModel):
+    """Request to calculate travel fee based on distance."""
+
+    distance_miles: float = Field(..., ge=0, description="Distance in miles")
+    station_id: Optional[UUID] = Field(
+        None, description="Station ID for custom fee rates"
+    )
+
+
+class TravelFeeResponse(BaseModel):
+    """Response with travel fee calculation."""
+
+    fee: float = Field(..., description="Calculated travel fee in dollars")
+    free_miles: int = Field(..., description="Number of free miles included")
+    billable_miles: float = Field(..., description="Miles beyond free miles")
+    per_mile_rate: float = Field(..., description="Rate per mile in dollars")
+    distance_miles: float = Field(..., description="Total distance")
+
+
+# ============================================================================
+# Chef Assignment Write Schemas
+# ============================================================================
+
+
+class ChefAssignRequest(BaseModel):
+    """Request to assign a chef to a booking."""
+
+    booking_id: UUID = Field(..., description="Booking to assign chef to")
+    chef_id: UUID = Field(..., description="Chef to assign")
+    event_date: date = Field(..., description="Date of the event")
+    event_time: time = Field(..., description="Time of the event")
+    override_conflicts: bool = Field(
+        False, description="Force assignment even with conflicts"
+    )
+
+
+class ChefAssignResponse(BaseModel):
+    """Response after chef assignment."""
+
+    success: bool
+    booking_id: UUID
+    chef_id: UUID
+    chef_name: str
+    message: str
+    conflicts: list[str] = Field(
+        default_factory=list, description="Any conflicts detected"
+    )
