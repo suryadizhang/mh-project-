@@ -304,7 +304,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
                         delete_reason,
                         metadata
                     ) VALUES (
-                        :user_id::uuid,
+                        CAST(:user_id AS uuid),
                         :user_role,
                         :user_name,
                         :user_email,
@@ -314,7 +314,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
                         :ip_address,
                         :user_agent,
                         :delete_reason,
-                        :metadata::jsonb
+                        CAST(:metadata AS jsonb)
                     )
                 """
                 )

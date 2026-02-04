@@ -519,7 +519,7 @@ class SlotHoldService:
                 text(
                     """
                     SELECT * FROM core.record_signing_link_sent(
-                        :hold_id::uuid,
+                        CAST(:hold_id AS uuid),
                         :channel
                     )
                 """

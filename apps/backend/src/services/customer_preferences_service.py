@@ -177,7 +177,7 @@ async def update_customer_preferences(
 
     # Allergen fields
     if updates.common_allergens is not None:
-        set_clauses.append("common_allergens = :common_allergens::jsonb")
+        set_clauses.append("common_allergens = CAST(:common_allergens AS jsonb)")
         import json
 
         params["common_allergens"] = json.dumps(updates.common_allergens)

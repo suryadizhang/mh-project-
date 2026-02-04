@@ -131,7 +131,7 @@ class AuditService:
                     :resource_name,
                     :ip_address,
                     :user_agent,
-                    :metadata::jsonb
+                    CAST(:metadata AS jsonb)
                 )
                 RETURNING id
             """)
@@ -225,11 +225,11 @@ class AuditService:
                     :action,
                     :table_name,
                     :record_id,
-                    :old_values::jsonb,
-                    :new_values::jsonb,
+                    CAST(:old_values AS jsonb),
+                    CAST(:new_values AS jsonb),
                     :ip_address,
                     :user_agent,
-                    :metadata::jsonb
+                    CAST(:metadata AS jsonb)
                 )
                 RETURNING id
             """)
@@ -321,7 +321,7 @@ class AuditService:
                     :email,
                     :ip_address,
                     :user_agent,
-                    :details::jsonb,
+                    CAST(:details AS jsonb),
                     :severity
                 )
                 RETURNING id
