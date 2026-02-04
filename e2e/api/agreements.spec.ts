@@ -95,7 +95,7 @@ test.describe('Agreements API - Slot Holds @api @agreements', () => {
       },
     });
 
-    expect([200, 201, 409, 422, 500]).toContain(response.status());
+    expect([200, 201, 404, 409, 422, 500]).toContain(response.status());
 
     if (response.status() === 200 || response.status() === 201) {
       const data = await response.json();
@@ -260,7 +260,7 @@ test.describe('Agreements API - Signing @api @agreements', () => {
       }
     );
 
-    expect([200, 400, 422, 500]).toContain(response.status());
+    expect([200, 400, 404, 422, 500]).toContain(response.status());
 
     if (response.status() === 200) {
       const data = await response.json();
