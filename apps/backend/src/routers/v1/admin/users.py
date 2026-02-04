@@ -274,9 +274,7 @@ async def get_user_role(db: AsyncSession, user_id: UUID) -> Optional[str]:
     return str(role).upper() if role else None
 
 
-async def get_user_station(
-    db: AsyncSession, user_id: UUID
-) -> tuple[Optional[UUID], Optional[str]]:
+async def get_user_station(db: AsyncSession, user_id: UUID) -> tuple[Optional[UUID], Optional[str]]:
     """Get the primary station assignment for a user."""
     result = await db.execute(
         select(Station.id, Station.name)
@@ -284,7 +282,7 @@ async def get_user_station(
         .where(
             and_(
                 StationUser.user_id == user_id,
-                StationUser.is_active == True,
+                StationUser.is_active,
             )
         )
         .limit(1)
@@ -318,7 +316,7 @@ async def get_accessible_user_ids(
             select(StationUser.station_id).where(
                 and_(
                     StationUser.user_id == current_user.id,
-                    StationUser.is_active == True,
+                    StationUser.is_active,
                 )
             )
         )
@@ -339,7 +337,7 @@ async def get_accessible_user_ids(
             select(StationUser.station_id).where(
                 and_(
                     StationUser.user_id == current_user.id,
-                    StationUser.is_active == True,
+                    StationUser.is_active,
                 )
             )
         )
@@ -599,6 +597,30 @@ async def create_user(
         await db.commit()
         await db.refresh(user)
 
+        # Audit logging: Log the creating user's action
+        # Industry best practice: Log who performed the action (current_user), not the resource being created
+        try:
+            logger.info(
+                "Audit: User created",
+                extra={
+                    "action": "create_user",
+                    "performed_by": str(current_user.id),
+                    "performed_by_email": current_user.email,
+                    "resource_type": "user",
+                    "resource_id": str(user.id),
+                    "details": {
+                        "created_user_email": user.email,
+                        "created_user_role": request.role,
+                        "assigned_station_id": (
+                            str(request.station_id) if request.station_id else None
+                        ),
+                    },
+                },
+            )
+        except Exception as audit_error:
+            # Audit logging should never block user creation
+            logger.warning(f"Audit logging failed for user creation: {audit_error}")
+
         # TODO: Add audit logging
         # await audit_log_action(
         #     action="create_user",
@@ -748,9 +770,7 @@ async def update_user(
         if request.phone is not None:
             user.phone = request.phone
         if request.is_active is not None:
-            user.status = (
-                UserStatus.ACTIVE if request.is_active else UserStatus.INACTIVE
-            )
+            user.status = UserStatus.ACTIVE if request.is_active else UserStatus.INACTIVE
 
         # Role update (only super_admin)
         if request.role is not None:
@@ -777,9 +797,7 @@ async def update_user(
             # Update station assignment
             # Deactivate old assignments
             await db.execute(
-                update(StationUser)
-                .where(StationUser.user_id == user_id)
-                .values(is_active=False)
+                update(StationUser).where(StationUser.user_id == user_id).values(is_active=False)
             )
             # Create new assignment
             station_user = StationUser(
@@ -887,9 +905,7 @@ async def delete_user(
 
         # Deactivate station assignments
         await db.execute(
-            update(StationUser)
-            .where(StationUser.user_id == user_id)
-            .values(is_active=False)
+            update(StationUser).where(StationUser.user_id == user_id).values(is_active=False)
         )
 
         await db.commit()

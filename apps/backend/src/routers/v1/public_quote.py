@@ -17,10 +17,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
 from core.config import settings
+from core.database import get_db
 from services.business_config_service import get_business_config
-from services.scheduling import TravelTimeService, GeocodingService
+from services.scheduling import GeocodingService, TravelTimeService
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class QuoteRequest(BaseModel):
     edamame: int = Field(default=0, ge=0, description="Number of edamame portions")
     gyoza: int = Field(default=0, ge=0, description="Number of gyoza portions")
 
-    # Location for travel fee calculation
+    # Location for travel fee calculation (at least one method required)
     venue_address: str | None = Field(
         default=None, description="Full venue address for travel calculation"
     )
@@ -68,6 +68,15 @@ class QuoteRequest(BaseModel):
     venue_lng: float | None = Field(
         default=None, description="Venue longitude (if already geocoded)"
     )
+
+    @property
+    def has_location(self) -> bool:
+        """Check if at least one location method is provided."""
+        return bool(
+            self.venue_address
+            or self.zip_code
+            or (self.venue_lat is not None and self.venue_lng is not None)
+        )
 
     model_config = {
         "json_schema_extra": {
@@ -195,6 +204,17 @@ async def calculate_quote(
     Uses BusinessConfig for dynamic pricing values.
     """
     try:
+        # Validate location is provided (industry best practice: fail fast with clear error)
+        if not request.has_location:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "error": "Location required",
+                    "message": "Please provide venue location using one of: venue_address, zip_code, or (venue_lat, venue_lng)",
+                    "fields": ["venue_address", "zip_code", "venue_lat", "venue_lng"],
+                },
+            )
+
         # Get dynamic pricing from BusinessConfig
         config = await get_business_config(db)
 

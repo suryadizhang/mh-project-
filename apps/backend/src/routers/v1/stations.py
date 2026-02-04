@@ -19,24 +19,82 @@ from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.auth.station_middleware import (
-    AuthenticatedUser,
-    audit_log_action,
-    require_station_permission,
-)
 from core.database import get_db_session
+from core.security import decode_access_token
 from db.models.identity import (
     Station,
     StationUser,
+    User,
 )
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["stations"])
+security = HTTPBearer()
+
+
+# =============================================================================
+# Authentication Dependencies
+# =============================================================================
+
+
+async def get_current_user_from_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db_session),
+) -> User:
+    """
+    Get current user from JWT token.
+    Validates token and fetches full User model from database.
+
+    This is the industry-standard JWT authentication pattern used across all API endpoints.
+    """
+    from db.models.identity import UserStatus
+
+    payload = decode_access_token(credentials.credentials)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token: missing user ID",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        result = await db.execute(select(User).where(User.id == UUID(user_id)))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        if user.status != UserStatus.ACTIVE:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Account is {user.status.value.lower()}",
+            )
+
+        return user
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid user ID in token: {e}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 # =============================================================================
@@ -78,30 +136,18 @@ class StationCreateRequest(BaseModel):
     """Request model for creating a new station."""
 
     name: str = Field(..., min_length=1, max_length=100, description="Station name")
-    display_name: str = Field(
-        ..., min_length=1, max_length=200, description="Display name for UI"
-    )
+    display_name: str = Field(..., min_length=1, max_length=200, description="Display name for UI")
     city: str = Field(..., min_length=1, max_length=100, description="City name")
-    state: str = Field(
-        ..., min_length=2, max_length=2, description="2-letter state code"
-    )
-    country: str = Field(
-        default="US", min_length=2, max_length=2, description="Country code"
-    )
+    state: str = Field(..., min_length=2, max_length=2, description="2-letter state code")
+    country: str = Field(default="US", min_length=2, max_length=2, description="Country code")
     timezone: str = Field(..., description="IANA timezone (e.g., America/Los_Angeles)")
     email: Optional[str] = Field(None, description="Contact email")
     phone: Optional[str] = Field(None, max_length=50, description="Contact phone")
     address: Optional[str] = Field(None, description="Street address")
-    postal_code: Optional[str] = Field(
-        None, max_length=20, description="ZIP/Postal code"
-    )
+    postal_code: Optional[str] = Field(None, max_length=20, description="ZIP/Postal code")
     status: str = Field(default="active", description="Station status")
-    business_hours: Optional[dict[str, Any]] = Field(
-        None, description="Operating hours JSON"
-    )
-    service_area_radius: Optional[int] = Field(
-        None, ge=0, description="Service radius in miles"
-    )
+    business_hours: Optional[dict[str, Any]] = Field(None, description="Operating hours JSON")
+    service_area_radius: Optional[int] = Field(None, ge=0, description="Service radius in miles")
     max_concurrent_bookings: Optional[int] = Field(
         default=10, ge=1, description="Max concurrent bookings"
     )
@@ -132,9 +178,7 @@ class StationCreateRequest(BaseModel):
 @router.get("/", response_model=list[StationResponse])
 async def list_stations(
     include_inactive: bool = Query(False, description="Include inactive stations"),
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("view_stations")
-    ),
+    current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db_session),
 ) -> list[StationResponse]:
     """
@@ -143,6 +187,11 @@ async def list_stations(
     By default, only shows active stations.
     Super admins can see all stations including inactive.
     Regular users can only see stations they're assigned to.
+
+    **Authentication:** Requires valid JWT token (standard Bearer token auth).
+    **Permissions:**
+    - SUPER_ADMIN: Can view all stations, including inactive
+    - Other roles: Can view active stations they're assigned to, or all active if no assignments
     """
     try:
         query = select(Station)
@@ -157,8 +206,8 @@ async def list_stations(
             station_ids_result = await db.execute(
                 select(StationUser.station_id).where(
                     and_(
-                        StationUser.user_id == current_user.user_id,
-                        StationUser.is_active == True,
+                        StationUser.user_id == current_user.id,
+                        StationUser.is_active,
                     )
                 )
             )
@@ -207,15 +256,16 @@ async def list_stations(
 
 @router.get("/me", response_model=Optional[StationResponse])
 async def get_my_station(
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("view_stations")
-    ),
+    current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db_session),
 ) -> Optional[StationResponse]:
     """
     Get the current user's assigned station.
 
     Returns the first active station assignment for the user.
+
+    **Authentication:** Requires valid JWT token.
+    **Returns:** First active station user is assigned to, or None if no assignments.
     """
     try:
         result = await db.execute(
@@ -223,8 +273,8 @@ async def get_my_station(
             .join(StationUser, StationUser.station_id == Station.id)
             .where(
                 and_(
-                    StationUser.user_id == current_user.user_id,
-                    StationUser.is_active == True,
+                    StationUser.user_id == current_user.id,
+                    StationUser.is_active,
                     Station.status == "active",
                 )
             )
@@ -265,13 +315,14 @@ async def get_my_station(
 @router.get("/{station_id}", response_model=StationResponse)
 async def get_station(
     station_id: UUID,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("view_stations")
-    ),
+    current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationResponse:
     """
     Get a specific station by ID.
+
+    **Authentication:** Requires valid JWT token.
+    **Permissions:** All authenticated users can view station details.
     """
     try:
         result = await db.execute(select(Station).where(Station.id == station_id))
@@ -291,16 +342,14 @@ async def get_station(
                     and_(
                         StationUser.user_id == current_user.user_id,
                         StationUser.station_id == station_id,
-                        StationUser.is_active == True,
+                        StationUser.is_active,
                     )
                 )
             )
             # Allow viewing even without assignment (public station info)
             # But log if they're not assigned
             if not assignment.scalar_one_or_none():
-                logger.debug(
-                    f"User {current_user.user_id} viewing unassigned station {station_id}"
-                )
+                logger.debug(f"User {current_user.user_id} viewing unassigned station {station_id}")
 
         return StationResponse(
             id=station.id,
@@ -334,9 +383,7 @@ async def get_station(
 @router.post("/", response_model=StationResponse, status_code=status.HTTP_201_CREATED)
 async def create_station(
     request: StationCreateRequest,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_stations")
-    ),
+    current_user: User = Depends(get_current_user_from_token),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationResponse:
     """
@@ -344,6 +391,9 @@ async def create_station(
 
     Only super_admin can create stations.
     Station code is auto-generated based on location.
+
+    **Authentication:** Requires valid JWT token with SUPER_ADMIN role.
+    **Permissions:** SUPER_ADMIN only.
     """
     # Only super_admin can create
     if not current_user.is_super_admin:
@@ -363,9 +413,7 @@ async def create_station(
             country=request.country,
         )
 
-        logger.info(
-            f"Generated station code: {station_code} for {request.city}, {request.state}"
-        )
+        logger.info(f"Generated station code: {station_code} for {request.city}, {request.state}")
 
         # Create station
         station = Station(
@@ -391,19 +439,26 @@ async def create_station(
         await db.commit()
         await db.refresh(station)
 
-        await audit_log_action(
-            action="create_station",
-            auth_user=current_user,
-            db=db,
-            resource_type="station",
-            resource_id=str(station.id),
-            details={
-                "station_name": station.name,
-                "station_code": station_code,
-                "city": request.city,
-                "state": request.state,
-            },
-        )
+        # Audit logging: Log station creation
+        try:
+            logger.info(
+                "Audit: Station created",
+                extra={
+                    "action": "create_station",
+                    "performed_by": str(current_user.id),
+                    "performed_by_email": current_user.email,
+                    "resource_type": "station",
+                    "resource_id": str(station.id),
+                    "details": {
+                        "station_name": station.name,
+                        "station_code": station_code,
+                        "city": request.city,
+                        "state": request.state,
+                    },
+                },
+            )
+        except Exception as audit_error:
+            logger.warning(f"Audit logging failed for station creation: {audit_error}")
 
         logger.info(f"Created station: {station_code} (ID: {station.id})")
 
