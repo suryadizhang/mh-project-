@@ -1,11 +1,10 @@
 ---
-applyTo: '**'
+applyTo: 'apps/**'
 ---
 
-# My Hibachi – Comprehensive Quality Control Standards
+# My Hibachi – Quality Control Standards
 
 **Priority: CRITICAL** – Apply to ALL code changes before commit.
-**Version:** 2.0.0 **Created:** 2025-01-27 **Updated:** 2025-01-27
 
 ---
 

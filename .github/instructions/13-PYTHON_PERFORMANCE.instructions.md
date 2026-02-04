@@ -4,7 +4,8 @@ applyTo: 'apps/backend/**'
 
 # My Hibachi – Python/FastAPI Performance Standards
 
-**Priority: HIGH** – Backend performance directly impacts user experience.
+**Priority: HIGH** – Backend performance directly impacts user
+experience.
 
 ---
 
@@ -42,12 +43,12 @@ for booking in bookings.scalars():
 
 ## 📊 SQLAlchemy Relationship Loading
 
-| Strategy       | Use When                      | SQL Generated        |
-| -------------- | ----------------------------- | -------------------- |
-| `joinedload`   | Single related object (1:1)   | LEFT JOIN            |
-| `selectinload` | Collection (1:N)              | Separate IN query    |
-| `subqueryload` | Large collections             | Subquery             |
-| `lazyload`     | Rarely accessed (default)     | Query on access      |
+| Strategy       | Use When                    | SQL Generated     |
+| -------------- | --------------------------- | ----------------- |
+| `joinedload`   | Single related object (1:1) | LEFT JOIN         |
+| `selectinload` | Collection (1:N)            | Separate IN query |
+| `subqueryload` | Large collections           | Subquery          |
+| `lazyload`     | Rarely accessed (default)   | Query on access   |
 
 ### Example with Multiple Relationships:
 
@@ -67,7 +68,8 @@ query = (
 
 ## 🚀 Lazy Loading for Heavy Services
 
-**Load ML models and heavy dependencies on first use, not at startup.**
+**Load ML models and heavy dependencies on first use, not at
+startup.**
 
 ### ❌ BAD - Loads on Import (Slow Startup):
 
@@ -263,13 +265,13 @@ logger.info(
 
 ### 2. Appropriate Log Levels
 
-| Level    | Use For                                |
-| -------- | -------------------------------------- |
-| DEBUG    | Detailed debugging (dev only)          |
-| INFO     | Normal operations, milestones          |
-| WARNING  | Recoverable issues                     |
-| ERROR    | Failures that need attention           |
-| CRITICAL | System failures                        |
+| Level    | Use For                       |
+| -------- | ----------------------------- |
+| DEBUG    | Detailed debugging (dev only) |
+| INFO     | Normal operations, milestones |
+| WARNING  | Recoverable issues            |
+| ERROR    | Failures that need attention  |
+| CRITICAL | System failures               |
 
 ### 3. Don't Log Sensitive Data
 
@@ -354,12 +356,12 @@ Before PR:
 
 ## 🎯 Performance Budgets
 
-| Metric                    | Budget   | Action if Exceeded         |
-| ------------------------- | -------- | -------------------------- |
-| API response time (P95)   | < 200ms  | Add caching, optimize query |
-| Startup time              | < 5s     | Lazy load services         |
-| Memory per request        | < 50MB   | Stream large results       |
-| Database queries per req  | < 10     | Use eager loading          |
+| Metric                   | Budget  | Action if Exceeded          |
+| ------------------------ | ------- | --------------------------- |
+| API response time (P95)  | < 200ms | Add caching, optimize query |
+| Startup time             | < 5s    | Lazy load services          |
+| Memory per request       | < 50MB  | Stream large results        |
+| Database queries per req | < 10    | Use eager loading           |
 
 ---
 
@@ -368,4 +370,3 @@ Before PR:
 - `docs/01-ARCHITECTURE/DATABASE_ARCHITECTURE.md` – DB design
 - `apps/backend/src/utils/pagination.py` – Pagination helper
 - `apps/backend/src/core/redis_client.py` – Redis setup
-

@@ -65,6 +65,16 @@ repos:
         args: ['-r', 'apps/backend/src/', '--skip', 'B101']
         files: ^apps/backend/src/.*\.py$
 
+  # Secret Detection (CRITICAL - prevents credential leaks)
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        name: detect-secrets
+        description: Detect secrets in code before commit
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package-lock\.json|\.env\.example|TEST_CREDENTIALS\.local\.md
+
   # Python Type Checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.7.1'

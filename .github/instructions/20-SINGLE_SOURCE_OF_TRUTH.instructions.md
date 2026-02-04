@@ -1,12 +1,14 @@
 ---
-applyTo: '**'
+applyTo: 'apps/backend/src/services/**,apps/customer/src/hooks/**,apps/customer/src/data/**,**/pricing*/**,**/config*/**,**/faq*/**'
 ---
 
 # My Hibachi – Single Source of Truth (SSoT) Architecture
 
 **Priority: CRITICAL** – ALL business data MUST flow from centralized
-sources. **Version:** 1.0.0 **Created:** 2025-12-27 **Updated:**
-2025-12-27
+sources.
+
+> **Quick Reference:** See `00-QUICK_REFERENCE.instructions.md` for
+> pricing values. This file has detailed SSoT architecture.
 
 ---
 

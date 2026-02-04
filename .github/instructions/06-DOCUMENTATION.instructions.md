@@ -209,23 +209,28 @@ Before committing docs:
 
 ## 🚨 Business Data Verification (CRITICAL for AI/Pricing Docs)
 
-**When documenting business data (pricing, policies, menu items), you MUST verify from source:**
+**When documenting business data (pricing, policies, menu items), you
+MUST verify from source:**
 
 ### ⚠️ DYNAMIC PRICING WARNING
 
-**ALL pricing values are managed by the Dynamic Variables System and can change at any time!**
+**ALL pricing values are managed by the Dynamic Variables System and
+can change at any time!**
 
-| Rule | Reason |
-|------|--------|
-| Never treat prices as permanent | Owner can update via admin panel |
-| Always include "as of [date]" | Values may be stale |
-| Reference variable names, not just values | `adultPrice` not just `$55` |
-| Add "verify current pricing" notes | Remind readers to check API |
+| Rule                                      | Reason                           |
+| ----------------------------------------- | -------------------------------- |
+| Never treat prices as permanent           | Owner can update via admin panel |
+| Always include "as of [date]"             | Values may be stale              |
+| Reference variable names, not just values | `adultPrice` not just `$55`      |
+| Add "verify current pricing" notes        | Remind readers to check API      |
 
 **Dynamic Variables Source of Truth:**
-- **Backend:** `dynamic_variables` table → `dynamic_variables_service.py`
+
+- **Backend:** `dynamic_variables` table →
+  `dynamic_variables_service.py`
 - **API:** `GET /api/v1/pricing/current`
-- **Frontend:** `usePricing()` hook → `pricingTemplates.ts` (fallback only)
+- **Frontend:** `usePricing()` hook → `pricingTemplates.ts` (fallback
+  only)
 
 ### Pre-Documentation Checklist:
 
@@ -233,9 +238,11 @@ Before committing docs:
 - [ ] **Searched `menu.ts`** for menu item names
 - [ ] **Searched `pricingTemplates.ts`** for default values
 - [ ] **NO invented values** - every number has a source
-- [ ] **Source cited** in document (e.g., "Source: faqsData.ts lines 98-111")
+- [ ] **Source cited** in document (e.g., "Source: faqsData.ts lines
+      98-111")
 - [ ] **Added "as of [date]"** to any specific price mentioned
-- [ ] **Referenced variable names** (e.g., `adultPrice`, `partyMinimum`)
+- [ ] **Referenced variable names** (e.g., `adultPrice`,
+      `partyMinimum`)
 - [ ] **Added dynamic pricing disclaimer** if doc contains prices
 
 ### Verification Commands:
@@ -253,12 +260,12 @@ grep -r "cancel\\|reschedule\\|refund.*day" apps/customer/src/lib/data/
 
 ### Red Flags (STOP and Verify):
 
-| If You're About To Write... | STOP and Search For... |
-|-----------------------------|------------------------|
-| Any dollar amount ($X) | Exact value in faqsData.ts or pricingTemplates.ts |
-| Menu item name not seen before | Verify in menu.ts or faqsData.ts |
-| Refund policy with timeframes | Exact policy in faqsData.ts (search "refund\|cancel") |
-| Upgrade names (Wagyu, King Crab) | Verify exists in faqsData.ts |
+| If You're About To Write...      | STOP and Search For...                                |
+| -------------------------------- | ----------------------------------------------------- |
+| Any dollar amount ($X)           | Exact value in faqsData.ts or pricingTemplates.ts     |
+| Menu item name not seen before   | Verify in menu.ts or faqsData.ts                      |
+| Refund policy with timeframes    | Exact policy in faqsData.ts (search "refund\|cancel") |
+| Upgrade names (Wagyu, King Crab) | Verify exists in faqsData.ts                          |
 
 ### If You Can't Find the Data:
 

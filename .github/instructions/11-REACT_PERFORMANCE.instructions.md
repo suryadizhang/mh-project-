@@ -20,7 +20,7 @@ const [retryCount, setRetryCount] = useState(0);
 
 const connectWebSocket = useCallback(() => {
   ws.onclose = () => {
-    setRetryCount((prev) => prev + 1); // Changes state
+    setRetryCount(prev => prev + 1); // Changes state
     if (retryCount < 3) {
       // Uses stale value!
       connectWebSocket(); // Recursive call
@@ -66,14 +66,14 @@ useEffect(() => {
 
 ## 📊 When to Use What
 
-| Need                                   | Use              | Why                          |
-| -------------------------------------- | ---------------- | ---------------------------- |
-| Trigger re-render on change            | `useState`       | React tracks changes         |
-| Store value without re-render          | `useRef`         | Mutable, no re-render        |
-| Stable function reference              | `useCallback`    | Prevents child re-renders    |
-| Expensive computation                  | `useMemo`        | Caches result                |
-| Track value across renders (no render) | `useRef`         | Instance variable            |
-| Derived state from props               | Compute directly | Don't duplicate in state     |
+| Need                                   | Use              | Why                       |
+| -------------------------------------- | ---------------- | ------------------------- |
+| Trigger re-render on change            | `useState`       | React tracks changes      |
+| Store value without re-render          | `useRef`         | Mutable, no re-render     |
+| Stable function reference              | `useCallback`    | Prevents child re-renders |
+| Expensive computation                  | `useMemo`        | Caches result             |
+| Track value across renders (no render) | `useRef`         | Instance variable         |
+| Derived state from props               | Compute directly | Don't duplicate in state  |
 
 ---
 
@@ -191,7 +191,9 @@ const ChatWidget = dynamic(() => import('./ChatWidget'), {
 
 ```tsx
 // ❌ BAD - recalculates on every render
-const sortedItems = items.sort((a, b) => a.name.localeCompare(b.name));
+const sortedItems = items.sort((a, b) =>
+  a.name.localeCompare(b.name)
+);
 
 // ✅ GOOD - only recalculates when items change
 const sortedItems = useMemo(
@@ -240,13 +242,13 @@ useEffect(() => {
 
 ## 📋 Component Complexity Limits
 
-| Metric             | Limit   | Action if Exceeded          |
-| ------------------ | ------- | --------------------------- |
-| useState calls     | 8       | Use useReducer or split     |
-| useEffect calls    | 5       | Extract to custom hooks     |
-| Component lines    | 300     | Split into sub-components   |
-| Props count        | 10      | Use context or composition  |
-| Render time        | 16ms    | Memoize or virtualize       |
+| Metric          | Limit | Action if Exceeded         |
+| --------------- | ----- | -------------------------- |
+| useState calls  | 8     | Use useReducer or split    |
+| useEffect calls | 5     | Extract to custom hooks    |
+| Component lines | 300   | Split into sub-components  |
+| Props count     | 10    | Use context or composition |
+| Render time     | 16ms  | Memoize or virtualize      |
 
 ---
 
@@ -267,4 +269,3 @@ useEffect(() => {
 - `10-COPILOT_PERFORMANCE.instructions.md` – General performance
 - [React useCallback docs](https://react.dev/reference/react/useCallback)
 - [React useMemo docs](https://react.dev/reference/react/useMemo)
-

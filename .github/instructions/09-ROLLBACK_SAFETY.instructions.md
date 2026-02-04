@@ -1,8 +1,11 @@
 ---
-applyTo: '**'
+applyTo: 'scripts/**,docker/**,.github/workflows/**,configs/**'
 ---
 
 # My Hibachi – Rollback & Safety Procedures
+
+> **Load On-Demand:** This file loads for deployment-related files
+> only.
 
 **Priority: CRITICAL** – Know how to recover from failures.
 

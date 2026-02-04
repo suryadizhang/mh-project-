@@ -1,5 +1,5 @@
 ---
-applyTo: '**'
+applyTo: '.github/instructions/**,CURRENT_BATCH_STATUS.md,docs/04-DEPLOYMENT/**'
 ---
 
 # My Hibachi – Batch Context Loader

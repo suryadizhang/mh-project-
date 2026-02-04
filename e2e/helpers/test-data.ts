@@ -63,8 +63,10 @@ export const testPayment = {
 };
 
 export const testAdmin = {
-  email: process.env.TEST_ADMIN_EMAIL || 'suryadizhang.swe@gmail.com',
-  password: process.env.TEST_ADMIN_PASSWORD || '***REDACTED***',
+  // NEVER hardcode credentials - use environment variables
+  // Set TEST_ADMIN_EMAIL and TEST_ADMIN_PASSWORD in your .env file
+  email: process.env.TEST_ADMIN_EMAIL || '',
+  password: process.env.TEST_ADMIN_PASSWORD || '',
 };
 
 /**

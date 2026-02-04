@@ -1,5 +1,5 @@
 ---
-applyTo: '**'
+applyTo: 'apps/backend/**,database/**,**/models/**,**/migrations/**'
 ---
 
 # My Hibachi – Database Schema Management

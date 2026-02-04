@@ -1,5 +1,5 @@
 ---
-applyTo: '**'
+applyTo: 'apps/customer/src/hooks/**,apps/customer/src/data/**,apps/backend/src/services/**,**/pricing*/**,**/config*/**'
 ---
 
 # My Hibachi – SSoT (Single Source of Truth) Patterns

@@ -1,5 +1,5 @@
 ---
-applyTo: '**'
+applyTo: '**/*.jpg,**/*.png,**/*.webp,**/*.avif,**/*.mp4,**/*.webm,**/images/**,**/videos/**,**/public/**'
 ---
 
 # My Hibachi – Media Optimization Standards

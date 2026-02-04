@@ -210,7 +210,8 @@ When working on tasks:
 2. **Check batch context** – See `CURRENT_BATCH_STATUS.md`
 3. **Verify dependencies** – Check imports resolve correctly
 4. **Test locally before PR** – Run tests before pushing
-5. **VERIFY all values** – Never write prices, policies, or business rules without checking source
+5. **VERIFY all values** – Never write prices, policies, or business
+   rules without checking source
 
 ---
 
@@ -218,19 +219,20 @@ When working on tasks:
 
 **Run this mental checklist before writing specific values:**
 
-| Value Type | Source to Check | Search Command |
-|------------|-----------------|----------------|
-| **Prices ($X)** | `faqsData.ts`, `pricingTemplates.ts` | `grep -r "\\$[0-9]" apps/customer/src/lib/data/` |
-| **Policies** | `faqsData.ts` | `grep -r "refund\|cancel\|deposit" apps/customer/src/lib/data/` |
-| **Menu items** | `menu.ts`, `faqsData.ts` | `grep -r "filet\|salmon\|lobster" apps/customer/src/lib/data/` |
-| **API endpoints** | `apps/backend/src/routers/` | `grep -r "@router" apps/backend/src/routers/` |
-| **Config values** | `config.py`, `.env.example` | Check actual files |
-| **DB columns** | `apps/backend/src/db/models/` | Check model definition |
-| **Feature flags** | `config.py` | `grep -r "FEATURE_" apps/backend/src/core/` |
+| Value Type        | Source to Check                      | Search Command                                                  |
+| ----------------- | ------------------------------------ | --------------------------------------------------------------- |
+| **Prices ($X)**   | `faqsData.ts`, `pricingTemplates.ts` | `grep -r "\\$[0-9]" apps/customer/src/lib/data/`                |
+| **Policies**      | `faqsData.ts`                        | `grep -r "refund\|cancel\|deposit" apps/customer/src/lib/data/` |
+| **Menu items**    | `menu.ts`, `faqsData.ts`             | `grep -r "filet\|salmon\|lobster" apps/customer/src/lib/data/`  |
+| **API endpoints** | `apps/backend/src/routers/`          | `grep -r "@router" apps/backend/src/routers/`                   |
+| **Config values** | `config.py`, `.env.example`          | Check actual files                                              |
+| **DB columns**    | `apps/backend/src/db/models/`        | Check model definition                                          |
+| **Feature flags** | `config.py`                          | `grep -r "FEATURE_" apps/backend/src/core/`                     |
 
 **If you can't find the value:** ASK the user. Never guess.
 
 **Example of WRONG behavior:**
+
 ```
 ❌ Writing: "Wagyu beef upgrade is +$30" (INVENTED - doesn't exist!)
 ❌ Writing: "Refund within 48 hours" (WRONG - it's 7 days!)
@@ -238,6 +240,7 @@ When working on tasks:
 ```
 
 **Example of CORRECT behavior:**
+
 ```
 ✅ Search faqsData.ts first, find: "Filet Mignon +$5"
 ✅ Then write: "Filet Mignon upgrade is +$5 (source: faqsData.ts line 101)"

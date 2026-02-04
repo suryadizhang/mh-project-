@@ -1,8 +1,11 @@
 ---
-applyTo: '**'
+applyTo: '**/audit/**,**/test*/**'
 ---
 
-# My Hibachi – Audit Standards (A–H Deep Audit)
+# My Hibachi – Audit Standards
+
+> **Load On-Demand:** This file only loads for audit/test files. For
+> manual audit, reference this file explicitly. (A–H Deep Audit)
 
 **Priority: HIGH** – Use when auditing, checking, or verifying code.
 
