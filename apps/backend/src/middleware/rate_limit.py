@@ -29,16 +29,45 @@ logger = logging.getLogger(__name__)
 
 
 class RateLimitConfig:
-    """Rate limit configuration constants"""
+    """
+    Rate limit configuration with ENVIRONMENT-AWARE multipliers.
+    
+    Different environments have different rate limits:
+    - Production: 1x (strict limits for security)
+    - Staging: 10x (relaxed for E2E testing)  
+    - Development: 50x (very relaxed for local dev)
+    """
 
-    # Role-based limits (requests per minute)
-    CUSTOMER_LIMIT = 30  # Increased from 10 for better UX
-    ADMIN_LIMIT = 200  # Increased from 100 for power users
-    STATION_MANAGER_LIMIT = 200  # Increased from 100 for operational efficiency
-    CHEF_LIMIT = 50  # Already appropriate for mobile app usage
-    UNAUTHENTICATED_LIMIT = 20  # Increased from 5 for public API access
+    def __init__(self):
+        # Get environment multiplier from settings
+        self._multiplier = settings._get_environment_rate_multiplier()
+        
+    @property
+    def CUSTOMER_LIMIT(self) -> int:
+        """Customer rate limit (base 30/min)"""
+        return 30 * self._multiplier
+    
+    @property
+    def ADMIN_LIMIT(self) -> int:
+        """Admin rate limit (base 200/min)"""
+        return 200 * self._multiplier
+    
+    @property
+    def STATION_MANAGER_LIMIT(self) -> int:
+        """Station manager rate limit (base 200/min)"""
+        return 200 * self._multiplier
+    
+    @property
+    def CHEF_LIMIT(self) -> int:
+        """Chef rate limit (base 50/min)"""
+        return 50 * self._multiplier
+    
+    @property
+    def UNAUTHENTICATED_LIMIT(self) -> int:
+        """Unauthenticated/public rate limit (base 20/min)"""
+        return 20 * self._multiplier
 
-    # Login attempt tracking
+    # Login attempt tracking (NOT multiplied - security critical)
     MAX_LOGIN_ATTEMPTS = 5  # Increased from 3 for typo tolerance
     LOCKOUT_DURATION_MINUTES = 15  # Reduced from 60 for better UX
     WARNING_THRESHOLD = 3  # Warn user after 3 failed attempts
@@ -118,6 +147,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.memory_store = InMemoryRateLimitStore()  # Fallback store
         self._redis_check_time = 0  # Time of last Redis check
         self._redis_retry_interval = 60  # Retry Redis every 60 seconds
+        
+        # Log rate limiting configuration
+        logger.info(
+            f"✅ Rate limit middleware initialized (env: {settings.ENVIRONMENT.value}, "
+            f"multiplier: {self.config._multiplier}x, unauthenticated: {self.config.UNAUTHENTICATED_LIMIT}/min)"
+        )
 
     async def _get_redis_client(self) -> aioredis.Redis | None:
         """Get or create Redis client, returns None if unavailable"""
