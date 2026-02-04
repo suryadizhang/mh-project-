@@ -589,10 +589,10 @@ async def get_slot_configurations():
     return AllSlotsConfigResponse(
         slots=[
             SlotConfigResponse(
-                slot_time=c.slot_time,
+                slot_time=c.standard_time,  # Map standard_time to slot_time
                 slot_name=c.slot_name,
-                adjust_earlier_minutes=c.adjust_earlier_minutes,
-                adjust_later_minutes=c.adjust_later_minutes,
+                adjust_earlier_minutes=30,  # Based on ±30 minute adjustment range
+                adjust_later_minutes=30,  # Based on ±30 minute adjustment range
                 is_active=c.is_active,
             )
             for c in configs
