@@ -22,20 +22,17 @@ Endpoints:
 
 import logging
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.auth.station_middleware import (
-    AuthenticatedUser,
-    audit_log_action,
-    require_station_permission,
-)
 from core.database import get_db_session
+from core.security import decode_access_token
 from db.models.identity import (
     Role,
     Station,
@@ -51,6 +48,128 @@ from utils.auth import UserRole
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["admin-users"])
+
+# HTTP Bearer security scheme
+security = HTTPBearer()
+
+
+# =============================================================================
+# Authentication Dependencies
+# =============================================================================
+
+
+async def get_current_user_from_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db_session),
+) -> User:
+    """
+    Get current user from JWT token.
+    Validates token and fetches full User model from database.
+    """
+    payload = decode_access_token(credentials.credentials)
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token: missing user ID",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        result = await db.execute(select(User).where(User.id == UUID(user_id)))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        if user.status != UserStatus.ACTIVE:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Account is {user.status.value.lower()}",
+            )
+
+        return user
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid user ID in token: {e}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+async def require_super_admin(
+    current_user: User = Depends(get_current_user_from_token),
+) -> User:
+    """Dependency to ensure user is a super admin."""
+    if not current_user.is_super_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Super admin privileges required",
+        )
+    return current_user
+
+
+async def require_admin_or_super_admin(
+    current_user: User = Depends(get_current_user_from_token),
+    db: AsyncSession = Depends(get_db_session),
+) -> User:
+    """Dependency to ensure user is admin or super admin."""
+    if current_user.is_super_admin:
+        return current_user
+
+    # Check if user has ADMIN role
+    result = await db.execute(
+        select(Role.role_type)
+        .join(UserRoleModel, UserRoleModel.role_id == Role.id)
+        .where(UserRoleModel.user_id == current_user.id)
+    )
+    roles = [str(r).upper() for r in result.scalars().all()]
+
+    if "ADMIN" not in roles and "SUPER_ADMIN" not in roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required",
+        )
+    return current_user
+
+
+async def require_view_users_permission(
+    current_user: User = Depends(get_current_user_from_token),
+    db: AsyncSession = Depends(get_db_session),
+) -> User:
+    """
+    Dependency to ensure user can view users.
+    Super admins, admins, and station managers can view users.
+    """
+    if current_user.is_super_admin:
+        return current_user
+
+    # Get user's role
+    result = await db.execute(
+        select(Role.role_type)
+        .join(UserRoleModel, UserRoleModel.role_id == Role.id)
+        .where(UserRoleModel.user_id == current_user.id)
+    )
+    roles = [str(r).upper() for r in result.scalars().all()]
+
+    allowed_roles = {"SUPER_ADMIN", "ADMIN", "STATION_MANAGER", "CUSTOMER_SUPPORT"}
+    if not any(role in allowed_roles for role in roles):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to view users",
+        )
+    return current_user
 
 
 # =============================================================================
@@ -185,7 +304,7 @@ async def get_user_station(
 
 async def get_accessible_user_ids(
     db: AsyncSession,
-    current_user: AuthenticatedUser,
+    current_user: User,
 ) -> Optional[list[UUID]]:
     """
     Get list of user IDs the current user can manage.
@@ -195,7 +314,7 @@ async def get_accessible_user_ids(
         return None  # Access to all
 
     # Get current user's role
-    user_role = await get_user_role(db, current_user.user_id)
+    user_role = await get_user_role(db, current_user.id)
     if user_role == "SUPER_ADMIN":
         return None
 
@@ -205,7 +324,7 @@ async def get_accessible_user_ids(
         station_result = await db.execute(
             select(StationUser.station_id).where(
                 and_(
-                    StationUser.user_id == current_user.user_id,
+                    StationUser.user_id == current_user.id,
                     StationUser.is_active == True,
                 )
             )
@@ -226,7 +345,7 @@ async def get_accessible_user_ids(
         station_result = await db.execute(
             select(StationUser.station_id).where(
                 and_(
-                    StationUser.user_id == current_user.user_id,
+                    StationUser.user_id == current_user.id,
                     StationUser.is_active == True,
                 )
             )
@@ -242,7 +361,7 @@ async def get_accessible_user_ids(
         return [row[0] for row in user_result.fetchall()]
 
     # Others can only view themselves
-    return [current_user.user_id]
+    return [current_user.id]
 
 
 # =============================================================================
@@ -258,7 +377,7 @@ async def list_users(
     role: Optional[str] = Query(None, description="Filter by role"),
     status: Optional[str] = Query(None, description="Filter by status"),
     station_id: Optional[UUID] = Query(None, description="Filter by station"),
-    current_user: AuthenticatedUser = Depends(require_station_permission("view_users")),
+    current_user: User = Depends(require_view_users_permission),
     db: AsyncSession = Depends(get_db_session),
 ) -> UserListResponse:
     """
@@ -383,9 +502,7 @@ async def list_users(
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
     request: UserCreateRequest,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: User = Depends(require_admin_or_super_admin),
     db: AsyncSession = Depends(get_db_session),
 ) -> UserResponse:
     """
@@ -533,7 +650,7 @@ async def create_user(
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: UUID,
-    current_user: AuthenticatedUser = Depends(require_station_permission("view_users")),
+    current_user: User = Depends(require_view_users_permission),
     db: AsyncSession = Depends(get_db_session),
 ) -> UserResponse:
     """
@@ -592,9 +709,7 @@ async def get_user(
 async def update_user(
     user_id: UUID,
     request: UserUpdateRequest,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: User = Depends(require_admin_or_super_admin),
     db: AsyncSession = Depends(get_db_session),
 ) -> UserResponse:
     """
@@ -810,9 +925,7 @@ async def delete_user(
 @router.post("/{user_id}/reactivate", response_model=UserResponse)
 async def reactivate_user(
     user_id: UUID,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: User = Depends(require_super_admin),
     db: AsyncSession = Depends(get_db_session),
 ) -> UserResponse:
     """
