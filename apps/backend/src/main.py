@@ -1299,6 +1299,32 @@ try:
 except ImportError as e:
     logger.error(f"❌ Staff Invitations endpoints not available: {e}")
 
+# Admin User Management (CRUD for admin users - 5-tier RBAC)
+try:
+    from routers.v1.admin.users import router as admin_users_router
+
+    app.include_router(
+        admin_users_router,
+        prefix="/api/v1/admin/users",
+        tags=["admin", "users", "rbac"],
+    )
+    logger.info("✅ Admin User Management endpoints included (CRUD for users)")
+except ImportError as e:
+    logger.error(f"❌ Admin User Management endpoints not available: {e}")
+
+# Public Stations API (GET for all users, POST for super_admin)
+try:
+    from routers.v1.stations import router as public_stations_router
+
+    app.include_router(
+        public_stations_router,
+        prefix="/api/v1/stations",
+        tags=["stations"],
+    )
+    logger.info("✅ Public Stations API included (/api/v1/stations)")
+except ImportError as e:
+    logger.error(f"❌ Public Stations API not available: {e}")
+
 # Notification Groups Admin - NEW location
 try:
     from routers.v1.admin.notification_groups import (
