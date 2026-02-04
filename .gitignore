@@ -42,6 +42,13 @@ login_*.json
 *credentials*
 !*template*
 
+# Postman Files with Tokens/Credentials
+*.postman_environment.json
+*-token.txt
+staging-token.txt
+production-token.txt
+local-token.txt
+
 # ===== Python =====
 __pycache__/
 *.py[cod]
