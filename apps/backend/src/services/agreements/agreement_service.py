@@ -77,16 +77,6 @@ class AgreementService:
             Template dict with id, version, title, content_markdown, variable_refs
             None if no active template found
         """
-        result = await self.db.execute(
-            select("*")
-            .select_from(self.db.bind.dialect.identifier_preparer.quote("core.agreement_templates"))
-            .where(
-                and_(
-                    # Using text for raw SQL since we might not have the model yet
-                )
-            )
-        )
-
         # Use raw SQL for now until SQLAlchemy models are created
         from sqlalchemy import text
 
