@@ -327,12 +327,12 @@ def invalidate_cache(pattern: str):
 _cache_service: CacheService | None = None
 
 
-async def get_cache_service(redis_url: str = "redis://localhost:6379/0") -> CacheService:
+async def get_cache_service(redis_url: str | None = None) -> CacheService:
     """
     Get or create cache service singleton
 
     Args:
-        redis_url: Redis connection URL
+        redis_url: Redis connection URL (defaults to REDIS_URL env var or localhost)
 
     Returns:
         CacheService instance
@@ -340,7 +340,10 @@ async def get_cache_service(redis_url: str = "redis://localhost:6379/0") -> Cach
     global _cache_service
 
     if _cache_service is None:
-        _cache_service = CacheService(redis_url)
+        import os
+        # Use provided URL, or environment variable, or fallback to localhost
+        url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        _cache_service = CacheService(url)
         await _cache_service.connect()
 
     return _cache_service
