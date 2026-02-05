@@ -27,7 +27,12 @@ from datetime import date, datetime, time
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Date,
+    DateTime,
+)
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
     ForeignKey,
@@ -51,7 +56,6 @@ from core.database import Base
 # ==================== ENUMS ====================
 
 
-
 class BookingStatus(str, enum.Enum):
     """Booking status workflow"""
 
@@ -64,9 +68,7 @@ class BookingStatus(str, enum.Enum):
     CANCELLED = "cancelled"
     NO_SHOW = "no_show"
     # 2-Step Cancellation Workflow
-    CANCELLATION_REQUESTED = (
-        "cancellation_requested"  # Slot still held, awaiting approval
-    )
+    CANCELLATION_REQUESTED = "cancellation_requested"  # Slot still held, awaiting approval
 
 
 class MenuCategory(str, enum.Enum):
@@ -157,12 +159,8 @@ class Booking(Base):
         CheckConstraint("deposit_due_cents >= 0", name="check_deposit_non_negative"),
         CheckConstraint("party_adults > 0", name="check_party_adults_positive"),
         CheckConstraint("party_kids >= 0", name="check_party_kids_non_negative"),
-        CheckConstraint(
-            "party_toddlers >= 0", name="check_party_toddlers_non_negative"
-        ),
-        CheckConstraint(
-            "total_due_cents >= deposit_due_cents", name="check_total_gte_deposit"
-        ),
+        CheckConstraint("party_toddlers >= 0", name="check_party_toddlers_non_negative"),
+        CheckConstraint("total_due_cents >= deposit_due_cents", name="check_total_gte_deposit"),
         ForeignKeyConstraint(
             ["chef_id"],
             ["ops.chefs.id"],
@@ -206,9 +204,7 @@ class Booking(Base):
             "deposit_confirmed_at",
         ),
         Index("ix_bookings_sms_consent", "sms_consent"),
-        Index(
-            "ix_core_bookings_chef_slot_unique", "chef_id", "date", "slot", unique=True
-        ),
+        Index("ix_core_bookings_chef_slot_unique", "chef_id", "date", "slot", unique=True),
         Index("ix_core_bookings_customer_id", "customer_id"),
         Index("ix_core_bookings_date_slot", "date", "slot"),
         Index("ix_core_bookings_status", "status"),
@@ -219,9 +215,7 @@ class Booking(Base):
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys (UPDATED - match database)
     customer_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
@@ -242,6 +236,14 @@ class Booking(Base):
     # slot = system-snapped time for scheduling, customer_requested_time = display
     customer_requested_time: Mapped[Optional[time]] = mapped_column(Time, nullable=True)
 
+    # Computed column: date + slot combined (GENERATED ALWAYS AS STORED in PostgreSQL)
+    # This column is read-only, automatically computed by the database
+    booking_datetime: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        insert_default=None,
+        nullable=True,
+    )
+
     # Location (UPDATED - match database)
     address_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     zone: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -250,9 +252,7 @@ class Booking(Base):
     party_adults: Mapped[int] = mapped_column(Integer, nullable=False)
     party_kids: Mapped[int] = mapped_column(Integer, nullable=False)
     # Toddlers (under 5) - free, but tracked for chef pay calculation
-    party_toddlers: Mapped[int] = mapped_column(
-        Integer, nullable=False, server_default=text("0")
-    )
+    party_toddlers: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
 
     # Pricing (UPDATED - match database)
     deposit_due_cents: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -276,36 +276,24 @@ class Booking(Base):
     source: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # TCPA Compliance (NEW - from database)
-    sms_consent: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
+    sms_consent: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     sms_consent_timestamp: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
     # Optimistic Locking (NEW - Bug #13 fix)
-    version: Mapped[int] = mapped_column(
-        Integer, nullable=False, server_default=text("1")
-    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("1"))
 
     # Dual Deadline System (UPDATED - match database)
-    customer_deposit_deadline: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, nullable=True
-    )
-    internal_deadline: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, nullable=True
-    )
+    customer_deposit_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    internal_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deposit_deadline: Mapped[Optional[datetime]] = mapped_column(
         DateTime, nullable=True
     )  # Legacy compatibility
 
     # Manual Deposit Confirmation (NEW - from database)
-    deposit_confirmed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, nullable=True
-    )
-    deposit_confirmed_by: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True
-    )
+    deposit_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    deposit_confirmed_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Admin Hold System (NEW - from database)
     hold_on_request: Mapped[bool] = mapped_column(
@@ -319,29 +307,19 @@ class Booking(Base):
     cancellation_requested_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    cancellation_requested_by: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True
-    )
+    cancellation_requested_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     cancellation_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     previous_status: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True
     )  # Stores status before cancellation request for potential rejection revert
-    cancelled_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    cancelled_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     cancelled_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    cancellation_approved_reason: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True
-    )
+    cancellation_approved_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     cancellation_rejected_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    cancellation_rejected_by: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True
-    )
-    cancellation_rejection_reason: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True
-    )
+    cancellation_rejected_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    cancellation_rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Menu & Notes (UPDATED - match database)
     menu_items: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
@@ -349,20 +327,14 @@ class Booking(Base):
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Metadata
-    booking_metadata: Mapped[Optional[dict]] = mapped_column(
-        "metadata", JSONB, nullable=True
-    )
+    booking_metadata: Mapped[Optional[dict]] = mapped_column("metadata", JSONB, nullable=True)
 
     # Soft Delete
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Urgent Booking Tracking (NEW - Station Manager Proactive Scheduling)
     # See: database/migrations/021_urgent_booking_system.sql
-    is_urgent: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("false")
-    )
+    is_urgent: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     days_until_event: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     booking_window: Mapped[str] = mapped_column(
         String(20), nullable=False, server_default=text("'standard'")
@@ -393,9 +365,7 @@ class Booking(Base):
     # Relationships
     customer: Mapped["Customer"] = relationship("Customer", back_populates="bookings")
     # NOTE: chef relationship removed - use ops.Chef directly via chef_id FK to ops.chefs
-    venue_address: Mapped[Optional["Address"]] = relationship(
-        "Address", back_populates="bookings"
-    )
+    venue_address: Mapped[Optional["Address"]] = relationship("Address", back_populates="bookings")
     reminders: Mapped[List["BookingReminder"]] = relationship(
         "BookingReminder",
         back_populates="booking",
@@ -437,18 +407,14 @@ class Customer(Base):
             ondelete="RESTRICT",
             name="fk_customers_station",
         ),
-        Index(
-            "idx_customer_station_email", "station_id", "email_encrypted", unique=True
-        ),
+        Index("idx_customer_station_email", "station_id", "email_encrypted", unique=True),
         Index("idx_customer_station_created", "station_id", "created_at"),
         Index("ix_core_customers_email_active", "email_encrypted", unique=True),
         {"schema": "core"},
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys (REQUIRED - NOT NULL)
     station_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
@@ -462,9 +428,7 @@ class Customer(Base):
     # Consent fields (match database schema)
     consent_sms: Mapped[bool] = mapped_column(Boolean, nullable=False)
     consent_email: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    consent_updated_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True)
-    )
+    consent_updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
     # Customer metadata
     timezone: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -503,9 +467,7 @@ class Customer(Base):
     )
 
     # Relationships
-    bookings: Mapped[List["Booking"]] = relationship(
-        "Booking", back_populates="customer"
-    )
+    bookings: Mapped[List["Booking"]] = relationship("Booking", back_populates="customer")
     message_threads: Mapped[List["MessageThread"]] = relationship(
         "MessageThread", back_populates="customer"
     )
@@ -611,9 +573,7 @@ class BookingReminder(Base):
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
     booking_id: Mapped[UUID] = mapped_column(
@@ -631,15 +591,11 @@ class BookingReminder(Base):
     scheduled_for: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )
-    sent_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Status
     status: Mapped[ReminderStatus] = mapped_column(
-        SQLEnum(
-            ReminderStatus, name="reminder_status", schema="public", create_type=False
-        ),
+        SQLEnum(ReminderStatus, name="reminder_status", schema="public", create_type=False),
         nullable=False,
         default=ReminderStatus.PENDING,
         index=True,
@@ -705,9 +661,7 @@ class Payment(Base):
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
     booking_id: Mapped[UUID] = mapped_column(
@@ -721,9 +675,7 @@ class Payment(Base):
     stripe_payment_intent_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True, unique=True, index=True
     )
-    stripe_customer_id: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True
-    )
+    stripe_customer_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     stripe_charge_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Payment Details
@@ -736,9 +688,7 @@ class Payment(Base):
 
     # Status
     status: Mapped[PaymentStatus] = mapped_column(
-        SQLEnum(
-            PaymentStatus, name="payment_status", schema="public", create_type=False
-        ),
+        SQLEnum(PaymentStatus, name="payment_status", schema="public", create_type=False),
         nullable=False,
         default=PaymentStatus.PENDING,
         index=True,
@@ -765,9 +715,7 @@ class Payment(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
-    completed_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     booking: Mapped["Booking"] = relationship("Booking", back_populates="payments")
@@ -790,9 +738,7 @@ class MessageThread(Base):
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
     customer_id: Mapped[UUID] = mapped_column(
@@ -805,9 +751,7 @@ class MessageThread(Base):
     # Thread Details
     subject: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     channel: Mapped[MessageChannel] = mapped_column(
-        SQLEnum(
-            MessageChannel, name="message_channel", schema="public", create_type=False
-        ),
+        SQLEnum(MessageChannel, name="message_channel", schema="public", create_type=False),
         nullable=False,
         default=MessageChannel.WEB_CHAT,
     )
@@ -836,9 +780,7 @@ class MessageThread(Base):
     )
 
     # Relationships
-    customer: Mapped["Customer"] = relationship(
-        "Customer", back_populates="message_threads"
-    )
+    customer: Mapped["Customer"] = relationship("Customer", back_populates="message_threads")
     messages: Mapped[List["CoreMessage"]] = relationship(
         "CoreMessage", back_populates="thread", cascade="all, delete-orphan"
     )
@@ -859,9 +801,7 @@ class CoreMessage(Base):
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
     thread_id: Mapped[UUID] = mapped_column(
@@ -885,9 +825,7 @@ class CoreMessage(Base):
     )
 
     # Relationships
-    thread: Mapped["MessageThread"] = relationship(
-        "MessageThread", back_populates="messages"
-    )
+    thread: Mapped["MessageThread"] = relationship("MessageThread", back_populates="messages")
 
 
 class PricingTier(Base):
@@ -908,9 +846,7 @@ class PricingTier(Base):
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Tier Details
     name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -935,9 +871,7 @@ class PricingTier(Base):
     max_guests: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Status
-    is_active: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True, index=True
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
 
     # Metadata
     tier_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
@@ -974,21 +908,15 @@ class SocialThread(Base):
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Platform Info
     platform: Mapped[SocialPlatform] = mapped_column(
-        SQLEnum(
-            SocialPlatform, name="social_platform", schema="public", create_type=False
-        ),
+        SQLEnum(SocialPlatform, name="social_platform", schema="public", create_type=False),
         nullable=False,
         index=True,
     )
-    platform_thread_id: Mapped[str] = mapped_column(
-        String(255), nullable=False, unique=True
-    )
+    platform_thread_id: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
     # Customer Info
     customer_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
@@ -1045,9 +973,7 @@ class Review(Base):
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
     thread_id: Mapped[UUID] = mapped_column(
@@ -1071,11 +997,7 @@ class Review(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-    moderated_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    moderated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    thread: Mapped["SocialThread"] = relationship(
-        "SocialThread", back_populates="reviews"
-    )
+    thread: Mapped["SocialThread"] = relationship("SocialThread", back_populates="reviews")

@@ -18,6 +18,16 @@ import { getAdminAuthToken } from '../helpers/mock-data';
 const API_URL =
   process.env.STAGING_API_URL || process.env.API_URL || 'http://localhost:8000';
 
+/**
+ * Helper function to generate a future date for booking tests.
+ * Returns a date at least 7 days in the future (more than the 48-hour minimum).
+ */
+function getFutureBookingDate(): string {
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + 7); // 7 days from now
+  return futureDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+}
+
 // Store auth token for authenticated tests
 let authToken: string | null = null;
 
@@ -50,7 +60,7 @@ test.describe('Bookings API', () => {
       customerName: 'Test User',
       customerEmail: `test-${Date.now()}@example.com`,
       customerPhone: '555-0123',
-      eventDate: '2025-12-25',
+      eventDate: getFutureBookingDate(),
       guestCount: 20,
       menuItems: ['Hibachi Chicken', 'Fried Rice'],
       specialRequests: 'Test booking',
@@ -77,7 +87,7 @@ test.describe('Bookings API', () => {
     const createResponse = await request.post(`${API_URL}/api/v1/bookings/`, {
       headers: { Authorization: `Bearer ${authToken}` },
       data: {
-        date: '2025-12-25',
+        date: getFutureBookingDate(),
         time: '18:00',
         guests: 8,
         location_address: '123 Test St, San Jose, CA 95123',
@@ -138,7 +148,7 @@ test.describe('Bookings API', () => {
     const createResponse = await request.post(`${API_URL}/api/v1/bookings/`, {
       headers: { Authorization: `Bearer ${authToken}` },
       data: {
-        date: '2025-12-25',
+        date: getFutureBookingDate(),
         time: '18:00',
         guests: 8,
         location_address: '123 Test St, San Jose, CA 95123',
@@ -203,7 +213,7 @@ test.describe('Bookings API', () => {
     const createResponse = await request.post(`${API_URL}/api/v1/bookings/`, {
       headers: { Authorization: `Bearer ${authToken}` },
       data: {
-        date: '2025-12-25',
+        date: getFutureBookingDate(),
         time: '18:00',
         guests: 8,
         location_address: '123 Test St, San Jose, CA 95123',

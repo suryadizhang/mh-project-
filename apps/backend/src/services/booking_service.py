@@ -3,13 +3,15 @@ Booking Service Layer
 Encapsulates booking business logic and orchestrates repository operations
 """
 
-from datetime import date, datetime, timedelta, timezone
 import logging
-from typing import Any, Optional, TYPE_CHECKING
+from datetime import date, datetime, timedelta, timezone
+from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID
 
 if TYPE_CHECKING:
     from services.lead_service import LeadService
+
+from sqlalchemy.exc import IntegrityError
 
 from core.cache import CacheService, cached, invalidate_cache
 from core.exceptions import (
@@ -24,7 +26,6 @@ from schemas.booking import BookingCreate
 from services.audit_service import AuditService
 from services.business_config_service import get_business_config_sync
 from services.terms_acknowledgment_service import send_terms_for_phone_booking
-from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -241,21 +242,19 @@ class BookingService:
         # Time format already validated by Pydantic (HH:MM 24-hour)
         # Party size already validated by Pydantic (1-50)
 
-        # Convert event_date + event_time to booking_datetime for availability check
+        # Validate event_time format (even though Pydantic should catch this)
         try:
-            event_time_obj = datetime.strptime(booking_data.event_time, "%H:%M").time()
-            event_datetime = datetime.combine(
-                booking_data.event_date, event_time_obj, tzinfo=timezone.utc
-            )
+            datetime.strptime(booking_data.event_time, "%H:%M")
         except ValueError as e:
             raise BusinessLogicException(
                 message=f"Invalid time format '{booking_data.event_time}': expected HH:MM (24-hour format)",
                 error_code=ErrorCode.BAD_REQUEST,
             ) from e
 
-        # Check availability
+        # Check availability using date and slot (matching repository signature)
         is_available = self.repository.check_availability(
-            booking_datetime=event_datetime,
+            event_date=booking_data.event_date,
+            event_slot=booking_data.event_time,
             party_size=booking_data.party_size,
             exclude_booking_id=None,
         )
@@ -304,17 +303,16 @@ class BookingService:
         # Use model_dump() to convert Pydantic model to dict
         booking_dict = booking_data.model_dump(exclude_unset=True)
 
-        # Convert event_date + event_time → booking_datetime
+        # Convert event_date + event_time → date + slot (matching the Booking model)
         if "event_date" in booking_dict and "event_time" in booking_dict:
             event_date = booking_dict.pop("event_date")
             event_time = booking_dict.pop("event_time")
 
             try:
-                # Use strptime for robust parsing and validation (consistent with line 247)
+                # Use strptime for robust parsing and validation
                 time_obj = datetime.strptime(event_time, "%H:%M").time()
-                booking_dict["booking_datetime"] = datetime.combine(
-                    event_date, time_obj, tzinfo=timezone.utc
-                )
+                booking_dict["date"] = event_date
+                booking_dict["slot"] = time_obj
             except ValueError as e:
                 raise BusinessLogicException(
                     message=f"Invalid time format '{event_time}': expected HH:MM (24-hour format)",
@@ -326,7 +324,9 @@ class BookingService:
         # Dual deadline system:
         # - Customer sees 2-hour deadline (creates urgency)
         # - Internal enforcement at 24 hours (grace period)
-        now = datetime.now(timezone.utc)
+        # Note: Database columns use timestamp without time zone, so we use naive UTC
+        # TODO: Migrate database columns to timestamp with time zone for consistency
+        now = datetime.utcnow()
         booking_dict["customer_deposit_deadline"] = now + timedelta(hours=2)
         booking_dict["internal_deadline"] = now + timedelta(hours=24)
         booking_dict["deposit_deadline"] = now + timedelta(hours=2)  # Backward compat
@@ -340,16 +340,16 @@ class BookingService:
         # Create booking with race condition protection
         # Three-layer defense against double bookings:
         # 1. SELECT FOR UPDATE in check_availability() (row-level locking)
-        # 2. UNIQUE constraint on (booking_datetime, status) at database level
+        # 2. UNIQUE constraint on (date, slot, status) at database level
         # 3. IntegrityError handling below (catches DB constraint violations)
         try:
             booking = self.repository.create(Booking(**booking_dict))
         except IntegrityError as e:
             # Unique constraint violation: Another request won the race
-            # This means someone booked this exact datetime between our
+            # This means someone booked this exact date/slot between our
             # availability check and our insert attempt
             logger.warning(
-                f"Race condition detected: booking_datetime={event_datetime} "
+                f"Race condition detected: date={booking_data.event_date} slot={booking_data.event_time} "
                 f"already exists. IntegrityError: {str(e)}"
             )
 
@@ -485,11 +485,12 @@ class BookingService:
             )
 
         # Store old values for audit
-        old_values = {"status": booking.status.value, "confirmed_at": None}
+        old_values = {"status": booking.status.value, "deposit_confirmed_at": None}
 
         # Update status
+        # Note: Using utcnow() for naive datetime (deposit_confirmed_at is timestamp without time zone)
         booking.status = BookingStatus.CONFIRMED
-        booking.confirmed_at = datetime.now(timezone.utc)
+        booking.deposit_confirmed_at = datetime.utcnow()
 
         updated_booking = self.repository.update(booking)
 
@@ -503,7 +504,11 @@ class BookingService:
                     old_values=old_values,
                     new_values={
                         "status": "confirmed",
-                        "confirmed_at": booking.confirmed_at.isoformat(),
+                        "deposit_confirmed_at": (
+                            booking.deposit_confirmed_at.isoformat()
+                            if booking.deposit_confirmed_at
+                            else None
+                        ),
                     },
                 )
             except Exception as e:
@@ -538,8 +543,10 @@ class BookingService:
             )
 
         # Check if cancellation is allowed (e.g., within 24 hours)
-        # Use booking_datetime directly (timezone-aware) for accurate calculation
-        time_until_event = booking.booking_datetime - datetime.now(timezone.utc)
+        # Combine date + slot to create event datetime for comparison
+        event_datetime = datetime.combine(booking.date, booking.slot)
+        now = datetime.utcnow()
+        time_until_event = event_datetime - now
 
         if time_until_event.days < 1:
             raise BusinessLogicException(
@@ -617,9 +624,10 @@ class BookingService:
             )
 
         # Place hold
+        # Note: Using utcnow() for naive datetime (held_at is timestamp without time zone)
         booking.hold_on_request = True
         booking.held_by = staff_member
-        booking.held_at = datetime.now(timezone.utc)
+        booking.held_at = datetime.utcnow()
         booking.hold_reason = reason
 
         updated_booking = self.repository.update(booking)
@@ -766,10 +774,10 @@ class BookingService:
             )
 
         # Update booking
+        # Note: Using utcnow() for naive datetime (deposit_confirmed_at is timestamp without time zone)
         old_status = booking.status
         booking.status = BookingStatus.CONFIRMED
-        booking.confirmed_at = datetime.now(timezone.utc)
-        booking.deposit_confirmed_at = datetime.now(timezone.utc)
+        booking.deposit_confirmed_at = datetime.utcnow()
         booking.deposit_confirmed_by = staff_member
 
         # Remove any holds (no longer needed since deposit confirmed)
