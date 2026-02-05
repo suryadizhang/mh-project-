@@ -145,14 +145,16 @@ async def delete_booking(
 
     # Log to audit trail
     await audit_logger.log_delete(
-        db=db,
-        entity_type="booking",
-        entity_id=str(booking.id),
-        user_id=user_id,
-        user_role=user_role,
-        reason=reason,
+        session=db,
+        user=current_user,
+        resource_type="booking",
+        resource_id=str(booking.id),
+        delete_reason=reason,
         old_values=old_values,
-        restore_until=restore_until,
+        metadata={
+            "restore_until": restore_until.isoformat(),
+            "deleted_by_role": user_role,
+        },
     )
 
     logger.info(

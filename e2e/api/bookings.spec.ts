@@ -20,15 +20,16 @@ const API_URL =
 
 /**
  * Helper function to generate a unique future date for booking tests.
- * Uses offset + random component to ensure each test run gets a unique date,
+ * Uses current timestamp to ensure each test run gets a truly unique date,
  * avoiding slot conflicts from previous test runs.
- * Returns a date at least 30+ days in the future (well beyond 48-hour minimum).
+ * Returns a date at least 100+ days in the future (well beyond 48-hour minimum).
  */
 function getFutureBookingDate(offsetDays: number = 0): string {
   const futureDate = new Date();
-  // Use 60 days base + offset + random days (0-30) to ensure uniqueness across test runs
-  const randomDays = Math.floor(Math.random() * 30);
-  futureDate.setDate(futureDate.getDate() + 60 + offsetDays * 10 + randomDays);
+  // Use 100 days base + offset*30 + timestamp-derived days for guaranteed uniqueness
+  // The timestamp component ensures different test runs get different dates
+  const timestampDays = Math.floor((Date.now() % 1000000) / 1000); // 0-999 based on ms
+  futureDate.setDate(futureDate.getDate() + 100 + offsetDays * 30 + (timestampDays % 200));
   return futureDate.toISOString().split('T')[0]; // YYYY-MM-DD format
 }
 

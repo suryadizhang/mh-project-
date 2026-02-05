@@ -77,8 +77,15 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
             }
           },
           "response": []
@@ -113,8 +120,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/auth/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "me"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
             }
           },
           "response": []
@@ -141,8 +155,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/auth/logout",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "logout"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
             }
           },
           "response": []
@@ -187,8 +208,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/admin/users?page=1&size=20",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "users"],
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -245,8 +273,15 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/admin/users",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "users"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
             }
           },
           "response": []
@@ -280,8 +315,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/admin/users/{{created_user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "users", "{{created_user_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{created_user_id}}"
+              ]
             }
           },
           "response": []
@@ -323,8 +366,16 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/admin/users/{{created_user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "users", "{{created_user_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{created_user_id}}"
+              ]
             }
           },
           "response": []
@@ -351,8 +402,16 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/admin/users/{{created_user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "admin", "users", "{{created_user_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users",
+                "{{created_user_id}}"
+              ]
             }
           },
           "response": []
@@ -389,8 +448,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/stations",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "stations"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "stations"
+              ]
             }
           },
           "response": []
@@ -424,8 +489,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/stations/{{station_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "stations", "{{station_id}}"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "stations",
+                "{{station_id}}"
+              ]
             }
           },
           "response": []
@@ -466,8 +538,12 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/health",
-              "host": ["{{base_url}}"],
-              "path": ["health"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
             }
           },
           "response": []
@@ -502,8 +578,14 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/health",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "health"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ]
             }
           },
           "response": []
@@ -548,8 +630,15 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/pricing/current",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "pricing", "current"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pricing",
+                "current"
+              ]
             }
           },
           "response": []
@@ -594,8 +683,15 @@
             },
             "url": {
               "raw": "{{base_url}}/api/v1/pricing/calculate",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "pricing", "calculate"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pricing",
+                "calculate"
+              ]
             }
           },
           "response": []

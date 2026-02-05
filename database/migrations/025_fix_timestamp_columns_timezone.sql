@@ -1,7 +1,7 @@
 -- Migration: Fix timestamp columns to use consistent timezone-aware timestamps
 -- Purpose: Align all timestamp columns in core.bookings to use 'timestamp with time zone'
 -- This fixes the asyncpg error: "can't subtract offset-naive and offset-aware datetimes"
--- 
+--
 -- Industry Standard: All timestamp columns should be timestamptz (timestamp with time zone)
 -- This ensures proper handling across different timezones and Python datetime objects
 --
@@ -13,24 +13,24 @@ BEGIN;
 -- Convert deadline columns from 'timestamp without time zone' to 'timestamp with time zone'
 -- These columns track deposit deadlines and should be timezone-aware
 
-ALTER TABLE core.bookings 
-    ALTER COLUMN customer_deposit_deadline TYPE timestamp with time zone 
+ALTER TABLE core.bookings
+    ALTER COLUMN customer_deposit_deadline TYPE timestamp with time zone
     USING customer_deposit_deadline AT TIME ZONE 'UTC';
 
-ALTER TABLE core.bookings 
-    ALTER COLUMN internal_deadline TYPE timestamp with time zone 
+ALTER TABLE core.bookings
+    ALTER COLUMN internal_deadline TYPE timestamp with time zone
     USING internal_deadline AT TIME ZONE 'UTC';
 
-ALTER TABLE core.bookings 
-    ALTER COLUMN deposit_deadline TYPE timestamp with time zone 
+ALTER TABLE core.bookings
+    ALTER COLUMN deposit_deadline TYPE timestamp with time zone
     USING deposit_deadline AT TIME ZONE 'UTC';
 
-ALTER TABLE core.bookings 
-    ALTER COLUMN deposit_confirmed_at TYPE timestamp with time zone 
+ALTER TABLE core.bookings
+    ALTER COLUMN deposit_confirmed_at TYPE timestamp with time zone
     USING deposit_confirmed_at AT TIME ZONE 'UTC';
 
-ALTER TABLE core.bookings 
-    ALTER COLUMN held_at TYPE timestamp with time zone 
+ALTER TABLE core.bookings
+    ALTER COLUMN held_at TYPE timestamp with time zone
     USING held_at AT TIME ZONE 'UTC';
 
 -- Add comments documenting the change
@@ -43,7 +43,7 @@ COMMENT ON COLUMN core.bookings.held_at IS 'When booking was put on hold - timez
 COMMIT;
 
 -- Verification query (run after migration):
--- SELECT column_name, data_type 
--- FROM information_schema.columns 
--- WHERE table_schema='core' AND table_name='bookings' 
+-- SELECT column_name, data_type
+-- FROM information_schema.columns
+-- WHERE table_schema='core' AND table_name='bookings'
 -- AND column_name IN ('customer_deposit_deadline', 'internal_deadline', 'deposit_deadline', 'deposit_confirmed_at', 'held_at');
