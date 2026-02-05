@@ -439,6 +439,11 @@ class PaymentEmailMonitor:
             return bool(exists)
         except Exception as e:
             logger.error(f"Error checking if email processed: {e}")
+            # Rollback to clear the failed transaction state
+            try:
+                self.db_session.rollback()
+            except Exception:
+                pass
             # On error, return False to allow processing (prefer duplicate over miss)
             return False
 

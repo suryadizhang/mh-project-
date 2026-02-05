@@ -166,6 +166,11 @@ class PaymentMatcher:
 
         except Exception as e:
             logger.exception(f"Error finding matching payment: {e}")
+            # Rollback to clear the failed transaction state
+            try:
+                db.rollback()
+            except Exception:
+                pass
             return None
 
     @staticmethod
@@ -256,6 +261,11 @@ class PaymentMatcher:
 
         except Exception as e:
             logger.exception(f"Error finding payment by phone: {e}")
+            # Rollback to clear the failed transaction state
+            try:
+                db.rollback()
+            except Exception:
+                pass
             return None
 
     @staticmethod
