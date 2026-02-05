@@ -4,7 +4,7 @@ Encapsulates booking business logic and orchestrates repository operations
 """
 
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID
 
@@ -324,9 +324,8 @@ class BookingService:
         # Dual deadline system:
         # - Customer sees 2-hour deadline (creates urgency)
         # - Internal enforcement at 24 hours (grace period)
-        # Note: Database columns use timestamp without time zone, so we use naive UTC
-        # TODO: Migrate database columns to timestamp with time zone for consistency
-        now = datetime.utcnow()
+        # Using timezone-aware UTC datetime for proper handling with PostgreSQL
+        now = datetime.now(timezone.utc)
         booking_dict["customer_deposit_deadline"] = now + timedelta(hours=2)
         booking_dict["internal_deadline"] = now + timedelta(hours=24)
         booking_dict["deposit_deadline"] = now + timedelta(hours=2)  # Backward compat
@@ -488,9 +487,9 @@ class BookingService:
         old_values = {"status": booking.status.value, "deposit_confirmed_at": None}
 
         # Update status
-        # Note: Using utcnow() for naive datetime (deposit_confirmed_at is timestamp without time zone)
+        # Using timezone-aware UTC datetime for consistency with PostgreSQL
         booking.status = BookingStatus.CONFIRMED
-        booking.deposit_confirmed_at = datetime.utcnow()
+        booking.deposit_confirmed_at = datetime.now(timezone.utc)
 
         updated_booking = self.repository.update(booking)
 
@@ -544,8 +543,9 @@ class BookingService:
 
         # Check if cancellation is allowed (e.g., within 24 hours)
         # Combine date + slot to create event datetime for comparison
-        event_datetime = datetime.combine(booking.date, booking.slot)
-        now = datetime.utcnow()
+        # Using timezone-aware UTC datetime for proper comparison
+        event_datetime = datetime.combine(booking.date, booking.slot, tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
         time_until_event = event_datetime - now
 
         if time_until_event.days < 1:
@@ -563,7 +563,7 @@ class BookingService:
 
         # Update status
         booking.status = BookingStatus.CANCELLED
-        booking.cancelled_at = datetime.utcnow()
+        booking.cancelled_at = datetime.now(timezone.utc)
         booking.cancellation_reason = reason
 
         updated_booking = self.repository.update(booking)
@@ -624,10 +624,10 @@ class BookingService:
             )
 
         # Place hold
-        # Note: Using utcnow() for naive datetime (held_at is timestamp without time zone)
+        # Using timezone-aware UTC datetime for consistency with PostgreSQL
         booking.hold_on_request = True
         booking.held_by = staff_member
-        booking.held_at = datetime.utcnow()
+        booking.held_at = datetime.now(timezone.utc)
         booking.hold_reason = reason
 
         updated_booking = self.repository.update(booking)
@@ -774,10 +774,10 @@ class BookingService:
             )
 
         # Update booking
-        # Note: Using utcnow() for naive datetime (deposit_confirmed_at is timestamp without time zone)
+        # Using timezone-aware UTC datetime for consistency with PostgreSQL
         old_status = booking.status
         booking.status = BookingStatus.CONFIRMED
-        booking.deposit_confirmed_at = datetime.utcnow()
+        booking.deposit_confirmed_at = datetime.now(timezone.utc)
         booking.deposit_confirmed_by = staff_member
 
         # Remove any holds (no longer needed since deposit confirmed)
