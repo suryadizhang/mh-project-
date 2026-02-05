@@ -38,9 +38,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode.update({"exp": expire})
 
     try:
-        encoded_jwt = jwt.encode(
-            to_encode, settings.secret_key, algorithm=settings.jwt_algorithm
-        )
+        encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.jwt_algorithm)
         return encoded_jwt
     except Exception as e:
         logger.exception(f"Token creation error: {e}")
@@ -51,16 +49,36 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 def decode_access_token(token: str) -> dict | None:
-    """Decode JWT access token with enhanced validation."""
+    """
+    Decode JWT access token with enhanced validation.
+
+    IMPORTANT: This function is aligned with core/security/tokens.py::decode_access_token
+    to ensure consistent token validation across all routers.
+
+    Validates:
+    - JWT signature (using SECRET_KEY)
+    - Expiration time
+    - Audience claim ("myhibachi-api")
+    - JTI claim presence (for blacklist support)
+    - Token type (rejects refresh tokens)
+    """
     try:
+        # Validate audience to match tokens created by core/security::create_access_token
+        # and api/v1/endpoints/auth.py
         payload = jwt.decode(
             token,
-            settings.secret_key,
-            algorithms=[settings.jwt_algorithm],
-            options={"verify_exp": True, "verify_iat": True},
+            settings.SECRET_KEY,  # Use uppercase for consistency with core/security
+            algorithms=["HS256"],  # Hardcode algorithm for security
+            audience="myhibachi-api",  # Validate audience claim
+            options={"verify_exp": True, "verify_iat": True, "verify_aud": True},
         )
 
-        # Additional security checks
+        # Reject refresh tokens presented as access tokens
+        if payload.get("type") == "refresh":
+            logger.warning("Refresh token presented as access token - rejected")
+            return None
+
+        # Verify JTI claim exists (required for blacklist tracking)
         if "jti" not in payload:
             logger.warning("Token missing JTI claim")
             return None

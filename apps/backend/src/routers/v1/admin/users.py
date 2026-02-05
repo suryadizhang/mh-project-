@@ -522,7 +522,7 @@ async def create_user(
             )
 
         # Permission check: Only super_admin can create super_admin or admin
-        current_role = await get_user_role(db, current_user.user_id)
+        current_role = await get_user_role(db, current_user.id)
         if not current_user.is_super_admin and current_role != "SUPER_ADMIN":
             if target_role in [UserRole.SUPER_ADMIN, UserRole.ADMIN]:
                 raise HTTPException(
