@@ -29,7 +29,9 @@ function getFutureBookingDate(offsetDays: number = 0): string {
   // Use 100 days base + offset*30 + timestamp-derived days for guaranteed uniqueness
   // The timestamp component ensures different test runs get different dates
   const timestampDays = Math.floor((Date.now() % 1000000) / 1000); // 0-999 based on ms
-  futureDate.setDate(futureDate.getDate() + 100 + offsetDays * 30 + (timestampDays % 200));
+  futureDate.setDate(
+    futureDate.getDate() + 100 + offsetDays * 30 + (timestampDays % 200)
+  );
   return futureDate.toISOString().split('T')[0]; // YYYY-MM-DD format
 }
 
@@ -193,14 +195,14 @@ test.describe('Bookings API', () => {
       return;
     }
 
-    // Update it
+    // Update it - using correct snake_case field names expected by backend
     const updateResponse = await request.put(
       `${API_URL}/api/v1/bookings/${bookingId}`,
       {
         headers: { Authorization: `Bearer ${authToken}` },
         data: {
-          guestCount: 25,
-          specialRequests: 'Updated request',
+          guests: 25,
+          special_requests: 'Updated request',
         },
       }
     );
@@ -209,7 +211,8 @@ test.describe('Bookings API', () => {
 
     if (updateResponse.status() === 200) {
       const updated = await updateResponse.json();
-      expect(updated.guestCount || updated.guest_count).toBe(25);
+      // API returns 'guests' field (not guestCount or guest_count)
+      expect(updated.guests).toBe(25);
     }
   });
 
