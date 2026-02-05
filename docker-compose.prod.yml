@@ -43,9 +43,13 @@ services:
       - REDIS_URL=redis://production-redis:6379/0
       # Performance
       - WORKERS=4
+      # Google Secret Manager credentials
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/gsm-service-account-key.json
     volumes:
       - production_logs:/app/logs
       - recordings:/app/recordings
+      # Mount GSM service account key for Secret Manager access
+      - ./apps/backend/gsm-service-account-key.json:/app/secrets/gsm-service-account-key.json:ro
     networks:
       - myhibachi-production-network
     depends_on:

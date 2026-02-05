@@ -37,8 +37,12 @@ services:
       - ENVIRONMENT=staging
       # Redis: Use Docker container name (not localhost)
       - REDIS_URL=redis://staging-redis:6379/0
+      # Google Secret Manager credentials
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/gsm-service-account-key.json
     volumes:
       - staging_logs:/app/logs
+      # Mount GSM service account key for Secret Manager access
+      - ./apps/backend/gsm-service-account-key.json:/app/secrets/gsm-service-account-key.json:ro
     networks:
       - myhibachi-staging-network
     depends_on:
