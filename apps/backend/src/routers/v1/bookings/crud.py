@@ -14,6 +14,7 @@ File Size: ~350 lines (within 500 line limit)
 import asyncio
 import logging
 import re
+from datetime import date as date_type
 from datetime import datetime
 from datetime import time as time_type
 from datetime import timedelta, timezone
@@ -21,7 +22,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, not_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
@@ -43,6 +44,101 @@ from .schemas import BookingCreate, BookingResponse, BookingUpdate, ErrorRespons
 
 router = APIRouter(tags=["bookings"])
 logger = logging.getLogger(__name__)
+
+
+async def _get_chef_capacity(
+    db: AsyncSession,
+    event_date: date_type,
+    time_slot: time_type | None = None,
+    default_capacity: int = 3,
+) -> int:
+    """
+    Get capacity based on available chefs for a given date/time.
+
+    Queries the ops.chef_availability and ops.chef_timeoff tables
+    to determine how many chefs can work on the requested date/time.
+
+    Args:
+        db: Database session
+        event_date: The date to check availability for
+        time_slot: Optional specific time slot to check
+        default_capacity: Fallback if chef tables don't exist or query fails
+
+    Returns:
+        Number of available chefs (capacity)
+    """
+    try:
+        from db.models.ops import (
+            Chef,
+            ChefAvailability,
+            ChefStatus,
+            ChefTimeOff,
+            DayOfWeek,
+            TimeOffStatus,
+        )
+
+        # Map Python weekday (0=Monday) to our DayOfWeek enum
+        day_names = [
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+            "sunday",
+        ]
+        day_of_week = DayOfWeek(day_names[event_date.weekday()])
+
+        # Base query: active chefs with availability on this day of week
+        availability_query = (
+            select(ChefAvailability.chef_id)
+            .join(Chef, Chef.id == ChefAvailability.chef_id)
+            .where(
+                and_(
+                    Chef.status == ChefStatus.ACTIVE,
+                    Chef.is_active.is_(True),
+                    ChefAvailability.day_of_week == day_of_week,
+                    ChefAvailability.is_available.is_(True),
+                )
+            )
+        )
+
+        # If time_slot specified, filter by time range
+        if time_slot:
+            availability_query = availability_query.where(
+                and_(
+                    ChefAvailability.start_time <= time_slot,
+                    ChefAvailability.end_time >= time_slot,
+                )
+            )
+
+        # Get chefs who have approved time off on this date
+        timeoff_subquery = select(ChefTimeOff.chef_id).where(
+            and_(
+                ChefTimeOff.start_date <= event_date,
+                ChefTimeOff.end_date >= event_date,
+                ChefTimeOff.status == TimeOffStatus.APPROVED,
+            )
+        )
+
+        # Exclude chefs with approved time off
+        final_query = availability_query.where(
+            not_(ChefAvailability.chef_id.in_(timeoff_subquery))
+        ).distinct()
+
+        result = await db.execute(final_query)
+        available_chef_ids = result.scalars().all()
+
+        capacity = len(available_chef_ids)
+        logger.debug(f"Chef capacity for {event_date} {time_slot}: {capacity} chefs available")
+
+        # Return at least 1 to allow bookings when no chef data exists
+        return capacity if capacity > 0 else default_capacity
+
+    except Exception as e:
+        # Tables may not exist yet or query may fail - fallback to default
+        logger.warning(f"Chef capacity check failed, using default: {e}")
+        return default_capacity
 
 
 @router.get(
@@ -354,9 +450,10 @@ async def create_booking(
                 detail="Booking time must be between 11:00 and 22:00",
             )
 
-        # Check slot availability
-        existing = await db.execute(
-            select(Booking).where(
+        # Check slot availability with multi-chef capacity
+        # Count existing bookings for this slot
+        existing_count_result = await db.execute(
+            select(func.count(Booking.id)).where(
                 and_(
                     Booking.date == booking_date,
                     Booking.slot == booking_slot,
@@ -365,10 +462,18 @@ async def create_booking(
                 )
             )
         )
-        if existing.scalar_one_or_none():
+        existing_booking_count = existing_count_result.scalar() or 0
+
+        # Get chef capacity for this date/slot
+        chef_capacity = await _get_chef_capacity(db, booking_date, booking_slot)
+        logger.debug(
+            f"Slot availability: {existing_booking_count}/{chef_capacity} bookings for {booking_date} {booking_slot}"
+        )
+
+        if existing_booking_count >= chef_capacity:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Time slot {booking_data.time} on {booking_data.date} is already booked",
+                detail=f"Time slot {booking_data.time} on {booking_data.date} is fully booked (capacity: {chef_capacity})",
             )
 
         # Parse customer name
