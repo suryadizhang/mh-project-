@@ -26,12 +26,13 @@ Usage:
     )
 """
 
-from datetime import datetime, timezone
 import logging
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -128,7 +129,7 @@ class AuditLogger:
         # Add timestamp to metadata
         metadata["logged_at"] = datetime.now(timezone.utc).isoformat()
 
-        # Insert audit log
+        # Insert audit log using JSONB bindparam for proper type handling with asyncpg
         query = text(
             """
             INSERT INTO audit_logs (
@@ -160,12 +161,16 @@ class AuditLogger:
                 :user_agent,
                 :station_id,
                 :delete_reason,
-                :old_values::jsonb,
-                :new_values::jsonb,
-                :metadata::jsonb
+                :old_values,
+                :new_values,
+                :metadata
             )
             RETURNING id
         """
+        ).bindparams(
+            bindparam("old_values", type_=JSONB),
+            bindparam("new_values", type_=JSONB),
+            bindparam("metadata", type_=JSONB),
         )
 
         result = await session.execute(
@@ -183,9 +188,10 @@ class AuditLogger:
                 "user_agent": user_agent,
                 "station_id": str(station_id) if station_id else None,
                 "delete_reason": delete_reason,
-                "old_values": old_values,
-                "new_values": new_values,
-                "metadata": metadata,
+                # Pass dict objects directly - JSONB type binding handles serialization
+                "old_values": old_values or {},
+                "new_values": new_values or {},
+                "metadata": metadata or {},
             },
         )
 
