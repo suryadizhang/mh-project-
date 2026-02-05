@@ -120,7 +120,15 @@ async def list_bookings(
             pass  # Invalid status, skip filter
 
     # Apply cursor pagination
-    result = await paginate_query(db, query, cursor=cursor, limit=limit)
+    result = await paginate_query(
+        db=db,
+        query=query,
+        order_by=Booking.created_at,
+        cursor=cursor,
+        limit=limit,
+        order_direction="desc",
+        secondary_order=Booking.id,
+    )
 
     return result
 
@@ -178,7 +186,15 @@ async def list_unassigned_bookings(
     query = query.order_by(Booking.event_datetime.asc())
 
     # Apply cursor pagination
-    result = await paginate_query(db, query, cursor=cursor, limit=limit)
+    result = await paginate_query(
+        db=db,
+        query=query,
+        order_by=Booking.event_datetime,
+        cursor=cursor,
+        limit=limit,
+        order_direction="asc",
+        secondary_order=Booking.id,
+    )
 
     return result
 
