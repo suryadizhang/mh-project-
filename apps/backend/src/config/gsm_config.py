@@ -104,7 +104,9 @@ class GSMConfig:
             logger.debug(f"✅ Retrieved secret from environment: {env_var}")
             return env_value
 
-        logger.error(f"❌ Secret not found: {secret_name} (env: {env_var})")
+        # Log at WARNING level (not error) since optional secrets may not be configured
+        # The calling code should handle missing secrets and decide if it's an error
+        logger.warning(f"⚠️ Secret not found: {secret_name} (env: {env_var})")
         return None
 
     async def get_secrets_batch(self, secrets: list) -> Dict[str, str]:

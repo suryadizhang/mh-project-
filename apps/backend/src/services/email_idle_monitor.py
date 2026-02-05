@@ -71,10 +71,25 @@ import imaplib
 import logging
 import select
 import socket
+import ssl
 from datetime import datetime, timezone, timedelta
 from typing import Callable, Optional, Any
 
 logger = logging.getLogger(__name__)
+
+# Transient connection errors - expected to happen, don't flood Sentry
+# These should be logged at WARNING level, not ERROR
+TRANSIENT_ERRORS = (
+    ssl.SSLEOFError,
+    socket.error,
+    socket.timeout,
+    OSError,
+    ConnectionError,
+    ConnectionResetError,
+    BrokenPipeError,
+    imaplib.IMAP4.abort,
+    imaplib.IMAP4.error,
+)
 
 
 class EmailIdleMonitor:
@@ -210,6 +225,11 @@ class EmailIdleMonitor:
                 self._idle_tag = None
                 return False
 
+        except TRANSIENT_ERRORS as e:
+            # Transient errors - expected, will reconnect
+            logger.warning(f"⚠️ IDLE start interrupted: {type(e).__name__}: {e}")
+            self._idle_tag = None
+            return False
         except Exception as e:
             logger.exception(f"❌ Error starting IDLE: {e}")
             self._idle_tag = None
@@ -230,6 +250,10 @@ class EmailIdleMonitor:
 
             self._idle_tag = None
 
+        except TRANSIENT_ERRORS as e:
+            # Transient errors - expected, will reconnect
+            logger.warning(f"⚠️ IDLE stop interrupted: {type(e).__name__}: {e}")
+            self._idle_tag = None
         except Exception as e:
             logger.exception(f"❌ Error stopping IDLE: {e}")
             self._idle_tag = None
@@ -270,6 +294,10 @@ class EmailIdleMonitor:
 
         except socket.timeout:
             logger.debug("IDLE socket timeout")
+            return False
+        except TRANSIENT_ERRORS as e:
+            # Transient errors - expected, will reconnect
+            logger.warning(f"⚠️ IDLE response interrupted: {type(e).__name__}: {e}")
             return False
         except Exception as e:
             logger.exception(f"❌ Error waiting for IDLE response: {e}")
@@ -415,8 +443,15 @@ class EmailIdleMonitor:
 
             return emails
 
+        except TRANSIENT_ERRORS as e:
+            # Transient network/connection errors - log WARNING, will auto-reconnect
+            logger.warning(
+                f"⚠️ Transient error fetching emails (will retry): {type(e).__name__}: {e}"
+            )
+            return []
         except Exception as e:
-            logger.exception(f"❌ Error fetching new emails: {e}")
+            # Unexpected errors - log ERROR (goes to Sentry)
+            logger.exception(f"❌ Unexpected error fetching new emails: {e}")
             return []
 
     async def _process_new_emails(self):
@@ -476,10 +511,16 @@ class EmailIdleMonitor:
                 # Small delay before restarting IDLE
                 await asyncio.sleep(1)
 
+            except TRANSIENT_ERRORS as e:
+                # Transient network/connection errors - log WARNING only
+                logger.warning(
+                    f"⚠️ IDLE connection interrupted (reconnecting): {type(e).__name__}: {e}"
+                )
+                self.disconnect()
+                await asyncio.sleep(10)
             except Exception as e:
-                logger.exception(f"❌ Error in IDLE loop: {e}")
-
-                # Reconnect
+                # Unexpected errors - log ERROR (goes to Sentry)
+                logger.exception(f"❌ Unexpected error in IDLE loop: {e}")
                 self.disconnect()
                 await asyncio.sleep(10)
 
@@ -542,10 +583,16 @@ class EmailIdleMonitor:
                 # Wait before next poll
                 await asyncio.sleep(next_interval)
 
+            except TRANSIENT_ERRORS as e:
+                # Transient network/connection errors - log WARNING only
+                logger.warning(
+                    f"⚠️ Polling connection interrupted (reconnecting): {type(e).__name__}: {e}"
+                )
+                self.disconnect()
+                await asyncio.sleep(10)
             except Exception as e:
-                logger.exception(f"❌ Error in polling loop: {e}")
-
-                # Reconnect
+                # Unexpected errors - log ERROR (goes to Sentry)
+                logger.exception(f"❌ Unexpected error in polling loop: {e}")
                 self.disconnect()
                 await asyncio.sleep(10)
 

@@ -12,17 +12,17 @@ DO $$
 BEGIN
     -- If email_provider column doesn't exist, we need to migrate
     IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_schema = 'payments' 
-        AND table_name = 'processed_emails' 
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'payments'
+        AND table_name = 'processed_emails'
         AND column_name = 'email_provider'
     ) THEN
         RAISE NOTICE 'Migrating processed_emails to new schema...';
-        
+
         -- Rename old table
-        ALTER TABLE IF EXISTS payments.processed_emails 
+        ALTER TABLE IF EXISTS payments.processed_emails
         RENAME TO processed_emails_old;
-        
+
         -- Create new table with correct schema
         CREATE TABLE payments.processed_emails (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -54,7 +54,7 @@ BEGIN
             processed_by VARCHAR(100) DEFAULT 'payment_email_monitor',
             UNIQUE(email_account, email_message_id)
         );
-        
+
         -- Migrate data from old table if it exists
         INSERT INTO payments.processed_emails (
             id,
@@ -66,7 +66,7 @@ BEGIN
             processed_at,
             email_from
         )
-        SELECT 
+        SELECT
             id,
             COALESCE(message_id, gen_random_uuid()::text),
             email_subject,
@@ -77,7 +77,7 @@ BEGIN
             sender_email
         FROM payments.processed_emails_old
         ON CONFLICT (email_account, email_message_id) DO NOTHING;
-        
+
         -- Create indexes
         CREATE INDEX IF NOT EXISTS idx_processed_emails_account
             ON payments.processed_emails(email_account);
@@ -91,18 +91,18 @@ BEGIN
             ON payments.processed_emails(matched_booking_id);
         CREATE INDEX IF NOT EXISTS idx_processed_emails_amount
             ON payments.processed_emails(amount_cents);
-        
+
         -- Full-text search for sender
         CREATE INDEX IF NOT EXISTS idx_processed_emails_sender_search
             ON payments.processed_emails USING gin(
-                to_tsvector('english', 
+                to_tsvector('english',
                     COALESCE(sender_name, '') || ' ' || COALESCE(sender_identifier, '')
                 )
             );
-        
+
         -- Drop old table after successful migration
         DROP TABLE IF EXISTS payments.processed_emails_old;
-        
+
         RAISE NOTICE 'Migration complete!';
     ELSE
         RAISE NOTICE 'Schema already up to date.';
