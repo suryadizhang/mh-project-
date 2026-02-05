@@ -231,6 +231,7 @@ async def lifespan(app: FastAPI):
         from core.cache import CacheService
 
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        logger.info(f"🔧 Cache service using REDIS_URL: {redis_url}")
         cache_service = CacheService(redis_url)
 
         # Add timeout to prevent hanging

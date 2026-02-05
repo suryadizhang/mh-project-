@@ -56,6 +56,7 @@ class CacheService:
             logger.warning("redis package not installed, caching disabled")
             return
 
+        logger.info(f"🔧 CacheService.connect() attempting to connect to: {self._redis_url}")
         try:
             self._client = await redis.from_url(
                 self._redis_url, encoding="utf-8", decode_responses=True
@@ -63,7 +64,7 @@ class CacheService:
             await self._client.ping()
             logger.info(f"✅ Redis cache connected: {self._redis_url}")
         except Exception as e:
-            logger.exception(f"Failed to connect to Redis: {e}")
+            logger.exception(f"Failed to connect to Redis at {self._redis_url}: {e}")
             self._client = None
 
     async def disconnect(self):
