@@ -19,14 +19,21 @@ const API_URL =
   process.env.STAGING_API_URL || process.env.API_URL || 'http://localhost:8000';
 
 /**
- * Helper function to generate a future date for booking tests.
+ * Helper function to generate a unique future date for booking tests.
+ * Uses offset to ensure each test gets a different date, avoiding slot conflicts.
  * Returns a date at least 7 days in the future (more than the 48-hour minimum).
  */
-function getFutureBookingDate(): string {
+function getFutureBookingDate(offsetDays: number = 0): string {
   const futureDate = new Date();
-  futureDate.setDate(futureDate.getDate() + 7); // 7 days from now
+  futureDate.setDate(futureDate.getDate() + 7 + offsetDays); // 7+ days from now
   return futureDate.toISOString().split('T')[0]; // YYYY-MM-DD format
 }
+
+/**
+ * Available time slots for booking tests.
+ * Using different slots for each test prevents conflicts.
+ */
+const BOOKING_SLOTS = ['12:00', '15:00', '18:00', '21:00'] as const;
 
 // Store auth token for authenticated tests
 let authToken: string | null = null;
@@ -84,11 +91,12 @@ test.describe('Bookings API', () => {
 
     // First create a booking with auth using correct schema
     // NOTE: trailing slash prevents 307 redirect which loses auth header
+    // Use unique date offset and slot to avoid conflicts with other tests
     const createResponse = await request.post(`${API_URL}/api/v1/bookings/`, {
       headers: { Authorization: `Bearer ${authToken}` },
       data: {
-        date: getFutureBookingDate(),
-        time: '18:00',
+        date: getFutureBookingDate(1), // +1 day offset for GET test
+        time: BOOKING_SLOTS[0], // 12:00 - unique slot for this test
         guests: 8,
         location_address: '123 Test St, San Jose, CA 95123',
         customer_name: 'Test User',
@@ -145,11 +153,12 @@ test.describe('Bookings API', () => {
 
     // Create booking with auth using correct schema
     // NOTE: trailing slash prevents 307 redirect which loses auth header
+    // Use unique date offset and slot to avoid conflicts with other tests
     const createResponse = await request.post(`${API_URL}/api/v1/bookings/`, {
       headers: { Authorization: `Bearer ${authToken}` },
       data: {
-        date: getFutureBookingDate(),
-        time: '18:00',
+        date: getFutureBookingDate(2), // +2 days offset for PUT test
+        time: BOOKING_SLOTS[1], // 15:00 - unique slot for this test
         guests: 8,
         location_address: '123 Test St, San Jose, CA 95123',
         customer_name: 'Test User PUT',
@@ -210,11 +219,12 @@ test.describe('Bookings API', () => {
 
     // Create booking with auth using correct schema
     // NOTE: trailing slash prevents 307 redirect which loses auth header
+    // Use unique date offset and slot to avoid conflicts with other tests
     const createResponse = await request.post(`${API_URL}/api/v1/bookings/`, {
       headers: { Authorization: `Bearer ${authToken}` },
       data: {
-        date: getFutureBookingDate(),
-        time: '18:00',
+        date: getFutureBookingDate(3), // +3 days offset for DELETE test
+        time: BOOKING_SLOTS[2], // 18:00 - unique slot for this test
         guests: 8,
         location_address: '123 Test St, San Jose, CA 95123',
         customer_name: 'Test User DELETE',

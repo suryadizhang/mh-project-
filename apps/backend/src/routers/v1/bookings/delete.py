@@ -25,8 +25,8 @@ from sqlalchemy.orm import joinedload
 from core.audit_logger import audit_logger
 from core.database import get_db
 from core.security.roles import role_matches
-from services.encryption_service import SecureDataHandler
 from db.models.core import Booking, BookingStatus
+from services.encryption_service import SecureDataHandler
 from utils.auth import can_access_station, require_customer_support
 
 from .constants import RESTORE_WINDOW_DAYS
@@ -78,7 +78,7 @@ async def delete_booking(
     booking_id: str,
     reason: str = "Customer request",
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_customer_support),
+    current_user: dict[str, Any] = Depends(require_customer_support()),
 ) -> DeleteBookingResponse:
     """
     Soft-delete a booking with full audit trail.

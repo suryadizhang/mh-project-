@@ -67,8 +67,7 @@ logger = logging.getLogger(__name__)
 )
 async def list_bookings(
     user_id: str | None = Query(None, description="Filter by customer ID"),
-    status_filter: str
-    | None = Query(None, alias="status", description="Filter by status"),
+    status_filter: str | None = Query(None, alias="status", description="Filter by status"),
     cursor: str | None = Query(None, description="Pagination cursor"),
     limit: int = Query(50, ge=1, le=100, description="Items per page"),
     db: AsyncSession = Depends(get_db),
@@ -94,9 +93,7 @@ async def list_bookings(
     if role_matches(user_role, "STATION_MANAGER", "station_manager"):
         station_ids = current_user.get("station_ids", [])
         if station_ids:
-            query = query.where(
-                Booking.station_id.in_([UUID(sid) for sid in station_ids])
-            )
+            query = query.where(Booking.station_id.in_([UUID(sid) for sid in station_ids]))
 
     # CHEF: Can only see bookings assigned to themselves
     elif role_matches(user_role, "CHEF", "chef"):
@@ -169,9 +166,7 @@ async def list_unassigned_bookings(
     elif role_matches(user_role, "STATION_MANAGER", "station_manager"):
         station_ids = current_user.get("station_ids", [])
         if station_ids:
-            query = query.where(
-                Booking.station_id.in_([UUID(sid) for sid in station_ids])
-            )
+            query = query.where(Booking.station_id.in_([UUID(sid) for sid in station_ids]))
         else:
             # No stations assigned, see nothing
             query = query.where(Booking.id.is_(None))
@@ -238,9 +233,7 @@ async def get_booking(
     booking = result.unique().scalar_one_or_none()
 
     if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
 
     # Authorization check
     customer_id_str = str(booking.customer_id)
@@ -256,12 +249,8 @@ async def get_booking(
             )
 
     # Calculate payment totals
-    total_paid = sum(
-        p.amount_cents for p in booking.payments if p.status == "completed"
-    )
-    deposit_paid = (
-        total_paid >= booking.deposit_due_cents if booking.deposit_due_cents else False
-    )
+    total_paid = sum(p.amount_cents for p in booking.payments if p.status == "completed")
+    deposit_paid = total_paid >= booking.deposit_due_cents if booking.deposit_due_cents else False
 
     return {
         "id": str(booking.id),
@@ -275,13 +264,9 @@ async def get_booking(
         ),
         "guests": (booking.party_adults or 0) + (booking.party_kids or 0),
         "status": (
-            booking.status.value
-            if hasattr(booking.status, "value")
-            else str(booking.status)
+            booking.status.value if hasattr(booking.status, "value") else str(booking.status)
         ),
-        "total_amount": (
-            booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0
-        ),
+        "total_amount": (booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0),
         "deposit_paid": deposit_paid,
         "balance_due": (
             (booking.total_due_cents - booking.deposit_due_cents) / 100.0
@@ -289,9 +274,7 @@ async def get_booking(
             else 0.0
         ),
         "payment_status": (
-            booking.status.value
-            if hasattr(booking.status, "value")
-            else str(booking.status)
+            booking.status.value if hasattr(booking.status, "value") else str(booking.status)
         ),
         "menu_items": [],
         "addons": [],
@@ -396,9 +379,7 @@ async def create_booking(
         # Encrypt PII
         email_encrypted = encryption_handler.encrypt_email(booking_data.customer_email)
         phone_encrypted = encryption_handler.encrypt_phone(booking_data.customer_phone)
-        address_encrypted = encryption_handler.encrypt_email(
-            booking_data.location_address
-        )
+        address_encrypted = encryption_handler.encrypt_email(booking_data.location_address)
 
         # Find or create customer
         customer = await _find_or_create_customer(
@@ -621,9 +602,7 @@ async def update_booking(
             booking.chef_id = None
             if old_chef_id:
                 changes.append("Chef unassigned from booking")
-                logger.info(
-                    f"🍳 Chef {old_chef_id} unassigned from booking {booking_id}"
-                )
+                logger.info(f"🍳 Chef {old_chef_id} unassigned from booking {booking_id}")
         else:
             # Assign new chef
             booking.chef_id = chef_id
@@ -665,9 +644,7 @@ async def update_booking(
         customer_phone = "+10000000000"
 
         if booking.customer:
-            customer_name = (
-                f"{booking.customer.first_name} {booking.customer.last_name}"
-            )
+            customer_name = f"{booking.customer.first_name} {booking.customer.last_name}"
             # Decrypt phone if needed
 
         asyncio.create_task(
@@ -677,7 +654,7 @@ async def update_booking(
                 booking_id=booking_id,
                 changes=", ".join(changes),
                 event_date=str(booking.date),
-                event_time=str(booking.time),
+                event_time=str(booking.slot),
             )
         )
         logger.info(f"📧 Edit notification queued for booking {booking_id}")
@@ -687,7 +664,7 @@ async def update_booking(
         "id": str(booking.id),
         "message": "Booking updated successfully",
         "date": str(booking.date),
-        "time": str(booking.time),
+        "time": str(booking.slot),
         "guests": booking.guests,
         "status": booking.status.value,
         "chef_id": str(booking.chef_id) if booking.chef_id else None,
