@@ -286,15 +286,15 @@ class Booking(Base):
     # Optimistic Locking (NEW - Bug #13 fix)
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("1"))
 
-    # Dual Deadline System (UPDATED - match database)
-    customer_deposit_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    internal_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    # Dual Deadline System (UPDATED - match database, using timezone=True for PostgreSQL timestamptz)
+    customer_deposit_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    internal_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     deposit_deadline: Mapped[Optional[datetime]] = mapped_column(
-        DateTime, nullable=True
+        DateTime(timezone=True), nullable=True
     )  # Legacy compatibility
 
-    # Manual Deposit Confirmation (NEW - from database)
-    deposit_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    # Manual Deposit Confirmation (NEW - from database, using timezone=True for PostgreSQL timestamptz)
+    deposit_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     deposit_confirmed_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Admin Hold System (NEW - from database)
@@ -302,7 +302,7 @@ class Booking(Base):
         Boolean, nullable=False, server_default=text("false")
     )
     held_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    held_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    held_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     hold_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # 2-Step Cancellation Workflow (NEW - for cancellation request/approval flow)
