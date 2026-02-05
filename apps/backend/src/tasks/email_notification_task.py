@@ -72,14 +72,14 @@ async def start_email_notification_task():
         Now includes database sync for fast email access!
         """
         # Create database session for this email
-        async for db in get_async_session():
-            try:
-                await service.handle_new_email(email_data, db=db)
-            except Exception as e:
-                logger.exception(f"❌ Failed to handle new email: {e}")
-            finally:
-                # Session automatically closed by async generator
-                break
+        # get_async_session() returns a session directly, not an async generator
+        db = await get_async_session()
+        try:
+            await service.handle_new_email(email_data, db=db)
+        except Exception as e:
+            logger.exception(f"❌ Failed to handle new email: {e}")
+        finally:
+            await db.close()
 
     try:
         # Create IMAP IDLE monitors

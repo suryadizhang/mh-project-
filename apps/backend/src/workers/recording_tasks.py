@@ -239,13 +239,14 @@ def link_recording_entities(self, recording_id: str):
 
     async def async_link():
         """Async wrapper for linking service"""
-        async for db in get_async_session():
-            try:
-                linking_service = RecordingLinkingService(db)
-                result = await linking_service.link_recording(UUID(recording_id))
-                return result
-            finally:
-                await db.close()
+        # get_async_session() returns a session directly, not an async generator
+        db = await get_async_session()
+        try:
+            linking_service = RecordingLinkingService(db)
+            result = await linking_service.link_recording(UUID(recording_id))
+            return result
+        finally:
+            await db.close()
 
     try:
         logger.info(f"Starting entity linking for recording {recording_id}")
