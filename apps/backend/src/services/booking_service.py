@@ -4,7 +4,7 @@ Encapsulates booking business logic and orchestrates repository operations
 """
 
 import logging
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID
 
@@ -563,7 +563,7 @@ class BookingService:
 
         # Update status
         booking.status = BookingStatus.CANCELLED
-        booking.cancelled_at = datetime.now(timezone.utc)
+        booking.cancelled_at = datetime.utcnow()
         booking.cancellation_reason = reason
 
         updated_booking = self.repository.update(booking)
