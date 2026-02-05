@@ -45,17 +45,16 @@ Usage:
 """
 
 import asyncio
-from datetime import datetime, timezone, timedelta
-from typing import Any, Optional
 import logging
+from datetime import datetime, timedelta, timezone
+from typing import Any, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import get_settings
 from services.customer_email_monitor import customer_email_monitor
-from services.payment_email_monitor import PaymentEmailMonitor
-from services.whatsapp_notification_service import get_whatsapp_service, NotificationChannel
 from services.email_sync_service import EmailSyncService
+from services.whatsapp_notification_service import get_whatsapp_service
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -107,7 +106,9 @@ class EmailNotificationService:
         self.admin_phones = [p.strip() for p in admin_phones.split(",")]
 
         logger.info("✅ EmailNotificationService initialized")
-        logger.info(f"   - Notification hours: {self.notification_start_hour}:00 - {self.notification_end_hour}:00")
+        logger.info(
+            f"   - Notification hours: {self.notification_start_hour}:00 - {self.notification_end_hour}:00"
+        )
         logger.info(f"   - Check interval: {self.check_interval_seconds}s")
         logger.info(f"   - Admin phones: {len(self.admin_phones)}")
 
@@ -153,9 +154,7 @@ class EmailNotificationService:
         # Remove old entries
         old_count = len(self._sent_notifications)
         self._sent_notifications = {
-            msg_id: ts
-            for msg_id, ts in self._sent_notifications.items()
-            if ts > cutoff
+            msg_id: ts for msg_id, ts in self._sent_notifications.items() if ts > cutoff
         }
 
         removed = old_count - len(self._sent_notifications)
@@ -206,10 +205,10 @@ class EmailNotificationService:
             f"Email: {from_address}",
             f"Subject: {subject[:100]}",
             "",
-            f"Preview:",
+            "Preview:",
             f"{preview[:150]}{'...' if len(preview) > 150 else ''}",
             "",
-            f"🔗 View in Admin:",
+            "🔗 View in Admin:",
             f"https://admin.mysticdatanode.net/emails?tab={inbox}&id={message_id}",
         ]
 
@@ -364,9 +363,7 @@ class EmailNotificationService:
         }
 
     async def handle_new_email(
-        self,
-        email_data: dict[str, Any],
-        db: Optional[AsyncSession] = None
+        self, email_data: dict[str, Any], db: Optional[AsyncSession] = None
     ) -> dict[str, Any]:
         """
         Handle new email from IMAP IDLE callback.
@@ -403,7 +400,10 @@ class EmailNotificationService:
         sync_result = None
         if db is not None:
             try:
-                sync_service = EmailSyncService(db)
+                from repositories.email_repository import EmailRepository
+
+                repository = EmailRepository(db)
+                sync_service = EmailSyncService(repository)
                 sync_result = await sync_service.sync_email_from_idle(email_data)
                 logger.info(f"✅ Email synced to database: {sync_result.get('action', 'unknown')}")
             except Exception as e:
@@ -413,11 +413,7 @@ class EmailNotificationService:
         # Check if should notify
         if not self.should_notify(message_id):
             logger.debug(f"Skipping notification for {message_id}")
-            return {
-                "success": False,
-                "reason": "already_notified",
-                "sync_result": sync_result
-            }
+            return {"success": False, "reason": "already_notified", "sync_result": sync_result}
 
         # Extract email data
         from_address = email_data.get("from_address", "unknown")
@@ -458,7 +454,9 @@ class EmailNotificationService:
         The new IMAP IDLE approach uses push notifications via handle_new_email().
         """
         logger.warning("⚠️  run_scheduler() is deprecated. Use IMAP IDLE monitors instead.")
-        logger.info(f"📬 Email notification scheduler started (interval: {self.check_interval_seconds}s)")
+        logger.info(
+            f"📬 Email notification scheduler started (interval: {self.check_interval_seconds}s)"
+        )
 
         while True:
             try:

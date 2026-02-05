@@ -28,9 +28,9 @@ For customer-facing SMS, use RingCentral directly:
     await sms_service.send_sms(to, message)
 """
 
+import logging
 from datetime import datetime, timezone
 from enum import Enum
-import logging
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -242,6 +242,23 @@ class WhatsAppNotificationService:
             "success": False,
             "channel": NotificationChannel.FAILED,
             "error": "WhatsApp messages removed. Use email or SMS instead.",
+        }
+
+    async def _send_sms(self, to: str, message: str) -> dict[str, Any]:
+        """
+        REMOVED - SMS via WhatsApp no longer supported.
+
+        For SMS, use RingCentral directly:
+            from services.ringcentral_service import get_ringcentral_service
+            sms_service = get_ringcentral_service()
+            await sms_service.send_sms(to, message)
+        """
+        logger.warning(f"SMS via WhatsApp skipped (no longer supported): to={to}")
+
+        return {
+            "success": False,
+            "channel": NotificationChannel.FAILED,
+            "error": "SMS via WhatsApp removed. Use RingCentral SMS instead.",
         }
 
     def _format_phone_number(self, phone: str) -> str:

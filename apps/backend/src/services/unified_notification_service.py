@@ -21,10 +21,10 @@ Features:
 """
 
 import asyncio
-from datetime import datetime, timezone
-from enum import Enum
 import logging
 import os
+from datetime import datetime, timezone
+from enum import Enum
 from typing import Any, Literal
 
 import httpx  # For Meta WhatsApp API calls
@@ -749,6 +749,27 @@ Check admin portal for details."""
         except Exception as e:
             logger.exception(f"❌ Meta WhatsApp send failed: {e}")
             return {"success": False, "channel": NotificationChannel.WHATSAPP, "error": str(e)}
+
+    # ==========================================
+    # BACKWARD COMPATIBILITY WRAPPER METHODS
+    # ==========================================
+
+    async def _send_whatsapp(self, to_number: str, message: str) -> dict[str, Any]:
+        """
+        Public wrapper for WhatsApp sending.
+
+        Used by enhanced_notification_service.py for direct WhatsApp access.
+        Falls back to SMS if WhatsApp fails (via _send_message).
+        """
+        return await self._send_via_meta_whatsapp(to_number, message)
+
+    async def _send_sms(self, to_number: str, message: str) -> dict[str, Any]:
+        """
+        Public wrapper for SMS sending via RingCentral.
+
+        Used by enhanced_notification_service.py for direct SMS access.
+        """
+        return await self._send_via_ringcentral_sms(to_number, message)
 
 
 # ==========================================
