@@ -9,6 +9,59 @@ staging/production.
 
 ---
 
+## 🚨 AI AGENT ENFORCEMENT (READ FIRST!)
+
+**BEFORE running ANY backend code, the AI agent MUST:**
+
+1. **USE DOCKER, NOT DIRECT PYTHON** - Never run `python -m uvicorn`
+   directly
+2. **BUILD DOCKER IMAGE FIRST** -
+   `docker compose --profile development build unified-backend`
+3. **RUN IN DOCKER CONTAINER** -
+   `docker compose --profile development up unified-backend`
+4. **TEST AGAINST DOCKER** - `curl http://localhost:8000/health` (port
+   8000, not 8001)
+
+### ❌ FORBIDDEN (AI Must NEVER Do):
+
+```bash
+# WRONG - Direct Python execution bypasses Docker environment
+python -m uvicorn main:app --host 0.0.0.0 --port 8001
+cd apps/backend/src && python main.py
+```
+
+### ✅ REQUIRED (AI Must ALWAYS Do):
+
+```bash
+# CORRECT - Docker execution matches staging/production
+docker compose --profile development build unified-backend
+docker compose --profile development up unified-backend
+curl http://localhost:8000/health
+```
+
+### Why Docker, Not Direct Python?
+
+| Direct Python (WRONG)         | Docker (CORRECT)                 |
+| ----------------------------- | -------------------------------- |
+| Different OS (Windows)        | Same OS (Linux Alpine)           |
+| Local Python packages         | Container Python packages        |
+| Local env vars                | Container env vars               |
+| Works locally, fails in prod  | If works locally, works in prod  |
+| Port 8001 (non-standard)      | Port 8000 (matches staging/prod) |
+| Missing dependencies possible | All deps in Dockerfile           |
+| No isolation                  | Full isolation                   |
+
+### AI Self-Check Before Testing:
+
+Before testing ANY backend endpoint, ask:
+
+- [ ] Am I using Docker? (If no → STOP, use Docker)
+- [ ] Did I build the Docker image? (If no → build first)
+- [ ] Is the container running? (If no → start it)
+- [ ] Am I testing on port 8000? (If 8001 → WRONG, use Docker)
+
+---
+
 ## 🎯 Purpose
 
 This document enforces the industry-standard development workflow:
