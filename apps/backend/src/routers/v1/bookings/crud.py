@@ -675,7 +675,7 @@ async def update_booking(
         )
 
     if "guests" in update_data:
-        booking.guests = update_data["guests"]
+        booking.party_adults = update_data["guests"]  # Fix: Booking uses party_adults not guests
         changes.append(f"Guest count changed to {update_data['guests']}")
 
     if "location_address" in update_data:
@@ -770,7 +770,7 @@ async def update_booking(
         "message": "Booking updated successfully",
         "date": str(booking.date),
         "time": str(booking.slot),
-        "guests": booking.guests,
+        "guests": (booking.party_adults or 0) + (booking.party_kids or 0) + (booking.party_toddlers or 0),
         "status": booking.status.value,
         "chef_id": str(booking.chef_id) if booking.chef_id else None,
         "customer_requested_time": (
