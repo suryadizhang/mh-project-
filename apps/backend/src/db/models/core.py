@@ -30,6 +30,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Computed,
     Date,
     DateTime,
 )
@@ -238,9 +239,10 @@ class Booking(Base):
 
     # Computed column: date + slot combined (GENERATED ALWAYS AS STORED in PostgreSQL)
     # This column is read-only, automatically computed by the database
+    # Using SQLAlchemy Computed() tells ORM to NEVER include this in INSERT/UPDATE statements
     booking_datetime: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
-        insert_default=None,
+        Computed("date + slot", persisted=True),
         nullable=True,
     )
 
