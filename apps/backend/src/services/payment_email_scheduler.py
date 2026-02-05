@@ -61,6 +61,7 @@ class PaymentEmailScheduler:
         self.last_run: datetime | None = None
         self.run_count = 0
         self.error_count = 0
+        self.no_match_count = 0  # Track "no match" separately (expected behavior)
         self.idle_connection: imaplib.IMAP4_SSL | None = None
 
     def check_emails_job(self):
@@ -109,12 +110,38 @@ class PaymentEmailScheduler:
                         f"({results['emails_found']} email(s) found)"
                     )
 
-                # Log errors
+                # Log errors - categorize by severity
                 if results["errors"]:
-                    self.error_count += len(results["errors"])
-                    logger.warning(f"⚠️ {len(results['errors'])} error(s) during email check")
+                    # Separate expected "no match" from actual errors
+                    no_match_errors = []
+                    real_errors = []
+
                     for error in results["errors"]:
-                        logger.error(f"  - {error}")
+                        error_msg = (
+                            error.get("error", "") if isinstance(error, dict) else str(error)
+                        )
+                        if "No matching payment found" in error_msg:
+                            no_match_errors.append(error)
+                        else:
+                            real_errors.append(error)
+
+                    # Track "no match" count (for metrics, not Sentry)
+                    if no_match_errors:
+                        self.no_match_count += len(no_match_errors)
+                        logger.info(
+                            f"📧 {len(no_match_errors)} payment email(s) with no pending match "
+                            f"(expected - customer may not have booked yet) "
+                            f"[total no-match: {self.no_match_count}]"
+                        )
+                        for error in no_match_errors:
+                            logger.debug(f"  - No match: {error}")
+
+                    # Log real errors as ERROR (these go to Sentry)
+                    if real_errors:
+                        self.error_count += len(real_errors)
+                        logger.warning(f"⚠️ {len(real_errors)} actual error(s) during email check")
+                        for error in real_errors:
+                            logger.error(f"  - {error}")
 
             finally:
                 db.close()

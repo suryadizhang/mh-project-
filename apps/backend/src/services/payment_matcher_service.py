@@ -114,7 +114,9 @@ class PaymentMatcher:
                 db.query(Payment)
                 .filter(
                     and_(
-                        Payment.status.in_([PaymentStatus.PENDING.value, PaymentStatus.PROCESSING.value]),
+                        Payment.status.in_(
+                            [PaymentStatus.PENDING.value, PaymentStatus.PROCESSING.value]
+                        ),
                         Payment.payment_method == payment_method,
                         Payment.amount >= min_amount,
                         Payment.amount <= max_amount,
@@ -129,9 +131,12 @@ class PaymentMatcher:
             potential_matches = query.all()
 
             if not potential_matches:
-                logger.warning(
-                    f"❌ No matching payment found for: "
-                    f"Amount=${amount}, Method={payment_method}, Time={received_at}"
+                # INFO level - this is expected when customer hasn't booked yet
+                # or payment is for a different business
+                logger.info(
+                    f"📧 No matching pending payment for: "
+                    f"Amount=${amount}, Method={payment_method}, Time={received_at} "
+                    f"(customer may not have booked yet)"
                 )
                 return None
 
@@ -216,7 +221,9 @@ class PaymentMatcher:
                 .join(Booking)
                 .filter(
                     and_(
-                        Payment.status.in_([PaymentStatus.PENDING.value, PaymentStatus.PROCESSING.value]),
+                        Payment.status.in_(
+                            [PaymentStatus.PENDING.value, PaymentStatus.PROCESSING.value]
+                        ),
                         Payment.payment_method == payment_method,
                         Payment.created_at >= time_start,
                         Payment.created_at <= time_end,
