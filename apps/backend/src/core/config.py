@@ -138,8 +138,6 @@ class Settings(BaseSettings):
                 ("global", "OPENAI_API_KEY", "OPENAI_API_KEY"),
                 ("backend-api", "JWT_SECRET", "JWT_SECRET"),
                 ("backend-api", "ENCRYPTION_KEY", "ENCRYPTION_KEY"),
-                ("backend-api", "DB_URL", "DATABASE_URL"),
-                ("backend-api", "REDIS_URL", "REDIS_URL"),
                 ("backend-api", "SMTP_PASSWORD", "SMTP_PASSWORD"),
                 # Google OAuth for admin panel authentication
                 ("backend-api", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_ID"),
