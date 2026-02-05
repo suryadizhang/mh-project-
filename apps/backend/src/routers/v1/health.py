@@ -299,3 +299,16 @@ async def detailed_health_check():
         raise HTTPException(
             status_code=503, detail=f"Detailed health check failed: {e!s}"
         )
+
+
+@router.get("/sentry-debug", tags=["Debug"])
+async def sentry_debug() -> dict:
+    """
+    Test endpoint to verify Sentry error capture.
+
+    Triggers a deliberate exception to confirm errors are being sent to Sentry.
+    Should only be used for testing purposes.
+    """
+    # This will raise a ZeroDivisionError and send it to Sentry
+    _ = 1 / 0  # noqa: F841
+    return {"status": "This should never be reached"}
