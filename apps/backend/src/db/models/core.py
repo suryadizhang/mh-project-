@@ -689,8 +689,15 @@ class Payment(Base):
     )
 
     # Status
+    # values_callable ensures SQLAlchemy uses enum.value (lowercase) not enum.name (uppercase)
     status: Mapped[PaymentStatus] = mapped_column(
-        SQLEnum(PaymentStatus, name="payment_status", schema="public", create_type=False),
+        SQLEnum(
+            PaymentStatus,
+            name="payment_status",
+            schema="public",
+            create_type=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
         nullable=False,
         default=PaymentStatus.PENDING,
         index=True,

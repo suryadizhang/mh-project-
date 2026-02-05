@@ -124,7 +124,12 @@ class StripePayment(Base):
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), default="usd", nullable=False)
     status: Mapped[PaymentStatus] = mapped_column(
-        SQLEnum(PaymentStatus, name="payment_status", create_type=True),
+        SQLEnum(
+            PaymentStatus,
+            name="payment_status",
+            create_type=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
         default=PaymentStatus.PENDING,
         nullable=False,
     )

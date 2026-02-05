@@ -109,11 +109,12 @@ class PaymentMatcher:
             time_end = received_at + timedelta(hours=1)  # Allow 1 hour future
 
             # Build base query
+            # Use .value for PostgreSQL enum compatibility (DB uses lowercase values)
             query = (
                 db.query(Payment)
                 .filter(
                     and_(
-                        Payment.status.in_([PaymentStatus.PENDING, PaymentStatus.PROCESSING]),
+                        Payment.status.in_([PaymentStatus.PENDING.value, PaymentStatus.PROCESSING.value]),
                         Payment.payment_method == payment_method,
                         Payment.amount >= min_amount,
                         Payment.amount <= max_amount,
@@ -204,12 +205,13 @@ class PaymentMatcher:
             time_end = received_at + timedelta(hours=1)
 
             # Find all pending payments with matching phone
+            # Use .value for PostgreSQL enum compatibility (DB uses lowercase values)
             query = (
                 db.query(Payment)
                 .join(Booking)
                 .filter(
                     and_(
-                        Payment.status.in_([PaymentStatus.PENDING, PaymentStatus.PROCESSING]),
+                        Payment.status.in_([PaymentStatus.PENDING.value, PaymentStatus.PROCESSING.value]),
                         Payment.payment_method == payment_method,
                         Payment.created_at >= time_start,
                         Payment.created_at <= time_end,
