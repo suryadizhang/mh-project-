@@ -454,3 +454,44 @@ export function randomString(length: number): string {
     .toString(36)
     .substring(2, 2 + length);
 }
+
+/**
+ * Get auth token by logging in with TEST_ADMIN credentials from environment.
+ * Returns the access token or null if login fails.
+ */
+export async function getAdminAuthToken(
+  request: {
+    post: (
+      url: string,
+      options: { data: { email: string; password: string } }
+    ) => Promise<{ status: () => number; json: () => Promise<unknown> }>;
+  },
+  apiUrl: string
+): Promise<string | null> {
+  const email = process.env.TEST_ADMIN_EMAIL;
+  const password = process.env.TEST_ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    console.warn(
+      'TEST_ADMIN_EMAIL or TEST_ADMIN_PASSWORD not set in environment'
+    );
+    return null;
+  }
+
+  try {
+    // /api/v1/auth/login expects JSON body with 'email' and 'password' fields
+    const response = await request.post(`${apiUrl}/api/v1/auth/login`, {
+      data: { email: email, password: password },
+    });
+
+    if (response.status() === 200) {
+      const data = (await response.json()) as { access_token?: string };
+      return data.access_token || null;
+    }
+    console.warn(`Login failed with status ${response.status()}`);
+    return null;
+  } catch (error) {
+    console.warn('Login request failed:', error);
+    return null;
+  }
+}
