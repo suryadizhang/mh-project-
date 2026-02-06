@@ -414,12 +414,11 @@ async def get_hold_status(
             rendered_markdown, extensions=["tables", "nl2br"]
         )
 
-        # Format slot_datetime as ISO string
-        slot_dt = hold["slot_datetime"]
-        if hasattr(slot_dt, "isoformat"):
-            slot_datetime_str = slot_dt.isoformat()
-        else:
-            slot_datetime_str = str(slot_dt)
+        # Format slot datetime from separate event_date and slot_time fields
+        event_date = hold["event_date"]
+        slot_time = hold["slot_time"]
+        # Combine date and time into datetime string
+        slot_datetime_str = f"{event_date}T{slot_time}"
 
         # Format expires_at as ISO string
         expires_at = hold["expires_at"]
