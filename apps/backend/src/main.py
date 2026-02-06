@@ -3,6 +3,10 @@ FastAPI Main Application - Enhanced with Dependency Injection
 Unified API with operational and AI endpoints, enterprise architecture patterns
 """
 
+# ruff: noqa: E402
+# The E402 (module level import not at top of file) is intentionally suppressed
+# because we have a startup debug block that runs before imports.
+
 # ==============================================
 # STARTUP DEBUG LOGGING - Confirm module loaded
 # This file write happens at module import time
@@ -21,6 +25,7 @@ import logging
 import os
 import time
 from contextlib import asynccontextmanager
+from typing import Any
 
 # Import Sentry for error tracking and performance monitoring
 import sentry_sdk
@@ -725,7 +730,7 @@ logger.info(
 
 # Root endpoints
 @app.get("/")
-async def root():
+async def root() -> dict[str, Any]:
     """API root endpoint with basic information"""
     return {
         "message": f"{settings.APP_NAME} API",
@@ -743,7 +748,7 @@ async def root():
 
 
 @app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])
-async def health_check(request: Request):
+async def health_check(request: Request) -> dict[str, Any]:
     """Health check endpoint for load balancers and uptime monitoring (supports HEAD)"""
     # Check DI container status
     di_status = (
@@ -789,7 +794,7 @@ async def health_check(request: Request):
 
 
 @app.get("/ready", tags=["Health"])
-async def readiness_check(request: Request):
+async def readiness_check(request: Request) -> dict[str, Any]:
     """Kubernetes readiness probe endpoint"""
     try:
         # Check database connectivity
@@ -823,7 +828,7 @@ async def readiness_check(request: Request):
 
 
 @app.get("/info", tags=["Health"])
-async def app_info():
+async def app_info() -> dict[str, Any]:
     """Application information endpoint"""
     return {
         "name": settings.APP_NAME,
@@ -1088,10 +1093,6 @@ try:
     # Also register customer endpoints at /api/v1 for frontend compatibility
     # Create a sub-router for customer endpoints only
     from fastapi import APIRouter as _APIRouter
-    from fastapi import Depends as _Depends
-    from sqlalchemy.ext.asyncio import AsyncSession as _AsyncSession
-
-    from core.database import get_db as _get_db
 
     customer_compat_router = _APIRouter(tags=["customers-compat"])
 
@@ -1099,10 +1100,10 @@ try:
     # This creates aliases at /api/v1/customers/* that point to /api/stripe/v1/customers/*
     @customer_compat_router.get("/v1/customers/dashboard")
     async def customer_dashboard_compat(
-        customer_id: str = None,
-        email: str = None,
-        request: Request = None,
-    ):
+        customer_id: str | None = None,
+        email: str | None = None,
+        request: Request | None = None,
+    ) -> dict:
         """Compatibility endpoint - uses Stripe customer_id or email"""
         from routers.v1.stripe import get_customer_dashboard_by_stripe_id
 
