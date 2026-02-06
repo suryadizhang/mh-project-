@@ -173,7 +173,7 @@ class PaymentEmailScheduler:
 
             try:
                 # Import models here to avoid circular imports
-                from models.payment_notification import (
+                from db.models.payment_notification import (
                     PaymentNotification,
                     PaymentNotificationStatus,
                 )

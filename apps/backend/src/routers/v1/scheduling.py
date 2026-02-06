@@ -56,7 +56,7 @@ from services.scheduling import (
     SuggestionEngine,
     TravelTimeService,
 )
-from services.scheduling.travel_time_service import Coordinates
+from services.scheduling.travel_time_service import Coordinates, calculate_event_duration
 
 router = APIRouter(prefix="/scheduling", tags=["Scheduling"])
 
@@ -612,8 +612,7 @@ async def calculate_event_duration(
     - Minimum: 63 minutes (1 guest)
     - Maximum: 120 minutes (20+ guests)
     """
-    slot_manager = SlotManagerService()
-    duration = slot_manager.calculate_event_duration(request.guest_count)
+    duration = calculate_event_duration(request.guest_count)
 
     return EventDurationResponse(
         guest_count=request.guest_count,
@@ -687,7 +686,8 @@ async def assign_chef_to_booking(
     """
     from sqlalchemy import select
 
-    from db.models.core import Booking, User
+    from db.models.core import Booking
+    from db.models.identity.users import User
 
     # Validate booking exists
     booking_query = select(Booking).where(Booking.id == request.booking_id)

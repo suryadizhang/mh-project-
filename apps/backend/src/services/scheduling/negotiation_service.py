@@ -465,6 +465,25 @@ class NegotiationService:
             "average_response_hours": round(avg_response, 1),
         }
 
+    async def get_pending_negotiations(
+        self, limit: int = 20
+    ) -> List[Dict[str, Any]]:
+        """
+        Get all pending negotiation requests.
+
+        This is a stub implementation. In production, this would query the database
+        for actual pending negotiation records.
+
+        Args:
+            limit: Maximum number of negotiations to return
+
+        Returns:
+            List of pending negotiation details
+        """
+        # TODO: Implement database query when negotiations table is created
+        # For now, return empty list as this feature is not yet fully implemented
+        return []
+
 
 # Alias for scheduling router compatibility
 NegotiationReason = NegotiationType

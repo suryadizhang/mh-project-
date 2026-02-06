@@ -8,7 +8,7 @@ When requested slot is unavailable, suggests alternative times:
 """
 
 from datetime import date, time, timedelta
-from typing import List, Optional
+from typing import Dict, List, Optional
 import logging
 
 from pydantic import BaseModel
@@ -441,3 +441,55 @@ class SuggestionEngine:
             return f"{date_str} (same day next week) at {time_str}"
         else:
             return f"{date_str} at {time_str}"
+
+    async def get_availability_calendar(
+        self,
+        start_date: date,
+        end_date: date,
+        guest_count: int = 10,
+        venue_lat: Optional[float] = None,
+        venue_lng: Optional[float] = None,
+        preferred_chef_id: Optional[object] = None,
+    ) -> Dict[date, List[SlotSuggestion]]:
+        """
+        Get availability calendar for a date range.
+
+        Returns a dictionary mapping dates to available slots.
+
+        Args:
+            start_date: Start of date range
+            end_date: End of date range
+            guest_count: Number of guests
+            venue_lat: Venue latitude (optional)
+            venue_lng: Venue longitude (optional)
+            preferred_chef_id: Preferred chef UUID (optional)
+
+        Returns:
+            Dictionary mapping dates to lists of SlotSuggestion
+        """
+        calendar: Dict[date, List[SlotSuggestion]] = {}
+        current_date = start_date
+
+        while current_date <= end_date:
+            # Get available slots for this date
+            all_slots = await self.availability_engine.get_available_slots_for_date(
+                current_date, guest_count
+            )
+
+            date_slots = []
+            for slot in all_slots:
+                date_slots.append(
+                    SlotSuggestion(
+                        slot_time=slot.slot_time,
+                        slot_date=current_date,
+                        slot_label=slot.slot_name,
+                        is_available=slot.is_available,
+                        conflict_reason=getattr(slot, "conflict_reason", None),
+                        score=1.0 if slot.is_available else 0.0,
+                    )
+                )
+
+            calendar[current_date] = date_slots
+            current_date = current_date + timedelta(days=1)
+
+        return calendar
