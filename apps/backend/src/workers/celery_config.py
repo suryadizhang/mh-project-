@@ -152,19 +152,19 @@ celery_app.conf.beat_schedule = {
     # ============================================================
     "check-signing-warnings": {
         "task": "slot_holds.check_signing_warnings",
-        "schedule": 300.0,  # Every 5 minutes
+        "schedule": 900.0,  # Every 15 minutes (balance: responsive + resource-efficient)
     },
     "check-payment-warnings": {
         "task": "slot_holds.check_payment_warnings",
-        "schedule": 300.0,  # Every 5 minutes
+        "schedule": 900.0,  # Every 15 minutes
     },
     "expire-unsigned-holds": {
         "task": "slot_holds.expire_unsigned_holds",
-        "schedule": 300.0,  # Every 5 minutes
+        "schedule": 900.0,  # Every 15 minutes
     },
     "expire-unpaid-holds": {
         "task": "slot_holds.expire_unpaid_holds",
-        "schedule": 300.0,  # Every 5 minutes
+        "schedule": 900.0,  # Every 15 minutes
     },
     # ============================================================
     # Chef Assignment Alert System (Batch 1 - FAILPROOF Alerts)

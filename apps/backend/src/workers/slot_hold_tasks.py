@@ -12,7 +12,7 @@ User Decision (from batch 1 audit):
 if deposit is not paid within 4 hours after the agreement signed
 with a warning to user 1 hour before auto cancel"
 
-Tasks run every 5 minutes to check for:
+Tasks run every 15 minutes to check for:
 1. Holds needing signing warning (1 hour before 2-hour deadline)
 2. Holds needing payment warning (1 hour before 4-hour deadline)
 3. Holds past signing deadline (auto-cancel)
@@ -79,7 +79,7 @@ def check_signing_warnings(self) -> dict:
     """
     Check for holds approaching the 2-hour signing deadline.
 
-    Runs every 5 minutes to find holds that:
+    Runs every 15 minutes to find holds that:
     - Are still pending (status = 'pending')
     - Have NOT signed the agreement yet (agreement_signed_at IS NULL)
     - Are within 1 hour of signing deadline
@@ -156,7 +156,7 @@ def check_payment_warnings(self) -> dict:
     """
     Check for holds approaching the 4-hour payment deadline.
 
-    Runs every 5 minutes to find holds that:
+    Runs every 15 minutes to find holds that:
     - Are still pending (status = 'pending')
     - HAVE signed the agreement (agreement_signed_at IS NOT NULL)
     - Have NOT paid the deposit yet (deposit_paid_at IS NULL)
@@ -234,7 +234,7 @@ def expire_unsigned_holds(self) -> dict:
     """
     Auto-cancel holds that missed the 2-hour signing deadline.
 
-    Runs every 5 minutes to find and cancel holds that:
+    Runs every 15 minutes to find and cancel holds that:
     - Are still pending (status = 'pending')
     - Have NOT signed the agreement (agreement_signed_at IS NULL)
     - Are past signing deadline (signing_deadline_at < now)
@@ -305,7 +305,7 @@ def expire_unpaid_holds(self) -> dict:
     """
     Auto-cancel signed holds that missed the 4-hour payment deadline.
 
-    Runs every 5 minutes to find and cancel holds that:
+    Runs every 15 minutes to find and cancel holds that:
     - Are still pending (status = 'pending')
     - HAVE signed the agreement (agreement_signed_at IS NOT NULL)
     - Have NOT paid the deposit (deposit_paid_at IS NULL)
@@ -452,7 +452,7 @@ Need help? Reply to this email or text us at (916) 740-8768.
 
         # Send email notification
         notification_service = NotificationService()
-        result = notification_service.send_email(
+        _result = notification_service.send_email(
             to_email=customer_email, subject=subject, body=message
         )
 
@@ -534,7 +534,7 @@ We'd still love to cook for you! If you have any questions, text us at (916) 740
 """
 
         notification_service = NotificationService()
-        result = notification_service.send_email(
+        _result = notification_service.send_email(
             to_email=customer_email, subject=subject, body=message
         )
 

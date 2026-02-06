@@ -49,6 +49,7 @@ interface QuoteFormData {
   // Event details
   adults: number;
   children: number;
+  toddlers: number;
   location: string;
   zipCode: string;
   venueAddress: string;
@@ -249,6 +250,7 @@ export function QuoteCalculator() {
       smsConsent: false,
       adults: 10,
       children: 0,
+      toddlers: 0,
       location: '',
       zipCode: '',
       venueAddress: '',
@@ -914,6 +916,36 @@ export function QuoteCalculator() {
                     ${childPrice} each ({childFreeUnderAge} &amp; under free)
                   </p>
                 )}
+              </div>
+
+              {/* Toddlers Input - Free (5 & under) */}
+              <div className="flex flex-col space-y-1.5">
+                <label
+                  htmlFor="toddlers"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <Baby className="h-4 w-4 text-gray-400" />
+                  Toddlers ({childFreeUnderAge} &amp; under)
+                </label>
+                <input
+                  id="toddlers"
+                  type="number"
+                  min="0"
+                  max="20"
+                  {...register('toddlers', {
+                    min: { value: 0, message: 'Cannot be negative' },
+                    max: { value: 20, message: 'Maximum 20 toddlers' },
+                    valueAsNumber: true,
+                    onChange: () => {
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
+                  className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none"
+                />
+                <p className="text-xs font-medium text-green-600">
+                  Free! (helps us prepare properly)
+                </p>
               </div>
             </div>
 

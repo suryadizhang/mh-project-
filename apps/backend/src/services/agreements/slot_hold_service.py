@@ -198,7 +198,7 @@ class SlotHoldService:
                 WHERE station_id = :station_id
                 AND date = :event_date
                 AND slot = :slot_time
-                AND status NOT IN ('cancelled', 'refunded')
+                AND status NOT IN ('cancelled')
                 AND deleted_at IS NULL
                 LIMIT 1
             """
