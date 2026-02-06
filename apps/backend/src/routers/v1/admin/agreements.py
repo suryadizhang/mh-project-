@@ -349,7 +349,7 @@ async def list_slot_holds(
                        sh.status, sh.created_at, sh.expires_at,
                        sh.agreement_signed_at, sh.deposit_paid_at
                 FROM core.slot_holds sh
-                LEFT JOIN core.stations s ON s.id = sh.station_id
+                LEFT JOIN identity.stations s ON s.id = sh.station_id
                 WHERE {where_sql}
                 ORDER BY sh.created_at DESC
                 LIMIT 100
