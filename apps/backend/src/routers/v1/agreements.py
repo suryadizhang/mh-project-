@@ -847,12 +847,13 @@ async def send_signing_link(
                 detail="Invalid or expired hold token",
             )
 
-        # TODO: Replace with actual frontend URL from settings
         base_url = "https://myhibachichef.com"
         signing_url = f"{base_url}/sign/{request.hold_token}"
 
         # Determine channel
         channel = request.send_via.lower()
+        send_success = False
+        customer_name = hold.get("customer_name", "")
 
         if channel == "sms":
             if not request.phone_number:
@@ -860,9 +861,19 @@ async def send_signing_link(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Phone number required for SMS",
                 )
-            # TODO: Integrate with SMS service (RingCentral)
-            # await sms_service.send_signing_link(request.phone_number, signing_url)
-            logger.info(f"Would send SMS signing link to {request.phone_number}: {signing_url}")
+            # Send SMS via RingCentral
+            from services.sms_service import send_sms_sync
+
+            message = (
+                f"Hi{' ' + customer_name if customer_name else ''}! "
+                f"Please sign your My Hibachi service agreement: {signing_url} "
+                f"(Link expires in 2 hours)"
+            )
+            send_success = send_sms_sync(to_phone=request.phone_number, message=message)
+            logger.info(
+                f"SMS signing link {'sent' if send_success else 'failed'} "
+                f"to {request.phone_number[:4]}***"
+            )
 
         elif channel == "email":
             if not request.email:
@@ -870,9 +881,45 @@ async def send_signing_link(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Email required for email link",
                 )
-            # TODO: Integrate with email service (Resend)
-            # await email_service.send_signing_link(request.email, signing_url)
-            logger.info(f"Would send email signing link to {request.email}: {signing_url}")
+            # Send email via EmailService
+            from services.email_service import EmailService
+
+            email_service = EmailService()
+            display_name = customer_name or "there"
+
+            subject = "Sign Your My Hibachi Service Agreement"
+            html_body = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2>Hi {display_name}!</h2>
+                <p>Thank you for choosing My Hibachi for your event!</p>
+                <p>Please sign your service agreement to confirm your booking:</p>
+                <p style="text-align: center; margin: 30px 0;">
+                    <a href="{signing_url}"
+                       style="background-color: #2563eb; color: white; padding: 15px 30px;
+                              text-decoration: none; border-radius: 8px; font-size: 16px;">
+                        Sign Agreement Now
+                    </a>
+                </p>
+                <p><strong>Important:</strong> This link expires in 2 hours.</p>
+                <p>Questions? Reply to this email or text us at (916) 740-8768.</p>
+                <p>- My Hibachi Team</p>
+            </div>
+            """
+            text_body = (
+                f"Hi {display_name}!\n\n"
+                f"Please sign your My Hibachi service agreement: {signing_url}\n\n"
+                f"This link expires in 2 hours.\n\n"
+                f"- My Hibachi Team"
+            )
+            send_success = email_service.send_email(
+                to_email=request.email,
+                subject=subject,
+                html_body=html_body,
+                text_body=text_body,
+            )
+            logger.info(
+                f"Email signing link {'sent' if send_success else 'failed'} to {request.email}"
+            )
 
         else:
             raise HTTPException(
@@ -895,8 +942,9 @@ async def send_signing_link(
             )
 
         return {
-            "message": f"Signing link sent via {request.send_via}",
-            "signing_url": signing_url,  # Also return URL for testing
+            "success": send_success,
+            "message": f"Signing link {'sent' if send_success else 'attempted'} via {channel}",
+            "signing_url": signing_url,
             "send_count": send_count,
         }
 

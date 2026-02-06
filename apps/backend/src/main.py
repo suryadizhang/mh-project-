@@ -1270,6 +1270,19 @@ try:
 except ImportError as e:
     logger.error(f"❌ Notification Groups endpoints not available: {e}")
 
+# Admin Agreements Management (signed agreements, slot holds, signing links)
+try:
+    from routers.v1.admin.agreements import router as admin_agreements_router
+
+    app.include_router(
+        admin_agreements_router,
+        prefix="/api/v1",
+        tags=["admin", "agreements"],
+    )
+    logger.info("✅ Admin Agreements Management endpoints included")
+except ImportError as e:
+    logger.error(f"❌ Admin Agreements endpoints not available: {e}")
+
 # Admin Analytics (comprehensive) - NEW location
 try:
     from routers.v1.admin_analytics import router as admin_analytics_router

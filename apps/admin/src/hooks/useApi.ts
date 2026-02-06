@@ -478,3 +478,59 @@ export function useConfigAuditLog(category?: string, limit: number = 50) {
     [category, limit]
   );
 }
+
+// ============================================================================
+// AGREEMENTS HOOKS
+// ============================================================================
+
+import {
+  agreementService,
+  type AgreementFilters,
+  type SignedAgreement,
+  type SignedAgreementDetail,
+  type SlotHold,
+} from '@/services/api';
+
+/**
+ * Hook for fetching signed agreements with filters
+ */
+export function useSignedAgreements(filters: AgreementFilters = {}) {
+  return useApiData<{
+    agreements: SignedAgreement[];
+    total: number;
+    page: number;
+    limit: number;
+  }>(
+    () => agreementService.getSignedAgreements(filters),
+    [
+      filters.page,
+      filters.limit,
+      filters.search,
+      filters.start_date,
+      filters.end_date,
+    ]
+  );
+}
+
+/**
+ * Hook for fetching a single signed agreement
+ */
+export function useSignedAgreement(agreementId: string | null) {
+  return useApiData<SignedAgreementDetail>(
+    () =>
+      agreementId
+        ? agreementService.getSignedAgreement(agreementId)
+        : Promise.resolve({ success: false, error: 'No ID provided' }),
+    [agreementId]
+  );
+}
+
+/**
+ * Hook for fetching active slot holds
+ */
+export function useSlotHolds(includeExpired = false) {
+  return useApiData<{ holds: SlotHold[]; total: number }>(
+    () => agreementService.getSlotHolds(includeExpired),
+    [includeExpired]
+  );
+}

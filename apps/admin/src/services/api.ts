@@ -1704,3 +1704,162 @@ export const customerPreferencesService = {
     );
   },
 };
+
+// ============================================================================
+// AGREEMENTS SERVICE
+// ============================================================================
+
+export interface SignedAgreement {
+  id: string;
+  slot_hold_id: string;
+  signing_token: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  event_date: string;
+  template_version: string;
+  signed_at: string;
+  signing_ip: string | null;
+  booking_id: string | null;
+  booking_created: boolean;
+}
+
+export interface SignedAgreementDetail extends SignedAgreement {
+  agreement_text: string;
+  full_customer_name: string;
+  full_customer_email: string;
+  full_customer_phone: string;
+  slot_hold_created_at: string;
+  slot_hold_expires_at: string;
+}
+
+export interface SlotHold {
+  id: string;
+  event_date: string;
+  time_slot: string;
+  customer_name: string | null;
+  customer_email: string | null;
+  customer_phone: string | null;
+  signing_token: string;
+  status: string;
+  is_valid: boolean;
+  expires_at: string;
+  created_at: string;
+  minutes_remaining: number;
+  signing_url: string;
+}
+
+export interface GenerateLinkRequest {
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  event_date: string;
+  time_slot: string;
+}
+
+export interface GenerateLinkResponse {
+  success: boolean;
+  signing_url: string;
+  signing_token: string;
+  expires_at: string;
+  slot_hold_id: string;
+}
+
+export interface SendLinkRequest {
+  slot_hold_id: string;
+  channel: 'sms' | 'email' | 'both';
+}
+
+export interface SendLinkResponse {
+  success: boolean;
+  message: string;
+  sms_sent?: boolean;
+  email_sent?: boolean;
+}
+
+export interface AgreementFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  start_date?: string;
+  end_date?: string;
+  signed_only?: boolean;
+}
+
+/**
+ * Agreements service for admin panel
+ */
+export const agreementService = {
+  /**
+   * Get all signed agreements with pagination and filters
+   */
+  async getSignedAgreements(filters: AgreementFilters = {}) {
+    const params = new URLSearchParams();
+
+    if (filters.page) params.append('page', filters.page.toString());
+    if (filters.limit) params.append('limit', filters.limit.toString());
+    if (filters.search) params.append('search', filters.search);
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+    if (filters.signed_only !== undefined)
+      params.append('signed_only', filters.signed_only.toString());
+
+    const query = params.toString();
+    const url = query
+      ? `/api/v1/admin/agreements/signed?${query}`
+      : '/api/v1/admin/agreements/signed';
+
+    return api.get<{
+      agreements: SignedAgreement[];
+      total: number;
+      page: number;
+      limit: number;
+    }>(url);
+  },
+
+  /**
+   * Get signed agreement details by ID
+   */
+  async getSignedAgreement(agreementId: string) {
+    return api.get<SignedAgreementDetail>(
+      `/api/v1/admin/agreements/signed/${agreementId}`
+    );
+  },
+
+  /**
+   * Get all active slot holds (pending signatures)
+   */
+  async getSlotHolds(includeExpired = false) {
+    const url = `/api/v1/admin/agreements/holds?include_expired=${includeExpired}`;
+    return api.get<{ holds: SlotHold[]; total: number }>(url);
+  },
+
+  /**
+   * Generate a signing link for a customer
+   */
+  async generateLink(data: GenerateLinkRequest) {
+    return api.post<GenerateLinkResponse>(
+      '/api/v1/admin/agreements/generate-link',
+      data
+    );
+  },
+
+  /**
+   * Send signing link to customer via SMS/email
+   */
+  async sendLink(data: SendLinkRequest) {
+    return api.post<SendLinkResponse>(
+      '/api/v1/admin/agreements/send-link',
+      data
+    );
+  },
+
+  /**
+   * Get signing URL for a slot hold
+   */
+  async getSigningUrl(holdId: string) {
+    return api.get<{ signing_url: string }>(
+      `/api/v1/admin/agreements/holds/${holdId}/signing-url`
+    );
+  },
+};

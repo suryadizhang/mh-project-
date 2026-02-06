@@ -124,6 +124,19 @@ const DAILY_OPERATIONS: NavSection = {
       description: 'Calendar view of all bookings',
       showInQuickBar: false,
     },
+    {
+      name: 'Agreements',
+      href: '/agreements',
+      icon: '📝',
+      roles: [
+        UserRole.SUPER_ADMIN,
+        UserRole.ADMIN,
+        UserRole.CUSTOMER_SUPPORT,
+      ],
+      tier: 'daily',
+      description: 'Customer agreements and signing links',
+      showInQuickBar: false,
+    },
   ],
 };
 
