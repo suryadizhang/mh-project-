@@ -1747,6 +1747,7 @@ export interface SlotHold {
   created_at: string;
   minutes_remaining: number;
   signing_url: string;
+  signing_link_sent_at: string | null;
 }
 
 export interface GenerateLinkRequest {

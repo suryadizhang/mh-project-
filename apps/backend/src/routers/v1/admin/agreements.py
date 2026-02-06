@@ -98,6 +98,7 @@ class SlotHoldSummary(BaseModel):
     expires_at: datetime
     agreement_signed_at: Optional[datetime]
     deposit_paid_at: Optional[datetime]
+    signing_link_sent_at: Optional[datetime]
     signing_link: str
 
 
@@ -347,7 +348,7 @@ async def list_slot_holds(
                 SELECT sh.id, sh.signing_token, sh.station_id, s.name as station_name,
                        sh.event_date, sh.slot_time, sh.customer_email, sh.customer_name,
                        sh.status, sh.created_at, sh.expires_at,
-                       sh.agreement_signed_at, sh.deposit_paid_at
+                       sh.agreement_signed_at, sh.deposit_paid_at, sh.signing_link_sent_at
                 FROM core.slot_holds sh
                 LEFT JOIN identity.stations s ON s.id = sh.station_id
                 WHERE {where_sql}
@@ -374,6 +375,7 @@ async def list_slot_holds(
                 expires_at=row.expires_at,
                 agreement_signed_at=row.agreement_signed_at,
                 deposit_paid_at=row.deposit_paid_at,
+                signing_link_sent_at=row.signing_link_sent_at,
                 signing_link=f"{base_url}/sign/{row.signing_token}",
             )
             for row in result.fetchall()
