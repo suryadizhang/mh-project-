@@ -1841,7 +1841,7 @@ export const agreementService = {
   async generateLink(data: GenerateLinkRequest) {
     return api.post<GenerateLinkResponse>(
       '/api/v1/admin/agreements/generate-link',
-      data
+      data as unknown as Record<string, unknown>
     );
   },
 
@@ -1851,7 +1851,7 @@ export const agreementService = {
   async sendLink(data: SendLinkRequest) {
     return api.post<SendLinkResponse>(
       '/api/v1/admin/agreements/send-link',
-      data
+      data as unknown as Record<string, unknown>
     );
   },
 
