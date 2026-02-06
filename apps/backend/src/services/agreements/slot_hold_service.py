@@ -144,7 +144,7 @@ class SlotHoldService:
 
         return {
             "id": row.id,
-            "signing_token": row.signing_token,
+            "signing_token": str(row.signing_token),  # Convert UUID to string
             "expires_at": row.expires_at,
             "created_at": row.created_at,
             "station_id": station_id,
@@ -289,7 +289,7 @@ class SlotHoldService:
             "customer_email": row.customer_email,
             "customer_name": row.customer_name,
             "guest_count": row.guest_count,
-            "signing_token": row.signing_token,
+            "signing_token": str(row.signing_token),  # Convert UUID to string
             "status": row.status,
             "expires_at": row.expires_at,
             "created_at": row.created_at,
@@ -589,7 +589,7 @@ class SlotHoldService:
         if row:
             return {
                 "id": row.id,
-                "signing_token": row.signing_token,
+                "signing_token": str(row.signing_token),  # Convert UUID to string
                 "sent_at": row.signing_link_sent_at,
                 "resent_at": row.signing_link_resent_at,
                 "send_count": row.signing_link_send_count,
