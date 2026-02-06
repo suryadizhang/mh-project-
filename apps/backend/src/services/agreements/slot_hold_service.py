@@ -42,10 +42,9 @@ See: database/migrations/008_legal_agreements_system.sql
 """
 
 import logging
-import secrets
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -102,8 +101,8 @@ class SlotHoldService:
         Raises:
             ValueError: If slot is already held or booked
         """
-        # Generate secure token for SMS signing link
-        signing_token = secrets.token_urlsafe(32)
+        # Generate UUID for SMS signing link (must be valid UUID for database)
+        signing_token = str(uuid4())
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=hold_minutes)
 
         # Check if slot is already held or booked
