@@ -55,9 +55,7 @@ class HolidayAnalyticsService:
         self.holiday_service = get_holiday_service()
 
     async def get_seasonal_trends(
-        self,
-        year: Optional[int] = None,
-        include_forecast: bool = False
+        self, year: Optional[int] = None, include_forecast: bool = False
     ) -> List[Dict]:
         """
         Get booking and revenue trends by holiday/season.
@@ -84,20 +82,14 @@ class HolidayAnalyticsService:
         trends = []
 
         # Get all holidays for the year
-        upcoming = self.holiday_service.get_upcoming_holidays(
-            days=365,
-            from_date=date(year, 1, 1)
-        )
+        upcoming = self.holiday_service.get_upcoming_holidays(days=365, from_date=date(year, 1, 1))
 
         for holiday_key, holiday_obj, holiday_date in upcoming:
             # Determine date range for this holiday/season
             date_range = self._get_holiday_date_range(holiday_obj, holiday_date)
 
             # Get bookings in this range
-            bookings = await self._get_bookings_in_range(
-                date_range["start"],
-                date_range["end"]
-            )
+            bookings = await self._get_bookings_in_range(date_range["start"], date_range["end"])
 
             if not bookings:
                 logger.info(f"No bookings for {holiday_obj.name} in {year}")
@@ -114,18 +106,10 @@ class HolidayAnalyticsService:
                 event_type = booking.event_type or "unknown"
                 event_types[event_type] = event_types.get(event_type, 0) + 1
 
-            top_event_types = sorted(
-                event_types.items(),
-                key=lambda x: x[1],
-                reverse=True
-            )[:3]
+            top_event_types = sorted(event_types.items(), key=lambda x: x[1], reverse=True)[:3]
 
             # Calculate YoY growth (if previous year data exists)
-            yoy_growth = await self._calculate_yoy_growth(
-                holiday_key,
-                year,
-                booking_count
-            )
+            yoy_growth = await self._calculate_yoy_growth(holiday_key, year, booking_count)
 
             trend = {
                 "season": holiday_obj.name,
@@ -147,23 +131,18 @@ class HolidayAnalyticsService:
             logger.info(f"✅ {holiday_obj.name}: {booking_count} bookings, ${total_revenue:,.2f}")
 
         # Sort by revenue (highest first)
-        trends.sort(key=lambda x: x['total_revenue'], reverse=True)
+        trends.sort(key=lambda x: x["total_revenue"], reverse=True)
 
         # Add forecasts if requested
         if include_forecast:
             for trend in trends:
                 trend["forecast_next_year"] = await self._forecast_holiday(
-                    trend["holiday_key"],
-                    year + 1
+                    trend["holiday_key"], year + 1
                 )
 
         return trends
 
-    def _get_holiday_date_range(
-        self,
-        holiday: any,
-        holiday_date: date
-    ) -> Dict[str, date]:
+    def _get_holiday_date_range(self, holiday: any, holiday_date: date) -> Dict[str, date]:
         """Get the full date range to analyze for a holiday/season."""
 
         # Event seasons have longer ranges
@@ -194,21 +173,16 @@ class HolidayAnalyticsService:
                 "end": holiday_date + timedelta(days=3),
             }
 
-    async def _get_bookings_in_range(
-        self,
-        start_date: date,
-        end_date: date
-    ) -> List:
+    async def _get_bookings_in_range(self, start_date: date, end_date: date) -> List:
         """Get all bookings in date range."""
 
         # TODO: Adjust this query based on your Booking model
         result = await self.db.execute(
-            select(Booking)
-            .where(
+            select(Booking).where(
                 and_(
                     Booking.event_date >= start_date,
                     Booking.event_date <= end_date,
-                    Booking.status.in_(["confirmed", "completed"])
+                    Booking.status.in_(["confirmed", "completed"]),
                 )
             )
         )
@@ -216,10 +190,7 @@ class HolidayAnalyticsService:
         return result.scalars().all()
 
     async def _calculate_yoy_growth(
-        self,
-        holiday_key: str,
-        current_year: int,
-        current_bookings: int
+        self, holiday_key: str, current_year: int, current_bookings: int
     ) -> str:
         """Calculate year-over-year growth percentage."""
 
@@ -238,8 +209,7 @@ class HolidayAnalyticsService:
 
             prev_date_range = self._get_holiday_date_range(prev_holiday, prev_holiday_date)
             prev_bookings = await self._get_bookings_in_range(
-                prev_date_range["start"],
-                prev_date_range["end"]
+                prev_date_range["start"], prev_date_range["end"]
             )
 
             prev_count = len(prev_bookings)
@@ -258,11 +228,7 @@ class HolidayAnalyticsService:
             logger.error(f"YoY calculation failed: {e}")
             return "N/A"
 
-    async def _forecast_holiday(
-        self,
-        holiday_key: str,
-        year: int
-    ) -> Dict:
+    async def _forecast_holiday(self, holiday_key: str, year: int) -> Dict:
         """Forecast bookings for next year based on historical data."""
 
         # Simple forecast: average of last 2 years + growth trend
@@ -299,11 +265,7 @@ class HolidayAnalyticsService:
             logger.error(f"Forecast failed: {e}")
             return {"forecast_bookings": 0, "confidence": "low"}
 
-    async def _get_holiday_bookings_count(
-        self,
-        holiday_key: str,
-        year: int
-    ) -> int:
+    async def _get_holiday_bookings_count(self, holiday_key: str, year: int) -> int:
         """Get booking count for specific holiday in specific year."""
 
         holiday_date = self.holiday_service.get_holiday_date(holiday_key, year)
@@ -315,10 +277,7 @@ class HolidayAnalyticsService:
             return 0
 
         date_range = self._get_holiday_date_range(holiday_obj, holiday_date)
-        bookings = await self._get_bookings_in_range(
-            date_range["start"],
-            date_range["end"]
-        )
+        bookings = await self._get_bookings_in_range(date_range["start"], date_range["end"])
 
         return len(bookings)
 
@@ -331,14 +290,11 @@ class HolidayAnalyticsService:
         trends = await self.get_seasonal_trends(year=year)
 
         # Sort by revenue
-        peaks = sorted(trends, key=lambda x: x['total_revenue'], reverse=True)[:5]
+        peaks = sorted(trends, key=lambda x: x["total_revenue"], reverse=True)[:5]
 
         return peaks
 
-    async def get_marketing_roi(
-        self,
-        campaign_id: str
-    ) -> Dict:
+    async def get_marketing_roi(self, campaign_id: str) -> Dict:
         """
         Calculate ROI for a marketing campaign.
 
@@ -402,11 +358,11 @@ class HolidayAnalyticsService:
         total_revenue = sum(t["total_revenue"] for t in trends)
 
         # Peak season
-        peak = max(trends, key=lambda x: x['total_revenue'])
+        peak = max(trends, key=lambda x: x["total_revenue"])
 
         # Average YoY growth (excluding N/A)
         yoy_values = [
-            float(t["yoy_growth"].rstrip('%').lstrip('+'))
+            float(t["yoy_growth"].rstrip("%").lstrip("+"))
             for t in trends
             if t["yoy_growth"] != "N/A"
         ]

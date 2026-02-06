@@ -188,18 +188,18 @@ voice_sessions_ended_total = Counter(
 
 class VoiceMetrics:
     """Helper class for recording voice AI metrics"""
-    
+
     @staticmethod
     def record_call_start():
         """Record a new call starting"""
         voice_calls_active.inc()
         voice_sessions_created_total.inc()
-    
+
     @staticmethod
     def record_call_end(status: str, duration: float, turns: int, transcripts: int):
         """
         Record call completion
-        
+
         Args:
             status: "completed", "failed", or "timeout"
             duration: Call duration in seconds
@@ -212,23 +212,23 @@ class VoiceMetrics:
         voice_conversation_turns.observe(turns)
         voice_conversation_transcripts.observe(transcripts)
         voice_sessions_ended_total.labels(final_state=status).inc()
-    
+
     @staticmethod
     def record_audio_frame_received():
         """Record audio frame received from RingCentral"""
         voice_audio_frames_received.inc()
-    
+
     @staticmethod
     def record_audio_frame_sent():
         """Record audio frame sent to RingCentral"""
         voice_audio_frames_sent.inc()
-    
+
     @staticmethod
     @contextmanager
     def track_audio_processing(operation: str):
         """
         Context manager to track audio processing time
-        
+
         Usage:
             with VoiceMetrics.track_audio_processing("resample"):
                 audio = processor.resample(data, 8000, 16000)
@@ -239,12 +239,12 @@ class VoiceMetrics:
         finally:
             duration = time.time() - start
             voice_audio_processing_duration_seconds.labels(operation=operation).observe(duration)
-    
+
     @staticmethod
     def record_transcript(is_final: bool, confidence: float, latency: Optional[float] = None):
         """
         Record STT transcript received
-        
+
         Args:
             is_final: Whether transcript is final
             confidence: Transcript confidence (0.0-1.0)
@@ -252,20 +252,20 @@ class VoiceMetrics:
         """
         voice_stt_transcripts_total.labels(is_final=str(is_final).lower()).inc()
         voice_stt_confidence.observe(confidence)
-        
+
         if latency is not None:
             voice_stt_latency_seconds.observe(latency)
-    
+
     @staticmethod
     def record_stt_error(error_type: str):
         """Record STT error"""
         voice_stt_errors_total.labels(error_type=error_type).inc()
-    
+
     @staticmethod
     def record_tts_request(status: str, latency: float, audio_size: int):
         """
         Record TTS request
-        
+
         Args:
             status: "success" or "error"
             latency: TTS latency in seconds
@@ -274,45 +274,45 @@ class VoiceMetrics:
         voice_tts_requests_total.labels(status=status).inc()
         voice_tts_latency_seconds.observe(latency)
         voice_tts_audio_size_bytes.observe(audio_size)
-    
+
     @staticmethod
     def record_ai_response(intent: str, latency: float):
         """
         Record AI response generated
-        
+
         Args:
             intent: Detected intent
             latency: AI pipeline latency in seconds
         """
         voice_ai_responses_total.labels(intent=intent).inc()
         voice_ai_latency_seconds.observe(latency)
-    
+
     @staticmethod
     def record_escalation(reason: str):
         """
         Record escalation to human agent
-        
+
         Args:
             reason: Escalation reason (low_confidence, complaint, explicit_request, error)
         """
         voice_ai_escalations_total.labels(reason=reason).inc()
-    
+
     @staticmethod
     def record_error(component: str, error_type: str):
         """
         Record system error
-        
+
         Args:
             component: Component where error occurred (websocket, stt, tts, ai, audio)
             error_type: Type of error
         """
         voice_errors_total.labels(component=component, error_type=error_type).inc()
-    
+
     @staticmethod
     def record_websocket_disconnect(reason: str):
         """
         Record WebSocket disconnection
-        
+
         Args:
             reason: Disconnect reason (normal, error, timeout)
         """

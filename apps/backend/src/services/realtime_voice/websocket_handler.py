@@ -271,9 +271,7 @@ class WebRTCCallHandler:
             session.errors_count += 1
             VoiceMetrics.record_error("audio_processor", "processing_error")
 
-    async def _handle_transcript(
-        self, session: CallSession, transcript: TranscriptResult
-    ):
+    async def _handle_transcript(self, session: CallSession, transcript: TranscriptResult):
         """
         Handle transcript from Deepgram STT.
 
@@ -311,9 +309,7 @@ class WebRTCCallHandler:
             session.errors_count += 1
             VoiceMetrics.record_stt_error("transcript_processing_error")
 
-    async def _generate_and_send_response(
-        self, session: CallSession, user_message: str
-    ):
+    async def _generate_and_send_response(self, session: CallSession, user_message: str):
         """
         Generate AI response and send as audio.
 
@@ -340,8 +336,7 @@ class WebRTCCallHandler:
             detected_tone = tone_result.get("tone", "neutral")
 
             logger.info(
-                f"🧠 NLP | intent={intent} | "
-                f"conf={confidence:.2f} | tone={detected_tone}"
+                f"🧠 NLP | intent={intent} | " f"conf={confidence:.2f} | tone={detected_tone}"
             )
 
             # 3. Generate AI response
@@ -370,9 +365,7 @@ class WebRTCCallHandler:
             if intent in ["complaint", "escalation", "manager"] or confidence < 0.4:
                 session.should_escalate = True
                 VoiceMetrics.record_escalation(reason=intent)
-                logger.warning(
-                    f"⚠️ Escalation triggered | intent={intent} | conf={confidence:.2f}"
-                )
+                logger.warning(f"⚠️ Escalation triggered | intent={intent} | conf={confidence:.2f}")
 
             logger.info(f"🤖 AI response: '{response[:100]}...'")
 
@@ -385,9 +378,7 @@ class WebRTCCallHandler:
             tts_latency = asyncio.get_event_loop().time() - tts_start_time
 
             # Record TTS metrics
-            VoiceMetrics.record_tts_request(
-                latency=tts_latency, audio_size=len(audio_bytes)
-            )
+            VoiceMetrics.record_tts_request(latency=tts_latency, audio_size=len(audio_bytes))
 
             # 5. Send audio to RingCentral
             await self._send_audio(session, audio_bytes)

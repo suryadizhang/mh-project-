@@ -194,12 +194,8 @@ async def email_monitors_health():
         health = get_monitor_health.delay().get(timeout=5)
 
         # Determine overall health
-        gmail_healthy = (
-            health["gmail"]["consecutive_failures"] == 0 and creds["gmail"]["valid"]
-        )
-        ionos_healthy = (
-            health["ionos"]["consecutive_failures"] == 0 and creds["ionos"]["valid"]
-        )
+        gmail_healthy = health["gmail"]["consecutive_failures"] == 0 and creds["gmail"]["valid"]
+        ionos_healthy = health["ionos"]["consecutive_failures"] == 0 and creds["ionos"]["valid"]
 
         overall_status = "healthy" if (gmail_healthy and ionos_healthy) else "degraded"
         if (
@@ -296,9 +292,7 @@ async def detailed_health_check():
         }
     except Exception as e:
         logger.exception(f"Detailed health check failed: {e}")
-        raise HTTPException(
-            status_code=503, detail=f"Detailed health check failed: {e!s}"
-        )
+        raise HTTPException(status_code=503, detail=f"Detailed health check failed: {e!s}")
 
 
 @router.get("/sentry-debug", tags=["Debug"])

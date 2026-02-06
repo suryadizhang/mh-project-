@@ -107,9 +107,7 @@ async def delete_admin(admin_username: str, user=Depends(superadmin_required)):
 # ============ BOOKING ENDPOINTS ============
 @router.post("/book")
 @limiter.limit("5/minute")
-async def book_service(
-    data: BookingCreate, background_tasks: BackgroundTasks, request: Request
-):
+async def book_service(data: BookingCreate, background_tasks: BackgroundTasks, request: Request):
     """Create a new booking and send confirmation emails."""
     # Implementation for booking creation
 
@@ -187,9 +185,7 @@ async def confirm_deposit(
         ...,
         description="Payment method used: venmo, zelle, cash, or stripe",
     ),
-    notes: Optional[str] = Body(
-        None, description="Optional admin notes about the payment"
-    ),
+    notes: Optional[str] = Body(None, description="Optional admin notes about the payment"),
     user=Depends(admin_required),
     booking_service: BookingService = Depends(get_booking_service),
 ):
@@ -365,9 +361,7 @@ async def get_customer_analytics(
                     if first_booking_utc
                     else None
                 ),
-                "customer_lifetime_days": int(
-                    analytics.get("customer_lifetime_days") or 0
-                ),
+                "customer_lifetime_days": int(analytics.get("customer_lifetime_days") or 0),
                 "payment_methods": payment_methods,
                 "timezone": station_timezone,
             },
@@ -384,9 +378,7 @@ async def get_customer_analytics(
 
 # ============ NEWSLETTER MANAGEMENT ============
 @router.get("/admin/newsletter/recipients")
-async def get_newsletter_recipients(
-    city: str = "", name: str = "", user=Depends(admin_required)
-):
+async def get_newsletter_recipients(city: str = "", name: str = "", user=Depends(admin_required)):
     """Get all newsletter recipients, optionally filtered by city and name."""
     # Implementation for newsletter recipients
 

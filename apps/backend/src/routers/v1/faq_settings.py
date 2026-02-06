@@ -29,9 +29,7 @@ class FAQSettingsUpdate(BaseModel):
     service_area: str = Field(..., min_length=5, max_length=500)
     service_area_details: str | None = None
 
-    deposit_amount: int = Field(
-        ..., ge=0, le=1000, description="Deposit amount in dollars"
-    )
+    deposit_amount: int = Field(..., ge=0, le=1000, description="Deposit amount in dollars")
     deposit_policy: str = Field(..., min_length=10, max_length=1000)
 
     pricing_info: dict = Field(..., description="Pricing structure as JSON")

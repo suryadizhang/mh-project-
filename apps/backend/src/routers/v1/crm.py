@@ -139,15 +139,11 @@ async def get_crm_bookings(
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(50, ge=1, le=100, description="Items per page"),
     cursor: Optional[str] = Query(None, description="Pagination cursor"),
-    status_filter: Optional[str] = Query(
-        None, alias="status", description="Filter by status"
-    ),
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by status"),
     payment_status: Optional[str] = Query(None, description="Filter by payment status"),
     date_from: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
     date_to: Optional[str] = Query(None, description="Filter to date (YYYY-MM-DD)"),
-    customer_search: Optional[str] = Query(
-        None, description="Search customer name/email"
-    ),
+    customer_search: Optional[str] = Query(None, description="Search customer name/email"),
     sort_by: str = Query("created_at", description="Sort field"),
     sort_order: str = Query("desc", description="Sort order (asc/desc)"),
     db: AsyncSession = Depends(get_db),
@@ -282,16 +278,14 @@ async def get_crm_bookings(
                         if hasattr(booking.status, "value")
                         else str(booking.status)
                     ),
-                    "total_amount": float(booking.total_due_cents or 0)
-                    / 100,  # cents to dollars
+                    "total_amount": float(booking.total_due_cents or 0) / 100,  # cents to dollars
                     "deposit_amount": float(booking.deposit_due_cents or 0) / 100,
                     "deposit_paid": deposit_paid,
                     "deposit_confirmed_at": booking.deposit_confirmed_at,
                     "customer_name": customer_name,
                     "customer_email": customer_email,
                     "customer_phone": customer_phone,
-                    "location_address": booking.address_encrypted
-                    or "",  # Note: encrypted
+                    "location_address": booking.address_encrypted or "",  # Note: encrypted
                     "zone": booking.zone or "",
                     "special_requests": booking.special_requests,
                     "notes": booking.notes,
@@ -329,9 +323,7 @@ async def get_crm_booking(
     try:
         booking_uuid = UUID(booking_id)
         result = await db.execute(
-            select(Booking)
-            .options(joinedload(Booking.customer))
-            .where(Booking.id == booking_uuid)
+            select(Booking).options(joinedload(Booking.customer)).where(Booking.id == booking_uuid)
         )
         booking = result.unique().scalar_one_or_none()
 
@@ -362,9 +354,7 @@ async def get_crm_booking(
             "data": {
                 "id": str(booking.id),
                 "date": booking.date.isoformat() if booking.date else None,
-                "time": (
-                    booking.slot.isoformat() if booking.slot else None
-                ),  # slot -> time
+                "time": (booking.slot.isoformat() if booking.slot else None),  # slot -> time
                 "customer_requested_time": (
                     booking.customer_requested_time.strftime("%H:%M")
                     if booking.customer_requested_time
@@ -575,9 +565,7 @@ async def get_crm_customer(
         last_booking = max((b.created_at for b in customer.bookings), default=None)
 
         # Get recent bookings for display
-        recent_bookings = sorted(
-            customer.bookings, key=lambda b: b.created_at, reverse=True
-        )[:10]
+        recent_bookings = sorted(customer.bookings, key=lambda b: b.created_at, reverse=True)[:10]
 
         return {
             "data": {
@@ -601,11 +589,7 @@ async def get_crm_customer(
                         "id": str(b.id),
                         "date": b.date.isoformat() if b.date else None,
                         "time": b.slot.isoformat() if b.slot else None,
-                        "status": (
-                            b.status.value
-                            if hasattr(b.status, "value")
-                            else str(b.status)
-                        ),
+                        "status": (b.status.value if hasattr(b.status, "value") else str(b.status)),
                         "total_amount": float(b.total_due_cents or 0) / 100,
                         "guests": (b.party_adults or 0) + (b.party_kids or 0),
                     }
@@ -671,9 +655,7 @@ async def get_customer_bookings(
                 "guests": (b.party_adults or 0) + (b.party_kids or 0),
                 "adults": b.party_adults or 0,
                 "kids": b.party_kids or 0,
-                "status": (
-                    b.status.value if hasattr(b.status, "value") else str(b.status)
-                ),
+                "status": (b.status.value if hasattr(b.status, "value") else str(b.status)),
                 "total_amount": float(b.total_due_cents or 0) / 100,
                 "deposit_amount": float(b.deposit_due_cents or 0) / 100,
                 "deposit_paid": b.deposit_confirmed_at is not None,
@@ -739,9 +721,7 @@ async def get_dashboard_stats(
         total_revenue_cents = revenue_result.scalar() or 0
 
         # Today's bookings
-        today_result = await db.execute(
-            select(func.count(Booking.id)).where(Booking.date == today)
-        )
+        today_result = await db.execute(select(func.count(Booking.id)).where(Booking.date == today))
         today_bookings = today_result.scalar() or 0
 
         # This week's bookings
@@ -769,15 +749,11 @@ async def get_dashboard_stats(
             .having(func.count(Booking.id) > 1)
         ).subquery()
 
-        repeat_result = await db.execute(
-            select(func.count()).select_from(repeat_subquery)
-        )
+        repeat_result = await db.execute(select(func.count()).select_from(repeat_subquery))
         repeat_customers = repeat_result.scalar() or 0
 
         # Average party size (party_adults + party_kids)
-        avg_result = await db.execute(
-            select(func.avg(Booking.party_adults + Booking.party_kids))
-        )
+        avg_result = await db.execute(select(func.avg(Booking.party_adults + Booking.party_kids)))
         avg_party_size = float(avg_result.scalar() or 0)
 
         # Pending deposits (unpaid)
@@ -785,9 +761,7 @@ async def get_dashboard_stats(
             select(func.count(Booking.id)).where(
                 and_(
                     Booking.deposit_confirmed_at.is_(None),
-                    Booking.status.in_(
-                        [BookingStatus.PENDING, BookingStatus.CONFIRMED]
-                    ),
+                    Booking.status.in_([BookingStatus.PENDING, BookingStatus.CONFIRMED]),
                 )
             )
         )
@@ -870,9 +844,7 @@ async def get_availability(
             slot = row[0]
             if slot:
                 booked_times.append(
-                    slot.strftime("%H:%M")
-                    if hasattr(slot, "strftime")
-                    else str(slot)[:5]
+                    slot.strftime("%H:%M") if hasattr(slot, "strftime") else str(slot)[:5]
                 )
 
         # Generate time slots (10 AM to 8 PM, hourly)

@@ -121,9 +121,7 @@ class PublicBookingCreate(BaseModel):
     date: str = Field(..., description="Booking date in YYYY-MM-DD format")
     time: str = Field(..., description="Booking time in HH:MM format")
     guests: int = Field(..., ge=1, le=50, description="Number of guests (1-50)")
-    location_address: str = Field(
-        ..., min_length=10, description="Event location address"
-    )
+    location_address: str = Field(..., min_length=10, description="Event location address")
     customer_name: str = Field(..., min_length=2, description="Customer full name")
     customer_email: EmailStr = Field(..., description="Customer email address")
     customer_phone: str = Field(..., description="Customer phone number")
@@ -160,9 +158,7 @@ class PublicBookingResponse(BaseModel):
     guests: int = Field(..., description="Number of guests")
     status: str = Field(..., description="Booking status (pending)")
     total_amount: float = Field(..., description="Total cost in USD")
-    deposit_amount: float = Field(
-        ..., description="Required deposit in USD ($100 fixed)"
-    )
+    deposit_amount: float = Field(..., description="Required deposit in USD ($100 fixed)")
     deposit_deadline: str = Field(..., description="Deadline to pay deposit")
     created_at: str = Field(..., description="Creation timestamp")
     message: str = Field(..., description="Confirmation message")
@@ -172,9 +168,7 @@ class TimeSlot(BaseModel):
     """Schema for available time slot."""
 
     time: str = Field(..., description="Time slot label (e.g., '12PM')")
-    label: str = Field(
-        ..., description="Human readable label (e.g., '12:00 PM - 2:00 PM')"
-    )
+    label: str = Field(..., description="Human readable label (e.g., '12:00 PM - 2:00 PM')")
     available: int = Field(..., description="Number of slots available")
     isAvailable: bool = Field(..., description="Whether the slot is available")
 
@@ -366,9 +360,7 @@ async def get_available_times(
             if parsed_date == today:
                 now = datetime.now(timezone.utc).time()
                 # Need at least 4 hours advance notice
-                cutoff = (
-                    datetime.combine(today, slot_time) - timedelta(hours=4)
-                ).time()
+                cutoff = (datetime.combine(today, slot_time) - timedelta(hours=4)).time()
                 if now > cutoff:
                     is_available = False
                     available = 0
@@ -486,9 +478,7 @@ async def create_public_booking(
 
         # Validate date is in the future (at least 48 hours)
         now = datetime.now(timezone.utc)
-        booking_datetime = datetime.combine(
-            booking_date, booking_slot, tzinfo=timezone.utc
-        )
+        booking_datetime = datetime.combine(booking_date, booking_slot, tzinfo=timezone.utc)
         if booking_datetime < now + timedelta(hours=48):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -517,9 +507,7 @@ async def create_public_booking(
 
         email_encrypted = encryption_handler.encrypt_email(booking_data.customer_email)
         phone_encrypted = encryption_handler.encrypt_phone(booking_data.customer_phone)
-        address_encrypted = encryption_handler.encrypt_email(
-            booking_data.location_address
-        )
+        address_encrypted = encryption_handler.encrypt_email(booking_data.location_address)
 
         zip_match = re.search(r"\b(\d{5})\b", booking_data.location_address)
         zone = zip_match.group(1) if zip_match else "DEFAULT"
@@ -733,9 +721,7 @@ async def create_public_booking(
                 guest_count=booking_data.guests,
                 location=booking_data.location_address,
             )
-            logger.info(
-                f"📧 Email confirmation sent to customer: {booking_data.customer_email}"
-            )
+            logger.info(f"📧 Email confirmation sent to customer: {booking_data.customer_email}")
 
         admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "myhibachichef@gmail.com")
         email_service.send_new_booking_email_to_admin(

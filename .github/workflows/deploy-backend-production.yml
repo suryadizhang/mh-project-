@@ -103,6 +103,37 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
+      - name: Validate Database Schema
+        run: |
+          echo "🔍 Checking SQLAlchemy model vs database schema sync..."
+
+          # Copy schema comparison script to VPS
+          scp -o StrictHostKeyChecking=no scripts/compare_schemas.py \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/compare_schemas.py
+
+          # Run schema validation on production database
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'SCHEMA_CHECK'
+          set -e
+          cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend
+
+          # Activate virtual environment if exists
+          if [ -f "venv/bin/activate" ]; then
+            source venv/bin/activate
+          fi
+
+          # Run schema comparison against production database
+          echo "📊 Comparing SQLAlchemy models with production database..."
+          python /tmp/compare_schemas.py --env production --ci 2>&1 || {
+            echo "⚠️ Schema mismatch detected! Review the above output."
+            echo "If critical columns are missing, run migrations before deployment."
+            # Exit with error to block deployment if critical mismatches found
+            exit 1
+          }
+
+          echo "✅ Schema validation passed"
+          rm -f /tmp/compare_schemas.py
+          SCHEMA_CHECK
+
       - name: Deploy to Production VPS
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_SCRIPT'

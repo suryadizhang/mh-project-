@@ -158,9 +158,7 @@ def calculate_zelle_savings(total_spent: Decimal) -> Decimal:
     return total_spent * STRIPE_FEE_RATE
 
 
-def format_payment_for_response(
-    payment: Any, include_sensitive: bool = False
-) -> Dict[str, Any]:
+def format_payment_for_response(payment: Any, include_sensitive: bool = False) -> Dict[str, Any]:
     """
     Format a payment record for API response.
 
@@ -176,12 +174,12 @@ def format_payment_for_response(
         "amount_cents": payment.amount_cents,
         "amount": float(payment.amount_cents) / 100 if payment.amount_cents else 0,
         "currency": payment.currency or "usd",
-        "status": payment.status.value
-        if hasattr(payment.status, "value")
-        else payment.status,
-        "payment_method": payment.payment_method.value
-        if hasattr(payment.payment_method, "value")
-        else payment.payment_method,
+        "status": payment.status.value if hasattr(payment.status, "value") else payment.status,
+        "payment_method": (
+            payment.payment_method.value
+            if hasattr(payment.payment_method, "value")
+            else payment.payment_method
+        ),
         "created_at": payment.created_at.isoformat() if payment.created_at else None,
         "description": payment.description,
     }
@@ -214,9 +212,7 @@ def format_invoice_for_response(invoice: Any) -> Dict[str, Any]:
         "amount_cents": invoice.amount_cents,
         "amount": float(invoice.amount_cents) / 100 if invoice.amount_cents else 0,
         "currency": invoice.currency or "usd",
-        "status": invoice.status.value
-        if hasattr(invoice.status, "value")
-        else invoice.status,
+        "status": invoice.status.value if hasattr(invoice.status, "value") else invoice.status,
         "created_at": invoice.created_at.isoformat() if invoice.created_at else None,
         "due_date": invoice.due_date.isoformat() if invoice.due_date else None,
         "paid_at": invoice.paid_at.isoformat() if invoice.paid_at else None,

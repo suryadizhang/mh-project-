@@ -507,6 +507,50 @@ async def create_station(
             logger.warning(f"⚠️ Failed to create notification group for station: {e}")
             # Don't fail station creation if notification group fails
 
+        # Auto-geocode the station address (prevents "no geocoded stations" errors)
+        try:
+            from services.scheduling.geocoding_service import GeocodingService
+
+            # Build full address for geocoding
+            address_parts = []
+            if station.address:
+                address_parts.append(station.address)
+            if station.city:
+                address_parts.append(station.city)
+            if station.state:
+                address_parts.append(station.state)
+            if station.postal_code:
+                address_parts.append(station.postal_code)
+            if station.country:
+                address_parts.append(station.country)
+
+            if address_parts:
+                full_address = ", ".join(address_parts)
+                geocoding_service = GeocodingService(db)
+                geocode_result = await geocoding_service.geocode(full_address)
+
+                if geocode_result and geocode_result.is_valid:
+                    station.lat = geocode_result.lat
+                    station.lng = geocode_result.lng
+                    station.geocode_status = "success"
+                    station.geocoded_at = datetime.now(timezone.utc)
+                    await db.commit()
+                    await db.refresh(station)
+                    logger.info(
+                        f"✅ Auto-geocoded station: {station.name} ({geocode_result.lat}, {geocode_result.lng})"
+                    )
+                else:
+                    station.geocode_status = "failed"
+                    await db.commit()
+                    logger.warning(f"⚠️ Geocoding returned no results for station: {station.name}")
+            else:
+                station.geocode_status = "no_address"
+                await db.commit()
+                logger.warning(f"⚠️ Station has no address to geocode: {station.name}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to auto-geocode station: {e}")
+            # Don't fail station creation if geocoding fails
+
         await log_station_activity(
             action="create_station",
             auth_user=current_user,
@@ -518,6 +562,7 @@ async def create_station(
                 "station_code": station_code,
                 "city": request.city,
                 "state": request.state,
+                "geocoded": station.geocode_status == "success",
             },
         )
 

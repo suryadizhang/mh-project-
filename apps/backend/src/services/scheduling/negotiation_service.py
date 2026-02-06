@@ -465,9 +465,7 @@ class NegotiationService:
             "average_response_hours": round(avg_response, 1),
         }
 
-    async def get_pending_negotiations(
-        self, limit: int = 20
-    ) -> List[Dict[str, Any]]:
+    async def get_pending_negotiations(self, limit: int = 20) -> List[Dict[str, Any]]:
         """
         Get all pending negotiation requests.
 

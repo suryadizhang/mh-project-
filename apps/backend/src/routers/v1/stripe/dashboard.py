@@ -127,12 +127,9 @@ async def get_customer_dashboard(
             zelle_savings=float(zelle_savings),
             pending_amount=float(pending_amount),
             recent_payments=[
-                format_payment_for_response(p, include_sensitive=False)
-                for p in recent_payments
+                format_payment_for_response(p, include_sensitive=False) for p in recent_payments
             ],
-            recent_invoices=[
-                format_invoice_for_response(inv) for inv in recent_invoices
-            ],
+            recent_invoices=[format_invoice_for_response(inv) for inv in recent_invoices],
         )
 
     except Exception as e:
@@ -221,9 +218,7 @@ async def get_customer_dashboard_by_stripe_id(
             if not customers.data:
                 raise HTTPException(status_code=404, detail="Customer not found")
             stripe_customer = customers.data[0]
-            customer_data = await stripe_service.get_customer_analytics(
-                stripe_customer.id
-            )
+            customer_data = await stripe_service.get_customer_analytics(stripe_customer.id)
 
         if not customer_data:
             raise HTTPException(status_code=404, detail="Customer analytics not found")

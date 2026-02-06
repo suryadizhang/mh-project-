@@ -73,9 +73,7 @@ async def station_login(
     request: StationLoginRequest,
     db: AsyncSession = Depends(get_db_session),
     auth_service: AuthenticationService = Depends(get_auth_service),
-    station_auth_service: StationAuthenticationService = Depends(
-        get_station_auth_service
-    ),
+    station_auth_service: StationAuthenticationService = Depends(get_station_auth_service),
 ):
     """
     Station-aware login endpoint.
@@ -119,12 +117,8 @@ async def station_login(
                 )
 
                 logger.warning(f"🔍 DEBUG station-login: Token preview: {token_preview}")
-                logger.warning(
-                    f"🔍 DEBUG station-login: jwt_secret_key preview: {key_preview}"
-                )
-                logger.warning(
-                    f"🔍 DEBUG station-login: SECRET_KEY preview: {secret_key_preview}"
-                )
+                logger.warning(f"🔍 DEBUG station-login: jwt_secret_key preview: {key_preview}")
+                logger.warning(f"🔍 DEBUG station-login: SECRET_KEY preview: {secret_key_preview}")
                 logger.warning(
                     f"🔍 DEBUG station-login: Keys match: {settings.jwt_secret_key == settings.SECRET_KEY}"
                 )
@@ -180,9 +174,7 @@ async def station_login(
         # METHOD 2: Password Authentication
         elif request.password:
             # Authenticate the user credentials by querying User directly
-            result = await db.execute(
-                select(User).where(User.email == request.email.lower())
-            )
+            result = await db.execute(select(User).where(User.email == request.email.lower()))
             user = result.scalar_one_or_none()
 
             if not user:
@@ -192,9 +184,7 @@ async def station_login(
                 )
 
             # Verify password
-            if not user.password_hash or not verify_password(
-                request.password, user.password_hash
-            ):
+            if not user.password_hash or not verify_password(request.password, user.password_hash):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid credentials",
@@ -206,9 +196,7 @@ async def station_login(
             )
 
         # Get user's station access
-        station_context = await station_auth_service.get_user_station_context(
-            db=db, user=user
-        )
+        station_context = await station_auth_service.get_user_station_context(db=db, user=user)
 
         # SUPER_ADMIN bypass: super admins always have station access
         # accessible_station_ids is the correct property name on StationContext
@@ -277,9 +265,7 @@ async def station_login(
         # Determine if this is a global role (super_admin, admin, customer_support)
         # Global roles don't need station context in UI header
         user_role = station_context.highest_role.value
-        is_global_role = role_matches(
-            user_role, "super_admin", "admin", "customer_support"
-        )
+        is_global_role = role_matches(user_role, "super_admin", "admin", "customer_support")
 
         # Count accessible stations for multi-station dropdown logic
         station_count = len(station_context.accessible_station_ids)
@@ -289,14 +275,10 @@ async def station_login(
             "station_id": str(target_station_id) if target_station_id else None,
             "station_name": station_name,
             "role": station_context.station_roles.get(target_station_id, "user"),
-            "permissions": list(
-                station_context.station_permissions.get(target_station_id, set())
-            ),
+            "permissions": list(station_context.station_permissions.get(target_station_id, set())),
             # Handle both "super_admin" and "superadmin" formats
             "is_super_admin": (
-                user_role.lower().replace("_", "") == "superadmin"
-                if user_role
-                else False
+                user_role.lower().replace("_", "") == "superadmin" if user_role else False
             ),
             # New fields for dashboard UX
             "user_email": user.email,
@@ -330,9 +312,7 @@ async def get_user_stations(
     email: str,
     db: AsyncSession = Depends(get_db_session),
     auth_service: AuthenticationService = Depends(get_auth_service),
-    station_auth_service: StationAuthenticationService = Depends(
-        get_station_auth_service
-    ),
+    station_auth_service: StationAuthenticationService = Depends(get_station_auth_service),
 ):
     """
     Get available stations for a user by email.
@@ -357,21 +337,16 @@ async def get_user_stations(
                     {
                         "id": str(station.id),
                         "name": station.name,
-                        "location": getattr(station, "display_name", station.name)
-                        or station.name,
+                        "location": getattr(station, "display_name", station.name) or station.name,
                         "role": "super_admin",
                         "is_primary": idx == 0,  # First station is primary
                     }
                 )
 
-            return ApiResponse(
-                success=True, data=UserStationsResponse(stations=stations)
-            )
+            return ApiResponse(success=True, data=UserStationsResponse(stations=stations))
 
         # Get station context for regular users
-        station_context = await station_auth_service.get_user_station_context(
-            db=db, user=user
-        )
+        station_context = await station_auth_service.get_user_station_context(db=db, user=user)
 
         if not station_context:
             return ApiResponse(success=True, data=UserStationsResponse(stations=[]))
@@ -380,9 +355,7 @@ async def get_user_stations(
         stations = []
         if station_context.accessible_station_ids:
             # Fetch all accessible stations in one query
-            stmt = select(Station).where(
-                Station.id.in_(station_context.accessible_station_ids)
-            )
+            stmt = select(Station).where(Station.id.in_(station_context.accessible_station_ids))
             result = await db.execute(stmt)
             station_records = {str(s.id): s for s in result.scalars().all()}
 
@@ -394,13 +367,9 @@ async def get_user_stations(
                         {
                             "id": station_id_str,
                             "name": station_record.name,
-                            "location": station_record.display_name
-                            or station_record.name,
-                            "role": station_context.station_roles.get(
-                                station_id, "user"
-                            ),
-                            "is_primary": station_id
-                            == station_context.primary_station_id,
+                            "location": station_record.display_name or station_record.name,
+                            "role": station_context.station_roles.get(station_id, "user"),
+                            "is_primary": station_id == station_context.primary_station_id,
                         }
                     )
                 else:
@@ -410,11 +379,8 @@ async def get_user_stations(
                             "id": station_id_str,
                             "name": f"Station {station_id}",
                             "location": "Unknown Location",
-                            "role": station_context.station_roles.get(
-                                station_id, "user"
-                            ),
-                            "is_primary": station_id
-                            == station_context.primary_station_id,
+                            "role": station_context.station_roles.get(station_id, "user"),
+                            "is_primary": station_id == station_context.primary_station_id,
                         }
                     )
 
@@ -432,9 +398,7 @@ async def switch_station(
     station_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-    station_auth_service: StationAuthenticationService = Depends(
-        get_station_auth_service
-    ),
+    station_auth_service: StationAuthenticationService = Depends(get_station_auth_service),
 ):
     """
     Switch user's current station context.
@@ -478,32 +442,24 @@ async def switch_station(
 
         # Fetch actual station details from database
         station_name = "Unknown Station"
-        station_result = await db.execute(
-            select(Station).where(Station.id == station_id)
-        )
+        station_result = await db.execute(select(Station).where(Station.id == station_id))
         station_record = station_result.scalar_one_or_none()
         if station_record:
             station_name = station_record.display_name or station_record.name
 
         # Determine if this is a global role
         user_role = station_context.highest_role.value
-        is_global_role = role_matches(
-            user_role, "super_admin", "admin", "customer_support"
-        )
+        is_global_role = role_matches(user_role, "super_admin", "admin", "customer_support")
 
         # Build new station context with enhanced data
         station_info = {
             "station_id": str(station_id),
             "station_name": station_name,
             "role": station_context.station_roles.get(station_id, "user"),
-            "permissions": list(
-                station_context.station_permissions.get(station_id, set())
-            ),
+            "permissions": list(station_context.station_permissions.get(station_id, set())),
             # Handle both "super_admin" and "superadmin" formats
             "is_super_admin": (
-                user_role.lower().replace("_", "") == "superadmin"
-                if user_role
-                else False
+                user_role.lower().replace("_", "") == "superadmin" if user_role else False
             ),
             # Enhanced fields
             "user_email": current_user.email,

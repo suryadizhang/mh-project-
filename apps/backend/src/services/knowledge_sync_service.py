@@ -143,9 +143,7 @@ class KnowledgeSyncService:
                             }
                         )
                     elif self._items_differ(file_item, db_item.to_dict()):
-                        modified.append(
-                            {"name": name, "old": db_item.to_dict(), "new": file_item}
-                        )
+                        modified.append({"name": name, "old": db_item.to_dict(), "new": file_item})
 
             # Check for deleted items
             file_names = {item["name"] for item in file_items}
@@ -298,9 +296,7 @@ class KnowledgeSyncService:
             try:
                 db_items = self.db.query(BusinessRule).all()
             except Exception as e:
-                print(
-                    f"⚠️ WARNING: Could not query business_rules table (may not exist): {e}"
-                )
+                print(f"⚠️ WARNING: Could not query business_rules table (may not exist): {e}")
                 db_items = []
 
             db_by_title = {item.title: item for item in db_items}
@@ -426,9 +422,7 @@ class KnowledgeSyncService:
 
             # Delete removed items
             for item_data in changes["deleted"]:
-                db_item = (
-                    self.db.query(MenuItem).filter_by(name=item_data["name"]).first()
-                )
+                db_item = self.db.query(MenuItem).filter_by(name=item_data["name"]).first()
                 if db_item:
                     self.db.delete(db_item)
                     applied += 1
@@ -437,11 +431,7 @@ class KnowledgeSyncService:
             if force and changes["conflicts"]:
                 for conflict in changes["conflicts"]:
                     if "file_data" in conflict:
-                        db_item = (
-                            self.db.query(MenuItem)
-                            .filter_by(name=conflict["name"])
-                            .first()
-                        )
+                        db_item = self.db.query(MenuItem).filter_by(name=conflict["name"]).first()
                         if db_item:
                             for key, value in conflict["file_data"].items():
                                 setattr(db_item, key, value)
@@ -558,9 +548,7 @@ class KnowledgeSyncService:
             enhancements_section = enhancements_section_match.group(0)
             # Pattern for enhancement items - captures any price format (integer or decimal)
             enhancement_pattern = r'<h5[^>]*>([^<]+)</h5>.*?<span className="price[^"]*">\+\$(\d+(?:\.\d{1,2})?)</span>.*?<p[^>]*>\s*([^<]+)</p>'
-            for match in re.finditer(
-                enhancement_pattern, enhancements_section, re.DOTALL
-            ):
+            for match in re.finditer(enhancement_pattern, enhancements_section, re.DOTALL):
                 name = match.group(1).strip()
                 price = float(match.group(2))  # Handles both "10" and "10.50"
                 description = match.group(3).strip()
@@ -585,8 +573,7 @@ class KnowledgeSyncService:
         elif any(x in name_lower for x in ["steak", "filet", "beef", "sirloin"]):
             return "beef"
         elif any(
-            x in name_lower
-            for x in ["shrimp", "lobster", "scallop", "salmon", "calamari", "fish"]
+            x in name_lower for x in ["shrimp", "lobster", "scallop", "salmon", "calamari", "fish"]
         ):
             return "seafood"
         elif any(x in name_lower for x in ["tofu", "vegetable"]):
@@ -814,9 +801,7 @@ class KnowledgeSyncService:
                 )
 
             # Extract pricing minimum from content
-            minimum_match = re.search(
-                r"\$(\d+)\s*(?:party\s*)?minimum", section, re.IGNORECASE
-            )
+            minimum_match = re.search(r"\$(\d+)\s*(?:party\s*)?minimum", section, re.IGNORECASE)
             if minimum_match:
                 minimum_amount = int(minimum_match.group(1))
                 rules.append(

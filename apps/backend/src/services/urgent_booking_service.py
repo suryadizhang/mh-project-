@@ -290,9 +290,7 @@ async def update_booking_urgency(
         ... )
     """
     # Calculate urgency values
-    days, window, urgent = calculate_urgency_details(
-        event_date, event_time, venue_timezone, config
-    )
+    days, window, urgent = calculate_urgency_details(event_date, event_time, venue_timezone, config)
 
     # Update booking in database
     # Note: We use raw SQL to avoid circular imports with Booking model

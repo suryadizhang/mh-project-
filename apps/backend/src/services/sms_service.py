@@ -94,9 +94,7 @@ async def _send_sms_async(
                 )
                 return True
             else:
-                logger.error(
-                    f"❌ SMS failed to {to_phone[:4]}***{to_phone[-4:]}: {response.error}"
-                )
+                logger.error(f"❌ SMS failed to {to_phone[:4]}***{to_phone[-4:]}: {response.error}")
                 return False
 
     except Exception as e:
@@ -132,9 +130,7 @@ def send_sms_batch_sync(
     for recipient in recipients:
         phone = recipient.get("phone")
         if not phone:
-            logger.warning(
-                f"Recipient missing phone: {recipient.get('name', 'unknown')}"
-            )
+            logger.warning(f"Recipient missing phone: {recipient.get('name', 'unknown')}")
             failed += 1
             continue
 

@@ -204,9 +204,7 @@ async def handle_transcription_webhook(
         confidence = transcript_data.get("confidence", 0.0)
         session_id = transcript_data.get("sessionId")
 
-        logger.info(
-            f"Transcript: '{text}' (final={is_final}, confidence={confidence:.2f})"
-        )
+        logger.info(f"Transcript: '{text}' (final={is_final}, confidence={confidence:.2f})")
 
         if is_final:
             # Process final transcript

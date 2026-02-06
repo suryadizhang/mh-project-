@@ -112,9 +112,7 @@ async def get_customer_bookings_with_balance(
 async def lookup_customer_balance(
     request: CustomerLookupRequest,
     db: AsyncSession = Depends(get_db),
-    tax_rate: float = Query(
-        default=0.0825, ge=0, le=0.2, description="Tax rate (default 8.25%)"
-    ),
+    tax_rate: float = Query(default=0.0825, ge=0, le=0.2, description="Tax rate (default 8.25%)"),
 ):
     """
     Look up customer by phone or email and get balance information.
@@ -132,9 +130,7 @@ async def lookup_customer_balance(
     - Tips are NOT taxed (calculated separately)
     """
     if not request.phone and not request.email:
-        raise HTTPException(
-            status_code=400, detail="Either phone or email is required for lookup"
-        )
+        raise HTTPException(status_code=400, detail="Either phone or email is required for lookup")
 
     try:
         # Build query conditions
@@ -174,9 +170,7 @@ async def lookup_customer_balance(
         for booking in bookings:
             # Calculate balance for this booking
             total_due = booking.total_due_cents or 0
-            deposit_paid = (
-                booking.deposit_due_cents or 0
-            )  # This is deposit AMOUNT, not paid
+            deposit_paid = booking.deposit_due_cents or 0  # This is deposit AMOUNT, not paid
 
             # Get actual paid amount for this booking
             paid_result = await db.execute(
@@ -281,9 +275,7 @@ async def calculate_payment_total(
     balance_cents: int = Query(..., ge=0, description="Balance due in cents"),
     travel_fee_cents: int = Query(default=0, ge=0, description="Travel fee in cents"),
     tip_cents: int = Query(default=0, ge=0, description="Tip amount in cents"),
-    tax_rate: float = Query(
-        default=0.0825, ge=0, le=0.2, description="Tax rate (default 8.25%)"
-    ),
+    tax_rate: float = Query(default=0.0825, ge=0, le=0.2, description="Tax rate (default 8.25%)"),
 ) -> TaxBreakdownResponse:
     """
     Calculate total payment amount with tax.

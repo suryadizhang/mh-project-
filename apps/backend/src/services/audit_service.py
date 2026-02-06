@@ -107,7 +107,8 @@ class AuditService:
             logger.warning(f"Invalid audit action '{action}', logging anyway")
 
         try:
-            query = text("""
+            query = text(
+                """
                 INSERT INTO audit_logs (
                     user_id,
                     user_role,
@@ -134,7 +135,8 @@ class AuditService:
                     CAST(:metadata AS jsonb)
                 )
                 RETURNING id
-            """)
+            """
+            )
 
             result = await self.db.execute(
                 query,
@@ -205,7 +207,8 @@ class AuditService:
                     return json.dumps(obj, default=str)
                 return json.dumps({"value": obj}, default=str)
 
-            query = text("""
+            query = text(
+                """
                 INSERT INTO audit_logs (
                     user_id,
                     user_role,
@@ -232,7 +235,8 @@ class AuditService:
                     CAST(:metadata AS jsonb)
                 )
                 RETURNING id
-            """)
+            """
+            )
 
             result = await self.db.execute(
                 query,
@@ -245,11 +249,13 @@ class AuditService:
                     "new_values": safe_serialize(new_values),
                     "ip_address": ip_address,
                     "user_agent": user_agent,
-                    "metadata": json.dumps({
-                        "change_type": action.upper(),
-                        "table": table_name,
-                        "logged_at": datetime.now(timezone.utc).isoformat(),
-                    }),
+                    "metadata": json.dumps(
+                        {
+                            "change_type": action.upper(),
+                            "table": table_name,
+                            "logged_at": datetime.now(timezone.utc).isoformat(),
+                        }
+                    ),
                 },
             )
 
@@ -306,7 +312,8 @@ class AuditService:
             if failure_reason:
                 details["failure_reason"] = failure_reason
 
-            query = text("""
+            query = text(
+                """
                 INSERT INTO security.security_events (
                     event_type,
                     user_id,
@@ -325,7 +332,8 @@ class AuditService:
                     :severity
                 )
                 RETURNING id
-            """)
+            """
+            )
 
             result = await self.db.execute(
                 query,
@@ -395,7 +403,8 @@ class AuditService:
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
 
-            query = text(f"""
+            query = text(
+                f"""
                 SELECT
                     id,
                     user_id,
@@ -415,7 +424,8 @@ class AuditService:
                 WHERE {where_clause}
                 ORDER BY created_at DESC
                 LIMIT :limit OFFSET :offset
-            """)
+            """
+            )
 
             result = await self.db.execute(query, params)
             rows = result.fetchall()
@@ -496,7 +506,8 @@ class AuditService:
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
 
-            query = text(f"""
+            query = text(
+                f"""
                 SELECT
                     id,
                     event_type,
@@ -511,7 +522,8 @@ class AuditService:
                 WHERE {where_clause}
                 ORDER BY created_at DESC
                 LIMIT :limit OFFSET :offset
-            """)
+            """
+            )
 
             result = await self.db.execute(query, params)
             rows = result.fetchall()

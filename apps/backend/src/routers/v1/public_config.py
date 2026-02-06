@@ -46,12 +46,8 @@ class PricingConfig(BaseModel):
     """Pricing configuration values (all amounts in cents)."""
 
     adult_price_cents: int = Field(..., description="Adult price per person in cents")
-    child_price_cents: int = Field(
-        ..., description="Child (6-12) price per person in cents"
-    )
-    child_free_under_age: int = Field(
-        ..., description="Age under which children are free"
-    )
+    child_price_cents: int = Field(..., description="Child (6-12) price per person in cents")
+    child_free_under_age: int = Field(..., description="Age under which children are free")
     party_minimum_cents: int = Field(..., description="Minimum party total in cents")
 
 
@@ -59,9 +55,7 @@ class TravelConfig(BaseModel):
     """Travel fee configuration."""
 
     free_miles: int = Field(..., description="Free travel radius in miles")
-    per_mile_cents: int = Field(
-        ..., description="Cost per mile in cents after free radius"
-    )
+    per_mile_cents: int = Field(..., description="Cost per mile in cents after free radius")
 
 
 class DepositConfig(BaseModel):
@@ -84,9 +78,7 @@ class GuestLimitsConfig(BaseModel):
 
     minimum: int = Field(default=1, description="Minimum guest count")
     maximum: int = Field(default=100, description="Maximum guest count")
-    minimum_for_hibachi: int = Field(
-        default=10, description="Minimum guests for standard hibachi"
-    )
+    minimum_for_hibachi: int = Field(default=10, description="Minimum guests for standard hibachi")
 
 
 class TimingConfig(BaseModel):
@@ -98,17 +90,13 @@ class TimingConfig(BaseModel):
     guest_count_finalize_hours: int = Field(
         ..., description="Hours before event when guest count must be finalized"
     )
-    free_reschedule_hours: int = Field(
-        ..., description="Hours before event to reschedule for free"
-    )
+    free_reschedule_hours: int = Field(..., description="Hours before event to reschedule for free")
 
 
 class ServiceConfig(BaseModel):
     """Service duration and logistics configuration (all values in minutes)."""
 
-    standard_duration_minutes: int = Field(
-        ..., description="Standard service duration in minutes"
-    )
+    standard_duration_minutes: int = Field(..., description="Standard service duration in minutes")
     extended_duration_minutes: int = Field(
         ..., description="Maximum extended service duration for large parties"
     )
@@ -120,12 +108,8 @@ class ServiceConfig(BaseModel):
 class PolicyConfig(BaseModel):
     """Policy configuration for fees and limits."""
 
-    reschedule_fee_cents: int = Field(
-        ..., description="Fee for late rescheduling in cents"
-    )
-    free_reschedule_count: int = Field(
-        ..., description="Number of free reschedules allowed"
-    )
+    reschedule_fee_cents: int = Field(..., description="Fee for late rescheduling in cents")
+    free_reschedule_count: int = Field(..., description="Number of free reschedules allowed")
 
 
 class ContactConfig(BaseModel):
@@ -167,9 +151,7 @@ class DepositPolicy(BaseModel):
     """Deposit policy with amount and human-readable text."""
 
     amount: int = Field(..., description="Deposit amount in dollars")
-    refund_days: int = Field(
-        ..., description="Days before event for refund eligibility"
-    )
+    refund_days: int = Field(..., description="Days before event for refund eligibility")
     text: str = Field(..., description="Human-readable policy text")
 
 

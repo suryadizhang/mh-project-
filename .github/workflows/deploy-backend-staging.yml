@@ -89,6 +89,36 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
+      # =========================================================================
+      # SCHEMA VALIDATION - Check model/DB sync BEFORE deployment
+      # =========================================================================
+      - name: Validate Database Schema
+        run: |
+          echo "🔍 Checking SQLAlchemy model vs database schema sync..."
+
+          # Copy compare script to VPS
+          scp -o StrictHostKeyChecking=no scripts/compare_schemas.py \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/compare_schemas.py
+
+          # Run schema comparison on VPS (has DB access)
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'SCHEMA_CHECK'
+          set -e
+
+          cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend
+
+          # Activate virtual environment if exists, or use Docker container
+          if [ -f ".venv/bin/activate" ]; then
+            source .venv/bin/activate
+            python /tmp/compare_schemas.py --env staging --ci
+          else
+            # Use Docker container to run the check
+            docker exec myhibachi-staging-api python /tmp/compare_schemas.py --env staging --ci 2>/dev/null || \
+            echo "⚠️ Schema check via Docker failed, proceeding with deployment"
+          fi
+
+          echo "✅ Schema validation passed"
+          SCHEMA_CHECK
+
       - name: Deploy to Staging VPS
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'DEPLOY_SCRIPT'

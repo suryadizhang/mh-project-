@@ -106,10 +106,22 @@ class KnowledgeService:
         self.formatters = KnowledgeFormatters()
 
     # Keys that should NOT be included in cache key generation (may contain sensitive data)
-    _SENSITIVE_CACHE_KEYS = frozenset([
-        'user_id', 'customer_id', 'email', 'phone', 'name', 'address',
-        'token', 'password', 'ssn', 'card', 'account', 'secret'
-    ])
+    _SENSITIVE_CACHE_KEYS = frozenset(
+        [
+            "user_id",
+            "customer_id",
+            "email",
+            "phone",
+            "name",
+            "address",
+            "token",
+            "password",
+            "ssn",
+            "card",
+            "account",
+            "secret",
+        ]
+    )
 
     def _make_cache_key(self, prefix: str, *args, **kwargs) -> str:
         """Generate a sanitized cache key from method name and arguments.
@@ -119,7 +131,8 @@ class KnowledgeService:
         """
         # Filter out sensitive kwargs
         safe_kwargs = {
-            k: str(v) for k, v in kwargs.items()
+            k: str(v)
+            for k, v in kwargs.items()
             if not any(sensitive in k.lower() for sensitive in self._SENSITIVE_CACHE_KEYS)
         }
         # Normalize args to prevent injection
@@ -134,7 +147,7 @@ class KnowledgeService:
         # Sanitize station_id to prevent injection
         station_part = ""
         if self.station_id:
-            sanitized_station = ''.join(c for c in str(self.station_id) if c.isalnum() or c in '-_')
+            sanitized_station = "".join(c for c in str(self.station_id) if c.isalnum() or c in "-_")
             station_part = f":{sanitized_station[:32]}"
         return f"knowledge:{prefix}{station_part}:{key_hash}"
 
@@ -149,21 +162,27 @@ class KnowledgeService:
         try:
             result = await self.cache.get(key)
             # Structured audit log without exposing full key
-            key_prefix = key.split(':')[1] if ':' in key else 'unknown'
+            key_prefix = key.split(":")[1] if ":" in key else "unknown"
             if result is not None:
-                logger.debug("Cache read: hit", extra={
-                    'action': 'cache_read',
-                    'outcome': 'hit',
-                    'key_prefix': key_prefix,
-                    'station_id': self.station_id,
-                })
+                logger.debug(
+                    "Cache read: hit",
+                    extra={
+                        "action": "cache_read",
+                        "outcome": "hit",
+                        "key_prefix": key_prefix,
+                        "station_id": self.station_id,
+                    },
+                )
             return result
         except Exception as e:
-            logger.warning("Cache read failed", extra={
-                'action': 'cache_read',
-                'outcome': 'error',
-                'error_type': type(e).__name__,
-            })
+            logger.warning(
+                "Cache read failed",
+                extra={
+                    "action": "cache_read",
+                    "outcome": "error",
+                    "error_type": type(e).__name__,
+                },
+            )
             return None
 
     async def _set_cached(self, key: str, value: Any, ttl: int) -> None:
@@ -177,20 +196,26 @@ class KnowledgeService:
         try:
             await self.cache.set(key, value, ttl=ttl)
             # Structured audit log without exposing full key or value
-            key_prefix = key.split(':')[1] if ':' in key else 'unknown'
-            logger.debug("Cache write: success", extra={
-                'action': 'cache_write',
-                'outcome': 'success',
-                'key_prefix': key_prefix,
-                'ttl': ttl,
-                'station_id': self.station_id,
-            })
+            key_prefix = key.split(":")[1] if ":" in key else "unknown"
+            logger.debug(
+                "Cache write: success",
+                extra={
+                    "action": "cache_write",
+                    "outcome": "success",
+                    "key_prefix": key_prefix,
+                    "ttl": ttl,
+                    "station_id": self.station_id,
+                },
+            )
         except Exception as e:
-            logger.warning("Cache write failed", extra={
-                'action': 'cache_write',
-                'outcome': 'error',
-                'error_type': type(e).__name__,
-            })
+            logger.warning(
+                "Cache write failed",
+                extra={
+                    "action": "cache_write",
+                    "outcome": "error",
+                    "error_type": type(e).__name__,
+                },
+            )
 
     # ============================================
     # BUSINESS RULES & POLICIES (with caching)

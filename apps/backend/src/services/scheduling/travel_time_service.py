@@ -318,9 +318,7 @@ class TravelTimeService:
             return int(base_minutes * RUSH_HOUR_MULTIPLIER)
         return base_minutes
 
-    def calculate_distance_miles(
-        self, lat1: float, lng1: float, lat2: float, lng2: float
-    ) -> float:
+    def calculate_distance_miles(self, lat1: float, lng1: float, lat2: float, lng2: float) -> float:
         """
         Calculate distance between two points using Haversine formula.
 
@@ -466,9 +464,7 @@ class TravelTimeService:
                     await asyncio.sleep(delay)
                     delay *= RETRY_BACKOFF_MULTIPLIER
                 else:
-                    logger.error(
-                        f"❌ Google Maps failed after {MAX_RETRIES + 1} attempts: {e}"
-                    )
+                    logger.error(f"❌ Google Maps failed after {MAX_RETRIES + 1} attempts: {e}")
 
         return None
 
@@ -537,9 +533,7 @@ class TravelTimeService:
 
         return None
 
-    async def _save_to_cache(
-        self, result: TravelTimeResult, is_rush_hour: bool
-    ) -> None:
+    async def _save_to_cache(self, result: TravelTimeResult, is_rush_hour: bool) -> None:
         """
         Save travel time result to cache (both LRU and DB).
 
@@ -599,12 +593,9 @@ class TravelTimeService:
         try:
             import googlemaps
         except ImportError:
-            logger.error(
-                "❌ googlemaps package not installed - cannot calculate travel fee"
-            )
+            logger.error("❌ googlemaps package not installed - cannot calculate travel fee")
             raise ImportError(
-                "googlemaps package not installed. "
-                "Install with: pip install googlemaps"
+                "googlemaps package not installed. " "Install with: pip install googlemaps"
             )
 
         if not self._client:
@@ -676,9 +667,7 @@ class TravelTimeService:
         - Geographic region characteristics
         """
         # Calculate straight-line distance (Haversine)
-        distance = self.calculate_distance_miles(
-            origin_lat, origin_lng, dest_lat, dest_lng
-        )
+        distance = self.calculate_distance_miles(origin_lat, origin_lng, dest_lat, dest_lng)
 
         # Apply road factor (roads aren't straight)
         # Typical factor is 1.3-1.5 for urban areas
@@ -750,9 +739,7 @@ def calculate_arrival_time(event_start: datetime, setup_minutes: int = 60) -> da
     return event_start - timedelta(minutes=setup_minutes)
 
 
-def calculate_departure_time(
-    event_end: datetime, cleanup_minutes: int = 15
-) -> datetime:
+def calculate_departure_time(event_end: datetime, cleanup_minutes: int = 15) -> datetime:
     """
     Calculate when chef can leave for next booking.
 

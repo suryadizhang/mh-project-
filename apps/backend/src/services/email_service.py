@@ -775,9 +775,7 @@ def generate_google_calendar_url(
                 continue
 
         if parsed_time:
-            parsed_date = parsed_date.replace(
-                hour=parsed_time.hour, minute=parsed_time.minute
-            )
+            parsed_date = parsed_date.replace(hour=parsed_time.hour, minute=parsed_time.minute)
 
         # Event duration: 2 hours for hibachi
         end_datetime = parsed_date + timedelta(hours=2)
@@ -824,18 +822,14 @@ class EmailService:
         self.enabled = getattr(settings, "EMAIL_ENABLED", False)
         if isinstance(self.enabled, str):
             self.enabled = self.enabled.lower() == "true"
-        self.provider = getattr(
-            settings, "EMAIL_PROVIDER", "smtp"
-        ).lower()  # smtp or resend
+        self.provider = getattr(settings, "EMAIL_PROVIDER", "smtp").lower()  # smtp or resend
         self.from_name = getattr(settings, "EMAIL_FROM_NAME", "My Hibachi Chef")
         self.frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3001")
 
         # SMTP Configuration (IONOS) - from GSM settings
         self.smtp_host = getattr(settings, "SMTP_HOST", "smtp.ionos.com")
         self.smtp_port = int(getattr(settings, "SMTP_PORT", 465))
-        self.smtp_from_email = getattr(
-            settings, "SMTP_USER", "internal@myhibachichef.com"
-        )
+        self.smtp_from_email = getattr(settings, "SMTP_USER", "internal@myhibachichef.com")
         self.smtp_password = getattr(settings, "SMTP_PASSWORD", "")
 
         # Resend Configuration (fallback)
@@ -865,19 +859,13 @@ class EmailService:
         elif self.provider == "resend":
             if self.resend_api_key and resend:
                 resend.api_key = self.resend_api_key
-                logger.info(
-                    f"✅ Resend email service initialized (from: {self.from_email})"
-                )
+                logger.info(f"✅ Resend email service initialized (from: {self.from_email})")
             elif not self.resend_api_key:
                 logger.error("❌ EMAIL_PROVIDER=resend but RESEND_API_KEY not found")
             elif not resend:
-                logger.error(
-                    "❌ EMAIL_PROVIDER=resend but resend library not installed"
-                )
+                logger.error("❌ EMAIL_PROVIDER=resend but resend library not installed")
         else:
-            logger.warning(
-                f"⚠️ Unknown EMAIL_PROVIDER={self.provider}, defaulting to smtp"
-            )
+            logger.warning(f"⚠️ Unknown EMAIL_PROVIDER={self.provider}, defaulting to smtp")
             self.provider = "smtp"
 
     def _format_sender(self) -> str:
@@ -911,9 +899,7 @@ class EmailService:
             logger.exception(f"Failed to send approval email to {email}: {e}")
             return False
 
-    def send_rejection_email(
-        self, email: str, full_name: str, reason: str | None = None
-    ) -> bool:
+    def send_rejection_email(self, email: str, full_name: str, reason: str | None = None) -> bool:
         """Send rejection notification email"""
         try:
             template = EMAIL_TEMPLATES["rejection"]
@@ -924,12 +910,8 @@ class EmailService:
                 reason_html = f"<p><strong>Reason:</strong> {reason}</p>"
                 reason_text = f"Reason: {reason}\n"
 
-            html_body = template["html"].format(
-                full_name=full_name, reason_html=reason_html
-            )
-            text_body = template["text"].format(
-                full_name=full_name, reason_text=reason_text
-            )
+            html_body = template["html"].format(full_name=full_name, reason_html=reason_html)
+            text_body = template["text"].format(full_name=full_name, reason_text=reason_text)
 
             return self._send_email(
                 to_email=email,
@@ -941,9 +923,7 @@ class EmailService:
             logger.exception(f"Failed to send rejection email to {email}: {e}")
             return False
 
-    def send_suspension_email(
-        self, email: str, full_name: str, reason: str | None = None
-    ) -> bool:
+    def send_suspension_email(self, email: str, full_name: str, reason: str | None = None) -> bool:
         """Send suspension notification email"""
         try:
             template = EMAIL_TEMPLATES["suspension"]
@@ -954,12 +934,8 @@ class EmailService:
                 reason_html = f"<p><strong>Reason:</strong> {reason}</p>"
                 reason_text = f"Reason: {reason}\n"
 
-            html_body = template["html"].format(
-                full_name=full_name, reason_html=reason_html
-            )
-            text_body = template["text"].format(
-                full_name=full_name, reason_text=reason_text
-            )
+            html_body = template["html"].format(full_name=full_name, reason_html=reason_html)
+            text_body = template["text"].format(full_name=full_name, reason_text=reason_text)
 
             return self._send_email(
                 to_email=email,
@@ -1037,9 +1013,7 @@ class EmailService:
                 tags=[{"name": "type", "value": "booking_confirmation"}],
             )
         except Exception as e:
-            logger.exception(
-                f"Failed to send booking confirmation email to {customer_email}: {e}"
-            )
+            logger.exception(f"Failed to send booking confirmation email to {customer_email}: {e}")
             return False
 
     def send_new_booking_email_to_admin(
@@ -1097,9 +1071,7 @@ class EmailService:
                 tags=[{"name": "type", "value": "booking_admin_alert"}],
             )
         except Exception as e:
-            logger.exception(
-                f"Failed to send booking alert email to admin {admin_email}: {e}"
-            )
+            logger.exception(f"Failed to send booking alert email to admin {admin_email}: {e}")
             return False
 
     def send_quote_email(
@@ -1139,9 +1111,7 @@ class EmailService:
                 if qty and qty > 0:
                     upgrade_lines.append(f"  - {name}: {qty}")
 
-            upgrades_text = (
-                "\n".join(upgrade_lines) if upgrade_lines else "  - None selected"
-            )
+            upgrades_text = "\n".join(upgrade_lines) if upgrade_lines else "  - None selected"
 
             # Build the plain text email
             text_body = f"""
@@ -1289,9 +1259,7 @@ Bringing the hibachi experience to you!
 
             # Connect and send - Port 465 uses SMTP_SSL (implicit TLS), others use STARTTLS
             if self.smtp_port == 465:
-                with smtplib.SMTP_SSL(
-                    self.smtp_host, self.smtp_port, context=context
-                ) as server:
+                with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, context=context) as server:
                     server.login(self.smtp_from_email, self.smtp_password)
                     server.sendmail(self.smtp_from_email, to_email, msg.as_string())
             else:
@@ -1304,9 +1272,7 @@ Bringing the hibachi experience to you!
             return True
 
         except smtplib.SMTPAuthenticationError as e:
-            logger.error(
-                f"❌ SMTP authentication failed for {self.smtp_from_email}: {e}"
-            )
+            logger.error(f"❌ SMTP authentication failed for {self.smtp_from_email}: {e}")
             return False
         except smtplib.SMTPException as e:
             logger.exception(f"❌ SMTP error sending to {to_email}: {e}")

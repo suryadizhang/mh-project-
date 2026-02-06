@@ -359,9 +359,7 @@ async def calculate_chef_earnings(
     toddlers = getattr(booking, "party_toddlers", 0) or 0
 
     # Get chef's pay rate class (lowercase enum value)
-    pay_rate_class = (
-        chef.pay_rate_class if hasattr(chef, "pay_rate_class") else "new_chef"
-    )
+    pay_rate_class = chef.pay_rate_class if hasattr(chef, "pay_rate_class") else "new_chef"
     if pay_rate_class is not None and hasattr(pay_rate_class, "value"):
         pay_rate_class = pay_rate_class.value
     # Normalize to lowercase for consistency
@@ -381,9 +379,7 @@ async def calculate_chef_earnings(
     travel_component = int(travel_fee_cents * config.travel_pct / 100)
 
     # Calculate total earnings (sum of all components)
-    total_earnings = (
-        adult_component + kid_component + toddler_component + travel_component
-    )
+    total_earnings = adult_component + kid_component + toddler_component + travel_component
 
     logger.info(
         f"💰 Chef earnings calculated: ${total_earnings/100:.2f} "
@@ -480,9 +476,7 @@ async def record_chef_score(
 
     await db.commit()
 
-    logger.info(
-        f"📊 Recorded chef score: chef={chef_id}, score={score}, type={rater_type}"
-    )
+    logger.info(f"📊 Recorded chef score: chef={chef_id}, score={score}, type={rater_type}")
 
     return score_id
 

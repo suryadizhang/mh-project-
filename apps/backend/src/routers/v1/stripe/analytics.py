@@ -60,21 +60,15 @@ async def get_payment_analytics(
             pass  # TODO: Implement station filtering through booking relationship
 
         # Total revenue
-        revenue_result = await db.execute(
-            select(func.sum(StripePayment.amount)).where(base_filter)
-        )
+        revenue_result = await db.execute(select(func.sum(StripePayment.amount)).where(base_filter))
         total_revenue = revenue_result.scalar() or Decimal("0")
 
         # Payment count
-        count_result = await db.execute(
-            select(func.count(StripePayment.id)).where(base_filter)
-        )
+        count_result = await db.execute(select(func.count(StripePayment.id)).where(base_filter))
         payment_count = count_result.scalar() or 0
 
         # Average payment
-        avg_payment = (
-            total_revenue / payment_count if payment_count > 0 else Decimal("0")
-        )
+        avg_payment = total_revenue / payment_count if payment_count > 0 else Decimal("0")
 
         # Payment method breakdown
         method_result = await db.execute(
@@ -199,6 +193,4 @@ async def get_daily_analytics(
 
     except Exception as e:
         logger.exception(f"Error generating daily analytics: {e}")
-        raise HTTPException(
-            status_code=500, detail="Failed to generate daily analytics"
-        )
+        raise HTTPException(status_code=500, detail="Failed to generate daily analytics")

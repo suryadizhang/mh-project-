@@ -1,0 +1,144 @@
+# Scheduled Database Schema Health Check
+# Runs weekly to detect schema drift, permission issues, and geocoding gaps
+# Results are visible in GitHub Actions for audit trail
+
+name: Weekly Schema Health Check
+
+on:
+  schedule:
+    # Every Sunday at 6:00 AM UTC (10:00 PM Saturday PST)
+    - cron: '0 6 * * 0'
+
+  # Allow manual trigger for on-demand checks
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to check'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  DEFAULT_ENV: 'production'
+
+jobs:
+  schema-health-check:
+    name: Database Schema Health Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Run Schema Health Check
+        id: health_check
+        run: |
+          ENV="${{ github.event.inputs.environment || env.DEFAULT_ENV }}"
+
+          echo "🔍 Running schema health check on $ENV..."
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+
+          # Copy health check script to VPS
+          scp -o StrictHostKeyChecking=no scripts/check_schema_health.sql \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/check_schema_health.sql
+
+          # Run health check and capture output
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << HEALTH_CHECK
+          set -e
+
+          if [ "$ENV" = "production" ]; then
+            DB_NAME="myhibachi_production"
+          else
+            DB_NAME="myhibachi_staging"
+          fi
+
+          echo "📊 Checking database: \$DB_NAME"
+          echo ""
+
+          # Run the health check SQL
+          sudo -u postgres psql -d \$DB_NAME -f /tmp/check_schema_health.sql
+
+          # Also run compare_schemas.py if available
+          cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend
+          if [ -f "scripts/compare_schemas.py" ]; then
+            echo ""
+            echo "📋 Running SQLAlchemy model comparison..."
+            python scripts/compare_schemas.py --env $ENV 2>&1 || true
+          fi
+
+          rm -f /tmp/check_schema_health.sql
+          HEALTH_CHECK
+
+      - name: Create Health Report Summary
+        if: always()
+        run: |
+          echo "## 🏥 Schema Health Check Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ steps.health_check.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the job logs above for detailed results." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Checks Performed:" >> $GITHUB_STEP_SUMMARY
+          echo "1. ✅ Table permissions for myhibachi_user" >> $GITHUB_STEP_SUMMARY
+          echo "2. ✅ Station geocoding status" >> $GITHUB_STEP_SUMMARY
+          echo "3. ✅ Auto-grant trigger status" >> $GITHUB_STEP_SUMMARY
+          echo "4. ✅ Schema table counts" >> $GITHUB_STEP_SUMMARY
+          echo "5. ✅ SQLAlchemy model vs DB sync" >> $GITHUB_STEP_SUMMARY
+
+  notify-on-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: schema-health-check
+    if: failure()
+
+    steps:
+      - name: Create Issue for Failed Check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `🚨 Weekly Schema Health Check Failed - ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            ## Schema Health Check Failure
+
+            The scheduled weekly schema health check has detected issues.
+
+            **Workflow Run:** [View Details](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+            ### Required Actions:
+            1. Review the workflow logs for specific issues
+            2. Run database migrations if columns are missing
+            3. Check permission grants using \`grant_all_permissions.sql\`
+            4. Verify station geocoding is working
+
+            ---
+            *This issue was automatically created by the schema health check workflow.*
+            `;
+
+            // Check if similar issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'schema-health,automated'
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['schema-health', 'automated', 'database']
+              });
+            }

@@ -34,8 +34,10 @@ router = APIRouter(prefix="/monitoring/rules", tags=["Monitoring - Alert Rules"]
 # Pydantic Models
 # ============================================================================
 
+
 class AlertRuleCreate(BaseModel):
     """Schema for creating a new alert rule"""
+
     name: str = Field(..., min_length=1, max_length=255, description="Unique rule name")
     description: Optional[str] = Field(None, max_length=1000, description="Rule description")
     metric_name: str = Field(..., min_length=1, max_length=100, description="Metric to monitor")
@@ -45,8 +47,12 @@ class AlertRuleCreate(BaseModel):
     cooldown_seconds: int = Field(default=300, ge=0, description="Cooldown period in seconds")
     severity: RuleSeverity = Field(default="medium", description="Alert severity level")
     enabled: bool = Field(default=True, description="Whether rule is enabled")
-    alert_title_template: Optional[str] = Field(None, max_length=500, description="Alert title template")
-    alert_message_template: Optional[str] = Field(None, max_length=2000, description="Alert message template")
+    alert_title_template: Optional[str] = Field(
+        None, max_length=500, description="Alert title template"
+    )
+    alert_message_template: Optional[str] = Field(
+        None, max_length=2000, description="Alert message template"
+    )
     tags: Optional[List[str]] = Field(default=None, description="Rule tags")
     metadata: Optional[dict] = Field(default=None, description="Additional metadata")
 
@@ -65,13 +71,14 @@ class AlertRuleCreate(BaseModel):
                 "alert_title_template": "{rule_name}: Response time at {current_value}ms",
                 "alert_message_template": "API response time is {current_value}ms (threshold: > {threshold_value}ms) for {duration}s",
                 "tags": ["api", "performance"],
-                "metadata": {"team": "backend", "priority": "high"}
+                "metadata": {"team": "backend", "priority": "high"},
             }
         }
 
 
 class AlertRuleUpdate(BaseModel):
     """Schema for updating an existing alert rule"""
+
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = Field(None, max_length=1000)
     metric_name: Optional[str] = Field(None, min_length=1, max_length=100)
@@ -89,6 +96,7 @@ class AlertRuleUpdate(BaseModel):
 
 class AlertRuleResponse(BaseModel):
     """Schema for alert rule response"""
+
     id: int
     name: str
     description: Optional[str]
@@ -115,11 +123,13 @@ class AlertRuleResponse(BaseModel):
 
 class RuleTestRequest(BaseModel):
     """Schema for testing a rule"""
+
     test_value: float = Field(..., description="Test metric value")
 
 
 class RuleTestResponse(BaseModel):
     """Schema for rule test result"""
+
     rule_id: int
     rule_name: str
     test_value: float
@@ -136,6 +146,7 @@ class RuleTestResponse(BaseModel):
 
 class RuleStatsResponse(BaseModel):
     """Schema for rule statistics"""
+
     rule_id: int
     rule_name: str
     trigger_count: int
@@ -146,12 +157,14 @@ class RuleStatsResponse(BaseModel):
 
 class BulkOperationRequest(BaseModel):
     """Schema for bulk operations"""
+
     rule_ids: List[int] = Field(..., min_items=1, description="List of rule IDs")
     operation: str = Field(..., description="Operation: enable, disable, delete")
 
 
 class BulkOperationResponse(BaseModel):
     """Schema for bulk operation result"""
+
     operation: str
     total: int
     success: int
@@ -163,13 +176,14 @@ class BulkOperationResponse(BaseModel):
 # Helper Functions
 # ============================================================================
 
+
 def get_redis_client() -> redis.Redis:
     """Get Redis client"""
     return redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
         db=settings.redis_db,
-        decode_responses=True
+        decode_responses=True,
     )
 
 
@@ -194,13 +208,14 @@ def rule_to_response(rule: AlertRule) -> AlertRuleResponse:
         updated_at=rule.updated_at,
         last_triggered_at=rule.last_triggered_at,
         trigger_count=rule.trigger_count,
-        condition_display=rule.get_condition_display()
+        condition_display=rule.get_condition_display(),
     )
 
 
 # ============================================================================
 # API Endpoints
 # ============================================================================
+
 
 @router.get("/", response_model=List[AlertRuleResponse])
 async def list_rules(
@@ -209,7 +224,7 @@ async def list_rules(
     metric_name: Optional[str] = Query(None, description="Filter by metric name"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     List all alert rules with optional filtering.
@@ -244,15 +259,12 @@ async def list_rules(
         logger.error(f"Error listing rules: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to list rules: {str(e)}"
+            detail=f"Failed to list rules: {str(e)}",
         )
 
 
 @router.get("/{rule_id}", response_model=AlertRuleResponse)
-async def get_rule(
-    rule_id: int,
-    db: Session = Depends(get_db)
-):
+async def get_rule(rule_id: int, db: Session = Depends(get_db)):
     """
     Get a specific alert rule by ID.
     """
@@ -261,8 +273,7 @@ async def get_rule(
 
         if not rule:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Rule {rule_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Rule {rule_id} not found"
             )
 
         return rule_to_response(rule)
@@ -273,15 +284,12 @@ async def get_rule(
         logger.error(f"Error getting rule {rule_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get rule: {str(e)}"
+            detail=f"Failed to get rule: {str(e)}",
         )
 
 
 @router.post("/", response_model=AlertRuleResponse, status_code=status.HTTP_201_CREATED)
-async def create_rule(
-    rule_data: AlertRuleCreate,
-    db: Session = Depends(get_db)
-):
+async def create_rule(rule_data: AlertRuleCreate, db: Session = Depends(get_db)):
     """
     Create a new alert rule.
     """
@@ -291,7 +299,7 @@ async def create_rule(
         if existing:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Rule with name '{rule_data.name}' already exists"
+                detail=f"Rule with name '{rule_data.name}' already exists",
             )
 
         # Create rule
@@ -309,7 +317,7 @@ async def create_rule(
             alert_message_template=rule_data.alert_message_template,
             tags=rule_data.tags,
             metadata=rule_data.metadata,
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
         db.add(rule)
@@ -327,16 +335,12 @@ async def create_rule(
         logger.error(f"Error creating rule: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create rule: {str(e)}"
+            detail=f"Failed to create rule: {str(e)}",
         )
 
 
 @router.patch("/{rule_id}", response_model=AlertRuleResponse)
-async def update_rule(
-    rule_id: int,
-    rule_data: AlertRuleUpdate,
-    db: Session = Depends(get_db)
-):
+async def update_rule(rule_id: int, rule_data: AlertRuleUpdate, db: Session = Depends(get_db)):
     """
     Update an existing alert rule.
     """
@@ -345,8 +349,7 @@ async def update_rule(
 
         if not rule:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Rule {rule_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Rule {rule_id} not found"
             )
 
         # Update fields
@@ -358,7 +361,7 @@ async def update_rule(
             if existing:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Rule with name '{update_data['name']}' already exists"
+                    detail=f"Rule with name '{update_data['name']}' already exists",
                 )
 
         for key, value in update_data.items():
@@ -380,15 +383,12 @@ async def update_rule(
         logger.error(f"Error updating rule {rule_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update rule: {str(e)}"
+            detail=f"Failed to update rule: {str(e)}",
         )
 
 
 @router.delete("/{rule_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_rule(
-    rule_id: int,
-    db: Session = Depends(get_db)
-):
+async def delete_rule(rule_id: int, db: Session = Depends(get_db)):
     """
     Delete an alert rule.
     """
@@ -397,8 +397,7 @@ async def delete_rule(
 
         if not rule:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Rule {rule_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Rule {rule_id} not found"
             )
 
         rule_name = rule.name
@@ -422,15 +421,12 @@ async def delete_rule(
         logger.error(f"Error deleting rule {rule_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete rule: {str(e)}"
+            detail=f"Failed to delete rule: {str(e)}",
         )
 
 
 @router.post("/{rule_id}/enable", response_model=AlertRuleResponse)
-async def enable_rule(
-    rule_id: int,
-    db: Session = Depends(get_db)
-):
+async def enable_rule(rule_id: int, db: Session = Depends(get_db)):
     """
     Enable an alert rule.
     """
@@ -439,8 +435,7 @@ async def enable_rule(
 
         if not rule:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Rule {rule_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Rule {rule_id} not found"
             )
 
         if rule.enabled:
@@ -463,15 +458,12 @@ async def enable_rule(
         logger.error(f"Error enabling rule {rule_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to enable rule: {str(e)}"
+            detail=f"Failed to enable rule: {str(e)}",
         )
 
 
 @router.post("/{rule_id}/disable", response_model=AlertRuleResponse)
-async def disable_rule(
-    rule_id: int,
-    db: Session = Depends(get_db)
-):
+async def disable_rule(rule_id: int, db: Session = Depends(get_db)):
     """
     Disable an alert rule.
     """
@@ -480,8 +472,7 @@ async def disable_rule(
 
         if not rule:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Rule {rule_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Rule {rule_id} not found"
             )
 
         if not rule.enabled:
@@ -509,16 +500,12 @@ async def disable_rule(
         logger.error(f"Error disabling rule {rule_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to disable rule: {str(e)}"
+            detail=f"Failed to disable rule: {str(e)}",
         )
 
 
 @router.post("/{rule_id}/test", response_model=RuleTestResponse)
-async def test_rule(
-    rule_id: int,
-    test_data: RuleTestRequest,
-    db: Session = Depends(get_db)
-):
+async def test_rule(rule_id: int, test_data: RuleTestRequest, db: Session = Depends(get_db)):
     """
     Test a rule with a specific value to see if it would trigger an alert.
     """
@@ -527,8 +514,7 @@ async def test_rule(
 
         if not rule:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Rule {rule_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Rule {rule_id} not found"
             )
 
         # Create evaluator
@@ -537,9 +523,7 @@ async def test_rule(
 
         # Evaluate metric
         violations = evaluator.evaluate_metric(
-            rule.metric_name,
-            test_data.test_value,
-            datetime.utcnow().timestamp()
+            rule.metric_name, test_data.test_value, datetime.utcnow().timestamp()
         )
 
         # Find our rule's violation
@@ -574,7 +558,7 @@ async def test_rule(
                 is_duration_met=violation.is_duration_met,
                 remaining_duration=violation.remaining_duration,
                 would_create_alert=would_create_alert,
-                message=message
+                message=message,
             )
         else:
             return RuleTestResponse(
@@ -589,7 +573,7 @@ async def test_rule(
                 is_duration_met=False,
                 remaining_duration=rule.duration_seconds,
                 would_create_alert=False,
-                message=f"NO VIOLATION: Value {test_data.test_value:.2f} is within threshold"
+                message=f"NO VIOLATION: Value {test_data.test_value:.2f} is within threshold",
             )
 
     except HTTPException:
@@ -598,15 +582,12 @@ async def test_rule(
         logger.error(f"Error testing rule {rule_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to test rule: {str(e)}"
+            detail=f"Failed to test rule: {str(e)}",
         )
 
 
 @router.get("/{rule_id}/stats", response_model=RuleStatsResponse)
-async def get_rule_stats(
-    rule_id: int,
-    db: Session = Depends(get_db)
-):
+async def get_rule_stats(rule_id: int, db: Session = Depends(get_db)):
     """
     Get statistics for a specific rule.
     """
@@ -615,8 +596,7 @@ async def get_rule_stats(
 
         if not rule:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Rule {rule_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Rule {rule_id} not found"
             )
 
         redis_client = get_redis_client()
@@ -639,7 +619,7 @@ async def get_rule_stats(
             trigger_count=rule.trigger_count,
             last_triggered_at=rule.last_triggered_at,
             current_violation=current_violation,
-            in_cooldown=in_cooldown
+            in_cooldown=in_cooldown,
         )
 
     except HTTPException:
@@ -648,15 +628,12 @@ async def get_rule_stats(
         logger.error(f"Error getting stats for rule {rule_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get rule stats: {str(e)}"
+            detail=f"Failed to get rule stats: {str(e)}",
         )
 
 
 @router.post("/bulk", response_model=BulkOperationResponse)
-async def bulk_operation(
-    operation_data: BulkOperationRequest,
-    db: Session = Depends(get_db)
-):
+async def bulk_operation(operation_data: BulkOperationRequest, db: Session = Depends(get_db)):
     """
     Perform bulk operations on multiple rules.
 
@@ -669,7 +646,7 @@ async def bulk_operation(
         if operation_data.operation not in ["enable", "disable", "delete"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid operation: {operation_data.operation}"
+                detail=f"Invalid operation: {operation_data.operation}",
             )
 
         total = len(operation_data.rule_ids)
@@ -684,10 +661,7 @@ async def bulk_operation(
                 rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
 
                 if not rule:
-                    errors.append({
-                        "rule_id": rule_id,
-                        "error": "Rule not found"
-                    })
+                    errors.append({"rule_id": rule_id, "error": "Rule not found"})
                     failed += 1
                     continue
 
@@ -710,10 +684,7 @@ async def bulk_operation(
                     success += 1
 
             except Exception as e:
-                errors.append({
-                    "rule_id": rule_id,
-                    "error": str(e)
-                })
+                errors.append({"rule_id": rule_id, "error": str(e)})
                 failed += 1
 
         db.commit()
@@ -725,7 +696,7 @@ async def bulk_operation(
             total=total,
             success=success,
             failed=failed,
-            errors=errors
+            errors=errors,
         )
 
     except HTTPException:
@@ -735,5 +706,5 @@ async def bulk_operation(
         logger.error(f"Error in bulk operation: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to perform bulk operation: {str(e)}"
+            detail=f"Failed to perform bulk operation: {str(e)}",
         )

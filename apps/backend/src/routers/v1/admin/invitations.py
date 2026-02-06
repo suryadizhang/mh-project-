@@ -150,9 +150,7 @@ def can_invite_role(inviter_role: UserRole, target_role: UserRole) -> bool:
     return target_role in allowed
 
 
-async def get_inviter_stations(
-    db: AsyncSession, user_id: UUID, user_role: UserRole
-) -> list[UUID]:
+async def get_inviter_stations(db: AsyncSession, user_id: UUID, user_role: UserRole) -> list[UUID]:
     """
     Get list of station IDs the user can manage.
 
@@ -229,9 +227,7 @@ async def validate_station_access(
 )
 async def create_invitation(
     request: InvitationCreateRequest,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_users")),
     db: AsyncSession = Depends(get_db_session),
 ) -> InvitationResponse:
     """
@@ -252,9 +248,7 @@ async def create_invitation(
                 detail=f"Invalid role: {request.role}. Must be one of: CHEF, STATION_MANAGER, CUSTOMER_SUPPORT, ADMIN",
             )
 
-        inviter_role = (
-            UserRole(current_user.role) if current_user.role else UserRole.CHEF
-        )
+        inviter_role = UserRole(current_user.role) if current_user.role else UserRole.CHEF
 
         # Check if inviter can invite this role
         if not can_invite_role(inviter_role, target_role):
@@ -305,9 +299,7 @@ async def create_invitation(
         # Get station name if applicable
         station_name = None
         if request.station_id:
-            result = await db.execute(
-                select(Station.name).where(Station.id == request.station_id)
-            )
+            result = await db.execute(select(Station.name).where(Station.id == request.station_id))
             station_name = result.scalar_one_or_none()
 
         # Send invitation email using password reset service
@@ -360,9 +352,7 @@ async def create_invitation(
 )
 async def list_invitations(
     status_filter: Optional[str] = None,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_users")),
     db: AsyncSession = Depends(get_db_session),
 ) -> InvitationListResponse:
     """
@@ -373,9 +363,7 @@ async def list_invitations(
     - STATION_MANAGER: Invitations for their station
     """
     try:
-        inviter_role = (
-            UserRole(current_user.role) if current_user.role else UserRole.CHEF
-        )
+        inviter_role = UserRole(current_user.role) if current_user.role else UserRole.CHEF
 
         # Build base query
         query = select(AdminInvitation)
@@ -390,9 +378,7 @@ async def list_invitations(
 
         # Filter by accessible stations (non-super admin)
         if inviter_role != UserRole.SUPER_ADMIN:
-            allowed_stations = await get_inviter_stations(
-                db, current_user.id, inviter_role
-            )
+            allowed_stations = await get_inviter_stations(db, current_user.id, inviter_role)
             if allowed_stations:
                 query = query.where(AdminInvitation.station_id.in_(allowed_stations))
             else:
@@ -450,9 +436,7 @@ async def list_invitations(
 )
 async def revoke_invitation(
     invitation_id: UUID,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_users")),
     db: AsyncSession = Depends(get_db_session),
 ) -> None:
     """
@@ -475,14 +459,10 @@ async def revoke_invitation(
             )
 
         # Check if user has access to this invitation
-        inviter_role = (
-            UserRole(current_user.role) if current_user.role else UserRole.CHEF
-        )
+        inviter_role = UserRole(current_user.role) if current_user.role else UserRole.CHEF
 
         if inviter_role != UserRole.SUPER_ADMIN and invitation.station_id:
-            allowed_stations = await get_inviter_stations(
-                db, current_user.id, inviter_role
-            )
+            allowed_stations = await get_inviter_stations(db, current_user.id, inviter_role)
             if invitation.station_id not in allowed_stations:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
@@ -501,8 +481,7 @@ async def revoke_invitation(
         await db.commit()
 
         logger.info(
-            f"✅ Invitation revoked: {invitation.email[:3]}*** "
-            f"by {current_user.email[:3]}***"
+            f"✅ Invitation revoked: {invitation.email[:3]}*** " f"by {current_user.email[:3]}***"
         )
 
     except HTTPException:
@@ -523,9 +502,7 @@ async def revoke_invitation(
 )
 async def resend_invitation(
     invitation_id: UUID,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_users")),
     db: AsyncSession = Depends(get_db_session),
 ) -> InvitationResponse:
     """
@@ -549,14 +526,10 @@ async def resend_invitation(
             )
 
         # Check permission
-        inviter_role = (
-            UserRole(current_user.role) if current_user.role else UserRole.CHEF
-        )
+        inviter_role = UserRole(current_user.role) if current_user.role else UserRole.CHEF
 
         if inviter_role != UserRole.SUPER_ADMIN and invitation.station_id:
-            allowed_stations = await get_inviter_stations(
-                db, current_user.id, inviter_role
-            )
+            allowed_stations = await get_inviter_stations(db, current_user.id, inviter_role)
             if invitation.station_id not in allowed_stations:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
@@ -594,8 +567,7 @@ async def resend_invitation(
         )
 
         logger.info(
-            f"✅ Invitation resent: {invitation.email[:3]}*** "
-            f"by {current_user.email[:3]}***"
+            f"✅ Invitation resent: {invitation.email[:3]}*** " f"by {current_user.email[:3]}***"
         )
 
         return InvitationResponse(
@@ -670,9 +642,7 @@ def can_delete_role(inviter_role: UserRole, target_role: UserRole) -> bool:
     description="List staff members that the current user can manage (deactivate/delete).",
 )
 async def list_staff(
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_users")),
     db: AsyncSession = Depends(get_db_session),
     station_id: Optional[UUID] = None,
     include_inactive: bool = False,
@@ -686,9 +656,7 @@ async def list_staff(
     - STATION_MANAGER: Can see CHEFs in their station only
     """
     try:
-        inviter_role = (
-            UserRole(current_user.role) if current_user.role else UserRole.CHEF
-        )
+        inviter_role = UserRole(current_user.role) if current_user.role else UserRole.CHEF
 
         # Get stations the inviter can manage
         inviter_stations = await get_inviter_stations(db, current_user.id, inviter_role)
@@ -703,9 +671,7 @@ async def list_staff(
         if not include_inactive:
             query = query.where(User.status == UserStatus.ACTIVE)
         else:
-            query = query.where(
-                User.status.in_([UserStatus.ACTIVE, UserStatus.INACTIVE])
-            )
+            query = query.where(User.status.in_([UserStatus.ACTIVE, UserStatus.INACTIVE]))
 
         # Exclude super admins from results (can't delete them)
         query = query.where(User.is_super_admin == False)
@@ -738,9 +704,7 @@ async def list_staff(
             if user.station_users:
                 user_station_id = user.station_users[0].station_id
                 user_station_name = (
-                    user.station_users[0].station.name
-                    if user.station_users[0].station
-                    else None
+                    user.station_users[0].station.name if user.station_users[0].station else None
                 )
 
             # Station scoping for non-super-admins
@@ -792,9 +756,7 @@ async def list_staff(
 )
 async def delete_staff(
     user_id: UUID,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_users")),
     db: AsyncSession = Depends(get_db_session),
 ) -> None:
     """
@@ -814,9 +776,7 @@ async def delete_staff(
         400: If trying to delete self or super admin
     """
     try:
-        inviter_role = (
-            UserRole(current_user.role) if current_user.role else UserRole.CHEF
-        )
+        inviter_role = UserRole(current_user.role) if current_user.role else UserRole.CHEF
 
         # Prevent self-deletion
         if user_id == current_user.id:
@@ -894,9 +854,7 @@ async def delete_staff(
                     )
 
                 # Get inviter's manageable stations
-                inviter_stations = await get_inviter_stations(
-                    db, current_user.id, inviter_role
-                )
+                inviter_stations = await get_inviter_stations(db, current_user.id, inviter_role)
 
                 if target_station_id not in inviter_stations:
                     raise HTTPException(
@@ -935,9 +893,7 @@ async def delete_staff(
 )
 async def reactivate_staff(
     user_id: UUID,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_users")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_users")),
     db: AsyncSession = Depends(get_db_session),
 ) -> StaffMemberResponse:
     """
@@ -947,9 +903,7 @@ async def reactivate_staff(
     Uses same permission rules as delete_staff.
     """
     try:
-        inviter_role = (
-            UserRole(current_user.role) if current_user.role else UserRole.CHEF
-        )
+        inviter_role = UserRole(current_user.role) if current_user.role else UserRole.CHEF
 
         # Fetch target user with roles and station assignments
         result = await db.execute(
@@ -1006,9 +960,7 @@ async def reactivate_staff(
                     target_station_id = target_user.station_users[0].station_id
 
                 if target_station_id:
-                    inviter_stations = await get_inviter_stations(
-                        db, current_user.id, inviter_role
-                    )
+                    inviter_stations = await get_inviter_stations(db, current_user.id, inviter_role)
                     if target_station_id not in inviter_stations:
                         raise HTTPException(
                             status_code=status.HTTP_403_FORBIDDEN,

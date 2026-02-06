@@ -261,9 +261,7 @@ class SlotManager:
         else:
             return config.min_time_30 <= requested_time <= config.max_time_30
 
-    def calculate_adjustment(
-        self, slot_number: int, requested_time: time
-    ) -> SlotAdjustment:
+    def calculate_adjustment(self, slot_number: int, requested_time: time) -> SlotAdjustment:
         """
         Calculate adjustment needed from standard time.
 
@@ -354,9 +352,7 @@ class SlotManager:
 
         return adjustments
 
-    def can_slots_conflict(
-        self, slot1: int, slot2: int, event_duration_minutes: int = 120
-    ) -> bool:
+    def can_slots_conflict(self, slot1: int, slot2: int, event_duration_minutes: int = 120) -> bool:
         """
         Check if two slots could potentially conflict.
 

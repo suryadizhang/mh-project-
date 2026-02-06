@@ -31,10 +31,7 @@ class EmailSyncService:
         self.repository = repository
 
     def _generate_thread_id(
-        self,
-        subject: str,
-        from_address: str,
-        to_addresses: Optional[List[str]] = None
+        self, subject: str, from_address: str, to_addresses: Optional[List[str]] = None
     ) -> str:
         """
         Generate thread ID for grouping related emails.
@@ -48,8 +45,8 @@ class EmailSyncService:
         """
         # Normalize subject (remove Re:, Fwd:, etc.)
         normalized_subject = subject.lower().strip()
-        normalized_subject = re.sub(r'^(re|fwd|fw):\s*', '', normalized_subject)
-        normalized_subject = re.sub(r'\s+', ' ', normalized_subject)
+        normalized_subject = re.sub(r"^(re|fwd|fw):\s*", "", normalized_subject)
+        normalized_subject = re.sub(r"\s+", " ", normalized_subject)
 
         # Get unique participants
         participants = [from_address.lower()]
@@ -63,10 +60,7 @@ class EmailSyncService:
 
         return f"thread_{thread_hash}"
 
-    async def sync_email_from_idle(
-        self,
-        email_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def sync_email_from_idle(self, email_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Sync email to database when received from IMAP IDLE callback.
 
@@ -117,9 +111,7 @@ class EmailSyncService:
 
             # Ensure thread exists
             thread = await self.repository.get_or_create_thread(
-                thread_id=thread_id,
-                inbox=inbox,
-                subject=subject
+                thread_id=thread_id, inbox=inbox, subject=subject
             )
 
             # Prepare message data for database
@@ -128,7 +120,6 @@ class EmailSyncService:
                 "thread_id": thread_id,
                 "inbox": inbox,
                 "folder": "INBOX",
-
                 # Headers
                 "subject": subject,
                 "from_address": from_address,
@@ -137,15 +128,12 @@ class EmailSyncService:
                 "cc_addresses": email_data.get("cc_addresses"),
                 "bcc_addresses": email_data.get("bcc_addresses"),
                 "reply_to": email_data.get("reply_to"),
-
                 # Content
                 "text_body": email_data.get("text_body"),
                 "html_body": email_data.get("html_body"),
-
                 # Metadata
                 "received_at": email_data.get("received_at", datetime.now(timezone.utc)),
                 "sent_at": email_data.get("sent_at"),
-
                 # Flags (new emails are unread by default)
                 "is_read": False,
                 "is_starred": False,
@@ -153,11 +141,9 @@ class EmailSyncService:
                 "is_spam": False,
                 "is_draft": False,
                 "is_sent": False,
-
                 # Attachments
                 "has_attachments": email_data.get("has_attachments", False),
                 "attachments": email_data.get("attachments"),
-
                 # Sync metadata
                 "last_synced_at": datetime.now(timezone.utc),
             }
@@ -171,24 +157,16 @@ class EmailSyncService:
             # Update thread participants
             participants = []
             if from_address:
-                participants.append({
-                    "email": from_address,
-                    "name": email_data.get("from_name")
-                })
+                participants.append({"email": from_address, "name": email_data.get("from_name")})
             if to_addresses:
                 for addr in to_addresses:
                     if addr not in [p["email"] for p in participants]:
                         participants.append({"email": addr, "name": None})
 
-            await self.repository.update_thread(thread_id, {
-                "participants": participants
-            })
+            await self.repository.update_thread(thread_id, {"participants": participants})
 
             # Record successful sync
-            await self.repository.record_sync_success(
-                inbox=inbox,
-                messages_synced=1
-            )
+            await self.repository.record_sync_success(inbox=inbox, messages_synced=1)
 
             logger.info(f"✅ Email synced to DB: {message_id} → thread {thread_id}")
 
@@ -205,10 +183,7 @@ class EmailSyncService:
 
             # Record sync error
             try:
-                await self.repository.record_sync_error(
-                    inbox=inbox,
-                    error_message=str(e)
-                )
+                await self.repository.record_sync_error(inbox=inbox, error_message=str(e))
             except Exception as err:
                 logger.error(f"Failed to record sync error: {err}")
 
@@ -253,7 +228,7 @@ class EmailSyncService:
             return {
                 "success": True,
                 "message_id": message_id,
-                "updated_fields": list(update_data.keys())
+                "updated_fields": list(update_data.keys()),
             }
 
         except Exception as e:
@@ -261,9 +236,7 @@ class EmailSyncService:
             return {"success": False, "error": str(e)}
 
     async def delete_message_from_db(
-        self,
-        message_id: str,
-        soft_delete: bool = True
+        self, message_id: str, soft_delete: bool = True
     ) -> Dict[str, Any]:
         """
         Delete message from database.
@@ -292,11 +265,7 @@ class EmailSyncService:
 
             logger.info(f"✅ Deleted message from DB: {message_id} (soft={soft_delete})")
 
-            return {
-                "success": True,
-                "message_id": message_id,
-                "soft_delete": soft_delete
-            }
+            return {"success": True, "message_id": message_id, "soft_delete": soft_delete}
 
         except Exception as e:
             logger.exception(f"❌ Failed to delete message: {e}")
@@ -324,8 +293,7 @@ class EmailSyncService:
                 update_data["is_archived"] = is_archived
 
             count = await self.repository.bulk_update_messages(
-                message_ids=message_ids,
-                update_data=update_data
+                message_ids=message_ids, update_data=update_data
             )
 
             logger.info(f"✅ Bulk updated {count} messages")
@@ -333,7 +301,7 @@ class EmailSyncService:
             return {
                 "success": True,
                 "updated_count": count,
-                "updated_fields": list(update_data.keys())
+                "updated_fields": list(update_data.keys()),
             }
 
         except Exception as e:

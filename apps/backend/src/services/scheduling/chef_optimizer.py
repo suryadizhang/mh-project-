@@ -144,9 +144,7 @@ class ChefScore(BaseModel):
     skill_score: float = Field(ge=0.0, le=100.0)
     workload_score: float = Field(ge=0.0, le=100.0)
     rating_score: float = Field(ge=0.0, le=100.0)
-    history_score: float = Field(
-        ge=0.0, le=100.0, default=0.0
-    )  # Future: customer history
+    history_score: float = Field(ge=0.0, le=100.0, default=0.0)  # Future: customer history
     preference_score: float = Field(ge=0.0, le=100.0)
     travel_time_minutes: int
     travel_distance_miles: float
@@ -240,9 +238,7 @@ class ChefOptimizer:
 
         # 2. If preference is required, check if preferred chef is available
         if is_preference_required and preferred_chef_id:
-            preferred_available = any(
-                c.chef_id == preferred_chef_id for c in available_chefs
-            )
+            preferred_available = any(c.chef_id == preferred_chef_id for c in available_chefs)
             if not preferred_available:
                 return OptimalAssignment(
                     booking_id=booking_id,
@@ -252,9 +248,7 @@ class ChefOptimizer:
                 )
 
         # 3. Get daily workload for each chef
-        workloads = await self._get_chef_workloads(
-            [c.chef_id for c in available_chefs], event_date
-        )
+        workloads = await self._get_chef_workloads([c.chef_id for c in available_chefs], event_date)
 
         # 4. Validate consecutive travel feasibility for each chef
         # Filters out chefs who cannot physically travel between venues
@@ -512,9 +506,7 @@ class ChefOptimizer:
             - False with reason if any gap is too short
         """
         # Get existing bookings with venue coordinates
-        existing_bookings = await self._get_chef_bookings_with_venues(
-            chef_id, event_date
-        )
+        existing_bookings = await self._get_chef_bookings_with_venues(chef_id, event_date)
 
         # Create proposed booking entry
         proposed = {
@@ -772,9 +764,7 @@ class ChefOptimizer:
             travel_minutes = int(travel_minutes * RUSH_HOUR_MULTIPLIER)
 
         # Apply congested area multiplier (stacks with rush hour)
-        is_congested_origin, origin_area = self._is_congested_area(
-            origin_lat, origin_lng
-        )
+        is_congested_origin, origin_area = self._is_congested_area(origin_lat, origin_lng)
         is_congested_dest, dest_area = self._is_congested_area(dest_lat, dest_lng)
         congested_area = origin_area or dest_area
 

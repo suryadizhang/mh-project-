@@ -12,6 +12,7 @@ from typing import Any
 from uuid import UUID
 
 from core.database import get_db
+
 # TODO: Legacy notification models not migrated yet - needs refactor
 from utils.auth import require_super_admin
 from fastapi import APIRouter, Depends, HTTPException, status

@@ -77,9 +77,7 @@ async def get_payments(
             next_cursor = payments[-1].created_at.isoformat()
 
         # Format response
-        payment_list = [
-            format_payment_for_response(p, include_sensitive=False) for p in payments
-        ]
+        payment_list = [format_payment_for_response(p, include_sensitive=False) for p in payments]
 
         return PaymentListResponse(
             payments=payment_list,
@@ -110,9 +108,7 @@ async def get_payment(
 
         # Check ownership
         if payment.user_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="Payment does not belong to this user"
-            )
+            raise HTTPException(status_code=403, detail="Payment does not belong to this user")
 
         return format_payment_for_response(payment, include_sensitive=True)
 
@@ -159,18 +155,14 @@ async def admin_list_payments(
         total = total_result.scalar() or 0
 
         # Apply pagination and ordering
-        query = (
-            query.order_by(StripePayment.created_at.desc()).offset(offset).limit(limit)
-        )
+        query = query.order_by(StripePayment.created_at.desc()).offset(offset).limit(limit)
 
         # Execute
         result = await db.execute(query)
         payments = result.scalars().all()
 
         return {
-            "payments": [
-                format_payment_for_response(p, include_sensitive=True) for p in payments
-            ],
+            "payments": [format_payment_for_response(p, include_sensitive=True) for p in payments],
             "total": total,
             "limit": limit,
             "offset": offset,

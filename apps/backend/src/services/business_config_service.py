@@ -115,15 +115,11 @@ class BusinessConfig:
     # Within this window: use chef availability (chefs have set schedules)
     # Beyond this window: use long_advance_slot_capacity from SSoT
     chef_availability_window_days: int = 14  # 2 weeks - chefs fill availability
-    long_advance_slot_capacity: int = (
-        1  # Default 1 chef per slot for long-advance bookings
-    )
+    long_advance_slot_capacity: int = 1  # Default 1 chef per slot for long-advance bookings
 
     # Timing (deadlines/cutoffs in hours)
     menu_change_cutoff_hours: int = 12  # No menu changes within 12 hours of event
-    guest_count_finalize_hours: int = (
-        24  # Guest count must be finalized 24 hours before
-    )
+    guest_count_finalize_hours: int = 24  # Guest count must be finalized 24 hours before
     free_reschedule_hours: int = 24  # Free reschedule allowed with 24+ hours notice
 
     # Service (duration and logistics)
@@ -247,9 +243,7 @@ async def get_business_config(
             )
         else:
             # PRIORITY 2: Fallback to legacy business_rules table
-            logger.warning(
-                "⚠️ No dynamic_variables found, falling back to business_rules"
-            )
+            logger.warning("⚠️ No dynamic_variables found, falling back to business_rules")
             config = await _load_from_business_rules(db, config)
 
         # Cache the result for future requests
@@ -265,9 +259,7 @@ async def get_business_config(
                 logger.warning(f"Failed to cache business config: {e}")
 
     except Exception as e:
-        logger.warning(
-            f"⚠️ Failed to load business config from DB: {e}, using environment fallback"
-        )
+        logger.warning(f"⚠️ Failed to load business config from DB: {e}, using environment fallback")
         config = _load_from_environment()
 
     # Populate module-level cache for sync fallback
@@ -278,9 +270,7 @@ async def get_business_config(
     return config
 
 
-def _map_dynamic_variables_to_config(
-    variables: list, config: BusinessConfig
-) -> BusinessConfig:
+def _map_dynamic_variables_to_config(variables: list, config: BusinessConfig) -> BusinessConfig:
     """
     Map dynamic_variables rows to BusinessConfig dataclass.
 
@@ -426,9 +416,7 @@ def _parse_variable_value(value: Any) -> Any:
     return value
 
 
-async def _load_from_business_rules(
-    db: AsyncSession, config: BusinessConfig
-) -> BusinessConfig:
+async def _load_from_business_rules(db: AsyncSession, config: BusinessConfig) -> BusinessConfig:
     """
     Fallback: Load configuration from legacy business_rules table.
 
@@ -463,24 +451,18 @@ async def _load_from_business_rules(
             if rule_type == "PAYMENT" and "Deposit" in title:
                 if "deposit_amount" in rule_value:
                     # Convert dollars to cents
-                    config.deposit_amount_cents = int(
-                        rule_value["deposit_amount"] * 100
-                    )
+                    config.deposit_amount_cents = int(rule_value["deposit_amount"] * 100)
 
             elif rule_type == "PRICING":
                 if "Party Minimum" in title or "minimum_amount" in rule_value:
                     if "minimum_amount" in rule_value:
-                        config.party_minimum_cents = int(
-                            rule_value["minimum_amount"] * 100
-                        )
+                        config.party_minimum_cents = int(rule_value["minimum_amount"] * 100)
 
                 if "Travel Fee" in title:
                     if "free_miles" in rule_value:
                         config.travel_free_miles = int(rule_value["free_miles"])
                     if "per_mile_rate" in rule_value:
-                        config.travel_per_mile_cents = int(
-                            rule_value["per_mile_rate"] * 100
-                        )
+                        config.travel_per_mile_cents = int(rule_value["per_mile_rate"] * 100)
 
             elif rule_type == "BOOKING":
                 if "Advance" in title and "minimum_hours" in rule_value:
@@ -566,9 +548,7 @@ def _load_from_environment() -> BusinessConfig:
         )
 
     except ValueError as e:
-        logger.error(
-            f"❌ Invalid environment variable value: {e}, using hardcoded defaults"
-        )
+        logger.error(f"❌ Invalid environment variable value: {e}, using hardcoded defaults")
         config = BusinessConfig()
         config.source = "defaults"
 

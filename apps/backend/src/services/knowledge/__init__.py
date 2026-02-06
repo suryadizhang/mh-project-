@@ -18,6 +18,7 @@ Total: ~1,296 lines split across 8 files (was 884 lines in 1 file)
 
 Created: 2025-11-12
 """
+
 from .knowledge_service import KnowledgeService
 from .business_rules import BusinessRulesService
 from .faq_service import FAQService
@@ -28,12 +29,12 @@ from .training_data import TrainingDataService
 from .formatters import KnowledgeFormatters
 
 __all__ = [
-    'KnowledgeService',
-    'BusinessRulesService',
-    'FAQService',
-    'MenuService',
-    'UpsellService',
-    'AvailabilityService',
-    'TrainingDataService',
-    'KnowledgeFormatters',
+    "KnowledgeService",
+    "BusinessRulesService",
+    "FAQService",
+    "MenuService",
+    "UpsellService",
+    "AvailabilityService",
+    "TrainingDataService",
+    "KnowledgeFormatters",
 ]

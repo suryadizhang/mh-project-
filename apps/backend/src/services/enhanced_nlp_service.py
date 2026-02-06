@@ -42,9 +42,7 @@ class PerformanceMonitor:
         )
         self.start_time = datetime.now(timezone.utc)
 
-    def record_call(
-        self, method_name: str, execution_time: float, success: bool = True
-    ):
+    def record_call(self, method_name: str, execution_time: float, success: bool = True):
         """Record a method call with its execution time"""
         metrics = self.metrics[method_name]
         metrics["total_calls"] += 1
@@ -63,43 +61,28 @@ class PerformanceMonitor:
                 return {}
 
             m = self.metrics[method_name]
-            avg_time = (
-                m["total_time"] / m["total_calls"]
-                if m["total_calls"] > 0
-                else 0
-            )
+            avg_time = m["total_time"] / m["total_calls"] if m["total_calls"] > 0 else 0
 
             return {
                 "method": method_name,
                 "total_calls": m["total_calls"],
                 "average_time_ms": round(avg_time * 1000, 2),
                 "min_time_ms": (
-                    round(m["min_time"] * 1000, 2)
-                    if m["min_time"] != float("inf")
-                    else 0
+                    round(m["min_time"] * 1000, 2) if m["min_time"] != float("inf") else 0
                 ),
                 "max_time_ms": round(m["max_time"] * 1000, 2),
                 "total_time_s": round(m["total_time"], 2),
                 "errors": m["errors"],
                 "error_rate": (
-                    round(m["errors"] / m["total_calls"] * 100, 2)
-                    if m["total_calls"] > 0
-                    else 0
+                    round(m["errors"] / m["total_calls"] * 100, 2) if m["total_calls"] > 0 else 0
                 ),
-                "last_called": (
-                    m["last_called"].isoformat() if m["last_called"] else None
-                ),
+                "last_called": (m["last_called"].isoformat() if m["last_called"] else None),
             }
 
         # Return all metrics
         return {
-            "uptime_seconds": (
-                datetime.now(timezone.utc) - self.start_time
-            ).total_seconds(),
-            "methods": {
-                method: self.get_metrics(method)
-                for method in self.metrics.keys()
-            },
+            "uptime_seconds": (datetime.now(timezone.utc) - self.start_time).total_seconds(),
+            "methods": {method: self.get_metrics(method) for method in self.metrics.keys()},
         }
 
     def reset(self):
@@ -125,9 +108,7 @@ def monitor_performance(method):
         finally:
             execution_time = time.time() - start_time
             if hasattr(self, "performance_monitor"):
-                self.performance_monitor.record_call(
-                    method.__name__, execution_time, success
-                )
+                self.performance_monitor.record_call(method.__name__, execution_time, success)
 
     return wrapper
 
@@ -164,9 +145,7 @@ class EnhancedNLPService:
             logger.info("Loading sentence-transformer model...")
             start_time = time.time()
             self.semantic_model = SentenceTransformer("all-MiniLM-L6-v2")
-            logger.info(
-                f"✅ sentence-transformer loaded in {time.time() - start_time:.2f}s"
-            )
+            logger.info(f"✅ sentence-transformer loaded in {time.time() - start_time:.2f}s")
 
             self._initialized = True
             logger.info("✅ Enhanced NLP models loaded successfully")
@@ -220,16 +199,13 @@ class EnhancedNLPService:
         # Feature extraction
         features = {
             "has_greeting": any(
-                token.text.lower()
-                in ["hi", "hello", "hey", "good morning", "good afternoon"]
+                token.text.lower() in ["hi", "hello", "hey", "good morning", "good afternoon"]
                 for token in doc
             ),
             "has_question": "?" in text,
             "has_exclamation": "!" in text,
             "word_count": len([token for token in doc if not token.is_punct]),
-            "avg_word_length": sum(
-                len(token.text) for token in doc if not token.is_punct
-            )
+            "avg_word_length": sum(len(token.text) for token in doc if not token.is_punct)
             / max(len([token for token in doc if not token.is_punct]), 1),
             "has_emoji": bool(re.search(r"[😀-🙏]", text)),
             "has_formal_words": any(
@@ -245,8 +221,7 @@ class EnhancedNLPService:
                 for token in doc
             ),
             "has_casual_words": any(
-                token.text.lower()
-                in ["wanna", "gonna", "yeah", "cool", "awesome", "hey"]
+                token.text.lower() in ["wanna", "gonna", "yeah", "cool", "awesome", "hey"]
                 for token in doc
             ),
             "has_anxiety_markers": any(
@@ -302,9 +277,7 @@ class EnhancedNLPService:
         return tone, confidence
 
     @monitor_performance
-    def semantic_search_faqs(
-        self, query: str, faq_list: List[Dict], top_k: int = 3
-    ) -> List[Dict]:
+    def semantic_search_faqs(self, query: str, faq_list: List[Dict], top_k: int = 3) -> List[Dict]:
         """
         Semantic search for FAQs - finds similar questions even if worded differently
 
@@ -340,9 +313,7 @@ class EnhancedNLPService:
                     {
                         **faq_list[idx],
                         "similarity_score": float(similarities[idx]),
-                        "confidence": (
-                            "high" if similarities[idx] > 0.7 else "medium"
-                        ),
+                        "confidence": ("high" if similarities[idx] > 0.7 else "medium"),
                     }
                 )
 
@@ -398,9 +369,7 @@ class EnhancedNLPService:
                             "folks",
                             "attendees",
                         ]
-                        if any(
-                            keyword in text_lower for keyword in party_keywords
-                        ):
+                        if any(keyword in text_lower for keyword in party_keywords):
                             guest_count = count
                             confidence_factors.append(0.3)
                             break
@@ -418,12 +387,8 @@ class EnhancedNLPService:
 
         relative_dates = {
             "today": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-            "tomorrow": (
-                datetime.now(timezone.utc) + timedelta(days=1)
-            ).strftime("%Y-%m-%d"),
-            "next week": (
-                datetime.now(timezone.utc) + timedelta(days=7)
-            ).strftime("%Y-%m-%d"),
+            "tomorrow": (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%d"),
+            "next week": (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d"),
             "this weekend": "this weekend",
             "this friday": "this Friday",
             "this saturday": "this Saturday",
@@ -590,10 +555,7 @@ class EnhancedNLPService:
         }
 
         for keyword, restriction in dietary_keywords.items():
-            if (
-                keyword in text_lower
-                and restriction not in dietary_restrictions
-            ):
+            if keyword in text_lower and restriction not in dietary_restrictions:
                 dietary_restrictions.append(restriction)
                 confidence_factors.append(0.1)
 
@@ -668,9 +630,7 @@ class EnhancedNLPService:
 
     # ========== Performance & Monitoring Methods ==========
 
-    def get_performance_metrics(
-        self, method_name: str = None
-    ) -> Dict[str, Any]:
+    def get_performance_metrics(self, method_name: str = None) -> Dict[str, Any]:
         """
         Get performance metrics for NLP operations
 
@@ -710,17 +670,11 @@ class EnhancedNLPService:
         metrics = self.get_performance_metrics()
 
         # Calculate aggregate statistics
-        total_calls = sum(
-            m["total_calls"] for m in metrics.get("methods", {}).values()
-        )
+        total_calls = sum(m["total_calls"] for m in metrics.get("methods", {}).values())
 
-        total_errors = sum(
-            m["errors"] for m in metrics.get("methods", {}).values()
-        )
+        total_errors = sum(m["errors"] for m in metrics.get("methods", {}).values())
 
-        error_rate = (
-            (total_errors / total_calls * 100) if total_calls > 0 else 0
-        )
+        error_rate = (total_errors / total_calls * 100) if total_calls > 0 else 0
 
         # Calculate average response time across all methods
         all_times = [
@@ -800,24 +754,18 @@ class EnhancedNLPService:
 
         # Anxious indicators
         if any(
-            word in text_lower
-            for word in ["nervous", "worried", "anxious", "scared", "help me"]
+            word in text_lower for word in ["nervous", "worried", "anxious", "scared", "help me"]
         ):
             return "anxious", 0.75
 
         # Casual indicators
-        if any(
-            word in text_lower
-            for word in ["hey", "wanna", "gonna", "yeah", "😊", "🎉"]
-        ):
+        if any(word in text_lower for word in ["hey", "wanna", "gonna", "yeah", "😊", "🎉"]):
             return "casual", 0.70
 
         # Default
         return "casual", 0.60
 
-    def _fallback_keyword_search(
-        self, query: str, faq_list: List[Dict], top_k: int
-    ) -> List[Dict]:
+    def _fallback_keyword_search(self, query: str, faq_list: List[Dict], top_k: int) -> List[Dict]:
         """Simple keyword-based FAQ search"""
         query_words = set(query.lower().split())
 

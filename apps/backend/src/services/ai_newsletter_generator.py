@@ -30,6 +30,7 @@ openai.api_key = settings.OPENAI_API_KEY
 
 class NewsletterType(str, Enum):
     """Types of newsletters."""
+
     HOLIDAY_PROMOTION = "holiday_promotion"
     EVENT_SEASON = "event_season"
     BOOKING_REMINDER = "booking_reminder"
@@ -40,6 +41,7 @@ class NewsletterType(str, Enum):
 
 class CustomerSegment(str, Enum):
     """Customer segments."""
+
     ALL = "all"
     FAMILIES = "families"
     EVENT_PLANNERS = "event_planners"
@@ -52,46 +54,43 @@ class CustomerSegment(str, Enum):
 class AINewsletterGenerator:
     """
     AI-powered newsletter content generator with holiday integration.
-    
+
     Usage:
         generator = AINewsletterGenerator()
-        
+
         # Generate holiday newsletters
         newsletters = await generator.generate_holiday_newsletters(days=60)
-        
+
         # Get AI content
         content = await generator.generate_content(
             holiday_key="thanksgiving",
             segment=CustomerSegment.FAMILIES
         )
     """
-    
+
     def __init__(self):
         self.holiday_service = get_holiday_service()
-    
-    async def generate_holiday_newsletters(
-        self, 
-        days: int = 60
-    ) -> List[Dict]:
+
+    async def generate_holiday_newsletters(self, days: int = 60) -> List[Dict]:
         """
         Generate AI-powered newsletters for all upcoming holidays.
-        
+
         Returns list of newsletter configs ready to customize/send.
         """
         newsletters = []
-        
+
         upcoming_holidays = self.holiday_service.get_upcoming_holidays(days=days)
         logger.info(f"Generating newsletters for {len(upcoming_holidays)} upcoming holidays")
-        
+
         for holiday_key, holiday_obj, holiday_date in upcoming_holidays:
             target_segments = self._get_target_segments(holiday_obj)
             context = self.holiday_service.get_holiday_message_context(holiday_key)
-            
+
             send_date = holiday_date - timedelta(days=holiday_obj.marketing_window_days)
-            
+
             if send_date < date.today():
                 continue
-            
+
             for segment in target_segments:
                 newsletter = {
                     "id": f"{holiday_key}_{segment.value}_{holiday_date.year}",
@@ -106,28 +105,25 @@ class AINewsletterGenerator:
                     "cta": self._get_cta(holiday_obj),
                     "created_at": datetime.now(timezone.utc),
                 }
-                
+
                 newsletters.append(newsletter)
                 logger.info(f"✅ Generated: {newsletter['subject']}")
-        
+
         return newsletters
-    
+
     async def generate_content(
-        self,
-        holiday_key: str,
-        segment: CustomerSegment,
-        context: Optional[Dict] = None
+        self, holiday_key: str, segment: CustomerSegment, context: Optional[Dict] = None
     ) -> Dict[str, str]:
         """
         Use OpenAI GPT-4 to generate newsletter content.
-        
+
         Returns dict with html_content, text_content, preview_text.
         """
         if context is None:
             context = self.holiday_service.get_holiday_message_context(holiday_key)
-        
+
         prompt = self._build_prompt(holiday_key, segment, context)
-        
+
         try:
             response = await openai.ChatCompletion.acreate(
                 model="gpt-4",
@@ -138,46 +134,43 @@ class AINewsletterGenerator:
                             "You are an expert email marketing copywriter for a premium hibachi "
                             "catering company. Write engaging, personalized content that drives bookings. "
                             "Use warm, professional tone with storytelling."
-                        )
+                        ),
                     },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.8,
                 max_tokens=1500,
             )
-            
+
             ai_text = response.choices[0].message.content
-            
+
             html_content = self._convert_to_html(ai_text, context)
             text_content = self._strip_html(html_content)
-            preview_text = text_content[:100] + '...'
-            
+            preview_text = text_content[:100] + "..."
+
             logger.info(f"✅ AI generated content for {holiday_key} - {segment.value}")
-            
+
             return {
                 "html_content": html_content,
                 "text_content": text_content,
                 "preview_text": preview_text,
                 "ai_generated": True,
             }
-            
+
         except Exception as e:
             logger.error(f"AI generation failed: {e}")
             return self._fallback_content(holiday_key, segment, context)
-    
+
     def _build_prompt(self, holiday_key: str, segment: CustomerSegment, context: Dict) -> str:
         """Build AI prompt for content generation."""
-        
+
         segment_guidance = {
             CustomerSegment.FAMILIES: "Target: Families. Tone: Warm, fun. Focus: Memories, bonding.",
             CustomerSegment.EVENT_PLANNERS: "Target: Planners. Tone: Professional. Focus: Execution, reliability.",
             CustomerSegment.CORPORATES: "Target: Corporate. Tone: Professional. Focus: Team building, networking.",
             CustomerSegment.PAST_CUSTOMERS: "Target: Past customers. Tone: Appreciative. Focus: Thank you, what's new.",
         }.get(segment, "Target: General. Tone: Friendly. Focus: Great experiences.")
-        
+
         return f"""
 Write SMS newsletter content for hibachi catering company.
 
@@ -205,7 +198,7 @@ Use: MH Hibachi Catering
 
 Note: STOP instructions will be added automatically by SMS service.
 """
-    
+
     async def _generate_subject_line(
         self, holiday: Holiday, segment: CustomerSegment, context: Dict
     ) -> str:
@@ -231,22 +224,22 @@ Just the preview text:
                 model="gpt-4",
                 messages=[
                     {"role": "system", "content": "Write compelling subject lines."},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=0.9,
                 max_tokens=50,
             )
-            
-            return response.choices[0].message.content.strip().strip('"\'')
-            
+
+            return response.choices[0].message.content.strip().strip("\"'")
+
         except Exception as e:
             logger.error(f"AI subject failed: {e}")
             return f"🎉 {context['name']} in {context['days_until']} Days - Book Now!"
-    
+
     def _convert_to_html(self, ai_text: str, context: Dict) -> str:
         """Convert AI text to HTML email."""
-        paragraphs = [p.strip() for p in ai_text.split('\n\n') if p.strip()]
-        
+        paragraphs = [p.strip() for p in ai_text.split("\n\n") if p.strip()]
+
         html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -271,10 +264,10 @@ Just the preview text:
                     <tr>
                         <td style="padding:40px;color:#333;font-size:16px;line-height:1.6;">
 """
-        
+
         for para in paragraphs:
             html += f'                            <p style="margin:0 0 20px;">{para}</p>\n'
-        
+
         html += f"""
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:30px;">
                                 <tr>
@@ -301,34 +294,45 @@ Just the preview text:
     </table>
 </body>
 </html>"""
-        
+
         return html
-    
+
     def _strip_html(self, html: str) -> str:
         """Convert HTML to plain text."""
         import re
-        text = re.sub(r'<[^>]+>', '', html)
-        text = text.replace('&nbsp;', ' ').replace('&amp;', '&')
-        text = re.sub(r'\n\s*\n', '\n\n', text)
+
+        text = re.sub(r"<[^>]+>", "", html)
+        text = text.replace("&nbsp;", " ").replace("&amp;", "&")
+        text = re.sub(r"\n\s*\n", "\n\n", text)
         return text.strip()
-    
+
     def _get_target_segments(self, holiday: Holiday) -> List[CustomerSegment]:
         """Determine target segments for holiday."""
         if holiday.category == HolidayCategory.EVENT_SEASON:
-            return [CustomerSegment.EVENT_PLANNERS, CustomerSegment.FAMILIES, CustomerSegment.PAST_CUSTOMERS]
+            return [
+                CustomerSegment.EVENT_PLANNERS,
+                CustomerSegment.FAMILIES,
+                CustomerSegment.PAST_CUSTOMERS,
+            ]
         elif holiday.category == HolidayCategory.FEDERAL:
-            return [CustomerSegment.FAMILIES, CustomerSegment.PAST_CUSTOMERS, CustomerSegment.INACTIVE]
+            return [
+                CustomerSegment.FAMILIES,
+                CustomerSegment.PAST_CUSTOMERS,
+                CustomerSegment.INACTIVE,
+            ]
         else:
             return [CustomerSegment.ALL]
-    
+
     def _get_cta(self, holiday: Holiday) -> Dict[str, str]:
         """Get CTA for holiday."""
         return {
             "text": f"Book Your {holiday.name} Event",
             "url": settings.BOOKING_URL,
         }
-    
-    def _fallback_content(self, holiday_key: str, segment: CustomerSegment, context: Dict) -> Dict[str, str]:
+
+    def _fallback_content(
+        self, holiday_key: str, segment: CustomerSegment, context: Dict
+    ) -> Dict[str, str]:
         """Fallback if AI fails."""
         content = f"""
 Hi there!
@@ -343,7 +347,7 @@ Our hibachi catering is perfect for:
 Book now for {context['name']}!
 """
         html = self._convert_to_html(content, context)
-        
+
         return {
             "html_content": html,
             "text_content": content,

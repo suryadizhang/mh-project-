@@ -227,9 +227,7 @@ class PaymentInstructionsService:
         if "venmo" in payment_methods:
             lines.append(f"💙 Venmo: {self.venmo_username}")
 
-        lines.extend(
-            ["", f"Questions? Call {self.business_phone}", "", "- My Hibachi Chef Team"]
-        )
+        lines.extend(["", f"Questions? Call {self.business_phone}", "", "- My Hibachi Chef Team"])
 
         return "\n".join(lines)
 

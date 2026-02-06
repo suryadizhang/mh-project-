@@ -530,33 +530,28 @@ class SlotHoldService:
         """
         Record that a signing link was sent for this hold.
 
-        Uses the database function core.record_signing_link_sent() which:
-        - Increments send count
-        - Tracks first send and last resend times
-        - Adds channel to the channels array
-        - Rate limits to 5 sends total
+        Simple implementation that updates signing_link_sent_at timestamp.
+        TODO: Add full send tracking with send_count, channels, rate limiting
+        once database schema is updated.
 
         Args:
             hold_id: The slot hold ID
             channel: Channel used ('sms' or 'email')
 
         Returns:
-            Dict with send_count, first_sent_at, last_sent_at, or None if failed
-
-        Raises:
-            ValueError: If rate limit exceeded (5 sends)
+            Dict with send_count (always 1 for now), or None if failed
         """
         try:
             result = await self.db.execute(
                 text(
                     """
-                    SELECT * FROM core.record_signing_link_sent(
-                        CAST(:hold_id AS uuid),
-                        :channel
-                    )
+                    UPDATE core.slot_holds
+                    SET signing_link_sent_at = NOW()
+                    WHERE id = :hold_id
+                    RETURNING id, signing_link_sent_at
                 """
                 ),
-                {"hold_id": str(hold_id), "channel": channel},
+                {"hold_id": str(hold_id)},
             )
 
             row = result.fetchone()
@@ -565,12 +560,12 @@ class SlotHoldService:
             if row:
                 logger.info(
                     f"Recorded signing link sent for hold {hold_id} "
-                    f"via {channel} (count: {row.send_count})"
+                    f"via {channel}"
                 )
                 return {
-                    "send_count": row.send_count,
-                    "first_sent_at": row.first_sent_at,
-                    "last_sent_at": row.last_sent_at,
+                    "send_count": 1,
+                    "first_sent_at": row.signing_link_sent_at,
+                    "last_sent_at": row.signing_link_sent_at,
                 }
 
             return None
@@ -588,7 +583,8 @@ class SlotHoldService:
         """
         Get the signing link status for a hold.
 
-        Uses the view core.slot_holds_with_link_status for computed fields.
+        Simple implementation using base slot_holds table.
+        TODO: Add full tracking view once database schema is updated.
 
         Args:
             hold_id: The slot hold ID
@@ -603,13 +599,11 @@ class SlotHoldService:
                     id,
                     signing_token,
                     signing_link_sent_at,
-                    signing_link_resent_at,
-                    signing_link_send_count,
-                    signing_link_channels,
-                    link_status,
-                    link_rate_limited,
-                    seconds_since_last_send
-                FROM core.slot_holds_with_link_status
+                    CASE
+                        WHEN signing_link_sent_at IS NOT NULL THEN 'sent'
+                        ELSE 'pending'
+                    END as link_status
+                FROM core.slot_holds
                 WHERE id = :hold_id
             """
             ),
@@ -620,14 +614,14 @@ class SlotHoldService:
         if row:
             return {
                 "id": row.id,
-                "signing_token": str(row.signing_token),  # Convert UUID to string
+                "signing_token": str(row.signing_token) if row.signing_token else None,
                 "sent_at": row.signing_link_sent_at,
-                "resent_at": row.signing_link_resent_at,
-                "send_count": row.signing_link_send_count,
-                "channels": row.signing_link_channels or [],
+                "resent_at": None,  # Not tracked yet
+                "send_count": 1 if row.signing_link_sent_at else 0,
+                "channels": [],  # Not tracked yet
                 "status": row.link_status,
-                "rate_limited": row.link_rate_limited,
-                "seconds_since_last_send": row.seconds_since_last_send,
+                "rate_limited": False,  # Not implemented yet
+                "seconds_since_last_send": None,  # Not tracked yet
             }
 
         return None

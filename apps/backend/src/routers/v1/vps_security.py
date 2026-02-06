@@ -155,7 +155,9 @@ async def run_ssh_command(command: str) -> tuple[bool, str, str]:
     Returns:
         Tuple of (success, stdout, stderr)
     """
-    ssh_cmd = f"ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 {VPS_USER}@{VPS_HOST} '{command}'"
+    ssh_cmd = (
+        f"ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 {VPS_USER}@{VPS_HOST} '{command}'"
+    )
 
     try:
         process = await asyncio.create_subprocess_shell(
@@ -164,9 +166,7 @@ async def run_ssh_command(command: str) -> tuple[bool, str, str]:
             stderr=asyncio.subprocess.PIPE,
         )
 
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(), timeout=SSH_TIMEOUT
-        )
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=SSH_TIMEOUT)
 
         return (
             process.returncode == 0,
@@ -265,9 +265,7 @@ async def get_security_status(
         if jail_match:
             jail_names = [j.strip() for j in jail_match.group(1).split(",")]
             for jail in jail_names:
-                success, stdout, _ = await run_ssh_command(
-                    f"fail2ban-client status {jail}"
-                )
+                success, stdout, _ = await run_ssh_command(f"fail2ban-client status {jail}")
                 if success:
                     parsed = parse_jail_status(stdout)
                     total_banned += parsed["currently_banned"]
@@ -306,9 +304,7 @@ async def get_jail_status(
     jail_names = [j.strip() for j in jail_match.group(1).split(",")]
 
     for jail_name in jail_names:
-        success, stdout, _ = await run_ssh_command(
-            f"fail2ban-client status {jail_name}"
-        )
+        success, stdout, _ = await run_ssh_command(f"fail2ban-client status {jail_name}")
         if success:
             parsed = parse_jail_status(stdout)
             jails.append(
@@ -349,9 +345,7 @@ async def get_banned_ips(
     jail_names = [j.strip() for j in jail_match.group(1).split(",")]
 
     for jail_name in jail_names:
-        success, stdout, _ = await run_ssh_command(
-            f"fail2ban-client status {jail_name}"
-        )
+        success, stdout, _ = await run_ssh_command(f"fail2ban-client status {jail_name}")
         if success:
             parsed = parse_jail_status(stdout)
             for ip in parsed["banned_ips"]:
@@ -441,9 +435,7 @@ async def get_security_stats(
             pass
 
     # Count bans in last 7 days (approximate)
-    success_7d, stdout_7d, _ = await run_ssh_command(
-        "grep 'Ban' /var/log/fail2ban.log | wc -l"
-    )
+    success_7d, stdout_7d, _ = await run_ssh_command("grep 'Ban' /var/log/fail2ban.log | wc -l")
     if success_7d:
         try:
             stats.total_bans_7d = int(stdout_7d.strip())
@@ -510,9 +502,7 @@ async def unban_ip(
                     if success:
                         unbanned_from.append(jail_name)
 
-    logger.info(
-        f"User {current_user.email} unbanned IP {request.ip} from jails: {unbanned_from}"
-    )
+    logger.info(f"User {current_user.email} unbanned IP {request.ip} from jails: {unbanned_from}")
 
     return UnbanResponse(
         success=len(unbanned_from) > 0,

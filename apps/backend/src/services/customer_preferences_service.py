@@ -287,8 +287,7 @@ async def get_chef_prep_allergens(
                     allergen=row.code,
                     display_name=row.display_name,
                     icon=row.icon or "⚠️",
-                    chef_action=row.chef_action
-                    or "Please confirm accommodations with customer.",
+                    chef_action=row.chef_action or "Please confirm accommodations with customer.",
                 )
             )
 
@@ -406,9 +405,7 @@ async def calculate_chef_request_bonus(
         kids = row.child_count or 0
         # Toddlers are free, not included in base
 
-        base_order_cents = (
-            adults * tier_rates["adult_cents"] + kids * tier_rates["kid_cents"]
-        )
+        base_order_cents = adults * tier_rates["adult_cents"] + kids * tier_rates["kid_cents"]
 
         bonus_amount_cents = int(base_order_cents * bonus_pct / 100)
 

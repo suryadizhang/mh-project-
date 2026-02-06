@@ -96,9 +96,7 @@ router.include_router(invoices_router)  # /invoices, /invoices/{id}, /admin/invo
 router.include_router(analytics_router)  # /analytics, /analytics/daily
 router.include_router(dashboard_router)  # /dashboard, /customer-portal, /loyalty-status
 router.include_router(webhooks_router)  # /webhook
-router.include_router(
-    customer_lookup_router
-)  # /lookup, /calculate-total, /suggested-tips
+router.include_router(customer_lookup_router)  # /lookup, /calculate-total, /suggested-tips
 
 # Export for external imports
 __all__ = [

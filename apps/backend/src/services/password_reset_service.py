@@ -73,15 +73,9 @@ class PasswordResetService:
             db: Database session for token storage
         """
         self.db = db
-        self.token_expiry_minutes = getattr(
-            settings, "PASSWORD_RESET_EXPIRE_MINUTES", 60
-        )
-        self.max_attempts = getattr(
-            settings, "PASSWORD_RESET_MAX_ATTEMPTS", 30
-        )  # 30 per minute
-        self.frontend_url = getattr(
-            settings, "FRONTEND_URL", "https://admin.myhibachichef.com"
-        )
+        self.token_expiry_minutes = getattr(settings, "PASSWORD_RESET_EXPIRE_MINUTES", 60)
+        self.max_attempts = getattr(settings, "PASSWORD_RESET_MAX_ATTEMPTS", 30)  # 30 per minute
+        self.frontend_url = getattr(settings, "FRONTEND_URL", "https://admin.myhibachichef.com")
 
     async def request_reset(self, email: str) -> bool:
         """
@@ -100,23 +94,17 @@ class PasswordResetService:
 
         try:
             # Check if user exists
-            result = await self.db.execute(
-                select(User).where(User.email == email_lower)
-            )
+            result = await self.db.execute(select(User).where(User.email == email_lower))
             user = result.scalar_one_or_none()
 
             if not user:
-                logger.info(
-                    f"📧 Reset requested for non-existent email: {email_lower[:3]}***"
-                )
+                logger.info(f"📧 Reset requested for non-existent email: {email_lower[:3]}***")
                 return True  # Don't reveal if email exists
 
             # Check rate limiting
             rate_limited = await self._is_rate_limited(email_lower)
             if rate_limited:
-                logger.warning(
-                    f"🚫 Rate limit exceeded for password reset: {email_lower}"
-                )
+                logger.warning(f"🚫 Rate limit exceeded for password reset: {email_lower}")
                 return True  # Still return True - don't reveal rate limiting
 
             # Generate secure token
@@ -124,9 +112,7 @@ class PasswordResetService:
             token_hash = self._hash_token(raw_token)
 
             # Store token in database
-            expires_at = datetime.utcnow() + timedelta(
-                minutes=self.token_expiry_minutes
-            )
+            expires_at = datetime.utcnow() + timedelta(minutes=self.token_expiry_minutes)
 
             await self.db.execute(
                 text(
@@ -156,9 +142,7 @@ class PasswordResetService:
             if email_sent:
                 logger.info(f"✅ Password reset email sent to {email_lower[:3]}***")
             else:
-                logger.error(
-                    f"❌ Failed to send password reset email to {email_lower[:3]}***"
-                )
+                logger.error(f"❌ Failed to send password reset email to {email_lower[:3]}***")
 
             return True
 
@@ -189,9 +173,7 @@ class PasswordResetService:
 
             # Find user (should exist - created by super admin)
             result = await self.db.execute(
-                text(
-                    "SELECT id, full_name, email FROM identity.users WHERE email = :email"
-                ),
+                text("SELECT id, full_name, email FROM identity.users WHERE email = :email"),
                 {"email": email_lower},
             )
             user = result.fetchone()
@@ -204,17 +186,13 @@ class PasswordResetService:
 
             # Check rate limiting
             if await self._is_rate_limited(email_lower):
-                logger.warning(
-                    f"⚠️ Rate limit exceeded for invitation: {email_lower[:3]}***"
-                )
+                logger.warning(f"⚠️ Rate limit exceeded for invitation: {email_lower[:3]}***")
                 return True
 
             # Generate secure token (256 bits of entropy)
             raw_token = secrets.token_urlsafe(32)
             token_hash = self._hash_token(raw_token)
-            expires_at = datetime.utcnow() + timedelta(
-                minutes=self.token_expiry_minutes
-            )
+            expires_at = datetime.utcnow() + timedelta(minutes=self.token_expiry_minutes)
 
             # Store token hash (never the raw token)
             await self.db.execute(
@@ -246,9 +224,7 @@ class PasswordResetService:
             if email_sent:
                 logger.info(f"✅ Admin invitation email sent to {email_lower[:3]}***")
             else:
-                logger.error(
-                    f"❌ Failed to send admin invitation email to {email_lower[:3]}***"
-                )
+                logger.error(f"❌ Failed to send admin invitation email to {email_lower[:3]}***")
 
             return True
 
@@ -293,9 +269,7 @@ class PasswordResetService:
 
             # Check if already used
             if used_at is not None:
-                logger.warning(
-                    f"🔒 Attempt to reuse password reset token for user {user_id}"
-                )
+                logger.warning(f"🔒 Attempt to reuse password reset token for user {user_id}")
                 return (
                     False,
                     "This reset link has already been used. Please request a new one.",

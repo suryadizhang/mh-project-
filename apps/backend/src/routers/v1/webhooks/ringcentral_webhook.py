@@ -192,7 +192,11 @@ async def process_inbound_sms(
 async def broadcast_message_update(processing_result: dict[str, Any]):
     """Broadcast message updates to WebSocket connections."""
     try:
-        {"type": "sms_received", "data": processing_result, "timestamp": datetime.now(timezone.utc).isoformat()}
+        {
+            "type": "sms_received",
+            "data": processing_result,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
 
         # Note: WebSocket manager would be imported here if available
         # await manager.broadcast_to_subscribers(update_message, "inbox_updates")

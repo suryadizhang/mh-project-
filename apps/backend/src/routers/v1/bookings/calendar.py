@@ -54,8 +54,7 @@ logger = logging.getLogger(__name__)
 async def get_weekly_bookings(
     date_from: str = Query(..., description="Start date (YYYY-MM-DD)"),
     date_to: str = Query(..., description="End date (YYYY-MM-DD)"),
-    status_filter: str
-    | None = Query(None, alias="status", description="Filter by status"),
+    status_filter: str | None = Query(None, alias="status", description="Filter by status"),
     db: AsyncSession = Depends(get_db),
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
@@ -153,12 +152,8 @@ async def get_weekly_bookings(
                 ),
                 "special_requests": special_requests,
                 "source": booking.source,
-                "created_at": booking.created_at.isoformat()
-                if booking.created_at
-                else None,
-                "updated_at": booking.updated_at.isoformat()
-                if booking.updated_at
-                else None,
+                "created_at": booking.created_at.isoformat() if booking.created_at else None,
+                "updated_at": booking.updated_at.isoformat() if booking.updated_at else None,
             }
         )
 
@@ -181,16 +176,13 @@ async def get_weekly_bookings(
 async def get_monthly_bookings(
     date_from: str = Query(..., description="Start date (YYYY-MM-DD)"),
     date_to: str = Query(..., description="End date (YYYY-MM-DD)"),
-    status_filter: str
-    | None = Query(None, alias="status", description="Filter by status"),
+    status_filter: str | None = Query(None, alias="status", description="Filter by status"),
     db: AsyncSession = Depends(get_db),
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Get all bookings for a month (admin calendar view)."""
     # Reuse weekly implementation (same logic, just different date range)
-    return await get_weekly_bookings(
-        date_from, date_to, status_filter, db, current_user
-    )
+    return await get_weekly_bookings(date_from, date_to, status_filter, db, current_user)
 
 
 @router.patch(
@@ -271,11 +263,7 @@ async def reschedule_booking(
         )
 
     # Validate booking status
-    status_value = (
-        booking.status.value
-        if hasattr(booking.status, "value")
-        else str(booking.status)
-    )
+    status_value = booking.status.value if hasattr(booking.status, "value") else str(booking.status)
     if status_value in ("cancelled", "completed"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

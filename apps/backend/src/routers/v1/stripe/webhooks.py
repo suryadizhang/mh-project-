@@ -247,9 +247,7 @@ async def handle_payment_intent_succeeded(
     # Update payment record in database
     payment_intent_id = payment_intent["id"]
     result = await db.execute(
-        select(StripePayment).where(
-            StripePayment.stripe_payment_intent_id == payment_intent_id
-        )
+        select(StripePayment).where(StripePayment.stripe_payment_intent_id == payment_intent_id)
     )
     payment = result.scalar_one_or_none()
 
@@ -297,9 +295,7 @@ async def handle_payment_intent_failed(
     # Update payment record
     payment_intent_id = payment_intent["id"]
     result = await db.execute(
-        select(StripePayment).where(
-            StripePayment.stripe_payment_intent_id == payment_intent_id
-        )
+        select(StripePayment).where(StripePayment.stripe_payment_intent_id == payment_intent_id)
     )
     payment = result.scalar_one_or_none()
 
@@ -331,9 +327,7 @@ async def handle_payment_intent_canceled(
     # Update payment record
     payment_intent_id = payment_intent["id"]
     result = await db.execute(
-        select(StripePayment).where(
-            StripePayment.stripe_payment_intent_id == payment_intent_id
-        )
+        select(StripePayment).where(StripePayment.stripe_payment_intent_id == payment_intent_id)
     )
     payment = result.scalar_one_or_none()
 
@@ -358,9 +352,7 @@ async def handle_payment_intent_processing(
     # Update payment record
     payment_intent_id = payment_intent["id"]
     result = await db.execute(
-        select(StripePayment).where(
-            StripePayment.stripe_payment_intent_id == payment_intent_id
-        )
+        select(StripePayment).where(StripePayment.stripe_payment_intent_id == payment_intent_id)
     )
     payment = result.scalar_one_or_none()
 
@@ -381,8 +373,7 @@ async def handle_customer_created(
 ):
     """Handle new Stripe customer creation."""
     logger.info(
-        f"[CUSTOMER CREATED] ID: {customer['id']}, "
-        f"Email: {customer.get('email', 'No email')}"
+        f"[CUSTOMER CREATED] ID: {customer['id']}, " f"Email: {customer.get('email', 'No email')}"
     )
 
     # TODO: Link Stripe customer to local user if email matches
@@ -401,9 +392,7 @@ async def handle_customer_updated(
     metadata = customer.get("metadata", {})
     preferred_method = metadata.get("preferredPaymentMethod")
     if preferred_method == "zelle":
-        logger.info(
-            f"[SMART CHOICE] Customer {customer['id']} chose Zelle - 3% savings!"
-        )
+        logger.info(f"[SMART CHOICE] Customer {customer['id']} chose Zelle - 3% savings!")
         # TODO: Send congratulations email for choosing Zelle
 
 
@@ -439,9 +428,7 @@ async def handle_invoice_payment_succeeded(
 
     # Update local invoice record
     stripe_invoice_id = invoice["id"]
-    result = await db.execute(
-        select(Invoice).where(Invoice.stripe_invoice_id == stripe_invoice_id)
-    )
+    result = await db.execute(select(Invoice).where(Invoice.stripe_invoice_id == stripe_invoice_id))
     local_invoice = result.scalar_one_or_none()
 
     if local_invoice:
@@ -466,9 +453,7 @@ async def handle_invoice_payment_failed(
 
     # Update local invoice record
     stripe_invoice_id = invoice["id"]
-    result = await db.execute(
-        select(Invoice).where(Invoice.stripe_invoice_id == stripe_invoice_id)
-    )
+    result = await db.execute(select(Invoice).where(Invoice.stripe_invoice_id == stripe_invoice_id))
     local_invoice = result.scalar_one_or_none()
 
     if local_invoice:
@@ -537,9 +522,7 @@ async def handle_charge_refunded(
     payment_intent_id = charge.get("payment_intent")
     if payment_intent_id:
         result = await db.execute(
-            select(StripePayment).where(
-                StripePayment.stripe_payment_intent_id == payment_intent_id
-            )
+            select(StripePayment).where(StripePayment.stripe_payment_intent_id == payment_intent_id)
         )
         payment = result.scalar_one_or_none()
 

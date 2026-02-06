@@ -114,9 +114,7 @@ async def verify_checkout_session(
         # Verify the session belongs to this user (via metadata)
         session_user_id = session.metadata.get("user_id")
         if session_user_id and session_user_id != str(current_user.id):
-            raise HTTPException(
-                status_code=403, detail="Session does not belong to this user"
-            )
+            raise HTTPException(status_code=403, detail="Session does not belong to this user")
 
         return {
             "session_id": session.id,

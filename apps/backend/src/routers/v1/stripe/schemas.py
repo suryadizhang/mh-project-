@@ -69,9 +69,7 @@ class RefundRequest(BaseModel):
     """Request model for creating a refund."""
 
     payment_intent_id: str
-    amount: Optional[int] = Field(
-        default=None, ge=1, description="Partial refund amount in cents"
-    )
+    amount: Optional[int] = Field(default=None, ge=1, description="Partial refund amount in cents")
     reason: Optional[str] = None
 
 
@@ -161,9 +159,7 @@ class CustomerLookupRequest(BaseModel):
     email: Optional[str] = Field(default=None, description="Customer email address")
 
     class Config:
-        json_schema_extra = {
-            "example": {"phone": "+19167408768", "email": "customer@example.com"}
-        }
+        json_schema_extra = {"example": {"phone": "+19167408768", "email": "customer@example.com"}}
 
 
 class BookingBalanceInfo(BaseModel):

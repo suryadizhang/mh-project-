@@ -70,8 +70,7 @@ async def get_booked_dates(
 
         # Format dates as ISO strings
         booked_dates = [
-            date.isoformat() if hasattr(date, "isoformat") else str(date)
-            for date in dates
+            date.isoformat() if hasattr(date, "isoformat") else str(date) for date in dates
         ]
 
         # Return in flat format expected by frontend: { bookedDates: [...] }
@@ -259,9 +258,7 @@ async def get_available_times(
             if parsed_date == today:
                 now = datetime.now(timezone.utc).time()
                 # Need at least 4 hours advance notice
-                cutoff = (
-                    datetime.combine(today, slot_time) - timedelta(hours=4)
-                ).time()
+                cutoff = (datetime.combine(today, slot_time) - timedelta(hours=4)).time()
                 if now > cutoff:
                     is_available = False
                     available_chefs = 0

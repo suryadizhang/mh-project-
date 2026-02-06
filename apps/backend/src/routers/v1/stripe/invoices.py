@@ -107,9 +107,7 @@ async def get_invoice(
 
         # Check ownership
         if invoice.user_id != current_user.id:
-            raise HTTPException(
-                status_code=403, detail="Invoice does not belong to this user"
-            )
+            raise HTTPException(status_code=403, detail="Invoice does not belong to this user")
 
         return format_invoice_for_response(invoice)
 

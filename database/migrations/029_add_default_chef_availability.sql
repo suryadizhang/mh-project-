@@ -1,11 +1,11 @@
 -- Migration: 029_add_default_chef_availability.sql
 -- Purpose: Add default chef(s) and availability records so bookings can work
--- 
+--
 -- How it works:
 -- 1. Creates 1 "Virtual Chef" per active station (placeholder until real chefs assigned)
 -- 2. Sets up availability for all 7 days of the week for standard slots (12PM, 3PM, 6PM, 9PM)
 -- 3. When a slot is booked, it counts against the available capacity
--- 
+--
 -- The availability check logic:
 -- - Counts bookings for a slot/date
 -- - Counts available chefs for that day/time
@@ -46,7 +46,7 @@ END $$;
 \echo '📋 Step 1: Creating default "Virtual Chef" for each active station...'
 
 -- Insert a default virtual chef for each active station
--- This chef represents "available capacity" 
+-- This chef represents "available capacity"
 INSERT INTO ops.chefs (
     id,
     first_name,
@@ -61,7 +61,7 @@ INSERT INTO ops.chefs (
     total_bookings,
     completed_bookings
 )
-SELECT 
+SELECT
     gen_random_uuid(),
     'Virtual Chef',
     s.code,  -- Use station code as last name for identification
@@ -77,7 +77,7 @@ SELECT
 FROM identity.stations s
 WHERE s.status = 'active'
   AND NOT EXISTS (
-    SELECT 1 FROM ops.chefs c 
+    SELECT 1 FROM ops.chefs c
     WHERE c.email = 'virtual-' || s.code || '@myhibachichef.com'
   );
 
@@ -86,8 +86,8 @@ WHERE s.status = 'active'
 -- Insert availability for each chef for all 7 days of week
 -- Covering standard slot times: 12PM, 3PM, 6PM, 9PM (with buffer for adjustment)
 WITH chef_info AS (
-    SELECT id as chef_id 
-    FROM ops.chefs 
+    SELECT id as chef_id
+    FROM ops.chefs
     WHERE first_name = 'Virtual Chef' AND is_active = true
 ),
 days AS (
@@ -97,14 +97,14 @@ slots AS (
     -- Define time ranges that cover each slot's adjustment window (±60 min)
     SELECT '11:00:00'::time as start_time, '14:00:00'::time as end_time  -- Covers 12PM slot
     UNION ALL
-    SELECT '14:00:00'::time, '17:00:00'::time  -- Covers 3PM slot  
+    SELECT '14:00:00'::time, '17:00:00'::time  -- Covers 3PM slot
     UNION ALL
     SELECT '17:00:00'::time, '20:00:00'::time  -- Covers 6PM slot
     UNION ALL
     SELECT '20:00:00'::time, '23:00:00'::time  -- Covers 9PM slot
 )
 INSERT INTO ops.chef_availability (id, chef_id, day_of_week, start_time, end_time, is_available)
-SELECT 
+SELECT
     gen_random_uuid(),
     ci.chef_id,
     d.day,
@@ -117,8 +117,8 @@ CROSS JOIN slots s
 WHERE NOT EXISTS (
     -- Don't insert duplicates
     SELECT 1 FROM ops.chef_availability ca
-    WHERE ca.chef_id = ci.chef_id 
-      AND ca.day_of_week = d.day 
+    WHERE ca.chef_id = ci.chef_id
+      AND ca.day_of_week = d.day
       AND ca.start_time = s.start_time
 );
 
@@ -126,12 +126,12 @@ WHERE NOT EXISTS (
 
 -- Show what was created
 SELECT 'Virtual Chefs Created:' as info;
-SELECT id, first_name, last_name, email, status, is_active 
-FROM ops.chefs 
+SELECT id, first_name, last_name, email, status, is_active
+FROM ops.chefs
 WHERE first_name = 'Virtual Chef';
 
 SELECT 'Availability Records Created:' as info;
-SELECT 
+SELECT
     c.last_name as station_code,
     ca.day_of_week,
     ca.start_time,
@@ -140,15 +140,15 @@ SELECT
 FROM ops.chef_availability ca
 JOIN ops.chefs c ON c.id = ca.chef_id
 WHERE c.first_name = 'Virtual Chef'
-ORDER BY c.last_name, 
-    CASE ca.day_of_week 
-        WHEN 'MONDAY' THEN 1 
-        WHEN 'TUESDAY' THEN 2 
-        WHEN 'WEDNESDAY' THEN 3 
-        WHEN 'THURSDAY' THEN 4 
-        WHEN 'FRIDAY' THEN 5 
-        WHEN 'SATURDAY' THEN 6 
-        WHEN 'SUNDAY' THEN 7 
+ORDER BY c.last_name,
+    CASE ca.day_of_week
+        WHEN 'MONDAY' THEN 1
+        WHEN 'TUESDAY' THEN 2
+        WHEN 'WEDNESDAY' THEN 3
+        WHEN 'THURSDAY' THEN 4
+        WHEN 'FRIDAY' THEN 5
+        WHEN 'SATURDAY' THEN 6
+        WHEN 'SUNDAY' THEN 7
     END,
     ca.start_time
 LIMIT 20;

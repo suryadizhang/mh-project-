@@ -66,13 +66,9 @@ class TokenResponse(BaseModel):
     """Authentication token response."""
 
     access_token: str = Field(..., description="JWT access token")
-    token_type: str = Field(
-        default="bearer", description="Token type (always 'bearer')"
-    )
+    token_type: str = Field(default="bearer", description="Token type (always 'bearer')")
     expires_in: int = Field(..., description="Token expiration time in seconds")
-    refresh_token: str = Field(
-        ..., description="Refresh token for obtaining new access tokens"
-    )
+    refresh_token: str = Field(..., description="Refresh token for obtaining new access tokens")
 
     model_config = {
         "json_schema_extra": {
@@ -94,9 +90,7 @@ class UserResponse(BaseModel):
     id: str = Field(..., description="Unique user identifier")
     email: EmailStr = Field(..., description="User email address")
     name: str = Field(..., description="User full name")
-    is_admin: bool = Field(
-        default=False, description="Whether user has admin privileges"
-    )
+    is_admin: bool = Field(default=False, description="Whether user has admin privileges")
     created_at: str = Field(..., description="Account creation timestamp (ISO 8601)")
 
     model_config = {
@@ -118,12 +112,8 @@ class RegisterRequest(BaseModel):
     """User registration request schema."""
 
     email: EmailStr = Field(..., description="User email address")
-    password: str = Field(
-        ..., min_length=8, description="User password (minimum 8 characters)"
-    )
-    full_name: str = Field(
-        ..., min_length=2, max_length=100, description="User's full name"
-    )
+    password: str = Field(..., min_length=8, description="User password (minimum 8 characters)")
+    full_name: str = Field(..., min_length=2, max_length=100, description="User's full name")
 
     model_config = {
         "json_schema_extra": {
@@ -188,9 +178,7 @@ class ErrorResponse(BaseModel):
         },
         400: {
             "description": "Invalid input or email already registered",
-            "content": {
-                "application/json": {"example": {"detail": "Email already registered"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Email already registered"}}},
         },
         422: {
             "description": "Validation error",
@@ -264,9 +252,7 @@ async def register(request: RegisterRequest) -> dict[str, Any]:
         400: {
             "description": "Invalid request data",
             "model": ErrorResponse,
-            "content": {
-                "application/json": {"example": {"detail": "Invalid email format"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Invalid email format"}}},
         },
         401: {
             "description": "Invalid credentials",
@@ -301,9 +287,7 @@ async def register(request: RegisterRequest) -> dict[str, Any]:
         },
     },
 )
-async def login(
-    credentials: LoginRequest, db: AsyncSession = Depends(get_db)
-) -> dict[str, Any]:
+async def login(credentials: LoginRequest, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
     Authenticate user and generate access tokens.
 
@@ -410,9 +394,7 @@ async def login(
     chef_id = None
     if user_role and user_role.upper() == "CHEF":
         try:
-            chef_result = await db.execute(
-                select(Chef.id).where(Chef.email == user.email)
-            )
+            chef_result = await db.execute(select(Chef.id).where(Chef.email == user.email))
             chef_row = chef_result.scalar_one_or_none()
             if chef_row:
                 chef_id = str(chef_row)
@@ -473,9 +455,7 @@ async def login(
         with open(debug_file, "a") as f:
             f.write(f"ERROR in create_access_token: {e}\n")
             f.write(f"Traceback:\n{traceback.format_exc()}\n")
-        raise HTTPException(
-            status_code=500, detail=f"Access token creation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Access token creation failed: {str(e)}")
 
     # Create refresh token with separate secret and longer expiry (7 days)
     try:
@@ -488,9 +468,7 @@ async def login(
         with open(debug_file, "a") as f:
             f.write(f"ERROR in create_refresh_token: {e}\n")
             f.write(f"Traceback:\n{traceback.format_exc()}\n")
-        raise HTTPException(
-            status_code=500, detail=f"Refresh token creation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Refresh token creation failed: {str(e)}")
 
     # Hash refresh token for storage
     refresh_token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
@@ -540,9 +518,7 @@ async def login(
             f.write(f"ERROR: Failed to create UserSession: {e}\n")
             f.write(f"Traceback:\n{tb}\n")
         # Re-raise with more detail for HTTP response
-        raise HTTPException(
-            status_code=500, detail=f"Session creation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Session creation failed: {str(e)}")
 
     return {
         "access_token": access_token,
@@ -662,9 +638,7 @@ async def get_current_user_info(
         "email": user.email,
         "name": user.full_name or user.email,
         "is_admin": is_admin or user.is_super_admin,
-        "created_at": (
-            user.created_at.isoformat() if user.created_at else "2024-01-01T00:00:00Z"
-        ),
+        "created_at": (user.created_at.isoformat() if user.created_at else "2024-01-01T00:00:00Z"),
     }
 
 
@@ -694,9 +668,7 @@ async def get_current_user_info(
     responses={
         200: {
             "description": "Logout successful",
-            "content": {
-                "application/json": {"example": {"message": "Logged out successfully"}}
-            },
+            "content": {"application/json": {"example": {"message": "Logged out successfully"}}},
         },
         401: {
             "description": "Authentication required",
@@ -755,9 +727,7 @@ async def logout(
             reason="user_logout",
         )
 
-        logger.info(
-            f"User {user_id} logged out successfully, token {jti[:8]}... blacklisted"
-        )
+        logger.info(f"User {user_id} logged out successfully, token {jti[:8]}... blacklisted")
         return {"message": "Logged out successfully"}
 
     except HTTPException:
@@ -847,9 +817,7 @@ async def logout_all_devices(
             reason="logout_all_devices",
         )
 
-        logger.info(
-            f"User {user_id} logged out from all devices, {count} tokens blacklisted"
-        )
+        logger.info(f"User {user_id} logged out from all devices, {count} tokens blacklisted")
         return {"message": "All sessions invalidated", "sessions_invalidated": count}
 
     except HTTPException:
@@ -902,9 +870,7 @@ async def logout_all_devices(
                     "examples": {
                         "expired": {
                             "summary": "Refresh token expired",
-                            "value": {
-                                "detail": "Refresh token has expired. Please login again."
-                            },
+                            "value": {"detail": "Refresh token has expired. Please login again."},
                         },
                         "invalid": {
                             "summary": "Invalid token",
@@ -1168,9 +1134,7 @@ async def reset_password(
         logger.error(f"Password reset error for {request.email}: {e}")
 
     # Always return success to prevent user enumeration
-    return {
-        "message": "If an account with that email exists, a password reset link has been sent."
-    }
+    return {"message": "If an account with that email exists, a password reset link has been sent."}
 
 
 # Schema for confirm password reset request
@@ -1186,9 +1150,7 @@ class ConfirmPasswordResetRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {"token": "abc123xyz789...", "new_password": "NewSecurePass123!"}
-            ]
+            "examples": [{"token": "abc123xyz789...", "new_password": "NewSecurePass123!"}]
         }
     }
 
@@ -1275,9 +1237,7 @@ async def confirm_reset_password(
         HTTPException(422): Invalid password format
     """
     service = PasswordResetService(db)
-    success = await service.reset_password(
-        token=request.token, new_password=request.new_password
-    )
+    success = await service.reset_password(token=request.token, new_password=request.new_password)
 
     if not success:
         raise HTTPException(
@@ -1285,6 +1245,4 @@ async def confirm_reset_password(
             detail="Invalid or expired reset token. Please request a new one.",
         )
 
-    return {
-        "message": "Password has been reset successfully. Please login with your new password."
-    }
+    return {"message": "Password has been reset successfully. Please login with your new password."}

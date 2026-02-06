@@ -150,13 +150,9 @@ class IPGeolocationService:
             "fc00:",
             "fd00:",
         ]
-        return any(
-            ip_address.startswith(prefix) for prefix in private_prefixes
-        )
+        return any(ip_address.startswith(prefix) for prefix in private_prefixes)
 
-    async def _get_cached_location(
-        self, ip_address: str
-    ) -> Optional[GeoLocation]:
+    async def _get_cached_location(self, ip_address: str) -> Optional[GeoLocation]:
         """Get cached geolocation from database"""
         try:
             query = text(
@@ -241,9 +237,7 @@ class IPGeolocationService:
                     is_proxy = data.get("proxy", False)
 
                     # Check ASN for known VPN providers
-                    asn = (
-                        data.get("as", "").split()[0] if data.get("as") else ""
-                    )
+                    asn = data.get("as", "").split()[0] if data.get("as") else ""
                     is_vpn = asn in self.KNOWN_VPN_ASNS or is_datacenter
 
                     # Calculate reputation score
@@ -271,9 +265,7 @@ class IPGeolocationService:
                         reputation_score=max(0, reputation),
                     )
 
-            logger.warning(
-                f"Geolocation lookup failed for {ip_address}: {response.status_code}"
-            )
+            logger.warning(f"Geolocation lookup failed for {ip_address}: {response.status_code}")
 
         except asyncio.TimeoutError:
             logger.warning(f"Geolocation timeout for {ip_address}")
@@ -327,11 +319,7 @@ class IPGeolocationService:
 
         # Detect device type
         device_type = "desktop"
-        if (
-            "mobile" in ua_lower
-            or "android" in ua_lower
-            or "iphone" in ua_lower
-        ):
+        if "mobile" in ua_lower or "android" in ua_lower or "iphone" in ua_lower:
             device_type = "mobile"
         elif "ipad" in ua_lower or "tablet" in ua_lower:
             device_type = "tablet"
@@ -356,9 +344,7 @@ class IPGeolocationService:
             is_bot=is_bot,
         )
 
-    async def is_ip_known_for_user(
-        self, user_id: str, ip_address: str
-    ) -> bool:
+    async def is_ip_known_for_user(self, user_id: str, ip_address: str) -> bool:
         """Check if this IP has been used by this user before"""
         try:
             query = text(
@@ -368,9 +354,7 @@ class IPGeolocationService:
                   AND ip_address = :ip_address
             """
             )
-            result = await self.db.execute(
-                query, {"user_id": user_id, "ip_address": ip_address}
-            )
+            result = await self.db.execute(query, {"user_id": user_id, "ip_address": ip_address})
             return result.fetchone() is not None
         except Exception as e:
             logger.error(f"Error checking known IP: {e}")
@@ -467,9 +451,7 @@ class IPGeolocationService:
                     "city": row.city,
                     "country": row.country,
                     "latitude": float(row.latitude) if row.latitude else None,
-                    "longitude": (
-                        float(row.longitude) if row.longitude else None
-                    ),
+                    "longitude": (float(row.longitude) if row.longitude else None),
                     "login_at": row.login_at,
                 }
             return None
@@ -477,9 +459,7 @@ class IPGeolocationService:
             logger.error(f"Error getting last login: {e}")
             return None
 
-    def calculate_distance_km(
-        self, lat1: float, lon1: float, lat2: float, lon2: float
-    ) -> float:
+    def calculate_distance_km(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """Calculate distance between two points using Haversine formula"""
         import math
 
@@ -492,9 +472,7 @@ class IPGeolocationService:
 
         a = (
             math.sin(delta_lat / 2) ** 2
-            + math.cos(lat1_rad)
-            * math.cos(lat2_rad)
-            * math.sin(delta_lon / 2) ** 2
+            + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
         )
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 

@@ -79,9 +79,7 @@ router = APIRouter(prefix="/chef-pay", tags=["Chef Pay"])
 
 
 async def require_station_manager_or_super_admin(
-    current_user: dict = Depends(
-        require_role([UserRole.STATION_MANAGER, UserRole.SUPER_ADMIN])
-    ),
+    current_user: dict = Depends(require_role([UserRole.STATION_MANAGER, UserRole.SUPER_ADMIN])),
 ) -> dict:
     """
     Dependency that requires Station Manager or Super Admin role.
@@ -208,9 +206,7 @@ async def get_earnings_summary(
     start_date: Optional[str] = Query(
         None, description="Start date (YYYY-MM-DD). Defaults to 30 days ago."
     ),
-    end_date: Optional[str] = Query(
-        None, description="End date (YYYY-MM-DD). Defaults to today."
-    ),
+    end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD). Defaults to today."),
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(require_station_manager_or_super_admin),
 ):
@@ -370,9 +366,7 @@ async def list_earnings(
                 "event_date": record.event_date,
                 "base_earnings_cents": record.base_earnings_cents,
                 "final_earnings_cents": record.final_earnings_cents,
-                "pay_rate_class": record.pay_rate_class.value
-                if record.pay_rate_class
-                else None,
+                "pay_rate_class": record.pay_rate_class.value if record.pay_rate_class else None,
                 "status": record.status.value if record.status else "pending",
                 "created_at": record.created_at,
             }

@@ -26,9 +26,7 @@ class BookingCreate(BaseModel):
     date: str = Field(..., description="Booking date in YYYY-MM-DD format")
     time: str = Field(..., description="Booking time in HH:MM format")
     guests: int = Field(..., ge=1, le=50, description="Number of guests (1-50)")
-    location_address: str = Field(
-        ..., min_length=10, description="Event location address"
-    )
+    location_address: str = Field(..., min_length=10, description="Event location address")
     customer_name: str = Field(..., min_length=2, description="Customer full name")
     customer_email: EmailStr = Field(..., description="Customer email address")
     customer_phone: str = Field(..., description="Customer phone number")
@@ -141,9 +139,7 @@ class DeleteBookingRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {"reason": "Customer requested cancellation due to weather concerns"}
-            ]
+            "examples": [{"reason": "Customer requested cancellation due to weather concerns"}]
         }
     }
 
@@ -259,6 +255,4 @@ class ErrorResponse(BaseModel):
 
     detail: str = Field(..., description="Error message")
 
-    model_config = {
-        "json_schema_extra": {"examples": [{"detail": "Booking not found"}]}
-    }
+    model_config = {"json_schema_extra": {"examples": [{"detail": "Booking not found"}]}}

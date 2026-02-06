@@ -44,9 +44,7 @@ from services.ai_lead_management import get_social_media_ai
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/newsletter", tags=["newsletter"])
-analytics_router = APIRouter(
-    prefix="/newsletter/analytics", tags=["newsletter-analytics"]
-)
+analytics_router = APIRouter(prefix="/newsletter/analytics", tags=["newsletter-analytics"])
 
 
 # Pydantic models
@@ -608,9 +606,7 @@ async def list_campaigns(
     if channel:
         query = query.where(Campaign.channel == channel)
 
-    campaigns = (
-        query.order_by(desc(Campaign.created_at)).offset(offset).limit(limit).all()
-    )
+    campaigns = query.order_by(desc(Campaign.created_at)).offset(offset).limit(limit).all()
 
     return campaigns
 
@@ -624,14 +620,10 @@ async def get_campaign(
     """Get campaign details."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
-        .scalars()
-        .first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
     )
     if not campaign:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
 
     return campaign
 
@@ -646,14 +638,10 @@ async def update_campaign(
     """Update campaign information."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
-        .scalars()
-        .first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
     )
     if not campaign:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
 
     if campaign.status in [CampaignStatus.SENT, CampaignStatus.SENDING]:
         raise HTTPException(
@@ -679,14 +667,10 @@ async def send_campaign(
     """Send campaign to subscribers."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
-        .scalars()
-        .first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
     )
     if not campaign:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
 
     if campaign.status != CampaignStatus.DRAFT:
         raise HTTPException(
@@ -716,14 +700,10 @@ async def get_campaign_stats(
     """Get campaign performance statistics."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
-        .scalars()
-        .first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
     )
     if not campaign:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
 
     # Count events by type
     stmt = (
@@ -774,12 +754,7 @@ async def get_campaign_events(
     if event_type:
         query = query.where(CampaignEvent.type == event_type)
 
-    events = (
-        query.order_by(desc(CampaignEvent.occurred_at))
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    events = query.order_by(desc(CampaignEvent.occurred_at)).offset(offset).limit(limit).all()
 
     return events
 
@@ -819,14 +794,10 @@ async def preview_segment(
         query = query.where(Subscriber.tags.overlap(filter_criteria["tags"]))
 
     if "engagement_min" in filter_criteria:
-        query = query.where(
-            Subscriber.engagement_score >= filter_criteria["engagement_min"]
-        )
+        query = query.where(Subscriber.engagement_score >= filter_criteria["engagement_min"])
 
     if "engagement_max" in filter_criteria:
-        query = query.where(
-            Subscriber.engagement_score <= filter_criteria["engagement_max"]
-        )
+        query = query.where(Subscriber.engagement_score <= filter_criteria["engagement_max"])
 
     if "last_opened_days" in filter_criteria:
         cutoff_date = datetime.now(timezone.utc) - timedelta(
@@ -940,9 +911,7 @@ async def _send_campaign_async(campaign_id: UUID):
                     )
 
                     # Send to SMS subscribers
-                    sms_content = campaign.content.get(
-                        "text", campaign.content.get("html", "")
-                    )
+                    sms_content = campaign.content.get("text", campaign.content.get("html", ""))
 
                     for subscriber in subscribers:
                         if not subscriber.sms_consent or not subscriber.phone_enc:
@@ -982,12 +951,8 @@ async def _send_campaign_async(campaign_id: UUID):
                                 db.add(delivery_event)
 
                                 # Update subscriber stats
-                                subscriber.total_sms_sent = (
-                                    subscriber.total_sms_sent or 0
-                                ) + 1
-                                subscriber.last_sms_sent_date = datetime.now(
-                                    timezone.utc
-                                )
+                                subscriber.total_sms_sent = (subscriber.total_sms_sent or 0) + 1
+                                subscriber.last_sms_sent_date = datetime.now(timezone.utc)
 
                                 logger.info(
                                     f"✅ SMS campaign sent: {phone[-4:]}",
@@ -1161,8 +1126,7 @@ async def get_subscriber_analytics(
 @analytics_router.get("/trend")
 async def get_unsubscribe_trend(
     days: int = Query(30, ge=1, le=365, description="Number of days to look back"),
-    channel: str
-    | None = Query(None, description="Filter by channel: EMAIL, SMS, or BOTH"),
+    channel: str | None = Query(None, description="Filter by channel: EMAIL, SMS, or BOTH"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):

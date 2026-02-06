@@ -21,6 +21,7 @@ DeepgramClient = None
 
 try:
     from deepgram import DeepgramClient
+
     DEEPGRAM_AVAILABLE = True
     logger.info("✅ Deepgram SDK v5.x loaded successfully")
 except ImportError as e:
@@ -80,14 +81,10 @@ class SpeechService:
 
         # Voice AI settings
         self.enable_voice_ai = os.getenv("ENABLE_VOICE_AI", "false").lower() == "true"
-        self.default_voice_model = os.getenv(
-            "DEEPGRAM_TTS_MODEL", VoiceModel.AURA_ASTERIA_EN.value
-        )
+        self.default_voice_model = os.getenv("DEEPGRAM_TTS_MODEL", VoiceModel.AURA_ASTERIA_EN.value)
 
         # Quality settings
-        self.transcription_model = os.getenv(
-            "DEEPGRAM_MODEL", TranscriptionQuality.NOVA_2.value
-        )
+        self.transcription_model = os.getenv("DEEPGRAM_MODEL", TranscriptionQuality.NOVA_2.value)
 
         # Initialize Deepgram client
         self.deepgram_client = None
@@ -113,7 +110,7 @@ class SpeechService:
     ) -> dict[str, Any]:
         """
         Real-time speech-to-text streaming.
-        
+
         NOTE: Deepgram v5.x has a different WebSocket API structure.
         This method is a placeholder for future implementation.
         For production phone calls, use transcribe_audio_file() for now.
@@ -182,8 +179,7 @@ class SpeechService:
             }
 
             logger.info(
-                f"File transcribed: {duration_minutes:.2f} min, "
-                f"{len(words)} words, ${cost:.4f}"
+                f"File transcribed: {duration_minutes:.2f} min, " f"{len(words)} words, ${cost:.4f}"
             )
 
             return result
@@ -225,7 +221,7 @@ class SpeechService:
                 text=text,
                 model=voice_model,
             )
-            
+
             # Stream chunks
             for chunk in audio_iterator:
                 yield chunk
@@ -267,10 +263,10 @@ class SpeechService:
                 text=text,
                 model=voice_model,
             )
-            
+
             # Collect all chunks into bytes
             audio_bytes = b"".join(chunk for chunk in audio_iterator)
-            
+
             # Return audio bytes
             return audio_bytes
 
@@ -296,71 +292,71 @@ class SpeechService:
                     "name": "Asteria",
                     "gender": "female",
                     "language": "English",
-                    "description": "Natural female voice"
+                    "description": "Natural female voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_LUNA_EN.value,
                     "name": "Luna",
                     "gender": "female",
                     "language": "English",
-                    "description": "Natural female voice"
+                    "description": "Natural female voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_STELLA_EN.value,
                     "name": "Stella",
                     "gender": "female",
                     "language": "English",
-                    "description": "Natural female voice"
+                    "description": "Natural female voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_ATHENA_EN.value,
                     "name": "Athena",
                     "gender": "female",
                     "language": "English",
-                    "description": "Natural female voice"
+                    "description": "Natural female voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_HERA_EN.value,
                     "name": "Hera",
                     "gender": "female",
                     "language": "English",
-                    "description": "Natural female voice"
+                    "description": "Natural female voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_ORION_EN.value,
                     "name": "Orion",
                     "gender": "male",
                     "language": "English",
-                    "description": "Natural male voice"
+                    "description": "Natural male voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_ARCAS_EN.value,
                     "name": "Arcas",
                     "gender": "male",
                     "language": "English",
-                    "description": "Natural male voice"
+                    "description": "Natural male voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_PERSEUS_EN.value,
                     "name": "Perseus",
                     "gender": "male",
                     "language": "English",
-                    "description": "Natural male voice"
+                    "description": "Natural male voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_ANGUS_EN.value,
                     "name": "Angus",
                     "gender": "male",
                     "language": "English",
-                    "description": "Natural male voice"
+                    "description": "Natural male voice",
                 },
                 {
                     "voice_model": VoiceModel.AURA_ORPHEUS_EN.value,
                     "name": "Orpheus",
                     "gender": "male",
                     "language": "English",
-                    "description": "Natural male voice"
-                }
+                    "description": "Natural male voice",
+                },
             ]
 
             logger.info(f"Retrieved {len(voice_list)} Deepgram Aura voices")

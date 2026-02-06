@@ -770,7 +770,9 @@ async def update_booking(
         "message": "Booking updated successfully",
         "date": str(booking.date),
         "time": str(booking.slot),
-        "guests": (booking.party_adults or 0) + (booking.party_kids or 0) + (booking.party_toddlers or 0),
+        "guests": (booking.party_adults or 0)
+        + (booking.party_kids or 0)
+        + (booking.party_toddlers or 0),
         "status": booking.status.value,
         "chef_id": str(booking.chef_id) if booking.chef_id else None,
         "customer_requested_time": (

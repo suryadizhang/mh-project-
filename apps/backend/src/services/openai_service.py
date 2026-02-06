@@ -20,9 +20,7 @@ class OpenAIService:
     def __init__(self):
         """Initialize OpenAI client with API key from settings."""
         if not settings.openai_api_key:
-            logger.warning(
-                "openai_api_key not found in settings. AI features will be disabled."
-            )
+            logger.warning("openai_api_key not found in settings. AI features will be disabled.")
             self.client = None
         else:
             self.client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
@@ -47,9 +45,7 @@ class OpenAIService:
             Response dictionary with 'content' field
         """
         if not self.client:
-            logger.error(
-                "OpenAI client not initialized. Check openai_api_key setting."
-            )
+            logger.error("OpenAI client not initialized. Check openai_api_key setting.")
             return {"content": "AI service unavailable"}
 
         try:

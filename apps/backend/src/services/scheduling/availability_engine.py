@@ -134,9 +134,7 @@ class AvailabilityEngine:
             }
 
         # Check database for existing bookings
-        booking_count = await self._get_booking_count_for_slot(
-            event_date, slot_time, slot_number
-        )
+        booking_count = await self._get_booking_count_for_slot(event_date, slot_time, slot_number)
 
         # DUAL-MODE CAPACITY LOGIC (SSoT Compliant)
         if days_until_event > config.chef_availability_window_days:
@@ -156,9 +154,7 @@ class AvailabilityEngine:
                 }
 
             is_available = booking_count < max_capacity
-            conflict_reason = (
-                None if is_available else "Slot capacity reached for this date"
-            )
+            conflict_reason = None if is_available else "Slot capacity reached for this date"
             available_chefs = max_capacity - booking_count if is_available else 0
 
         else:
@@ -166,9 +162,7 @@ class AvailabilityEngine:
             capacity_mode = "short_term_chef_availability"
 
             # Get real available chef count from ChefAvailability table
-            available_chefs = await self._get_available_chef_count(
-                event_date, slot_time
-            )
+            available_chefs = await self._get_available_chef_count(event_date, slot_time)
 
             # Capacity = number of available chefs (1 chef = 1 booking per slot)
             max_capacity = available_chefs
@@ -273,13 +267,9 @@ class AvailabilityEngine:
             result = await self.db.execute(final_query)
             available_chef_ids = result.scalars().all()
 
-            chef_count = len(
-                set(available_chef_ids)
-            )  # Dedupe in case of multiple entries
+            chef_count = len(set(available_chef_ids))  # Dedupe in case of multiple entries
 
-            logger.debug(
-                f"Found {chef_count} available chefs for {event_date} at {slot_time}"
-            )
+            logger.debug(f"Found {chef_count} available chefs for {event_date} at {slot_time}")
 
             return chef_count
 

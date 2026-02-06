@@ -216,45 +216,45 @@ class RingCentralService:
     def get_call_transcript(self, call_session_id: str) -> dict:
         """
         Get AI-generated transcript from RingCentral AI Insights.
-        
+
         RingCentral AI provides automatic transcription with:
         - Full transcript with timestamps
         - Speaker separation
         - Confidence scores
         - AI insights (sentiment, topics, action items)
-        
+
         Args:
             call_session_id: RingCentral call session ID
-            
+
         Returns:
             dict with transcript and AI insights:
             - full_text: Complete transcript
             - confidence: Average confidence score (0-100)
             - segments: List of transcript segments with timestamps
             - insights: AI-extracted insights (sentiment, topics, etc)
-            
+
         Raises:
             RuntimeError: If transcript fetch fails
         """
         if not self.is_configured():
             raise RuntimeError("RingCentral not configured")
-        
+
         try:
             # Get transcript from RC AI Insights API
             response = self.platform.get(
                 f"/restapi/v1.0/account/~/call-log/{call_session_id}/transcript"
             )
-            
+
             result = response.json()
-            
+
             # Extract transcript segments
             segments = result.get("segments", [])
             full_transcript = " ".join([seg.get("text", "") for seg in segments])
-            
+
             # Calculate average confidence
             confidences = [seg.get("confidence", 0) for seg in segments if seg.get("confidence")]
             avg_confidence = int(sum(confidences) / len(confidences) * 100) if confidences else 0
-            
+
             # Extract AI insights if available
             insights = {
                 "sentiment": result.get("sentiment", {}),
@@ -264,12 +264,12 @@ class RingCentralService:
                 "speakers": result.get("speakers", []),
                 "keywords": result.get("keywords", []),
             }
-            
+
             logger.info(
                 f"Transcript fetched for call {call_session_id}: "
                 f"{len(full_transcript)} chars, {avg_confidence}% confidence"
             )
-            
+
             return {
                 "full_text": full_transcript,
                 "confidence": avg_confidence,
@@ -277,7 +277,7 @@ class RingCentralService:
                 "insights": insights,
                 "fetched_at": datetime.utcnow().isoformat(),
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to fetch transcript for {call_session_id}: {str(e)}")
             # Return empty result if RC AI not available (graceful degradation)
@@ -288,44 +288,42 @@ class RingCentralService:
                 "insights": {},
                 "error": str(e),
             }
-    
+
     def get_recording_stream_url(self, recording_id: str, expires_in: int = 3600) -> str:
         """
         Get temporary streaming URL for recording playback.
-        
+
         Returns a time-limited URL to stream recording audio.
         No download needed - stream directly from RingCentral.
-        
+
         Args:
             recording_id: RingCentral recording ID
             expires_in: URL expiration in seconds (default 1 hour)
-            
+
         Returns:
             str: Streaming URL with embedded auth token
-            
+
         Raises:
             RuntimeError: If URL generation fails
         """
         if not self.is_configured():
             raise RuntimeError("RingCentral not configured")
-        
+
         try:
             # RingCentral API returns content URL directly
-            response = self.platform.get(
-                f"/restapi/v1.0/account/~/recording/{recording_id}"
-            )
-            
+            response = self.platform.get(f"/restapi/v1.0/account/~/recording/{recording_id}")
+
             result = response.json()
             content_uri = result.get("contentUri")
-            
+
             if not content_uri:
                 raise ValueError("No content URI in recording metadata")
-            
+
             # Return the content URI (already includes auth token)
             logger.info(f"Generated streaming URL for recording {recording_id}")
-            
+
             return content_uri
-            
+
         except Exception as e:
             logger.error(f"Failed to get streaming URL for {recording_id}: {str(e)}")
             raise RuntimeError(f"Stream URL generation failed: {str(e)}")

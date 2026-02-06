@@ -64,12 +64,7 @@ class DynamicVariablesService:
     # READ OPERATIONS
     # =========================================================================
 
-    async def get_value(
-        self,
-        category: str,
-        key: str,
-        as_of: datetime | None = None
-    ) -> Any | None:
+    async def get_value(self, category: str, key: str, as_of: datetime | None = None) -> Any | None:
         """
         Get a single dynamic variable value.
 
@@ -85,7 +80,8 @@ class DynamicVariablesService:
         timestamp = as_of or datetime.utcnow()
 
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT value
                 FROM dynamic_variables
                 WHERE category = :category
@@ -95,8 +91,9 @@ class DynamicVariablesService:
                   AND (effective_to IS NULL OR effective_to > :ts)
                 ORDER BY effective_from DESC NULLS LAST
                 LIMIT 1
-            """),
-            {"category": category, "key": key, "ts": timestamp}
+            """
+            ),
+            {"category": category, "key": key, "ts": timestamp},
         )
         row = result.fetchone()
 
@@ -119,7 +116,8 @@ class DynamicVariablesService:
             Dict of {key: value} for all active variables in category
         """
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT key, value, display_name, description, unit
                 FROM dynamic_variables
                 WHERE category = :category
@@ -127,14 +125,19 @@ class DynamicVariablesService:
                   AND (effective_from IS NULL OR effective_from <= NOW())
                   AND (effective_to IS NULL OR effective_to > NOW())
                 ORDER BY key
-            """),
-            {"category": category}
+            """
+            ),
+            {"category": category},
         )
         rows = result.fetchall()
 
         return {
             row.key: {
-                "value": row.value.get("amount") if isinstance(row.value, dict) and "amount" in row.value else row.value,
+                "value": (
+                    row.value.get("amount")
+                    if isinstance(row.value, dict) and "amount" in row.value
+                    else row.value
+                ),
                 "display_name": row.display_name,
                 "description": row.description,
                 "unit": row.unit,
@@ -150,14 +153,16 @@ class DynamicVariablesService:
             Dict of {category: {key: value_info}}
         """
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT category, key, value, display_name, description, unit, validation_rules
                 FROM dynamic_variables
                 WHERE is_active = true
                   AND (effective_from IS NULL OR effective_from <= NOW())
                   AND (effective_to IS NULL OR effective_to > NOW())
                 ORDER BY category, key
-            """)
+            """
+            )
         )
         rows = result.fetchall()
 
@@ -167,7 +172,11 @@ class DynamicVariablesService:
                 grouped[row.category] = {}
 
             grouped[row.category][row.key] = {
-                "value": row.value.get("amount") if isinstance(row.value, dict) and "amount" in row.value else row.value,
+                "value": (
+                    row.value.get("amount")
+                    if isinstance(row.value, dict) and "amount" in row.value
+                    else row.value
+                ),
                 "raw_value": row.value,
                 "display_name": row.display_name,
                 "description": row.description,
@@ -182,7 +191,8 @@ class DynamicVariablesService:
         Get full details for a single variable including validation rules.
         """
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT id, category, key, value, display_name, description, unit,
                        validation_rules, effective_from, effective_to,
                        updated_by, updated_at, created_at
@@ -192,8 +202,9 @@ class DynamicVariablesService:
                   AND is_active = true
                 ORDER BY effective_from DESC NULLS LAST
                 LIMIT 1
-            """),
-            {"category": category, "key": key}
+            """
+            ),
+            {"category": category, "key": key},
         )
         row = result.fetchone()
 
@@ -271,7 +282,8 @@ class DynamicVariablesService:
 
         # Update the variable
         await self.db.execute(
-            text("""
+            text(
+                """
                 UPDATE dynamic_variables
                 SET value = :value,
                     updated_by = :user_id,
@@ -281,7 +293,8 @@ class DynamicVariablesService:
                 WHERE category = :category
                   AND key = :key
                   AND is_active = true
-            """),
+            """
+            ),
             {
                 "category": category,
                 "key": key,
@@ -289,12 +302,13 @@ class DynamicVariablesService:
                 "user_id": user_id,
                 "effective_from": effective_from,
                 "effective_to": effective_to,
-            }
+            },
         )
 
         # Log to audit table
         await self.db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO config_audit_log (
                     variable_id, category, key, old_value, new_value,
                     change_type, changed_by, changed_by_email,
@@ -304,7 +318,8 @@ class DynamicVariablesService:
                     'update', :changed_by, :changed_by_email,
                     :change_reason, :ip_address
                 )
-            """),
+            """
+            ),
             {
                 "variable_id": variable_id,
                 "category": category,
@@ -315,7 +330,7 @@ class DynamicVariablesService:
                 "changed_by_email": user_email,
                 "change_reason": reason,
                 "ip_address": ip_address,
-            }
+            },
         )
 
         await self.db.commit()
@@ -367,7 +382,8 @@ class DynamicVariablesService:
 
         # Insert new variable
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO dynamic_variables (
                     category, key, value, display_name, description,
                     unit, validation_rules, updated_by
@@ -376,7 +392,8 @@ class DynamicVariablesService:
                     :unit, :validation_rules, :user_id
                 )
                 RETURNING id
-            """),
+            """
+            ),
             {
                 "category": category,
                 "key": key,
@@ -386,7 +403,7 @@ class DynamicVariablesService:
                 "unit": unit,
                 "validation_rules": validation_rules,
                 "user_id": user_id,
-            }
+            },
         )
         row = result.fetchone()
         if row is None:
@@ -395,7 +412,8 @@ class DynamicVariablesService:
 
         # Audit log
         await self.db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO config_audit_log (
                     variable_id, category, key, old_value, new_value,
                     change_type, changed_by, changed_by_email, change_reason
@@ -403,7 +421,8 @@ class DynamicVariablesService:
                     :variable_id, :category, :key, NULL, :new_value,
                     'create', :changed_by, :changed_by_email, :change_reason
                 )
-            """),
+            """
+            ),
             {
                 "variable_id": variable_id,
                 "category": category,
@@ -412,7 +431,7 @@ class DynamicVariablesService:
                 "changed_by": user_id,
                 "changed_by_email": user_email,
                 "change_reason": reason,
-            }
+            },
         )
 
         await self.db.commit()
@@ -447,20 +466,23 @@ class DynamicVariablesService:
 
         # Soft delete
         await self.db.execute(
-            text("""
+            text(
+                """
                 UPDATE dynamic_variables
                 SET is_active = false,
                     updated_by = :user_id,
                     updated_at = NOW()
                 WHERE category = :category
                   AND key = :key
-            """),
-            {"category": category, "key": key, "user_id": user_id}
+            """
+            ),
+            {"category": category, "key": key, "user_id": user_id},
         )
 
         # Audit log
         await self.db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO config_audit_log (
                     variable_id, category, key, old_value, new_value,
                     change_type, changed_by, changed_by_email, change_reason
@@ -468,7 +490,8 @@ class DynamicVariablesService:
                     :variable_id, :category, :key, :old_value, :old_value,
                     'delete', :changed_by, :changed_by_email, :change_reason
                 )
-            """),
+            """
+            ),
             {
                 "variable_id": variable_id,
                 "category": category,
@@ -477,7 +500,7 @@ class DynamicVariablesService:
                 "changed_by": user_id,
                 "changed_by_email": user_email,
                 "change_reason": reason,
-            }
+            },
         )
 
         await self.db.commit()
@@ -522,7 +545,8 @@ class DynamicVariablesService:
         where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
         result = await self.db.execute(
-            text(f"""
+            text(
+                f"""
                 SELECT id, variable_id, category, key, old_value, new_value,
                        change_type, changed_by, changed_by_email, changed_at,
                        change_reason, ip_address
@@ -530,8 +554,9 @@ class DynamicVariablesService:
                 {where_sql}
                 ORDER BY changed_at DESC
                 LIMIT :limit OFFSET :offset
-            """),
-            params
+            """
+            ),
+            params,
         )
         rows = result.fetchall()
 
@@ -587,11 +612,8 @@ class DynamicVariablesService:
 # HELPER FUNCTIONS
 # =========================================================================
 
-async def get_dynamic_variable(
-    db: AsyncSession,
-    category: str,
-    key: str
-) -> Any | None:
+
+async def get_dynamic_variable(db: AsyncSession, category: str, key: str) -> Any | None:
     """
     Quick helper to get a single dynamic variable value.
 

@@ -368,7 +368,9 @@ async def liveness_probe():
     }
 
 
-@router.api_route("/ready", methods=["GET", "HEAD"], response_model=HealthResponse, status_code=status.HTTP_200_OK)
+@router.api_route(
+    "/ready", methods=["GET", "HEAD"], response_model=HealthResponse, status_code=status.HTTP_200_OK
+)
 async def readiness_probe(db: AsyncSession = Depends(get_db)):
     """
     Readiness probe - Kubernetes uses this to know if the app can serve traffic
