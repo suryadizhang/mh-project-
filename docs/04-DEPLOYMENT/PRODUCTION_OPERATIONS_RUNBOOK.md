@@ -27,11 +27,14 @@
 
 ### Purpose
 
-This runbook provides comprehensive operational procedures for the MyHibachi production environment. It covers deployment, monitoring, incident response, and disaster recovery for all system components.
+This runbook provides comprehensive operational procedures for the
+MyHibachi production environment. It covers deployment, monitoring,
+incident response, and disaster recovery for all system components.
 
 ### Scope
 
 **Covered Services:**
+
 - ✅ FastAPI Backend (mhapi.mysticdatanode.net)
 - ✅ Customer Frontend (myhibachichef.com) - Vercel
 - ✅ Admin Frontend (admin.mysticdatanode.net) - Vercel
@@ -40,20 +43,21 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 - ✅ Load Balancer (Apache httpd)
 
 **Infrastructure:**
+
 - VPS Plesk (Backend services)
 - Vercel (Frontend services)
 - External APIs (Stripe, OpenAI, RingCentral)
 
 ### Service Level Objectives (SLOs)
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| **Uptime** | 99.9% | Monthly |
-| **API Response Time** | <200ms (P95) | Real-time |
-| **AI Response Time** | <1s (P95) | Real-time |
-| **Error Rate** | <0.1% | Per hour |
-| **Page Load Time** | <2s | Weekly average |
-| **Database Query** | <50ms (P95) | Real-time |
+| Metric                | Target       | Measurement    |
+| --------------------- | ------------ | -------------- |
+| **Uptime**            | 99.9%        | Monthly        |
+| **API Response Time** | <200ms (P95) | Real-time      |
+| **AI Response Time**  | <1s (P95)    | Real-time      |
+| **Error Rate**        | <0.1%        | Per hour       |
+| **Page Load Time**    | <2s          | Weekly average |
+| **Database Query**    | <50ms (P95)  | Real-time      |
 
 ---
 
@@ -93,6 +97,7 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 #### Frontend Services (Vercel)
 
 **Customer App** (`https://myhibachichef.com`)
+
 - **Framework:** Next.js 15.5.4 (App Router)
 - **Deployment:** Automatic on `main` branch push
 - **Build Time:** ~2-3 minutes
@@ -101,6 +106,7 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 - **SSL:** Auto-managed by Vercel
 
 **Admin App** (`https://admin.mysticdatanode.net`)
+
 - **Framework:** Next.js 15.5.4 (App Router)
 - **Deployment:** Automatic on `main` branch push
 - **Build Time:** ~1-2 minutes
@@ -111,6 +117,7 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 #### Backend Services (VPS Plesk)
 
 **Main API** (`https://mhapi.mysticdatanode.net`)
+
 - **Framework:** FastAPI 0.109+
 - **Runtime:** Python 3.11.0
 - **WSGI:** Gunicorn (4 workers)
@@ -119,13 +126,15 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 - **Cache:** Redis
 - **Health Check:** `/health`
 - **Metrics:** `/metrics`
-- **Note:** AI endpoints integrated into main API (no separate AI service)
+- **Note:** AI endpoints integrated into main API (no separate AI
+  service)
 - **Port:** 8000 (reverse proxied via Apache httpd)
 - **Rate Limit:** 60 req/min
 
 #### Database Services
 
 **PostgreSQL 14**
+
 - **Version:** 14.x
 - **Connection Pool:** 20 max connections
 - **Backup:** Daily automated
@@ -134,6 +143,7 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 - **Monitoring:** Active
 
 **Redis 7**
+
 - **Version:** 7.x
 - **Max Memory:** 512MB
 - **Eviction Policy:** LRU
@@ -147,6 +157,7 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 ### Pre-Deployment Checklist
 
 **Code Review:**
+
 - [ ] All PR reviews completed and approved
 - [ ] CI/CD pipeline passing (all tests green)
 - [ ] No critical security vulnerabilities (Snyk/Dependabot)
@@ -155,6 +166,7 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 - [ ] Environment variables verified
 
 **Testing:**
+
 - [ ] Unit tests: >85% coverage
 - [ ] Integration tests: All passing
 - [ ] E2E tests: Critical flows validated
@@ -163,12 +175,14 @@ This runbook provides comprehensive operational procedures for the MyHibachi pro
 - [ ] Manual QA: Sign-off completed
 
 **Communication:**
+
 - [ ] Deployment announcement sent (30 min before)
 - [ ] On-call engineer identified
 - [ ] Rollback plan documented
 - [ ] Stakeholders notified (if major release)
 
 **Backup:**
+
 - [ ] Database backup completed (<1 hour old)
 - [ ] Configuration files backed up
 - [ ] Current production version tagged
@@ -332,18 +346,20 @@ vercel ls --scope=myhibachi
 **1. Health Check Dashboard**
 
 Visit internal monitoring dashboard:
+
 - Backend: https://mhapi.mysticdatanode.net/metrics
-- NOTE: AI endpoints are integrated into main backend (no separate AI service)
+- NOTE: AI endpoints are integrated into main backend (no separate AI
+  service)
 
 **2. Functional Tests (5 minutes)**
 
-| Test | Endpoint | Expected Result |
-|------|----------|-----------------|
-| Quote Form | POST /api/v1/public/leads | 200 OK |
-| Booking Form | POST /api/v1/public/bookings | 200 OK |
-| AI Chat | POST /api/chat | 200 OK |
-| Admin Login | POST /api/auth/login | 200 OK + JWT |
-| Payment | POST /api/v1/bookings/{id}/payment | 200 OK |
+| Test         | Endpoint                           | Expected Result |
+| ------------ | ---------------------------------- | --------------- |
+| Quote Form   | POST /api/v1/public/leads          | 200 OK          |
+| Booking Form | POST /api/v1/public/bookings       | 200 OK          |
+| AI Chat      | POST /api/chat                     | 200 OK          |
+| Admin Login  | POST /api/auth/login               | 200 OK + JWT    |
+| Payment      | POST /api/v1/bookings/{id}/payment | 200 OK          |
 
 **3. Performance Validation**
 
@@ -358,6 +374,7 @@ pytest tests/test_api_performance.py -v
 **4. Error Monitoring**
 
 Check error tracking (Sentry/CloudWatch):
+
 - Error rate: <0.1%
 - No new critical errors
 - Response times: Within SLOs
@@ -402,6 +419,7 @@ vercel alias set myhibachi.com canary.myhibachi.com
 ### Monitoring Stack
 
 **Tools in Use:**
+
 - **Application Monitoring:** Sentry (errors), Custom metrics
 - **Infrastructure Monitoring:** System health monitor script
 - **Uptime Monitoring:** UptimeRobot, Pingdom
@@ -413,6 +431,7 @@ vercel alias set myhibachi.com canary.myhibachi.com
 #### Application Metrics
 
 **API Performance:**
+
 ```
 api_request_duration_seconds (P50, P95, P99)
 api_requests_total (by endpoint, status)
@@ -421,6 +440,7 @@ api_active_requests (gauge)
 ```
 
 **AI Backend:**
+
 ```
 ai_request_duration_seconds (P95)
 ai_tokens_used_total
@@ -429,6 +449,7 @@ ai_rate_limit_hits_total
 ```
 
 **Database:**
+
 ```
 db_connection_pool_size (gauge)
 db_query_duration_seconds (P95)
@@ -437,6 +458,7 @@ db_errors_total
 ```
 
 **Cache:**
+
 ```
 redis_hit_rate (%)
 redis_memory_usage_bytes (gauge)
@@ -447,6 +469,7 @@ redis_commands_total
 #### Infrastructure Metrics
 
 **System Health:**
+
 ```
 cpu_usage_percent (gauge)
 memory_usage_percent (gauge)
@@ -455,6 +478,7 @@ network_io_bytes (counter)
 ```
 
 **Service Health:**
+
 ```
 service_up (gauge, 1=up, 0=down)
 service_restart_count (counter)
@@ -463,26 +487,28 @@ service_response_time (gauge)
 
 ### Alert Thresholds
 
-| Alert | Severity | Threshold | Action |
-|-------|----------|-----------|--------|
-| **Service Down** | P1 | Health check fails 3x | Immediate page |
-| **High Error Rate** | P2 | >5% errors for 5 min | Page on-call |
-| **Slow Response** | P3 | P95 >500ms for 10 min | Investigate |
-| **Database Slow** | P2 | P95 >100ms for 5 min | Check queries |
-| **Disk Space Low** | P2 | >85% used | Free space |
-| **Memory High** | P3 | >90% for 10 min | Restart service |
-| **CPU High** | P3 | >90% for 15 min | Scale up |
-| **SSL Expiring** | P3 | <7 days | Renew cert |
+| Alert               | Severity | Threshold             | Action          |
+| ------------------- | -------- | --------------------- | --------------- |
+| **Service Down**    | P1       | Health check fails 3x | Immediate page  |
+| **High Error Rate** | P2       | >5% errors for 5 min  | Page on-call    |
+| **Slow Response**   | P3       | P95 >500ms for 10 min | Investigate     |
+| **Database Slow**   | P2       | P95 >100ms for 5 min  | Check queries   |
+| **Disk Space Low**  | P2       | >85% used             | Free space      |
+| **Memory High**     | P3       | >90% for 10 min       | Restart service |
+| **CPU High**        | P3       | >90% for 15 min       | Scale up        |
+| **SSL Expiring**    | P3       | <7 days               | Renew cert      |
 
 ### Alert Routing
 
 **Severity Levels:**
+
 - **P1 (Critical):** Page on-call immediately, escalate after 5 min
 - **P2 (High):** Notify on-call via Slack, escalate after 15 min
 - **P3 (Medium):** Email + Slack, handle within 1 hour
 - **P4 (Low):** Email, handle within 24 hours
 
 **Notification Channels:**
+
 - **PagerDuty/OnCall Phone:** P1 alerts only
 - **Slack #alerts:** P1, P2, P3 alerts
 - **Email:** All alerts (for records)
@@ -506,7 +532,8 @@ Response (200 OK):
 }
 ```
 
-**NOTE:** AI endpoints are integrated into main API. No separate AI backend service.
+**NOTE:** AI endpoints are integrated into main API. No separate AI
+backend service.
 
 **Frontend Health Check:**
 
@@ -524,10 +551,13 @@ Response (200 OK):
 ### Monitoring Dashboard URLs
 
 **Internal Dashboards:**
+
 - **API Metrics:** https://mhapi.mysticdatanode.net/metrics
-- **System Health:** Run `/opt/myhibachi/app/ops/system_health_monitor.py`
+- **System Health:** Run
+  `/opt/myhibachi/app/ops/system_health_monitor.py`
 
 **External Services:**
+
 - **Vercel Dashboard:** https://vercel.com/myhibachi/dashboard
 - **Sentry:** https://sentry.io/organizations/myhibachi/
 - **UptimeRobot:** https://uptimerobot.com/dashboard
@@ -538,23 +568,25 @@ Response (200 OK):
 
 ### Incident Severity Levels
 
-| Severity | Definition | Response Time | Examples |
-|----------|-----------|---------------|----------|
-| **P1 (Critical)** | Complete service outage | Immediate | All services down, data loss |
-| **P2 (High)** | Major degradation | <15 minutes | API errors >10%, DB down |
-| **P3 (Medium)** | Partial degradation | <1 hour | Slow responses, cache issues |
-| **P4 (Low)** | Minor issues | <24 hours | UI glitch, log warnings |
+| Severity          | Definition              | Response Time | Examples                     |
+| ----------------- | ----------------------- | ------------- | ---------------------------- |
+| **P1 (Critical)** | Complete service outage | Immediate     | All services down, data loss |
+| **P2 (High)**     | Major degradation       | <15 minutes   | API errors >10%, DB down     |
+| **P3 (Medium)**   | Partial degradation     | <1 hour       | Slow responses, cache issues |
+| **P4 (Low)**      | Minor issues            | <24 hours     | UI glitch, log warnings      |
 
 ### Incident Response Process
 
 #### 1. Detection & Alert
 
 **Alert Received:**
+
 - PagerDuty page
 - Slack notification
 - Monitoring dashboard
 
 **Initial Actions (60 seconds):**
+
 1. Acknowledge alert
 2. Check monitoring dashboard
 3. Verify issue (not false alarm)
@@ -585,6 +617,7 @@ curl https://mhapi.mysticdatanode.net/health
 ```
 
 **Determine Severity:**
+
 - P1: Customer-facing services down
 - P2: Partial functionality impaired
 - P3: Non-critical issues
@@ -611,10 +644,12 @@ Incident Manager: [Name]
 ```
 
 **Communication Channels:**
+
 - **P1/P2:** Slack #incidents, Email to stakeholders
 - **P3/P4:** Slack #alerts only
 
 **Update Frequency:**
+
 - **P1:** Every 15 minutes
 - **P2:** Every 30 minutes
 - **P3/P4:** As significant progress is made
@@ -624,6 +659,7 @@ Incident Manager: [Name]
 **Common Mitigation Strategies:**
 
 **Service Restart:**
+
 ```bash
 cd /opt/myhibachi/app
 docker compose -f docker-compose.prod.yml restart [service]
@@ -634,6 +670,7 @@ curl https://mhapi.mysticdatanode.net/health
 ```
 
 **Database Issues:**
+
 ```bash
 # Check connections
 docker compose exec postgres psql -U myhibachi -c "
@@ -642,9 +679,9 @@ SELECT count(*) FROM pg_stat_activity;
 
 # Kill long-running queries
 docker compose exec postgres psql -U myhibachi -c "
-SELECT pg_terminate_backend(pid) 
-FROM pg_stat_activity 
-WHERE state = 'active' 
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE state = 'active'
 AND query_start < NOW() - INTERVAL '5 minutes';
 "
 
@@ -653,6 +690,7 @@ docker compose -f docker-compose.prod.yml restart postgres
 ```
 
 **High CPU/Memory:**
+
 ```bash
 # Identify process
 htop
@@ -666,6 +704,7 @@ docker compose -f docker-compose.prod.yml up -d --scale fastapi-backend=4
 ```
 
 **Cache Issues:**
+
 ```bash
 # Clear Redis cache
 docker compose exec redis redis-cli FLUSHDB
@@ -719,6 +758,7 @@ Incident Report: [Link]
 **Within 48 Hours:**
 
 Create incident report documenting:
+
 1. Timeline of events
 2. Root cause analysis
 3. Resolution steps taken
@@ -733,11 +773,13 @@ Create incident report documenting:
 #### Incident: Service Completely Down
 
 **Symptoms:**
+
 - Health check: Connection refused
 - All endpoints returning 5xx errors
 - No response from service
 
 **Investigation:**
+
 ```bash
 # Check if service is running
 docker compose -f docker-compose.prod.yml ps
@@ -751,12 +793,14 @@ df -h
 ```
 
 **Resolution:**
+
 1. Restart service: `docker compose restart fastapi-backend`
 2. If fails, check logs for error messages
 3. If disk full, free space: `docker system prune -a`
 4. If memory issue, restart VPS (last resort)
 
 **Prevention:**
+
 - Set up disk space monitoring
 - Configure memory limits in docker-compose
 - Enable auto-restart policy
@@ -766,43 +810,49 @@ df -h
 #### Incident: Database Connection Pool Exhausted
 
 **Symptoms:**
+
 - API returning "database connection" errors
 - Slow queries timing out
 - Pool size at maximum
 
 **Investigation:**
+
 ```bash
 # Check active connections
 docker compose exec postgres psql -U myhibachi -c "
-SELECT count(*), state 
-FROM pg_stat_activity 
+SELECT count(*), state
+FROM pg_stat_activity
 GROUP BY state;
 "
 
 # Check long-running queries
 docker compose exec postgres psql -U myhibachi -c "
-SELECT pid, now() - query_start as duration, query 
-FROM pg_stat_activity 
-WHERE state = 'active' 
+SELECT pid, now() - query_start as duration, query
+FROM pg_stat_activity
+WHERE state = 'active'
 ORDER BY duration DESC;
 "
 ```
 
 **Resolution:**
+
 1. Kill long-running queries (>5 min):
+
 ```bash
 docker compose exec postgres psql -U myhibachi -c "
-SELECT pg_terminate_backend(pid) 
-FROM pg_stat_activity 
-WHERE state = 'active' 
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE state = 'active'
 AND query_start < NOW() - INTERVAL '5 minutes';
 "
 ```
+
 2. Increase pool size in `DATABASE_URL` (e.g., `?pool_size=30`)
 3. Optimize slow queries (see logs)
 4. Restart backend service
 
 **Prevention:**
+
 - Monitor connection pool usage
 - Add connection pool metrics
 - Optimize database queries
@@ -813,11 +863,13 @@ AND query_start < NOW() - INTERVAL '5 minutes';
 #### Incident: High API Error Rate
 
 **Symptoms:**
-- >5% of requests returning 5xx errors
+
+- > 5% of requests returning 5xx errors
 - Sentry reporting many errors
 - Users reporting issues
 
 **Investigation:**
+
 ```bash
 # Check recent errors in logs
 docker compose logs --tail=500 fastapi-backend | grep "ERROR"
@@ -830,6 +882,7 @@ docker compose logs --tail=500 fastapi-backend | grep "ERROR"
 ```
 
 **Resolution:**
+
 1. Identify error type (database, external API, code bug)
 2. If external API (Stripe, OpenAI), check status pages
 3. If database, follow database playbook
@@ -837,6 +890,7 @@ docker compose logs --tail=500 fastapi-backend | grep "ERROR"
 5. If load-related, scale up resources
 
 **Prevention:**
+
 - Comprehensive error handling
 - Circuit breakers for external APIs
 - Retry logic with exponential backoff
@@ -847,11 +901,13 @@ docker compose logs --tail=500 fastapi-backend | grep "ERROR"
 #### Incident: Slow API Response Times
 
 **Symptoms:**
+
 - P95 response time >500ms
 - Users reporting slow page loads
 - Timeout errors
 
 **Investigation:**
+
 ```bash
 # Check system resources
 htop
@@ -859,9 +915,9 @@ df -h
 
 # Check database query times
 docker compose exec postgres psql -U myhibachi -c "
-SELECT query, mean_exec_time, calls 
-FROM pg_stat_statements 
-ORDER BY mean_exec_time DESC 
+SELECT query, mean_exec_time, calls
+FROM pg_stat_statements
+ORDER BY mean_exec_time DESC
 LIMIT 20;
 "
 
@@ -873,6 +929,7 @@ ping mhapi.mysticdatanode.net
 ```
 
 **Resolution:**
+
 1. If database slow, run `VACUUM ANALYZE`
 2. If cache issues, clear and warm cache
 3. If high CPU, reduce worker load or scale up
@@ -880,6 +937,7 @@ ping mhapi.mysticdatanode.net
 5. If code inefficiency, optimize hot paths
 
 **Prevention:**
+
 - Database query optimization
 - Implement caching strategy
 - Performance testing in CI/CD
@@ -890,11 +948,13 @@ ping mhapi.mysticdatanode.net
 #### Incident: SSL Certificate Expired
 
 **Symptoms:**
+
 - HTTPS connections failing
 - Browser showing "Not secure" warning
 - SSL error in logs
 
 **Investigation:**
+
 ```bash
 # Check certificate expiry
 echo | openssl s_client -connect mhapi.mysticdatanode.net:443 2>/dev/null | openssl x509 -noout -dates
@@ -904,6 +964,7 @@ sudo certbot certificates
 ```
 
 **Resolution:**
+
 ```bash
 # Renew certificate manually
 sudo certbot renew
@@ -916,6 +977,7 @@ curl -I https://mhapi.mysticdatanode.net
 ```
 
 **Prevention:**
+
 - Enable certbot auto-renewal: `certbot renew --dry-run`
 - Set up renewal monitoring alert (7 days before expiry)
 - Document manual renewal procedure
@@ -927,6 +989,7 @@ curl -I https://mhapi.mysticdatanode.net
 ### When to Rollback
 
 **Rollback Triggers:**
+
 - Deployment causes critical bugs (P1/P2 incidents)
 - Error rate increases significantly (>10%)
 - Performance degrades beyond acceptable (P95 >1s)
@@ -934,6 +997,7 @@ curl -I https://mhapi.mysticdatanode.net
 - Unable to resolve issue within 30 minutes
 
 **Rollback Decision:**
+
 - On-call engineer can rollback for P1 incidents
 - Engineering lead approval for P2/P3
 - Document reason for rollback
@@ -1040,6 +1104,7 @@ vercel promote <deployment-url> --scope=myhibachi
 ### Rollback Verification
 
 **Checklist:**
+
 - [ ] Service health checks passing
 - [ ] Error rate back to normal (<0.1%)
 - [ ] Response times within SLOs
@@ -1048,6 +1113,7 @@ vercel promote <deployment-url> --scope=myhibachi
 - [ ] Monitor for 30 minutes for stability
 
 **Post-Rollback Actions:**
+
 1. Update incident ticket with rollback details
 2. Communicate rollback to stakeholders
 3. Investigate root cause in development
@@ -1067,6 +1133,7 @@ Location: `/opt/myhibachi/app/ops/system_health_monitor.py`
 **Runs Every:** 5 minutes (via systemd timer)
 
 **Checks:**
+
 - Service status (Docker containers)
 - API health endpoints
 - Database connectivity
@@ -1131,7 +1198,7 @@ All daily checks plus:
 ```bash
 # 1. Database performance
 docker compose exec postgres psql -U myhibachi -c "
-SELECT schemaname, tablename, 
+SELECT schemaname, tablename,
        pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
 FROM pg_tables
 WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
@@ -1141,9 +1208,9 @@ LIMIT 10;
 
 # 2. Slow queries review
 docker compose exec postgres psql -U myhibachi -c "
-SELECT query, mean_exec_time, calls 
-FROM pg_stat_statements 
-ORDER BY mean_exec_time DESC 
+SELECT query, mean_exec_time, calls
+FROM pg_stat_statements
+ORDER BY mean_exec_time DESC
 LIMIT 20;
 "
 
@@ -1166,16 +1233,16 @@ pytest tests/test_api_performance.py -v
 
 ### Health Check Thresholds
 
-| Metric | Healthy | Warning | Critical |
-|--------|---------|---------|----------|
-| **API Response** | 200 OK | Non-200 | Connection refused |
-| **Response Time** | <200ms | 200-500ms | >500ms |
-| **Error Rate** | <0.1% | 0.1-1% | >1% |
-| **CPU Usage** | <70% | 70-90% | >90% |
-| **Memory Usage** | <80% | 80-95% | >95% |
-| **Disk Space** | <70% | 70-85% | >85% |
-| **DB Connections** | <15 | 15-20 | >20 |
-| **SSL Expiry** | >30 days | 7-30 days | <7 days |
+| Metric             | Healthy  | Warning   | Critical           |
+| ------------------ | -------- | --------- | ------------------ |
+| **API Response**   | 200 OK   | Non-200   | Connection refused |
+| **Response Time**  | <200ms   | 200-500ms | >500ms             |
+| **Error Rate**     | <0.1%    | 0.1-1%    | >1%                |
+| **CPU Usage**      | <70%     | 70-90%    | >90%               |
+| **Memory Usage**   | <80%     | 80-95%    | >95%               |
+| **Disk Space**     | <70%     | 70-85%    | >85%               |
+| **DB Connections** | <15      | 15-20     | >20                |
+| **SSL Expiry**     | >30 days | 7-30 days | <7 days            |
 
 ---
 
@@ -1186,6 +1253,7 @@ pytest tests/test_api_performance.py -v
 **Problem:** Service fails to start after restart
 
 **Investigation:**
+
 ```bash
 # Check container logs
 docker compose logs fastapi-backend --tail=100
@@ -1203,6 +1271,7 @@ df -h
 **Common Causes & Solutions:**
 
 1. **Port already in use:**
+
 ```bash
 # Kill process using port
 sudo kill -9 $(sudo lsof -t -i:8003)
@@ -1212,6 +1281,7 @@ docker compose restart fastapi-backend
 ```
 
 2. **Environment variable missing:**
+
 ```bash
 # Check .env file
 cat /opt/myhibachi/config/.env
@@ -1221,6 +1291,7 @@ cat /opt/myhibachi/config/.env
 ```
 
 3. **Database migration failed:**
+
 ```bash
 # Check migration status
 cd apps/backend
@@ -1238,6 +1309,7 @@ alembic upgrade head
 **Problem:** "Unable to connect to database" errors
 
 **Investigation:**
+
 ```bash
 # Check if PostgreSQL is running
 docker compose ps postgres
@@ -1252,11 +1324,13 @@ echo $DATABASE_URL
 **Solutions:**
 
 1. **PostgreSQL not running:**
+
 ```bash
 docker compose restart postgres
 ```
 
 2. **Wrong credentials:**
+
 ```bash
 # Verify credentials in .env
 cat /opt/myhibachi/config/.env | grep DATABASE_URL
@@ -1270,13 +1344,14 @@ ALTER USER myhibachi WITH PASSWORD 'new_secure_password';
 ```
 
 3. **Connection pool exhausted:**
+
 ```bash
 # Kill idle connections
 docker compose exec postgres psql -U myhibachi -c "
-SELECT pg_terminate_backend(pid) 
-FROM pg_stat_activity 
-WHERE datname = 'myhibachi' 
-AND state = 'idle' 
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'myhibachi'
+AND state = 'idle'
 AND state_change < NOW() - INTERVAL '30 minutes';
 "
 
@@ -1289,6 +1364,7 @@ docker compose restart fastapi-backend
 **Problem:** System running out of memory
 
 **Investigation:**
+
 ```bash
 # Check memory usage
 free -m
@@ -1304,16 +1380,19 @@ docker compose exec fastapi-backend ps aux --sort=-%mem
 **Solutions:**
 
 1. **Clear cache:**
+
 ```bash
 docker compose exec redis redis-cli FLUSHDB
 ```
 
 2. **Restart services:**
+
 ```bash
 docker compose restart
 ```
 
 3. **Increase memory limits:**
+
 ```bash
 # Edit docker-compose.prod.yml
 # Add under service:
@@ -1331,21 +1410,22 @@ docker compose up -d
 **Problem:** Queries taking too long
 
 **Investigation:**
+
 ```bash
 # Find slow queries
 docker compose exec postgres psql -U myhibachi -c "
-SELECT pid, now() - pg_stat_activity.query_start AS duration, query 
-FROM pg_stat_activity 
-WHERE state = 'active' 
+SELECT pid, now() - pg_stat_activity.query_start AS duration, query
+FROM pg_stat_activity
+WHERE state = 'active'
 AND now() - pg_stat_activity.query_start > interval '1 second'
 ORDER BY duration DESC;
 "
 
 # Check query performance
 docker compose exec postgres psql -U myhibachi -c "
-SELECT query, mean_exec_time, calls 
-FROM pg_stat_statements 
-ORDER BY mean_exec_time DESC 
+SELECT query, mean_exec_time, calls
+FROM pg_stat_statements
+ORDER BY mean_exec_time DESC
 LIMIT 20;
 "
 ```
@@ -1353,11 +1433,13 @@ LIMIT 20;
 **Solutions:**
 
 1. **Run VACUUM:**
+
 ```bash
 docker compose exec postgres psql -U myhibachi -c "VACUUM ANALYZE;"
 ```
 
 2. **Add missing indexes:**
+
 ```bash
 # Check for missing indexes
 docker compose exec postgres psql -U myhibachi -c "
@@ -1371,6 +1453,7 @@ ORDER BY abs(correlation) DESC;
 ```
 
 3. **Optimize queries:**
+
 ```bash
 # Use EXPLAIN ANALYZE
 docker compose exec postgres psql -U myhibachi -c "
@@ -1385,6 +1468,7 @@ EXPLAIN ANALYZE SELECT * FROM bookings WHERE ...;
 **Problem:** Stripe, OpenAI, or RingCentral API calls failing
 
 **Investigation:**
+
 ```bash
 # Check service status pages
 # Stripe: https://status.stripe.com
@@ -1400,6 +1484,7 @@ docker compose logs | grep "API"
 **Solutions:**
 
 1. **API key expired:**
+
 ```bash
 # Update API key in .env
 nano /opt/myhibachi/config/.env
@@ -1409,6 +1494,7 @@ docker compose restart
 ```
 
 2. **Rate limit exceeded:**
+
 ```bash
 # Reduce request rate
 # Implement exponential backoff
@@ -1416,6 +1502,7 @@ docker compose restart
 ```
 
 3. **Service outage:**
+
 ```bash
 # Enable graceful degradation
 # Show user-friendly error message
@@ -1427,6 +1514,7 @@ docker compose restart
 **Problem:** SSL certificate errors
 
 **Investigation:**
+
 ```bash
 # Check certificate
 echo | openssl s_client -connect mhapi.mysticdatanode.net:443 2>/dev/null | openssl x509 -noout -dates
@@ -1441,6 +1529,7 @@ sudo certbot certificates
 **Solutions:**
 
 1. **Certificate expired:**
+
 ```bash
 # Renew certificate
 sudo certbot renew
@@ -1450,6 +1539,7 @@ sudo systemctl reload nginx
 ```
 
 2. **Wrong certificate:**
+
 ```bash
 # Check Nginx config
 sudo nano /etc/nginx/sites-available/default
@@ -1469,6 +1559,7 @@ sudo nginx -t && sudo systemctl reload nginx
 ### Scheduled Maintenance
 
 **Standard Maintenance Window:**
+
 - **Day:** Sunday
 - **Time:** 02:00 - 04:00 UTC (off-peak)
 - **Frequency:** Monthly (first Sunday)
@@ -1476,6 +1567,7 @@ sudo nginx -t && sudo systemctl reload nginx
 - **Notice:** 7 days advance notice
 
 **Emergency Maintenance:**
+
 - Critical security patches
 - Data corruption risk mitigation
 - Infrastructure failures
@@ -1486,18 +1578,21 @@ sudo nginx -t && sudo systemctl reload nginx
 #### Pre-Maintenance Checklist
 
 **7 Days Before:**
+
 - [ ] Schedule announced to stakeholders
 - [ ] Maintenance plan documented
 - [ ] Rollback plan prepared
 - [ ] Team availability confirmed
 
 **24 Hours Before:**
+
 - [ ] Final maintenance plan review
 - [ ] Customer notification sent
 - [ ] Backup completed and verified
 - [ ] On-call schedule confirmed
 
 **1 Hour Before:**
+
 - [ ] Team ready on Slack/video call
 - [ ] All tools and access verified
 - [ ] Final go/no-go decision
@@ -1530,6 +1625,7 @@ docker compose -f docker-compose.prod.yml stop
 **3. Perform Maintenance**
 
 Examples:
+
 - Database schema changes
 - Major version upgrades
 - Server configuration changes
@@ -1581,6 +1677,7 @@ sudo systemctl reload nginx
 **Automated Backups:**
 
 **Database:**
+
 - **Frequency:** Daily at 03:00 UTC
 - **Retention:** 30 days
 - **Location:** `/var/backups/myhibachi/`
@@ -1588,17 +1685,18 @@ sudo systemctl reload nginx
 - **Verification:** Automated restore test weekly
 
 **Configuration:**
+
 - **Frequency:** On every change (Git)
 - **Location:** GitHub repository
 - **Method:** Version control
 
 **User Uploads (if applicable):**
+
 - **Frequency:** Daily
 - **Location:** External storage (S3/Cloud)
 - **Method:** Rsync or cloud sync
 
-**Backup Script Location:**
-`/opt/myhibachi/app/ops/backup_db.py`
+**Backup Script Location:** `/opt/myhibachi/app/ops/backup_db.py`
 
 **Manual Backup:**
 
@@ -1648,6 +1746,7 @@ curl https://mhapi.mysticdatanode.net/health
 Not currently supported. Requires WAL archiving setup.
 
 **To implement:**
+
 ```bash
 # Enable WAL archiving in PostgreSQL
 # Edit postgresql.conf:
@@ -1767,6 +1866,7 @@ curl https://mhapi.mysticdatanode.net/health
 **Team Size:** Minimum 2 engineers (primary + backup)
 
 **Responsibilities:**
+
 - Respond to production alerts within 5 minutes
 - Investigate and resolve P1/P2 incidents
 - Perform deployments (if scheduled)
@@ -1776,6 +1876,7 @@ curl https://mhapi.mysticdatanode.net/health
 ### On-Call Handoff
 
 **Outgoing Engineer:**
+
 - [ ] Brief incoming engineer on current issues
 - [ ] Share ongoing incident tickets
 - [ ] Highlight any scheduled maintenance
@@ -1783,6 +1884,7 @@ curl https://mhapi.mysticdatanode.net/health
 - [ ] Update on-call schedule in PagerDuty
 
 **Incoming Engineer:**
+
 - [ ] Test alert reception (PagerDuty test alert)
 - [ ] Verify access to production systems
 - [ ] Review recent incidents
@@ -1792,6 +1894,7 @@ curl https://mhapi.mysticdatanode.net/health
 ### On-Call Tools Access
 
 **Required Access:**
+
 - VPS SSH (key-based authentication)
 - Vercel Dashboard
 - Sentry
@@ -1803,23 +1906,27 @@ curl https://mhapi.mysticdatanode.net/health
 ### Escalation Path
 
 **Level 1: On-Call Engineer** (Primary responder)
+
 - Respond within 5 minutes
 - Investigate and attempt resolution
 - Escalate if unable to resolve in 30 minutes (P1) or 1 hour (P2)
 
 **Level 2: Engineering Lead**
+
 - Escalate via phone call + Slack
 - Provide technical guidance
 - Approve major decisions (rollback, extended maintenance)
 - Escalate to CTO if business-critical
 
 **Level 3: CTO**
+
 - Escalate via phone call
 - Major system-wide outages
 - Data breach or security incident
 - Customer communication approval
 
 **External Escalation:**
+
 - **Hosting Provider:** VPS outages, network issues
 - **Vercel Support:** Frontend deployment issues
 - **Database Consultant:** Complex database issues
@@ -1829,15 +1936,15 @@ curl https://mhapi.mysticdatanode.net/health
 
 ## Escalation Matrix
 
-| Issue Type | Severity | First Response | Escalation (if unresolved) |
-|-----------|----------|----------------|---------------------------|
-| **Complete Outage** | P1 | On-Call Engineer (5 min) | Engineering Lead (30 min) → CTO (1 hour) |
-| **API Errors >10%** | P2 | On-Call Engineer (15 min) | Engineering Lead (1 hour) |
-| **Database Issues** | P2 | On-Call Engineer (15 min) | Engineering Lead (1 hour) → DBA (2 hours) |
-| **Security Breach** | P1 | On-Call Engineer (immediate) | Security Lead (immediate) → CTO (immediate) |
-| **Data Loss** | P1 | On-Call Engineer (immediate) | Engineering Lead (15 min) → CTO (30 min) |
-| **Performance Degradation** | P3 | On-Call Engineer (1 hour) | Engineering Lead (next business day) |
-| **External API Down** | P3 | On-Call Engineer (1 hour) | Engineering Lead (4 hours) |
+| Issue Type                  | Severity | First Response               | Escalation (if unresolved)                  |
+| --------------------------- | -------- | ---------------------------- | ------------------------------------------- |
+| **Complete Outage**         | P1       | On-Call Engineer (5 min)     | Engineering Lead (30 min) → CTO (1 hour)    |
+| **API Errors >10%**         | P2       | On-Call Engineer (15 min)    | Engineering Lead (1 hour)                   |
+| **Database Issues**         | P2       | On-Call Engineer (15 min)    | Engineering Lead (1 hour) → DBA (2 hours)   |
+| **Security Breach**         | P1       | On-Call Engineer (immediate) | Security Lead (immediate) → CTO (immediate) |
+| **Data Loss**               | P1       | On-Call Engineer (immediate) | Engineering Lead (15 min) → CTO (30 min)    |
+| **Performance Degradation** | P3       | On-Call Engineer (1 hour)    | Engineering Lead (next business day)        |
+| **External API Down**       | P3       | On-Call Engineer (1 hour)    | Engineering Lead (4 hours)                  |
 
 ---
 
@@ -1885,27 +1992,27 @@ ENABLE_ANALYTICS=true
 
 ### Appendix B: Port Reference
 
-| Port | Service | Protocol | Access |
-|------|---------|----------|--------|
-| 80 | HTTP (redirect to HTTPS) | HTTP | Public |
-| 443 | HTTPS (Nginx) | HTTPS | Public |
-| 8003 | FastAPI Backend | HTTP | Internal/Public |
-| 8002 | AI Backend | HTTP | Internal/Public |
-| 5432 | PostgreSQL | TCP | Internal only |
-| 6379 | Redis | TCP | Internal only |
-| 22 | SSH | TCP | Admin only |
+| Port | Service                  | Protocol | Access          |
+| ---- | ------------------------ | -------- | --------------- |
+| 80   | HTTP (redirect to HTTPS) | HTTP     | Public          |
+| 443  | HTTPS (Nginx)            | HTTPS    | Public          |
+| 8003 | FastAPI Backend          | HTTP     | Internal/Public |
+| 8002 | AI Backend               | HTTP     | Internal/Public |
+| 5432 | PostgreSQL               | TCP      | Internal only   |
+| 6379 | Redis                    | TCP      | Internal only   |
+| 22   | SSH                      | TCP      | Admin only      |
 
 ### Appendix C: Key File Locations
 
-| File/Directory | Purpose |
-|---------------|---------|
-| `/opt/myhibachi/app` | Application root |
-| `/opt/myhibachi/config/.env` | Environment variables |
-| `/var/backups/myhibachi/` | Database backups |
-| `/var/log/myhibachi/` | Application logs |
-| `/etc/nginx/sites-available/default` | Nginx configuration |
-| `/etc/systemd/system/myhibachi-*.service` | Systemd services |
-| `/var/lib/myhibachi/monitoring/` | Monitoring data |
+| File/Directory                            | Purpose               |
+| ----------------------------------------- | --------------------- |
+| `/opt/myhibachi/app`                      | Application root      |
+| `/opt/myhibachi/config/.env`              | Environment variables |
+| `/var/backups/myhibachi/`                 | Database backups      |
+| `/var/log/myhibachi/`                     | Application logs      |
+| `/etc/nginx/sites-available/default`      | Nginx configuration   |
+| `/etc/systemd/system/myhibachi-*.service` | Systemd services      |
+| `/var/lib/myhibachi/monitoring/`          | Monitoring data       |
 
 ### Appendix D: Useful Commands Cheat Sheet
 
@@ -1960,9 +2067,13 @@ git status
 
 ## Related Documentation
 
-- [TESTING_COMPREHENSIVE_GUIDE.md](./TESTING_COMPREHENSIVE_GUIDE.md) - Testing procedures
-- [FINAL_PRODUCTION_DEPLOYMENT_GUIDE.md](./FINAL_PRODUCTION_DEPLOYMENT_GUIDE.md) - Deployment guide
-- [DATABASE_SETUP_GUIDE.md](./DATABASE_SETUP_GUIDE.md) - Database setup
-- [LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md) - Local development
+- [TESTING_COMPREHENSIVE_GUIDE.md](./TESTING_COMPREHENSIVE_GUIDE.md) -
+  Testing procedures
+- [FINAL_PRODUCTION_DEPLOYMENT_GUIDE.md](./FINAL_PRODUCTION_DEPLOYMENT_GUIDE.md) -
+  Deployment guide
+- [DATABASE_SETUP_GUIDE.md](./DATABASE_SETUP_GUIDE.md) - Database
+  setup
+- [LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md) - Local
+  development
 
 ---

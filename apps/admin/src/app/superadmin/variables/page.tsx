@@ -1,6 +1,17 @@
 'use client';
 
-import { AlertTriangle, CheckCircle, Clock, Database, Loader2, RefreshCw, Save, Sliders, X, XCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Database,
+  Loader2,
+  RefreshCw,
+  Save,
+  Sliders,
+  X,
+  XCircle,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -17,12 +28,12 @@ interface Variable {
   value: string | number | boolean;
   type: 'string' | 'number' | 'boolean';
   category:
-  | 'pricing'
-  | 'business'
-  | 'feature'
-  | 'environment'
-  | 'ai'
-  | 'monitoring';
+    | 'pricing'
+    | 'business'
+    | 'feature'
+    | 'environment'
+    | 'ai'
+    | 'monitoring';
   description: string;
   source: string;
   priority: 'critical' | 'high' | 'medium' | 'low';
@@ -34,9 +45,7 @@ interface Variable {
 /**
  * Map backend category to frontend category
  */
-function mapCategoryToFrontend(
-  backendCategory: string
-): Variable['category'] {
+function mapCategoryToFrontend(backendCategory: string): Variable['category'] {
   const categoryMap: Record<string, Variable['category']> = {
     pricing: 'pricing',
     deposit: 'pricing', // deposit maps to pricing for display
@@ -105,16 +114,13 @@ export default function VariablesManagementPage() {
   >({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [pendingApprovals, setPendingApprovals] = useState<ApprovalRequest[]>([]);
+  const [pendingApprovals, setPendingApprovals] = useState<ApprovalRequest[]>(
+    []
+  );
   const [approvalsLoading, setApprovalsLoading] = useState(false);
 
   // Fetch variables from SSoT API
-  const {
-    data: configVars,
-    loading,
-    error,
-    refetch,
-  } = useConfigVariables();
+  const { data: configVars, loading, error, refetch } = useConfigVariables();
 
   // Transform API data to UI format when it changes
   useEffect(() => {
@@ -171,14 +177,24 @@ export default function VariablesManagementPage() {
 
     try {
       // Separate changes by priority - critical/high need approval, medium/low can be direct
-      const directUpdates: Array<{ variable: Variable; key: string; newValue: string | number | boolean }> = [];
-      const approvalRequests: Array<{ variable: Variable; key: string; newValue: string | number | boolean }> = [];
+      const directUpdates: Array<{
+        variable: Variable;
+        key: string;
+        newValue: string | number | boolean;
+      }> = [];
+      const approvalRequests: Array<{
+        variable: Variable;
+        key: string;
+        newValue: string | number | boolean;
+      }> = [];
 
       Object.entries(pendingChanges).forEach(([key, newValue]) => {
-        const variable = variables.find((v) => v.key === key);
+        const variable = variables.find(v => v.key === key);
         if (!variable) return;
 
-        const priority = determinePriority(variable.backendCategory || variable.category);
+        const priority = determinePriority(
+          variable.backendCategory || variable.category
+        );
         if (priority === 'critical' || priority === 'high') {
           approvalRequests.push({ variable, key, newValue });
         } else {
@@ -186,58 +202,79 @@ export default function VariablesManagementPage() {
         }
       });
 
-      const results: Array<{ success: boolean; key: string; error?: string; needsApproval?: boolean }> = [];
+      const results: Array<{
+        success: boolean;
+        key: string;
+        error?: string;
+        needsApproval?: boolean;
+      }> = [];
 
       // Process direct updates (medium/low priority)
       if (directUpdates.length > 0) {
-        const updatePromises = directUpdates.map(async ({ variable, key, newValue }) => {
-          const backendCategory = variable.backendCategory || variable.category;
-          const response = await configService.updateVariable(backendCategory, key, { value: newValue });
-          return { success: response.success, key, error: response.error };
-        });
+        const updatePromises = directUpdates.map(
+          async ({ variable, key, newValue }) => {
+            const backendCategory =
+              variable.backendCategory || variable.category;
+            const response = await configService.updateVariable(
+              backendCategory,
+              key,
+              { value: newValue }
+            );
+            return { success: response.success, key, error: response.error };
+          }
+        );
         const directResults = await Promise.all(updatePromises);
         results.push(...directResults);
       }
 
       // Process approval requests (critical/high priority)
       if (approvalRequests.length > 0) {
-        const approvalPromises = approvalRequests.map(async ({ variable, key, newValue }) => {
-          const backendCategory = variable.backendCategory || variable.category;
-          const response = await configService.requestApproval({
-            category: backendCategory,
-            key,
-            proposed_value: newValue,
-            reason: `Change requested via admin panel: ${variable.key} from ${variable.value} to ${newValue}`,
-          });
-          return {
-            success: response.success,
-            key,
-            error: response.error,
-            needsApproval: true,
-          };
-        });
+        const approvalPromises = approvalRequests.map(
+          async ({ variable, key, newValue }) => {
+            const backendCategory =
+              variable.backendCategory || variable.category;
+            const response = await configService.requestApproval({
+              category: backendCategory,
+              key,
+              proposed_value: newValue,
+              reason: `Change requested via admin panel: ${variable.key} from ${variable.value} to ${newValue}`,
+            });
+            return {
+              success: response.success,
+              key,
+              error: response.error,
+              needsApproval: true,
+            };
+          }
+        );
         const approvalResults = await Promise.all(approvalPromises);
         results.push(...approvalResults);
       }
 
       // Check for failures
-      const failures = results.filter((r) => !r.success);
-      const approvalsPending = results.filter((r) => r.success && r.needsApproval);
+      const failures = results.filter(r => !r.success);
+      const approvalsPending = results.filter(
+        r => r.success && r.needsApproval
+      );
 
       if (failures.length > 0) {
         setSaveError(
-          `Failed to update ${failures.length} variable(s): ${failures.map((f) => f.key).join(', ')}`
+          `Failed to update ${failures.length} variable(s): ${failures.map(f => f.key).join(', ')}`
         );
       } else if (approvalsPending.length > 0 && directUpdates.length === 0) {
         // All changes need approval
         setSaveSuccess(true);
-        setSaveError(`${approvalsPending.length} change(s) submitted for approval. A second administrator must approve before changes take effect.`);
+        setSaveError(
+          `${approvalsPending.length} change(s) submitted for approval. A second administrator must approve before changes take effect.`
+        );
         setPendingChanges({});
         await fetchPendingApprovals();
       } else if (approvalsPending.length > 0) {
         // Mixed: some direct, some need approval
         setSaveSuccess(true);
-        setSaveError(`${directUpdates.length} change(s) saved. ${approvalsPending.length} critical/high priority change(s) submitted for approval.`);
+        setSaveError(
+          `${directUpdates.length} change(s) saved. ${approvalsPending.length} critical/high priority change(s) submitted for approval.`
+        );
         setPendingChanges({});
         await refetch();
         await fetchPendingApprovals();
@@ -278,7 +315,10 @@ export default function VariablesManagementPage() {
 
   const handleApprove = async (approvalId: string) => {
     try {
-      const response = await configService.approveRequest(approvalId, 'Approved via admin panel');
+      const response = await configService.approveRequest(
+        approvalId,
+        'Approved via admin panel'
+      );
       if (response.success) {
         await fetchPendingApprovals();
         await refetch();
@@ -296,7 +336,10 @@ export default function VariablesManagementPage() {
     if (reason === null) return; // User cancelled
 
     try {
-      const response = await configService.rejectRequest(approvalId, reason || 'Rejected via admin panel');
+      const response = await configService.rejectRequest(
+        approvalId,
+        reason || 'Rejected via admin panel'
+      );
       if (response.success) {
         await fetchPendingApprovals();
         alert('Request rejected.');
@@ -375,7 +418,9 @@ export default function VariablesManagementPage() {
             variant="outline"
             className="border-gray-300"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+            />
             Refresh
           </Button>
 
@@ -418,9 +463,12 @@ export default function VariablesManagementPage() {
           <div className="flex items-center">
             <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
             <div>
-              <h3 className="text-sm font-medium text-green-800">Changes Saved Successfully</h3>
+              <h3 className="text-sm font-medium text-green-800">
+                Changes Saved Successfully
+              </h3>
               <p className="text-sm text-green-700">
-                All configuration changes have been applied and cache has been refreshed.
+                All configuration changes have been applied and cache has been
+                refreshed.
               </p>
             </div>
           </div>
@@ -434,7 +482,9 @@ export default function VariablesManagementPage() {
             <div className="flex items-center">
               <XCircle className="w-5 h-5 text-red-600 mr-3" />
               <div>
-                <h3 className="text-sm font-medium text-red-800">Failed to Save Changes</h3>
+                <h3 className="text-sm font-medium text-red-800">
+                  Failed to Save Changes
+                </h3>
                 <p className="text-sm text-red-700">{saveError}</p>
               </div>
             </div>
@@ -463,7 +513,7 @@ export default function VariablesManagementPage() {
             )}
           </div>
           <div className="space-y-3">
-            {pendingApprovals.map((approval) => (
+            {pendingApprovals.map(approval => (
               <div
                 key={approval.id}
                 className="bg-white border border-purple-100 rounded-md p-3"
@@ -488,7 +538,8 @@ export default function VariablesManagementPage() {
                       </span>
                     </div>
                     <div className="mt-1 text-xs text-gray-500">
-                      Requested by {approval.requester_name || approval.requester_id} •{' '}
+                      Requested by{' '}
+                      {approval.requester_name || approval.requester_id} •{' '}
                       {new Date(approval.created_at).toLocaleString()}
                       {approval.reason && (
                         <span className="ml-2 italic">"{approval.reason}"</span>
@@ -633,13 +684,15 @@ export default function VariablesManagementPage() {
                                 </span>
                               )}
                               {pendingApprovals.some(
-                                a => a.key === variable.key && a.category === variable.category
+                                a =>
+                                  a.key === variable.key &&
+                                  a.category === variable.category
                               ) && (
-                                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    Pending Approval
-                                  </span>
-                                )}
+                                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  Pending Approval
+                                </span>
+                              )}
                             </div>
                             <div className="text-sm text-gray-500 mt-1">
                               {variable.description}

@@ -10,6 +10,7 @@ python seed_first_station.py
 ```
 
 **Expected Output**:
+
 ```
 ✓ Generated station code: STATION-CA-BAY-001
 ✓ Station created successfully!
@@ -29,6 +30,7 @@ python seed_first_station.py
 ## 📡 API Endpoints
 
 ### Base URL
+
 ```
 http://localhost:8000/api/stations
 ```
@@ -40,6 +42,7 @@ POST /api/stations
 ```
 
 **Request Body**:
+
 ```json
 {
   "name": "Texas Austin",
@@ -54,13 +57,13 @@ POST /api/stations
   "postal_code": "78701",
   "status": "active",
   "business_hours": {
-    "monday": {"open": "10:00", "close": "22:00"},
-    "tuesday": {"open": "10:00", "close": "22:00"},
-    "wednesday": {"open": "10:00", "close": "22:00"},
-    "thursday": {"open": "10:00", "close": "22:00"},
-    "friday": {"open": "10:00", "close": "23:00"},
-    "saturday": {"open": "09:00", "close": "23:00"},
-    "sunday": {"open": "09:00", "close": "22:00"}
+    "monday": { "open": "10:00", "close": "22:00" },
+    "tuesday": { "open": "10:00", "close": "22:00" },
+    "wednesday": { "open": "10:00", "close": "22:00" },
+    "thursday": { "open": "10:00", "close": "22:00" },
+    "friday": { "open": "10:00", "close": "23:00" },
+    "saturday": { "open": "09:00", "close": "23:00" },
+    "sunday": { "open": "09:00", "close": "22:00" }
   },
   "max_concurrent_bookings": 12,
   "booking_lead_time_hours": 24
@@ -68,6 +71,7 @@ POST /api/stations
 ```
 
 **Response**: `201 Created`
+
 ```json
 {
   "id": "uuid",
@@ -91,12 +95,15 @@ GET /api/stations?skip=0&limit=20&status=active
 ```
 
 **Query Parameters**:
+
 - `skip` (int): Pagination offset (default: 0)
 - `limit` (int): Results per page (default: 20, max: 100)
-- `status` (string): Filter by status (active, inactive, suspended, maintenance)
+- `status` (string): Filter by status (active, inactive, suspended,
+  maintenance)
 - `include_stats` (bool): Include user/booking counts
 
 **Response**: `200 OK`
+
 ```json
 [
   {
@@ -120,6 +127,7 @@ GET /api/stations/{station_id}?include_stats=true
 ```
 
 **Response**: `200 OK`
+
 ```json
 {
   "id": "uuid",
@@ -141,6 +149,7 @@ PUT /api/stations/{station_id}
 ```
 
 **Request Body** (all fields optional):
+
 ```json
 {
   "name": "Updated Name",
@@ -151,6 +160,7 @@ PUT /api/stations/{station_id}
 ```
 
 **Response**: `200 OK`
+
 ```json
 {
   "id": "uuid",
@@ -169,20 +179,21 @@ DELETE /api/stations/{station_id}?force=false
 ```
 
 **Query Parameters**:
-- `force` (bool): Override safety checks (super admin only, default: false)
+
+- `force` (bool): Override safety checks (super admin only, default:
+  false)
 
 **Scenarios**:
 
 #### **Scenario A: Blocked (has active bookings/users)**
+
 **Response**: `409 Conflict`
+
 ```json
 {
   "detail": {
     "message": "Cannot delete station with active data",
-    "blocking_issues": [
-      "3 active booking(s)",
-      "2 assigned user(s)"
-    ],
+    "blocking_issues": ["3 active booking(s)", "2 assigned user(s)"],
     "active_bookings": 3,
     "assigned_users": 2,
     "total_bookings": 47,
@@ -192,15 +203,19 @@ DELETE /api/stations/{station_id}?force=false
 ```
 
 #### **Scenario B: Success (no active data)**
+
 **Response**: `204 No Content`
+
 ```
 (empty response)
 ```
 
 #### **Scenario C: Force Delete (super admin)**
+
 ```bash
 DELETE /api/stations/{station_id}?force=true
 ```
+
 **Response**: `204 No Content`
 
 ---
@@ -212,6 +227,7 @@ POST /api/stations/{station_id}/users
 ```
 
 **Request Body**:
+
 ```json
 {
   "user_id": "uuid",
@@ -221,6 +237,7 @@ POST /api/stations/{station_id}/users
 ```
 
 **Response**: `201 Created`
+
 ```json
 {
   "id": "uuid",
@@ -244,9 +261,11 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 ```
 
 **Permissions Required**:
+
 - **Create**: `manage_stations` (super admin only)
 - **Read**: `view_stations` (all roles)
-- **Update**: `manage_stations` (super admin or station admin for own station)
+- **Update**: `manage_stations` (super admin or station admin for own
+  station)
 - **Delete**: `manage_stations` (super admin only)
 
 ---
@@ -260,6 +279,7 @@ STATION-{STATE}-{CITY}-{###}
 ```
 
 **Real Examples**:
+
 - `STATION-CA-BAY-001` - California Bay Area (1st)
 - `STATION-CA-BAY-002` - California Bay Area (2nd)
 - `STATION-TX-AUSTIN-001` - Texas Austin (1st)
@@ -267,6 +287,7 @@ STATION-{STATE}-{CITY}-{###}
 - `STATION-NY-MANHATTAN-001` - New York Manhattan (1st)
 
 **City Normalization**:
+
 - "Bay Area" → `BAY`
 - "San Francisco" → `SAN`
 - "Austin" → `AUSTIN`
@@ -277,17 +298,21 @@ STATION-{STATE}-{CITY}-{###}
 ## ⚠️ Delete Safety Rules
 
 ### Hard Blocks (Cannot delete without force=true)
+
 - ❌ Active bookings (status: pending, confirmed, in_progress)
 - ❌ Assigned users (is_active: true)
 
 ### Warnings (Shows warning, allows deletion)
+
 - ⚠️ Historical bookings (status: completed, cancelled)
 - ⚠️ Inactive users (is_active: false)
 
 ### Force Delete (Super Admin Only)
+
 ```bash
 DELETE /api/stations/{id}?force=true
 ```
+
 - Bypasses all safety checks
 - Creates detailed audit log entry
 - Irreversible - use with caution!
@@ -297,6 +322,7 @@ DELETE /api/stations/{id}?force=true
 ## 🧪 Testing Scenarios
 
 ### Test 1: Create and List
+
 ```bash
 # Create a station
 curl -X POST http://localhost:8000/api/stations \
@@ -316,6 +342,7 @@ curl http://localhost:8000/api/stations \
 ```
 
 ### Test 2: Update Station
+
 ```bash
 curl -X PUT http://localhost:8000/api/stations/{id} \
   -H "Authorization: Bearer $TOKEN" \
@@ -324,6 +351,7 @@ curl -X PUT http://localhost:8000/api/stations/{id} \
 ```
 
 ### Test 3: Delete (Safety Check)
+
 ```bash
 # Will fail if bookings/users exist
 curl -X DELETE http://localhost:8000/api/stations/{id} \
@@ -338,12 +366,12 @@ curl -X DELETE "http://localhost:8000/api/stations/{id}?force=true" \
 
 ## 📊 Station Statuses
 
-| Status | Description | Use Case |
-|--------|-------------|----------|
-| `active` | Fully operational | Normal operations |
-| `inactive` | Temporarily closed | Seasonal closure |
-| `suspended` | Admin suspended | Compliance issues |
-| `maintenance` | Under maintenance | System upgrades |
+| Status        | Description        | Use Case          |
+| ------------- | ------------------ | ----------------- |
+| `active`      | Fully operational  | Normal operations |
+| `inactive`    | Temporarily closed | Seasonal closure  |
+| `suspended`   | Admin suspended    | Compliance issues |
+| `maintenance` | Under maintenance  | System upgrades   |
 
 ---
 
@@ -427,23 +455,28 @@ PUT /api/stations/{id}
 ## 🐛 Troubleshooting
 
 ### Error: "Only super administrators can create stations"
+
 - **Cause**: Current user lacks super_admin role
 - **Solution**: Login as super admin or request super admin to create
 
 ### Error: "Cannot delete station with active data"
+
 - **Cause**: Station has active bookings or assigned users
-- **Solution**: 
+- **Solution**:
   1. Complete/cancel active bookings
   2. Reassign users to other stations
   3. Then delete, or use `force=true` (super admin)
 
 ### Error: "Station not found"
+
 - **Cause**: Invalid station ID or station was deleted
-- **Solution**: Verify station ID, check if station exists via GET /api/stations
+- **Solution**: Verify station ID, check if station exists via GET
+  /api/stations
 
 ### Error: "Access denied to this station"
+
 - **Cause**: User trying to access station they're not assigned to
-- **Solution**: 
+- **Solution**:
   - Super admin: No restrictions
   - Station admin: Can only access assigned station
   - Request super admin to grant access
@@ -456,17 +489,20 @@ PUT /api/stations/{id}
 - Station codes are **unique** across the entire platform
 - **Super admin** role required for most station management
 - **Audit logs** track all station changes for compliance
-- **Soft delete** not supported - deletions are permanent (with audit trail)
+- **Soft delete** not supported - deletions are permanent (with audit
+  trail)
 
 ---
 
 ## 🔗 Related Documentation
 
 - [Station Management Implementation Complete](./STATION_MANAGEMENT_IMPLEMENTATION_COMPLETE.md)
-- [Google OAuth Integration Guide](./GOOGLE_OAUTH_INTEGRATION_GUIDE.md) (coming soon)
+- [Google OAuth Integration Guide](./GOOGLE_OAUTH_INTEGRATION_GUIDE.md)
+  (coming soon)
 - [API Documentation](./API_DOCUMENTATION.md)
 - [RBAC System Overview](./4_TIER_RBAC_IMPLEMENTATION_PLAN.md)
 
 ---
 
-**Questions?** Check the full implementation guide or contact the development team.
+**Questions?** Check the full implementation guide or contact the
+development team.

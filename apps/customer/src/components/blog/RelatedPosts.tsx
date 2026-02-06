@@ -1,137 +1,139 @@
-'use client'
+'use client';
 
 import type { BlogPost } from '@my-hibachi/blog-types';
-import { ArrowRight, Calendar, User } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
+import { ArrowRight, Calendar, User } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
 
-import { getAuthorName } from '@/lib/blog/helpers'
+import { getAuthorName } from '@/lib/blog/helpers';
 
-import BlogCardImage from './BlogCardImage'
+import BlogCardImage from './BlogCardImage';
 
 interface RelatedPostsProps {
-  currentPost: BlogPost
-  allPosts: BlogPost[]
-  maxPosts?: number
+  currentPost: BlogPost;
+  allPosts: BlogPost[];
+  maxPosts?: number;
 }
 
 export default function RelatedPosts({ currentPost, allPosts, maxPosts = 3 }: RelatedPostsProps) {
   const getRelatedPosts = (): BlogPost[] => {
     // Filter out the current post
-    const otherPosts = allPosts.filter(post => post.id !== currentPost.id)
+    const otherPosts = allPosts.filter((post) => post.id !== currentPost.id);
 
     // Score posts based on relevance
-    const scoredPosts = otherPosts.map(post => {
-      let score = 0
+    const scoredPosts = otherPosts.map((post) => {
+      let score = 0;
 
       // Same category gets highest score
       if (post.category === currentPost.category) {
-        score += 10
+        score += 10;
       }
 
       // Same service area gets high score
       if (post.serviceArea === currentPost.serviceArea) {
-        score += 8
+        score += 8;
       }
 
       // Same event type gets high score
       if (post.eventType === currentPost.eventType) {
-        score += 7
+        score += 7;
       }
 
       // Shared keywords/tags
-      const currentKeywords = currentPost.keywords || []
-      const postKeywords = post.keywords || []
-      const sharedKeywords = currentKeywords.filter((keyword: string) => postKeywords.includes(keyword))
-      score += sharedKeywords.length * 2
+      const currentKeywords = currentPost.keywords || [];
+      const postKeywords = post.keywords || [];
+      const sharedKeywords = currentKeywords.filter((keyword: string) =>
+        postKeywords.includes(keyword),
+      );
+      score += sharedKeywords.length * 2;
 
       // Same author gets moderate score
       if (post.author === currentPost.author) {
-        score += 3
+        score += 3;
       }
 
       // Recent posts get slight bonus (within 30 days)
-      const postDate = new Date(post.date)
-      const currentPostDate = new Date(currentPost.date)
+      const postDate = new Date(post.date);
+      const currentPostDate = new Date(currentPost.date);
       const daysDiff = Math.abs(
-        (postDate.getTime() - currentPostDate.getTime()) / (1000 * 60 * 60 * 24)
-      )
+        (postDate.getTime() - currentPostDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
       if (daysDiff <= 30) {
-        score += 1
+        score += 1;
       }
 
-      return { post, score }
-    })
+      return { post, score };
+    });
 
     // Sort by score and return top posts
     return scoredPosts
       .sort((a, b) => b.score - a.score)
       .slice(0, maxPosts)
-      .map(item => item.post)
-  }
+      .map((item) => item.post);
+  };
 
-  const relatedPosts = getRelatedPosts()
+  const relatedPosts = getRelatedPosts();
 
   if (relatedPosts.length === 0) {
-    return null
+    return null;
   }
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6 mt-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="mt-8 rounded-lg bg-gray-50 p-6">
+      <div className="mb-6 flex items-center justify-between">
         <h3 className="text-xl font-bold text-gray-900">Related Articles</h3>
         <Link
           href="/blog"
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center"
+          className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-700"
         >
-          View All <ArrowRight className="w-4 h-4 ml-1" />
+          View All <ArrowRight className="ml-1 h-4 w-4" />
         </Link>
       </div>
 
       <div className="grid gap-4">
-        {relatedPosts.map(post => (
+        {relatedPosts.map((post) => (
           <article
             key={post.id}
-            className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+            className="rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md"
           >
             <div className="flex gap-4">
               {/* Thumbnail */}
-              <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
-                <BlogCardImage post={post} className="w-full h-full object-cover" />
+              <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg">
+                <BlogCardImage post={post} className="h-full w-full object-cover" />
               </div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center text-xs text-gray-500 mb-2">
-                  <Calendar className="w-3 h-3 mr-1" />
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 flex items-center text-xs text-gray-500">
+                  <Calendar className="mr-1 h-3 w-3" />
                   <span className="mr-3">{post.date}</span>
-                  <User className="w-3 h-3 mr-1" />
+                  <User className="mr-1 h-3 w-3" />
                   <span>{getAuthorName(post.author)}</span>
                 </div>
 
-                <h4 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
+                <h4 className="mb-2 line-clamp-2 text-base font-semibold text-gray-900">
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="hover:text-blue-600 transition-colors"
+                    className="transition-colors hover:text-blue-600"
                   >
                     {post.title}
                   </Link>
                 </h4>
 
-                <p className="text-sm text-gray-600 line-clamp-2 mb-2">{post.excerpt}</p>
+                <p className="mb-2 line-clamp-2 text-sm text-gray-600">{post.excerpt}</p>
 
                 {/* Tags/Categories */}
                 <div className="flex flex-wrap gap-1">
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
                     {post.category}
                   </span>
                   {post.serviceArea && (
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                    <span className="rounded bg-green-100 px-2 py-1 text-xs text-green-800">
                       {post.serviceArea}
                     </span>
                   )}
                   {post.eventType && (
-                    <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                    <span className="rounded bg-purple-100 px-2 py-1 text-xs text-purple-800">
                       {post.eventType}
                     </span>
                   )}
@@ -146,11 +148,11 @@ export default function RelatedPosts({ currentPost, allPosts, maxPosts = 3 }: Re
       <div className="mt-6 text-center">
         <Link
           href="/blog"
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
         >
-          Explore More Articles <ArrowRight className="w-4 h-4 ml-2" />
+          Explore More Articles <ArrowRight className="ml-2 h-4 w-4" />
         </Link>
       </div>
     </div>
-  )
+  );
 }

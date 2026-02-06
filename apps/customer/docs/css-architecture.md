@@ -117,7 +117,7 @@ Each critical page has a layout wrapper:
 ```tsx
 // app/menu/layout.tsx
 export default function MenuLayout({ children }: { children: React.ReactNode }) {
-  return <div data-page="menu">{children}</div>
+  return <div data-page="menu">{children}</div>;
 }
 ```
 
@@ -141,11 +141,11 @@ Replace legacy `.btn-primary` with centralized component:
 
 ```tsx
 // Before (legacy)
-;<button className="btn-primary">Get Quote</button>
+<button className="btn-primary">Get Quote</button>;
 
 // After (scoped)
-import { HibachiButton } from '@/components/ui/button'
-;<HibachiButton variant="primary">Get Quote</HibachiButton>
+import { HibachiButton } from '@/components/ui/button';
+<HibachiButton variant="primary">Get Quote</HibachiButton>;
 ```
 
 ### Visual Compatibility

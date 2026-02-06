@@ -149,58 +149,72 @@ export function useAutoSave<T extends Record<string, unknown>>({
    * Automatically excludes sensitive fields from DEFAULT_SENSITIVE_FIELDS
    * plus any additional fields specified in excludeFields.
    */
-  const filterData = useCallback((inputData: T): Partial<T> => {
-    const filtered = { ...inputData };
+  const filterData = useCallback(
+    (inputData: T): Partial<T> => {
+      const filtered = { ...inputData };
 
-    // Always exclude default sensitive fields using precise word matching
-    // Split camelCase and snake_case keys into words to avoid false positives
-    const inputKeys = Object.keys(filtered);
-    inputKeys.forEach((key) => {
-      // Split camelCase (e.g., cardNumber -> card number) and snake_case (e.g., card_number -> card number)
-      const keyParts = key
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .toLowerCase()
-        .split(/[\s_]+/);
+      // Always exclude default sensitive fields using precise word matching
+      // Split camelCase and snake_case keys into words to avoid false positives
+      const inputKeys = Object.keys(filtered);
+      inputKeys.forEach((key) => {
+        // Split camelCase (e.g., cardNumber -> card number) and snake_case (e.g., card_number -> card number)
+        const keyParts = key
+          .replace(/([a-z])([A-Z])/g, '$1 $2')
+          .toLowerCase()
+          .split(/[\s_]+/);
 
-      // Check if any part of the key matches a sensitive field
-      if (keyParts.some(part => DEFAULT_SENSITIVE_FIELDS.map(s => s.toLowerCase()).includes(part))) {
-        delete filtered[key as keyof T];
-      }
-    });
+        // Check if any part of the key matches a sensitive field
+        if (
+          keyParts.some((part) =>
+            DEFAULT_SENSITIVE_FIELDS.map((s) => s.toLowerCase()).includes(part),
+          )
+        ) {
+          delete filtered[key as keyof T];
+        }
+      });
 
-    // Also exclude explicitly specified fields
-    excludeFields.forEach((field) => {
-      delete filtered[field];
-    });
+      // Also exclude explicitly specified fields
+      excludeFields.forEach((field) => {
+        delete filtered[field];
+      });
 
-    return filtered;
-  }, [excludeFields]);
+      return filtered;
+    },
+    [excludeFields],
+  );
 
   /**
    * Save data to localStorage
    */
-  const saveToStorage = useCallback((dataToSave: T) => {
-    if (!enabled) return;
+  const saveToStorage = useCallback(
+    (dataToSave: T) => {
+      if (!enabled) return;
 
-    try {
-      const filteredData = filterData(dataToSave);
-      const savedData: SavedFormData<Partial<T>> = {
-        data: filteredData,
-        timestamp: Date.now(),
-        version: CURRENT_VERSION,
-      };
+      try {
+        const filteredData = filterData(dataToSave);
+        const savedData: SavedFormData<Partial<T>> = {
+          data: filteredData,
+          timestamp: Date.now(),
+          version: CURRENT_VERSION,
+        };
 
-      localStorage.setItem(storageKey, JSON.stringify(savedData));
-      setLastSaved(new Date(savedData.timestamp));
-      setHasSavedData(true);
-      setIsSaving(false);
+        localStorage.setItem(storageKey, JSON.stringify(savedData));
+        setLastSaved(new Date(savedData.timestamp));
+        setHasSavedData(true);
+        setIsSaving(false);
 
-      logger.debug('[AutoSave] Saved form data', { key, timestamp: savedData.timestamp });
-    } catch (error) {
-      logger.error('[AutoSave] Failed to save form data', error instanceof Error ? error : undefined, { key });
-      setIsSaving(false);
-    }
-  }, [enabled, filterData, key, storageKey]);
+        logger.debug('[AutoSave] Saved form data', { key, timestamp: savedData.timestamp });
+      } catch (error) {
+        logger.error(
+          '[AutoSave] Failed to save form data',
+          error instanceof Error ? error : undefined,
+          { key },
+        );
+        setIsSaving(false);
+      }
+    },
+    [enabled, filterData, key, storageKey],
+  );
 
   /**
    * Load saved data from localStorage
@@ -217,7 +231,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
         logger.debug('[AutoSave] Version mismatch, clearing saved data', {
           key,
           savedVersion: parsed.version,
-          currentVersion: CURRENT_VERSION
+          currentVersion: CURRENT_VERSION,
         });
         localStorage.removeItem(storageKey);
         return null;
@@ -234,7 +248,11 @@ export function useAutoSave<T extends Record<string, unknown>>({
       setLastSaved(new Date(parsed.timestamp));
       return parsed.data;
     } catch (error) {
-      logger.error('[AutoSave] Failed to load saved data', error instanceof Error ? error : undefined, { key });
+      logger.error(
+        '[AutoSave] Failed to load saved data',
+        error instanceof Error ? error : undefined,
+        { key },
+      );
       return null;
     }
   }, [expirationMs, key, storageKey]);
@@ -249,7 +267,11 @@ export function useAutoSave<T extends Record<string, unknown>>({
       setLastSaved(null);
       logger.debug('[AutoSave] Cleared saved data', { key });
     } catch (error) {
-      logger.error('[AutoSave] Failed to clear saved data', error instanceof Error ? error : undefined, { key });
+      logger.error(
+        '[AutoSave] Failed to clear saved data',
+        error instanceof Error ? error : undefined,
+        { key },
+      );
     }
   }, [key, storageKey]);
 
@@ -290,7 +312,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
         logger.info('[AutoSave] Auto-restored form data on mount', { key });
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, key]); // Only run on mount and key change
 
   /**

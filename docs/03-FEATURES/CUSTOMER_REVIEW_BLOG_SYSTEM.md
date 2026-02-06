@@ -1,7 +1,9 @@
 # 📝 Customer Review Blog System - Implementation Guide
 
 ## Overview
-Enterprise-grade customer review blog system with image upload, admin approval, and integration with Google/Yelp review flow.
+
+Enterprise-grade customer review blog system with image upload, admin
+approval, and integration with Google/Yelp review flow.
 
 **Pattern:** Like Facebook newsfeed + Yelp reviews + Instagram stories
 
@@ -17,39 +19,39 @@ CREATE TABLE customer_review_blog_posts (
     id SERIAL PRIMARY KEY,
     customer_id INTEGER REFERENCES customers(id),
     booking_id INTEGER REFERENCES bookings(id),
-    
+
     -- Content
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-    
+
     -- Images
     images JSONB DEFAULT '[]', -- Array of image URLs
-    
+
     -- Status (admin approval workflow)
     status VARCHAR(20) DEFAULT 'pending', -- pending, approved, rejected
     approved_by INTEGER REFERENCES users(id),
     approved_at TIMESTAMP,
     rejection_reason TEXT,
-    
+
     -- External reviews (track if they also reviewed on Google/Yelp)
     reviewed_on_google BOOLEAN DEFAULT FALSE,
     reviewed_on_yelp BOOLEAN DEFAULT FALSE,
     google_review_link TEXT,
     yelp_review_link TEXT,
-    
+
     -- Metadata
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- SEO
     slug VARCHAR(255) UNIQUE,
     keywords TEXT[],
-    
+
     -- Engagement
     likes_count INTEGER DEFAULT 0,
     helpful_count INTEGER DEFAULT 0,
-    
+
     INDEX idx_status (status),
     INDEX idx_customer (customer_id),
     INDEX idx_created (created_at DESC),
@@ -121,7 +123,7 @@ async def submit_customer_review(
 ):
     """
     Submit a customer review with optional images
-    
+
     Enterprise Features:
     - Image upload with validation
     - Thumbnail generation
@@ -129,11 +131,11 @@ async def submit_customer_review(
     - Email notifications
     - Integration with Google/Yelp reviews
     """
-    
+
     # Validate image count
     if len(images) > 10:
         raise HTTPException(status_code=400, detail="Maximum 10 images allowed")
-    
+
     # Create review post (pending approval)
     review = CustomerReviewBlogPost(
         customer_id=customer.id,
@@ -148,47 +150,47 @@ async def submit_customer_review(
         yelp_review_link=yelp_review_link,
         slug=f"{uuid.uuid4()}-{title.lower().replace(' ', '-')[:50]}"
     )
-    
+
     db.add(review)
     db.commit()
     db.refresh(review)
-    
+
     # Process and upload images
     image_service = ImageService()
     uploaded_images = []
-    
+
     for image_file in images:
         # Validate image
         if not image_file.content_type.startswith('image/'):
             continue
-        
+
         # Read image
         contents = await image_file.read()
-        
+
         # Validate size (max 10MB)
         if len(contents) > 10 * 1024 * 1024:
             raise HTTPException(status_code=400, detail=f"Image {image_file.filename} exceeds 10MB")
-        
+
         # Process image
         image = Image.open(io.BytesIO(contents))
-        
+
         # Generate optimized version
         optimized = image_service.optimize_image(image, max_width=1920, quality=85)
-        
+
         # Generate thumbnail
         thumbnail = image_service.generate_thumbnail(image, size=(400, 300))
-        
+
         # Upload to storage (S3, Cloudinary, etc.)
         image_url = await image_service.upload_image(
             optimized,
             f"reviews/{review.id}/{uuid.uuid4()}.jpg"
         )
-        
+
         thumbnail_url = await image_service.upload_image(
             thumbnail,
             f"reviews/{review.id}/thumb_{uuid.uuid4()}.jpg"
         )
-        
+
         # Store image metadata
         uploaded_images.append({
             'url': image_url,
@@ -197,15 +199,15 @@ async def submit_customer_review(
             'height': image.height,
             'filename': image_file.filename
         })
-    
+
     # Update review with images
     review.images = uploaded_images
     db.commit()
-    
+
     # Send email notification to admin
     email_service = EmailService()
     await email_service.notify_admin_new_review(review)
-    
+
     # Log submission
     from ..models import ReviewApprovalLog
     log = ReviewApprovalLog(
@@ -215,7 +217,7 @@ async def submit_customer_review(
     )
     db.add(log)
     db.commit()
-    
+
     return JSONResponse(
         status_code=201,
         content={
@@ -235,7 +237,7 @@ async def get_my_reviews(
     reviews = db.query(CustomerReviewBlogPost).filter(
         CustomerReviewBlogPost.customer_id == customer.id
     ).order_by(CustomerReviewBlogPost.created_at.desc()).all()
-    
+
     return {
         'reviews': [
             {
@@ -260,24 +262,24 @@ async def get_approved_reviews(
 ):
     """
     Get approved customer reviews (public endpoint)
-    
+
     Features:
     - Pagination
     - Newest first (like Facebook newsfeed)
     - Only approved reviews
     """
     offset = (page - 1) * per_page
-    
+
     reviews = db.query(CustomerReviewBlogPost).filter(
         CustomerReviewBlogPost.status == 'approved'
     ).order_by(
         CustomerReviewBlogPost.approved_at.desc()
     ).offset(offset).limit(per_page).all()
-    
+
     total = db.query(CustomerReviewBlogPost).filter(
         CustomerReviewBlogPost.status == 'approved'
     ).count()
-    
+
     return {
         'reviews': [
             {
@@ -326,24 +328,24 @@ async def get_pending_reviews(
 ):
     """
     Get all pending reviews for admin approval
-    
+
     Features:
     - Pagination
     - Oldest first (FIFO queue)
     - Full customer details for context
     """
     offset = (page - 1) * per_page
-    
+
     reviews = db.query(CustomerReviewBlogPost).filter(
         CustomerReviewBlogPost.status == 'pending'
     ).order_by(
         CustomerReviewBlogPost.created_at.asc()  # Oldest first (queue)
     ).offset(offset).limit(per_page).all()
-    
+
     total = db.query(CustomerReviewBlogPost).filter(
         CustomerReviewBlogPost.status == 'pending'
     ).count()
-    
+
     return {
         'reviews': [
             {
@@ -386,18 +388,18 @@ async def approve_review(
     review = db.query(CustomerReviewBlogPost).filter(
         CustomerReviewBlogPost.id == review_id
     ).first()
-    
+
     if not review:
         raise HTTPException(status_code=404, detail="Review not found")
-    
+
     if review.status != 'pending':
         raise HTTPException(status_code=400, detail="Review already processed")
-    
+
     # Approve review
     review.status = 'approved'
     review.approved_by = admin.id
     review.approved_at = datetime.utcnow()
-    
+
     # Log approval
     log = ReviewApprovalLog(
         review_id=review.id,
@@ -407,12 +409,12 @@ async def approve_review(
     )
     db.add(log)
     db.commit()
-    
+
     # Send email to customer
     from ..services.email_service import EmailService
     email_service = EmailService()
     await email_service.notify_customer_review_approved(review)
-    
+
     return {
         'success': True,
         'message': 'Review approved successfully',
@@ -430,17 +432,17 @@ async def reject_review(
     review = db.query(CustomerReviewBlogPost).filter(
         CustomerReviewBlogPost.id == review_id
     ).first()
-    
+
     if not review:
         raise HTTPException(status_code=404, detail="Review not found")
-    
+
     if review.status != 'pending':
         raise HTTPException(status_code=400, detail="Review already processed")
-    
+
     # Reject review
     review.status = 'rejected'
     review.rejection_reason = rejection_reason
-    
+
     # Log rejection
     log = ReviewApprovalLog(
         review_id=review.id,
@@ -450,12 +452,12 @@ async def reject_review(
     )
     db.add(log)
     db.commit()
-    
+
     # Send email to customer with reason
     from ..services.email_service import EmailService
     email_service = EmailService()
     await email_service.notify_customer_review_rejected(review, rejection_reason)
-    
+
     return {
         'success': True,
         'message': 'Review rejected',
@@ -473,12 +475,12 @@ async def bulk_review_action(
     """Bulk approve/reject reviews"""
     if action not in ['approve', 'reject']:
         raise HTTPException(status_code=400, detail="Invalid action")
-    
+
     reviews = db.query(CustomerReviewBlogPost).filter(
         CustomerReviewBlogPost.id.in_(review_ids),
         CustomerReviewBlogPost.status == 'pending'
     ).all()
-    
+
     processed = []
     for review in reviews:
         if action == 'approve':
@@ -488,7 +490,7 @@ async def bulk_review_action(
         else:
             review.status = 'rejected'
             review.rejection_reason = reason or 'Rejected by admin'
-        
+
         # Log action
         log = ReviewApprovalLog(
             review_id=review.id,
@@ -498,9 +500,9 @@ async def bulk_review_action(
         )
         db.add(log)
         processed.append(review.id)
-    
+
     db.commit()
-    
+
     return {
         'success': True,
         'message': f'Bulk {action} completed',
@@ -543,24 +545,24 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    
+
     if (images.length + files.length > 10) {
       setError('Maximum 10 images allowed')
       return
     }
-    
+
     // Validate file size (10MB max per image)
     const invalidFiles = files.filter(f => f.size > 10 * 1024 * 1024)
     if (invalidFiles.length > 0) {
       setError('Each image must be under 10MB')
       return
     }
-    
+
     setImages([...images, ...files])
-    
+
     // Generate previews
     files.forEach(file => {
       const reader = new FileReader()
@@ -569,19 +571,19 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
       }
       reader.readAsDataURL(file)
     })
-    
+
     setError('')
   }
-  
+
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index))
     setPreviews(previews.filter((_, i) => i !== index))
   }
-  
+
   const handleSubmit = async () => {
     setIsSubmitting(true)
     setError('')
-    
+
     try {
       const formData = new FormData()
       formData.append('title', title)
@@ -592,11 +594,11 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
       formData.append('reviewed_on_yelp', reviewedOnYelp.toString())
       if (googleLink) formData.append('google_review_link', googleLink)
       if (yelpLink) formData.append('yelp_review_link', yelpLink)
-      
+
       images.forEach(image => {
         formData.append('images', image)
       })
-      
+
       const response = await fetch('/api/customer-reviews/submit-review', {
         method: 'POST',
         body: formData,
@@ -604,12 +606,12 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       })
-      
+
       if (!response.ok) {
         const error = await response.json()
         throw new Error(error.detail || 'Failed to submit review')
       }
-      
+
       setSuccess(true)
       onSuccess?.()
     } catch (err) {
@@ -618,7 +620,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
       setIsSubmitting(false)
     }
   }
-  
+
   if (success) {
     return (
       <div className="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-lg text-center">
@@ -646,7 +648,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
       </div>
     )
   }
-  
+
   return (
     <div className="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-lg">
       {/* Progress Steps */}
@@ -670,14 +672,14 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
           </div>
         ))}
       </div>
-      
+
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
           <AlertCircle className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" />
           <p className="text-red-600">{error}</p>
         </div>
       )}
-      
+
       {/* Step 1: Rating */}
       {step === 'rating' && (
         <div>
@@ -721,7 +723,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
           </button>
         </div>
       )}
-      
+
       {/* Step 2: Content */}
       {step === 'content' && (
         <div>
@@ -768,13 +770,13 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
           </div>
         </div>
       )}
-      
+
       {/* Step 3: Images */}
       {step === 'images' && (
         <div>
           <h2 className="text-2xl font-bold mb-4">Add Photos (Optional)</h2>
           <p className="text-gray-600 mb-6">Share your favorite moments! Up to 10 images, max 10MB each.</p>
-          
+
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6">
             <input
               type="file"
@@ -793,7 +795,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
               <p className="text-sm text-gray-400">PNG, JPG, WEBP up to 10MB each</p>
             </label>
           </div>
-          
+
           {/* Image Previews */}
           {previews.length > 0 && (
             <div className="grid grid-cols-3 gap-4 mb-6">
@@ -815,7 +817,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
               ))}
             </div>
           )}
-          
+
           <div className="flex gap-4">
             <button
               onClick={() => setStep('content')}
@@ -832,7 +834,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
           </div>
         </div>
       )}
-      
+
       {/* Step 4: External Reviews */}
       {step === 'external' && (
         <div>
@@ -840,7 +842,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
           <p className="text-gray-600 mb-6">
             Help us grow by sharing your experience on Google and Yelp! It takes just a minute.
           </p>
-          
+
           <div className="space-y-4 mb-6">
             <div className="p-4 border border-gray-200 rounded-lg">
               <label className="flex items-center gap-3 cursor-pointer">
@@ -878,7 +880,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
                 </div>
               )}
             </div>
-            
+
             <div className="p-4 border border-gray-200 rounded-lg">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
@@ -915,7 +917,7 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
               )}
             </div>
           </div>
-          
+
           <div className="flex gap-4">
             <button
               onClick={() => setStep('images')}
@@ -938,4 +940,5 @@ export default function CustomerReviewForm({ bookingId, onSuccess }: CustomerRev
 }
 ```
 
-This is getting very long. Let me create a summary document instead with all the implementation details:
+This is getting very long. Let me create a summary document instead
+with all the implementation details:

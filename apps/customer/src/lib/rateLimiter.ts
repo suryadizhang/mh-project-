@@ -73,63 +73,63 @@ interface TokenBucket {
 const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig> = {
   // Booking operations - strict limits for critical endpoints
   booking_create: {
-    maxRequests: 5,           // 5 requests per minute
-    windowMs: 60 * 1000,      // 1 minute
-    refillRate: 0.0833,       // ~5 tokens per minute
-    burstCapacity: 5,         // Can make 5 requests at once
+    maxRequests: 5, // 5 requests per minute
+    windowMs: 60 * 1000, // 1 minute
+    refillRate: 0.0833, // ~5 tokens per minute
+    burstCapacity: 5, // Can make 5 requests at once
   },
 
   booking_update: {
-    maxRequests: 10,          // 10 requests per minute
+    maxRequests: 10, // 10 requests per minute
     windowMs: 60 * 1000,
-    refillRate: 0.1667,       // ~10 tokens per minute
+    refillRate: 0.1667, // ~10 tokens per minute
     burstCapacity: 10,
   },
 
   booking_list: {
-    maxRequests: 30,          // 30 requests per minute
+    maxRequests: 30, // 30 requests per minute
     windowMs: 60 * 1000,
-    refillRate: 0.5,          // 30 tokens per minute
+    refillRate: 0.5, // 30 tokens per minute
     burstCapacity: 30,
   },
 
   // Search operations - moderate limits
   search: {
-    maxRequests: 20,          // 20 searches per minute
+    maxRequests: 20, // 20 searches per minute
     windowMs: 60 * 1000,
-    refillRate: 0.3333,       // ~20 tokens per minute
-    burstCapacity: 10,        // Prevent search spam
+    refillRate: 0.3333, // ~20 tokens per minute
+    burstCapacity: 10, // Prevent search spam
   },
 
   // Payment operations - very strict
   payment: {
-    maxRequests: 3,           // 3 payments per 5 minutes
-    windowMs: 5 * 60 * 1000,  // 5 minutes
-    refillRate: 0.01,         // ~3 tokens per 5 minutes
+    maxRequests: 3, // 3 payments per 5 minutes
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    refillRate: 0.01, // ~3 tokens per 5 minutes
     burstCapacity: 3,
   },
 
   // File uploads - strict limits
   upload: {
-    maxRequests: 5,           // 5 uploads per 5 minutes
+    maxRequests: 5, // 5 uploads per 5 minutes
     windowMs: 5 * 60 * 1000,
-    refillRate: 0.0167,       // ~5 tokens per 5 minutes
+    refillRate: 0.0167, // ~5 tokens per 5 minutes
     burstCapacity: 5,
   },
 
   // Chat operations - moderate limits
   chat: {
-    maxRequests: 15,          // 15 messages per minute
+    maxRequests: 15, // 15 messages per minute
     windowMs: 60 * 1000,
-    refillRate: 0.25,         // 15 tokens per minute
+    refillRate: 0.25, // 15 tokens per minute
     burstCapacity: 15,
   },
 
   // General API calls - lenient limits
   api: {
-    maxRequests: 60,          // 60 requests per minute
+    maxRequests: 60, // 60 requests per minute
     windowMs: 60 * 1000,
-    refillRate: 1.0,          // 60 tokens per minute
+    refillRate: 1.0, // 60 tokens per minute
     burstCapacity: 60,
   },
 };
@@ -268,17 +268,14 @@ export class RateLimiter {
 
     if (tokensToAdd >= 1) {
       // Add tokens up to burst capacity
-      bucket.tokens = Math.min(
-        config.burstCapacity,
-        bucket.tokens + Math.floor(tokensToAdd)
-      );
+      bucket.tokens = Math.min(config.burstCapacity, bucket.tokens + Math.floor(tokensToAdd));
       bucket.lastRefill = now;
 
       logger.debug('Tokens refilled', {
         endpoint,
         category,
         tokensAdded: Math.floor(tokensToAdd),
-        currentTokens: bucket.tokens
+        currentTokens: bucket.tokens,
       });
     }
 
@@ -313,7 +310,7 @@ export class RateLimiter {
           category,
           requestCount: bucket.requestCount,
           maxRequests: config.maxRequests,
-          windowMs: config.windowMs
+          windowMs: config.windowMs,
         });
         return false;
       }
@@ -325,7 +322,7 @@ export class RateLimiter {
         endpoint,
         category,
         tokens: bucket.tokens,
-        burstCapacity: config.burstCapacity
+        burstCapacity: config.burstCapacity,
       });
       return false;
     }
@@ -350,7 +347,7 @@ export class RateLimiter {
       endpoint,
       category,
       remainingTokens: bucket.tokens,
-      requestCount: bucket.requestCount
+      requestCount: bucket.requestCount,
     });
 
     // Save state after recording

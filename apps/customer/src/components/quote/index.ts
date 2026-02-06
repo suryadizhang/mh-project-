@@ -1,2 +1,2 @@
 // Quote components
-export { QuoteCalculator } from './QuoteCalculator'
+export { QuoteCalculator } from './QuoteCalculator';

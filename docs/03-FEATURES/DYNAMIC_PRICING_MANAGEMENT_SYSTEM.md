@@ -2,9 +2,13 @@
 
 ## 🎯 Overview
 
-This document outlines the complete system for managing pricing dynamically across your website, database, and AI responses.
+This document outlines the complete system for managing pricing
+dynamically across your website, database, and AI responses.
 
-**Your Concern:** *"these price are dynamic subject to change we need to check our webpage for these, or create a system for whenever the frontend page change prices we update our data too or how we can manage it?"*
+**Your Concern:** _"these price are dynamic subject to change we need
+to check our webpage for these, or create a system for whenever the
+frontend page change prices we update our data too or how we can
+manage it?"_
 
 ---
 
@@ -33,6 +37,7 @@ This document outlines the complete system for managing pricing dynamically acro
 ```
 
 **Benefits:**
+
 - ✅ Single source of truth
 - ✅ No sync issues
 - ✅ Instant updates everywhere
@@ -168,7 +173,7 @@ async def get_all_pricing(db: Session = Depends(get_db)):
     """Get all current pricing"""
     menu_items = db.query(MenuItem).filter(MenuItem.is_active == True).all()
     addon_items = db.query(AddonItem).filter(AddonItem.is_active == True).all()
-    
+
     return {
         "menu_items": [
             {
@@ -205,7 +210,7 @@ async def update_menu_item_price(
     item = db.query(MenuItem).filter(MenuItem.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Menu item not found")
-    
+
     # Log the change
     history = PriceChangeHistory(
         item_type="menu_item",
@@ -218,12 +223,12 @@ async def update_menu_item_price(
         effective_date=effective_date
     )
     db.add(history)
-    
+
     # Update the price
     item.base_price = new_price
     item.updated_at = datetime.now()
     db.commit()
-    
+
     return {
         "message": f"Price updated from ${history.old_price} to ${new_price}",
         "item": {
@@ -241,14 +246,14 @@ async def get_price_history(
 ):
     """Get price change history"""
     query = db.query(PriceChangeHistory)
-    
+
     if item_type:
         query = query.filter(PriceChangeHistory.item_type == item_type)
     if item_id:
         query = query.filter(PriceChangeHistory.item_id == item_id)
-    
+
     changes = query.order_by(PriceChangeHistory.created_at.desc()).all()
-    
+
     return {
         "price_changes": [
             {
@@ -286,19 +291,22 @@ export async function fetchCurrentPricing(): Promise<PricingData> {
 export function getCachedPricing(): PricingData | null {
   const cached = localStorage.getItem('pricing_data');
   if (!cached) return null;
-  
+
   const { data, expiry } = JSON.parse(cached);
   if (Date.now() > expiry) {
     localStorage.removeItem('pricing_data');
     return null;
   }
-  
+
   return data;
 }
 
 export function cachePricing(data: PricingData): void {
-  const expiry = Date.now() + (15 * 60 * 1000); // 15 minutes
-  localStorage.setItem('pricing_data', JSON.stringify({ data, expiry }));
+  const expiry = Date.now() + 15 * 60 * 1000; // 15 minutes
+  localStorage.setItem(
+    'pricing_data',
+    JSON.stringify({ data, expiry })
+  );
 }
 
 // Usage in components:
@@ -306,7 +314,7 @@ export async function getPricing(): Promise<PricingData> {
   // Try cache first
   const cached = getCachedPricing();
   if (cached) return cached;
-  
+
   // Fetch fresh data
   const data = await fetchCurrentPricing();
   cachePricing(data);
@@ -322,27 +330,41 @@ import { getPricing } from '@/services/pricingService';
 
 export function PricingDisplay() {
   const [pricing, setPricing] = useState(null);
-  
+
   useEffect(() => {
     getPricing().then(setPricing);
   }, []);
-  
+
   if (!pricing) return <div>Loading prices...</div>;
-  
+
   return (
     <div className="pricing-container">
       <h2>Current Pricing</h2>
-      
+
       <div className="price-item">
         <span>Adult (13+):</span>
-        <span className="price">${pricing.menu_items.find(i => i.name === 'Adult Base Price')?.price}</span>
+        <span className="price">
+          $
+          {
+            pricing.menu_items.find(
+              i => i.name === 'Adult Base Price'
+            )?.price
+          }
+        </span>
       </div>
-      
+
       <div className="price-item">
         <span>Child (6-12):</span>
-        <span className="price">${pricing.menu_items.find(i => i.name === 'Child Base Price')?.price}</span>
+        <span className="price">
+          $
+          {
+            pricing.menu_items.find(
+              i => i.name === 'Child Base Price'
+            )?.price
+          }
+        </span>
       </div>
-      
+
       {/* More pricing items... */}
     </div>
   );
@@ -361,7 +383,7 @@ def get_adult_price(self) -> Decimal:
         .where(MenuItem.name == 'Adult Base Price')
         .where(MenuItem.is_active == True)
     ).scalar_one_or_none()
-    
+
     return menu_item.base_price if menu_item else Decimal("55.00")
 ```
 
@@ -381,12 +403,12 @@ def notify_price_change(item_name, old_price, new_price, changed_by):
         title=f"Price Updated: {item_name}",
         message=f"""
         Price change recorded:
-        
+
         Item: {item_name}
         Old Price: ${old_price}
         New Price: ${new_price}
         Changed By: {changed_by}
-        
+
         All new quotes will use updated pricing.
         Frontend pricing display will refresh automatically.
         """,
@@ -402,11 +424,14 @@ def notify_price_change(item_name, old_price, new_price, changed_by):
 
 ```typescript
 // Refresh pricing every 15 minutes
-setInterval(async () => {
-  const newPricing = await fetchCurrentPricing();
-  cachePricing(newPricing);
-  // Update UI if component is mounted
-}, 15 * 60 * 1000);
+setInterval(
+  async () => {
+    const newPricing = await fetchCurrentPricing();
+    cachePricing(newPricing);
+    // Update UI if component is mounted
+  },
+  15 * 60 * 1000
+);
 ```
 
 ### Option B: WebSocket (Real-time)
@@ -415,13 +440,13 @@ setInterval(async () => {
 // Real-time price updates via WebSocket
 const ws = new WebSocket('ws://localhost:8000/ws/pricing');
 
-ws.onmessage = (event) => {
+ws.onmessage = event => {
   const { type, data } = JSON.parse(event.data);
-  
+
   if (type === 'PRICE_UPDATE') {
     // Update pricing cache immediately
     cachePricing(data.new_pricing);
-    
+
     // Show toast notification
     toast.info(`Pricing updated: ${data.changed_items.join(', ')}`);
   }
@@ -440,7 +465,7 @@ async def pricing_stream():
             if has_pricing_changes():
                 yield f"data: {json.dumps(get_current_pricing())}\n\n"
             await asyncio.sleep(60)  # Check every minute
-    
+
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 ```
 
@@ -475,29 +500,34 @@ async def pricing_stream():
 ## 🚀 Implementation Timeline
 
 ### Phase 1: Database Setup (1 hour)
+
 - [ ] Create `price_change_history` table
 - [ ] Seed database with current pricing
 - [ ] Add indexes for performance
 
 ### Phase 2: Admin API (2 hours)
+
 - [ ] Create GET `/api/admin/pricing/menu-items`
 - [ ] Create PUT `/api/admin/pricing/menu-items/{id}`
 - [ ] Create GET `/api/admin/pricing/price-history`
 - [ ] Add authentication/authorization
 
 ### Phase 3: Admin UI (4 hours)
+
 - [ ] Build pricing management page
 - [ ] Inline edit functionality
 - [ ] Price history timeline
 - [ ] Bulk update form
 
 ### Phase 4: Frontend Integration (2 hours)
+
 - [ ] Create `pricingService.ts`
 - [ ] Update pricing display components
 - [ ] Add caching with TTL
 - [ ] Test real-time updates
 
 ### Phase 5: Testing (1 hour)
+
 - [ ] Test price changes reflect in AI quotes
 - [ ] Test frontend updates
 - [ ] Test cache invalidation
@@ -508,12 +538,14 @@ async def pricing_stream():
 ## ✅ Current Status
 
 **What's Already Done:**
+
 - ✅ `menu_items` and `addon_items` tables exist
 - ✅ `PricingService` queries database
 - ✅ Fallback to hardcoded prices if database unavailable
 - ✅ AI system uses `PricingService` for quotes
 
 **What Needs to Be Built:**
+
 - [ ] `price_change_history` table
 - [ ] Admin pricing management UI
 - [ ] Frontend price API endpoints
@@ -552,6 +584,7 @@ async def pricing_stream():
 If you need help implementing any part of this system, let me know!
 
 **Priority order for implementation:**
+
 1. Phase 1: Database setup (needed for everything else)
 2. Phase 2: Admin API (needed for price updates)
 3. Phase 3: Admin UI (makes it user-friendly)
@@ -561,6 +594,7 @@ If you need help implementing any part of this system, let me know!
 ---
 
 **Current pricing confirmed:**
+
 - Adult: $55 ✅
 - Child (6-12): $30 ✅
 - Child under 5: FREE ✅

@@ -275,11 +275,9 @@ If Plesk Docker extension is installed:
 ### Monitoring via Plesk
 
 1. **Server Management > Services**
-
    - Verify Docker service is running
 
 2. **Logs > Apache Logs**
-
    - View reverse proxy logs
 
 3. **Server Health**

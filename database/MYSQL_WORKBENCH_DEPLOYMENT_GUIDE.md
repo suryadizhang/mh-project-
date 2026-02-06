@@ -18,13 +18,17 @@
 ### **Step 1: Open the SQL Script in MySQL Workbench**
 
 **Option A: Via File Menu (Recommended)**
+
 1. In MySQL Workbench, click **File** → **Open SQL Script...**
-2. Navigate to: `C:\Users\surya\projects\MH webapps\database\migrations\`
+2. Navigate to:
+   `C:\Users\surya\projects\MH webapps\database\migrations\`
 3. Select `001_create_performance_indexes.sql`
 4. Click **Open**
 
 **Option B: Copy-Paste**
-1. Open `001_create_performance_indexes.sql` in VS Code (already open for you!)
+
+1. Open `001_create_performance_indexes.sql` in VS Code (already open
+   for you!)
 2. Press `Ctrl+A` to select all
 3. Press `Ctrl+C` to copy
 4. In MySQL Workbench, open a new SQL tab (**Ctrl+T**)
@@ -43,8 +47,10 @@ Look at the top of MySQL Workbench window:
 **Important:** Make sure you're connected to the correct database!
 
 If not connected or wrong database:
+
 1. Click the **dropdown** next to "Schemas"
-2. Select your **production database** (likely named `myhibachi` or similar)
+2. Select your **production database** (likely named `myhibachi` or
+   similar)
 3. Double-click to set as default
 
 ---
@@ -52,11 +58,13 @@ If not connected or wrong database:
 ### **Step 3: Execute the SQL Script**
 
 **Method 1: Execute All (Recommended)**
+
 1. Click the **lightning bolt icon** (⚡) in the toolbar
    - OR press **Ctrl+Shift+Enter**
 2. This runs the entire script
 
 **Method 2: Execute Selection**
+
 1. Select specific sections if needed
 2. Click lightning bolt icon
    - OR press **Ctrl+Enter**
@@ -77,6 +85,7 @@ You'll see in the **Output panel** (bottom of window):
 **Expected Duration:** 2-5 minutes depending on data volume
 
 **What You'll See:**
+
 - ✅ Green checkmarks for successful indexes
 - ⚠️ Warnings if index already exists (safe to ignore)
 - ❌ Red X for errors (let me know if you see any)
@@ -89,7 +98,7 @@ After execution completes, run this verification query:
 
 ```sql
 -- Copy and paste this in a NEW query tab
-SELECT 
+SELECT
     TABLE_NAME,
     INDEX_NAME,
     COLUMN_NAME,
@@ -122,11 +131,12 @@ ORDER BY TABLE_NAME, INDEX_NAME;
 Run these queries **BEFORE and AFTER** to see the improvement:
 
 #### **Test 1: Customer Booking History**
+
 ```sql
-EXPLAIN 
-SELECT * FROM bookings 
-WHERE customer_id = 1 
-ORDER BY booking_date DESC 
+EXPLAIN
+SELECT * FROM bookings
+WHERE customer_id = 1
+ORDER BY booking_date DESC
 LIMIT 20;
 ```
 
@@ -136,10 +146,11 @@ LIMIT 20;
 ---
 
 #### **Test 2: Recent Bookings for Dashboard**
+
 ```sql
 EXPLAIN
-SELECT * FROM bookings 
-ORDER BY created_at DESC 
+SELECT * FROM bookings
+ORDER BY created_at DESC
 LIMIT 50;
 ```
 
@@ -149,10 +160,11 @@ LIMIT 50;
 ---
 
 #### **Test 3: Inbox Thread Messages**
+
 ```sql
 EXPLAIN
-SELECT * FROM messages 
-WHERE thread_id = 1 
+SELECT * FROM messages
+WHERE thread_id = 1
 ORDER BY created_at DESC;
 ```
 
@@ -163,13 +175,13 @@ ORDER BY created_at DESC;
 
 ## ⚡ Expected Performance Improvements
 
-| Query Type | Before | After | Improvement |
-|-----------|--------|-------|-------------|
-| Customer booking history | 2,500ms | 5ms | **500x faster** |
-| Recent bookings list | 1,800ms | 3ms | **600x faster** |
-| Inbox message load | 3,200ms | 8ms | **400x faster** |
-| Lead pipeline query | 2,000ms | 50ms | **40x faster** |
-| Search customers | 1,500ms | 25ms | **60x faster** |
+| Query Type               | Before  | After | Improvement     |
+| ------------------------ | ------- | ----- | --------------- |
+| Customer booking history | 2,500ms | 5ms   | **500x faster** |
+| Recent bookings list     | 1,800ms | 3ms   | **600x faster** |
+| Inbox message load       | 3,200ms | 8ms   | **400x faster** |
+| Lead pipeline query      | 2,000ms | 50ms  | **40x faster**  |
+| Search customers         | 1,500ms | 25ms  | **60x faster**  |
 
 ---
 
@@ -178,37 +190,49 @@ ORDER BY created_at DESC;
 ### **Error: "Index already exists"**
 
 **Message:**
+
 ```
 Error Code: 1061. Duplicate key name 'idx_bookings_customer_id'
 ```
 
-**Solution:** This is fine! It means the index already exists. The script uses `IF NOT EXISTS` but some MySQL versions don't support it. You can:
+**Solution:** This is fine! It means the index already exists. The
+script uses `IF NOT EXISTS` but some MySQL versions don't support it.
+You can:
+
 - Ignore the error and continue
-- OR drop the existing index first: `DROP INDEX idx_bookings_customer_id ON bookings;`
+- OR drop the existing index first:
+  `DROP INDEX idx_bookings_customer_id ON bookings;`
 
 ---
 
 ### **Error: "Unknown column"**
 
 **Message:**
+
 ```
 Error Code: 1054. Unknown column 'station_id' in 'field list'
 ```
 
-**Solution:** Your database schema doesn't have this column. This is OK! You can:
+**Solution:** Your database schema doesn't have this column. This is
+OK! You can:
+
 - Skip indexes for columns you don't have
-- Comment out those CREATE INDEX statements (add `--` at start of line)
+- Comment out those CREATE INDEX statements (add `--` at start of
+  line)
 
 ---
 
 ### **Error: "Table doesn't exist"**
 
 **Message:**
+
 ```
 Error Code: 1146. Table 'myhibachi.audit_logs' doesn't exist
 ```
 
-**Solution:** Your database doesn't have all tables yet. This is OK! You can:
+**Solution:** Your database doesn't have all tables yet. This is OK!
+You can:
+
 - Skip indexes for tables you don't have
 - Comment out those sections
 
@@ -217,10 +241,12 @@ Error Code: 1146. Table 'myhibachi.audit_logs' doesn't exist
 ### **Script Taking Too Long (>10 minutes)**
 
 **Possible Causes:**
+
 - Very large dataset (millions of rows)
 - Server under heavy load
 
 **Solution:**
+
 1. Check progress in Output panel
 2. Let it complete (indexes being created)
 3. If truly stuck, stop and retry during low-traffic time
@@ -230,6 +256,7 @@ Error Code: 1146. Table 'myhibachi.audit_logs' doesn't exist
 ### **Connection Lost During Execution**
 
 **Solution:**
+
 1. Reconnect to database
 2. Run verification query to see which indexes were created
 3. Re-run script (will skip existing indexes)
@@ -254,7 +281,7 @@ After deployment, verify:
 
 ```sql
 -- See if queries are faster
-SELECT 
+SELECT
     DIGEST_TEXT,
     COUNT_STAR as executions,
     AVG_TIMER_WAIT/1000000000000 as avg_time_sec,
@@ -275,7 +302,7 @@ LIMIT 20;
 
 ```sql
 -- See which indexes are being used
-SELECT 
+SELECT
     OBJECT_NAME as table_name,
     INDEX_NAME,
     COUNT_STAR as times_used,
@@ -294,12 +321,14 @@ LIMIT 20;
 ## 🔄 Maintenance Schedule
 
 ### **Weekly (Automated)**
+
 ```sql
 -- Update table statistics
 ANALYZE TABLE bookings, customers, messages, leads, threads, customer_reviews;
 ```
 
 ### **Monthly (During Low Traffic)**
+
 ```sql
 -- Rebuild indexes to prevent fragmentation
 OPTIMIZE TABLE bookings, customers, messages, leads, threads, customer_reviews;
@@ -325,6 +354,7 @@ DROP INDEX idx_bookings_created_at ON bookings;
 ## ✅ After Successful Deployment
 
 **Tell me "deployed" and I'll:**
+
 1. ✅ Mark task complete
 2. 🚀 Immediately start mobile responsive fixes
 3. 📱 Build loading/error states
@@ -354,7 +384,9 @@ A: Share the error message with me and I'll help troubleshoot.
 ## 🎯 Quick Reference
 
 **Execute Script:**
-1. File → Open SQL Script → Select `001_create_performance_indexes.sql`
+
+1. File → Open SQL Script → Select
+   `001_create_performance_indexes.sql`
 2. Click lightning bolt ⚡ (or Ctrl+Shift+Enter)
 3. Wait 2-5 minutes
 4. Run verification query

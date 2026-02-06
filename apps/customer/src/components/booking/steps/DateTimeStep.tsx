@@ -3,7 +3,14 @@
 import React, { useState, useCallback } from 'react';
 import { UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { Calendar, Clock, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
-import { BookingFormData, BaseStepProps, StepVariant, TimeSlot, AlternativeSuggestion, VenueCoordinates } from './types';
+import {
+  BookingFormData,
+  BaseStepProps,
+  StepVariant,
+  TimeSlot,
+  AlternativeSuggestion,
+  VenueCoordinates,
+} from './types';
 
 // Default time slots
 const DEFAULT_TIME_SLOTS: TimeSlot[] = [
@@ -20,7 +27,11 @@ interface DateTimeStepProps extends Omit<BaseStepProps<BookingFormData>, 'isVali
   isValid?: boolean;
   venueCoordinates?: VenueCoordinates | null;
   guestCount?: number;
-  onCheckAvailability?: (date: string, venueCoords: VenueCoordinates, guestCount: number) => Promise<{
+  onCheckAvailability?: (
+    date: string,
+    venueCoords: VenueCoordinates,
+    guestCount: number,
+  ) => Promise<{
     slots: TimeSlot[];
     suggestions?: AlternativeSuggestion[];
   }>;
@@ -57,9 +68,12 @@ const getStyles = (variant: StepVariant = 'booking') => {
       spinner: 'animate-spin rounded-full h-8 w-8 border-b-2 border-red-600',
       suggestions: 'bg-blue-50 border border-blue-200 rounded-xl p-4',
       suggestionsText: 'text-sm text-blue-700 font-medium mb-2',
-      suggestionButton: 'px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200 transition-colors',
-      backButton: 'flex-1 py-3 px-6 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all',
-      continueButton: 'flex-1 py-3 px-6 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all',
+      suggestionButton:
+        'px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200 transition-colors',
+      backButton:
+        'flex-1 py-3 px-6 bg-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all',
+      continueButton:
+        'flex-1 py-3 px-6 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all',
       errorText: 'mt-2 text-sm text-red-600',
     };
   }
@@ -91,9 +105,12 @@ const getStyles = (variant: StepVariant = 'booking') => {
     spinner: 'animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500',
     suggestions: 'bg-blue-500/10 border border-blue-500/20 rounded-lg p-4',
     suggestionsText: 'text-sm text-blue-400 font-medium mb-2',
-    suggestionButton: 'px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm hover:bg-blue-500/30 transition-colors',
-    backButton: 'flex-1 py-3 px-6 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all',
-    continueButton: 'flex-1 py-3 px-6 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all',
+    suggestionButton:
+      'px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm hover:bg-blue-500/30 transition-colors',
+    backButton:
+      'flex-1 py-3 px-6 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all',
+    continueButton:
+      'flex-1 py-3 px-6 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all',
     errorText: 'mt-2 text-sm text-red-400',
   };
 };
@@ -173,7 +190,7 @@ export function DateTimeStep({
         }
       }
     },
-    [setValue, onCheckAvailability, venueCoordinates, guestCount]
+    [setValue, onCheckAvailability, venueCoordinates, guestCount],
   );
 
   // Handle time selection
@@ -181,7 +198,7 @@ export function DateTimeStep({
     (time: '12PM' | '3PM' | '6PM' | '9PM') => {
       setValue('eventTime', time, { shouldValidate: true });
     },
-    [setValue]
+    [setValue],
   );
 
   // Navigate months
@@ -210,12 +227,15 @@ export function DateTimeStep({
       {/* Calendar Section */}
       <div>
         <label className={styles.label}>
-          <Calendar className="inline-block w-5 h-5 mr-2" style={{ color: variant === 'quote' ? '#dc2626' : '#f59e0b' }} />
+          <Calendar
+            className="mr-2 inline-block h-5 w-5"
+            style={{ color: variant === 'quote' ? '#dc2626' : '#f59e0b' }}
+          />
           Select Event Date
         </label>
 
         {/* Month Navigation */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <button
             type="button"
             onClick={goToPreviousMonth}
@@ -244,7 +264,7 @@ export function DateTimeStep({
         {/* Calendar Grid */}
         <div className={styles.calendar.wrapper}>
           {/* Week day headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="mb-2 grid grid-cols-7 gap-1">
             {weekDays.map((day) => (
               <div key={day} className={styles.calendar.weekday}>
                 {day}
@@ -261,8 +281,7 @@ export function DateTimeStep({
 
               const isSelectable = isDateSelectable(date);
               const isSelected =
-                selectedDate &&
-                date.toDateString() === new Date(selectedDate).toDateString();
+                selectedDate && date.toDateString() === new Date(selectedDate).toDateString();
               const isToday = date.toDateString() === new Date().toDateString();
 
               let dayClass = styles.calendar.dayBase;
@@ -290,16 +309,17 @@ export function DateTimeStep({
             })}
           </div>
         </div>
-        {errors.eventDate && (
-          <p className={styles.errorText}>{errors.eventDate.message}</p>
-        )}
+        {errors.eventDate && <p className={styles.errorText}>{errors.eventDate.message}</p>}
       </div>
 
       {/* Time Slots Section */}
       {selectedDate && (
         <div>
           <label className={styles.label}>
-            <Clock className="inline-block w-5 h-5 mr-2" style={{ color: variant === 'quote' ? '#dc2626' : '#f59e0b' }} />
+            <Clock
+              className="mr-2 inline-block h-5 w-5"
+              style={{ color: variant === 'quote' ? '#dc2626' : '#f59e0b' }}
+            />
             Select Time Slot
           </label>
 
@@ -324,24 +344,23 @@ export function DateTimeStep({
                   <button
                     key={slot.time}
                     type="button"
-                    onClick={() => slot.isAvailable && handleTimeSelect(slot.time as '12PM' | '3PM' | '6PM' | '9PM')}
+                    onClick={() =>
+                      slot.isAvailable &&
+                      handleTimeSelect(slot.time as '12PM' | '3PM' | '6PM' | '9PM')
+                    }
                     disabled={!slot.isAvailable}
                     className={slotClass}
                   >
                     <div className="text-lg font-semibold">{slot.label}</div>
                     <div className="text-sm opacity-75">
-                      {slot.isAvailable
-                        ? `${slot.available} chefs available`
-                        : 'Unavailable'}
+                      {slot.isAvailable ? `${slot.available} chefs available` : 'Unavailable'}
                     </div>
                   </button>
                 );
               })}
             </div>
           )}
-          {errors.eventTime && (
-            <p className={styles.errorText}>{errors.eventTime.message}</p>
-          )}
+          {errors.eventTime && <p className={styles.errorText}>{errors.eventTime.message}</p>}
         </div>
       )}
 
@@ -349,7 +368,10 @@ export function DateTimeStep({
       {suggestions.length > 0 && (
         <div className={styles.suggestions}>
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: variant === 'quote' ? '#3b82f6' : '#60a5fa' }} />
+            <AlertCircle
+              className="mt-0.5 h-5 w-5 flex-shrink-0"
+              style={{ color: variant === 'quote' ? '#3b82f6' : '#60a5fa' }}
+            />
             <div>
               <p className={styles.suggestionsText}>
                 Your selected time is limited. Consider these alternatives:
@@ -381,11 +403,7 @@ export function DateTimeStep({
 
       {/* Navigation Buttons */}
       <div className="flex gap-4 pt-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className={styles.backButton}
-        >
+        <button type="button" onClick={onBack} className={styles.backButton}>
           Back
         </button>
         <button

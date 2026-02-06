@@ -2,9 +2,9 @@
 
 import type { BlogPost } from '@my-hibachi/blog-types';
 import { Filter, Search, X } from 'lucide-react';
-import { useEffect, useMemo,useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { useCategories, useEventTypes,useServiceAreas } from '@/hooks/useBlogAPI';
+import { useCategories, useEventTypes, useServiceAreas } from '@/hooks/useBlogAPI';
 
 import styles from './BlogSearch.module.css';
 

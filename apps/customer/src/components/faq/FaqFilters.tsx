@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
 
 interface FaqFiltersProps {
-  activeCategory: string
-  activeTags: string[]
-  onCategoryChange: (category: string) => void
-  onTagToggle: (tag: string) => void
-  availableTags: string[]
+  activeCategory: string;
+  activeTags: string[];
+  onCategoryChange: (category: string) => void;
+  onTagToggle: (tag: string) => void;
+  availableTags: string[];
 }
 
 export function FaqFilters({
@@ -15,9 +15,9 @@ export function FaqFilters({
   activeTags,
   onCategoryChange,
   onTagToggle,
-  availableTags
+  availableTags,
 }: FaqFiltersProps) {
-  const [showAllTags, setShowAllTags] = useState(false)
+  const [showAllTags, setShowAllTags] = useState(false);
 
   // Define categories locally to avoid import issues
   const categories = [
@@ -30,11 +30,11 @@ export function FaqFilters({
     'Policies (Cancellation, Weather, Refunds)',
     'Kids & Special Occasions',
     'Corporate & Insurance',
-    'Contact & Response Times'
-  ]
+    'Contact & Response Times',
+  ];
 
-  const maxVisibleTags = 6
-  const visibleTags = showAllTags ? availableTags : availableTags.slice(0, maxVisibleTags)
+  const maxVisibleTags = 6;
+  const visibleTags = showAllTags ? availableTags : availableTags.slice(0, maxVisibleTags);
 
   return (
     <div className="faq-filters">
@@ -47,7 +47,7 @@ export function FaqFilters({
         >
           All Questions
         </button>
-        {categories.map(category => (
+        {categories.map((category) => (
           <button
             key={category}
             onClick={() => onCategoryChange(category)}
@@ -63,7 +63,7 @@ export function FaqFilters({
       {availableTags.length > 0 && (
         <div className="tag-filters">
           <div className="tag-chips">
-            {visibleTags.map(tag => (
+            {visibleTags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => onTagToggle(tag)}
@@ -96,7 +96,7 @@ export function FaqFilters({
               </button>
             </span>
           )}
-          {activeTags.map(tag => (
+          {activeTags.map((tag) => (
             <span key={tag} className="active-filter">
               {tag}
               <button onClick={() => onTagToggle(tag)} className="remove-filter">
@@ -106,8 +106,8 @@ export function FaqFilters({
           ))}
           <button
             onClick={() => {
-              onCategoryChange('All')
-              activeTags.forEach(tag => onTagToggle(tag))
+              onCategoryChange('All');
+              activeTags.forEach((tag) => onTagToggle(tag));
             }}
             className="clear-all-filters"
           >
@@ -116,5 +116,5 @@ export function FaqFilters({
         </div>
       )}
     </div>
-  )
+  );
 }

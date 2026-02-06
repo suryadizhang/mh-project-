@@ -72,15 +72,19 @@ export const MathCaptcha: React.FC<MathCaptchaProps> = ({ onVerify, className = 
             />
           </div>
           {isCorrect && (
-            <div className="text-green-600 text-sm font-medium mt-1">✓ Correct! You&apos;re verified.</div>
+            <div className="mt-1 text-sm font-medium text-green-600">
+              ✓ Correct! You&apos;re verified.
+            </div>
           )}
           {isIncorrect && (
-            <div className="text-red-600 text-sm font-medium mt-1">✗ Incorrect answer. Please try again.</div>
+            <div className="mt-1 text-sm font-medium text-red-600">
+              ✗ Incorrect answer. Please try again.
+            </div>
           )}
         </div>
         <button
           type="button"
-          className="flex-shrink-0 px-3 py-2 border-2 border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 hover:border-gray-400 transition-all duration-200"
+          className="flex-shrink-0 rounded-lg border-2 border-gray-300 px-3 py-2 text-gray-600 transition-all duration-200 hover:border-gray-400 hover:bg-gray-100"
           onClick={generateNewQuestion}
           title="Generate new question"
           aria-label="Generate new question"
@@ -88,7 +92,7 @@ export const MathCaptcha: React.FC<MathCaptchaProps> = ({ onVerify, className = 
           🔄
         </button>
       </div>
-      <small className="text-gray-500 text-sm block mt-1">
+      <small className="mt-1 block text-sm text-gray-500">
         This helps us prevent automated spam bookings.
       </small>
     </div>

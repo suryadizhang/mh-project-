@@ -1,6 +1,7 @@
 # 🗄️ Database Migrations Guide
 
-**Purpose:** Comprehensive guide for managing database schema changes using Alembic  
+**Purpose:** Comprehensive guide for managing database schema changes
+using Alembic  
 **Database:** PostgreSQL  
 **Migration Tool:** Alembic (SQLAlchemy-based)  
 **Location:** `apps/backend/src/db/migrations/`
@@ -63,16 +64,18 @@ alembic check
 ### **What is a Migration?**
 
 A migration is a **versioned database schema change** that can be:
+
 - **Applied** (upgrade): Move database forward to new schema
 - **Reverted** (downgrade): Move database backward to previous schema
 
 ### **Why Use Migrations?**
 
 ✅ **Version Control:** Track schema changes like code changes  
-✅ **Reproducible:** Apply same changes across dev/staging/production  
+✅ **Reproducible:** Apply same changes across
+dev/staging/production  
 ✅ **Reversible:** Rollback if something goes wrong  
 ✅ **Automated:** No manual SQL scripts  
-✅ **Safe:** Test migrations before production  
+✅ **Safe:** Test migrations before production
 
 ### **Migration Structure**
 
@@ -142,7 +145,7 @@ from app.database import Base
 
 class UserPreferences(Base):
     __tablename__ = "user_preferences"
-    
+
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     theme = Column(String(20), nullable=False, default="light")
@@ -159,6 +162,7 @@ alembic revision --autogenerate -m "Add user preferences table"
 ```
 
 **What Alembic Detects:**
+
 - ✅ New tables
 - ✅ New columns
 - ✅ Changed column types
@@ -166,6 +170,7 @@ alembic revision --autogenerate -m "Add user preferences table"
 - ✅ New foreign keys
 
 **What Alembic DOESN'T Detect:**
+
 - ❌ Table/column renames (sees as drop + add)
 - ❌ Changes to `server_default` values
 - ❌ Check constraints
@@ -180,6 +185,7 @@ code apps/backend/src/db/migrations/alembic/versions/abc123_add_user_preferences
 ```
 
 **Check for:**
+
 1. ✅ Column types are correct
 2. ✅ Nullable constraints match your intent
 3. ✅ Foreign keys reference correct tables
@@ -367,10 +373,10 @@ def downgrade() -> None:
 def upgrade() -> None:
     # 1. Add new column as nullable
     op.add_column('users', sa.Column('full_name', sa.String(255), nullable=True))
-    
+
     # 2. Populate data
     op.execute("UPDATE users SET full_name = first_name || ' ' || last_name")
-    
+
     # 3. Make column non-nullable
     op.alter_column('users', 'full_name', nullable=False)
 
@@ -460,6 +466,7 @@ alembic upgrade head
 **Cause:** Migration file missing from `versions/` directory
 
 **Solution:**
+
 ```bash
 # 1. Pull latest migrations from git
 git pull origin main
@@ -476,6 +483,7 @@ alembic stamp head  # ⚠️ Use with caution!
 **Cause:** Migration tries to insert data that already exists
 
 **Solution:**
+
 ```python
 # Use ON CONFLICT in your migration
 def upgrade() -> None:
@@ -491,6 +499,7 @@ def upgrade() -> None:
 **Cause:** Database out of sync with migrations
 
 **Solution 1: Stamp database to correct version**
+
 ```bash
 # Find current schema state
 alembic current
@@ -500,6 +509,7 @@ alembic stamp xyz789  # Use actual revision ID
 ```
 
 **Solution 2: Reset database (DEVELOPMENT ONLY)**
+
 ```bash
 # ⚠️ DESTRUCTIVE - Only for development!
 dropdb myhibachi_dev
@@ -512,7 +522,9 @@ alembic upgrade head
 **Cause:** Large table with blocking operation
 
 **Solutions:**
+
 1. **Use concurrent index creation (PostgreSQL)**
+
    ```python
    def upgrade() -> None:
        op.create_index(
@@ -537,11 +549,13 @@ alembic upgrade head
 ### **Pre-Deployment**
 
 - [ ] **Backup database**
+
   ```bash
   ./ops/backup_db.py --environment production
   ```
 
 - [ ] **Review migration SQL**
+
   ```bash
   alembic upgrade head --sql > migration_preview.sql
   ```
@@ -552,6 +566,7 @@ alembic upgrade head
   - Changed enum values?
 
 - [ ] **Test in staging environment**
+
   ```bash
   # Staging should mirror production
   alembic upgrade head
@@ -572,24 +587,28 @@ alembic upgrade head
 ### **During Deployment**
 
 - [ ] **Put app in maintenance mode** (if needed)
+
   ```bash
   # Set maintenance flag
   touch /opt/myhibachi/maintenance
   ```
 
 - [ ] **Apply migrations**
+
   ```bash
   cd /opt/myhibachi/apps/backend
   alembic upgrade head
   ```
 
 - [ ] **Verify migration success**
+
   ```bash
   alembic current  # Check version
   psql -d myhibachi_prod -c "\dt"  # Verify tables
   ```
 
 - [ ] **Deploy application code**
+
   ```bash
   git pull origin main
   systemctl restart myhibachi-api
@@ -604,22 +623,26 @@ alembic upgrade head
 ### **Post-Deployment**
 
 - [ ] **Monitor logs**
+
   ```bash
   journalctl -u myhibachi-api -f
   ```
 
 - [ ] **Monitor database performance**
+
   ```sql
   SELECT * FROM pg_stat_activity WHERE state = 'active';
   ```
 
 - [ ] **Verify data integrity**
+
   ```sql
   SELECT COUNT(*) FROM bookings;
   SELECT COUNT(*) FROM users;
   ```
 
 - [ ] **Remove maintenance mode**
+
   ```bash
   rm /opt/myhibachi/maintenance
   ```
@@ -632,40 +655,43 @@ alembic upgrade head
 
 ## 📊 Migration History
 
-Current migrations in `apps/backend/src/db/migrations/alembic/versions/`:
+Current migrations in
+`apps/backend/src/db/migrations/alembic/versions/`:
 
-| Revision | Description | Date | Status |
-|----------|-------------|------|--------|
-| 001 | Create CRM schemas | - | ✅ Applied |
-| 001 | Initial Stripe tables | - | ✅ Applied |
-| 002 | Create read projections | - | ✅ Applied |
-| 003 | Add lead newsletter schemas | - | ✅ Applied |
-| 003 | Add social media integration | - | ✅ Applied |
-| 004 | Add station multi-tenant RBAC | - | ✅ Applied |
-| 9fd62e8 | Merge migrations | - | ✅ Applied |
-| ea90695 | Update indexes and constraints | - | ✅ Applied |
+| Revision | Description                    | Date | Status     |
+| -------- | ------------------------------ | ---- | ---------- |
+| 001      | Create CRM schemas             | -    | ✅ Applied |
+| 001      | Initial Stripe tables          | -    | ✅ Applied |
+| 002      | Create read projections        | -    | ✅ Applied |
+| 003      | Add lead newsletter schemas    | -    | ✅ Applied |
+| 003      | Add social media integration   | -    | ✅ Applied |
+| 004      | Add station multi-tenant RBAC  | -    | ✅ Applied |
+| 9fd62e8  | Merge migrations               | -    | ✅ Applied |
+| ea90695  | Update indexes and constraints | -    | ✅ Applied |
 
-**AI Migrations** (separate branch):
-| Revision | Description | Date | Status |
-|----------|-------------|------|--------|
-| 56d701c | Initial AI router schema | - | ✅ Applied |
-| cdf6709 | Update chat system with new models | - | ✅ Applied |
+**AI Migrations** (separate branch): | Revision | Description | Date |
+Status | |----------|-------------|------|--------| | 56d701c |
+Initial AI router schema | - | ✅ Applied | | cdf6709 | Update chat
+system with new models | - | ✅ Applied |
 
 ---
 
 ## 📚 Additional Resources
 
 **Internal:**
+
 - Database models: `apps/backend/src/models/`
 - Alembic config: `apps/backend/alembic.ini`
 - Environment setup: `apps/backend/src/db/migrations/alembic/env.py`
 
 **External:**
+
 - [Alembic Documentation](https://alembic.sqlalchemy.org/)
 - [PostgreSQL ALTER TABLE](https://www.postgresql.org/docs/current/sql-altertable.html)
 - [SQLAlchemy Column Types](https://docs.sqlalchemy.org/en/20/core/types.html)
 
 **Common Alembic Operations:**
+
 - [Alembic Operations Reference](https://alembic.sqlalchemy.org/en/latest/ops.html)
 
 ---
@@ -703,4 +729,3 @@ alembic stamp <revision>     # Mark database as being at specific version
 **Maintained by:** Backend Team  
 **Last Updated:** January 15, 2025  
 **Questions?** Refer to Alembic documentation or contact the team.
-

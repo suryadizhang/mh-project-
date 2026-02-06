@@ -36,7 +36,7 @@ export class RequestDeduplicator {
 
     // Create new request promise
     const requestPromise = requestFn()
-      .then((result) => {
+      .then(result => {
         // Keep the result cached briefly to handle rapid successive calls
         setTimeout(() => {
           this.pendingRequests.delete(key);
@@ -45,7 +45,7 @@ export class RequestDeduplicator {
 
         return result;
       })
-      .catch((error) => {
+      .catch(error => {
         // Remove from cache immediately on error
         this.pendingRequests.delete(key);
         this.requestTimestamps.delete(key);
@@ -81,7 +81,7 @@ export class RequestDeduplicator {
     const now = Date.now();
     let oldestAge = 0;
 
-    this.requestTimestamps.forEach((timestamp) => {
+    this.requestTimestamps.forEach(timestamp => {
       const age = now - timestamp;
       if (age > oldestAge) {
         oldestAge = age;

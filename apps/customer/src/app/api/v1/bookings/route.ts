@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
 /**
  * ⚠️  MIGRATED TO BACKEND ⚠️
@@ -24,11 +24,11 @@ export async function GET() {
         to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/bookings`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update frontend to use backend API endpoint'
-      }
+        instructions: 'Update frontend to use backend API endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }
 
 export async function POST() {
@@ -40,11 +40,11 @@ export async function POST() {
         to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/bookings`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update frontend to use backend API endpoint'
-      }
+        instructions: 'Update frontend to use backend API endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }
 
 export async function PUT() {
@@ -56,11 +56,11 @@ export async function PUT() {
         to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/bookings`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update frontend to use backend API endpoint'
-      }
+        instructions: 'Update frontend to use backend API endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }
 
 export async function DELETE() {
@@ -72,9 +72,9 @@ export async function DELETE() {
         to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/bookings`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update frontend to use backend API endpoint'
-      }
+        instructions: 'Update frontend to use backend API endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }

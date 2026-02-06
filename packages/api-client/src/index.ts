@@ -58,7 +58,10 @@ export class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: Record<string, string> = { ...this.defaultHeaders, ...options.headers as Record<string, string> };
+    const headers: Record<string, string> = {
+      ...this.defaultHeaders,
+      ...(options.headers as Record<string, string>),
+    };
 
     // Add request ID for tracing
     headers['X-Request-ID'] = crypto.randomUUID();
@@ -83,27 +86,36 @@ export class ApiClient {
     endpoint: string,
     searchParams?: Record<string, string>
   ): Promise<ApiResponse<T>> {
-    const url = searchParams 
+    const url = searchParams
       ? `${endpoint}?${new URLSearchParams(searchParams).toString()}`
       : endpoint;
     return this.request<T>(url);
   }
 
-  async post<T, U = unknown>(endpoint: string, json?: U): Promise<ApiResponse<T>> {
+  async post<T, U = unknown>(
+    endpoint: string,
+    json?: U
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(json),
     });
   }
 
-  async put<T, U = unknown>(endpoint: string, json?: U): Promise<ApiResponse<T>> {
+  async put<T, U = unknown>(
+    endpoint: string,
+    json?: U
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(json),
     });
   }
 
-  async patch<T, U = unknown>(endpoint: string, json?: U): Promise<ApiResponse<T>> {
+  async patch<T, U = unknown>(
+    endpoint: string,
+    json?: U
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: JSON.stringify(json),

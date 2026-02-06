@@ -1,7 +1,9 @@
 # 📊 PRODUCTION MONITORING QUERIES
+
 ## Phase 2A+2C Performance Optimization
 
-**Purpose:** Monitor performance, health, and success of Phase 2 deployment  
+**Purpose:** Monitor performance, health, and success of Phase 2
+deployment  
 **Database:** PostgreSQL (Supabase)  
 **Last Updated:** November 2, 2025
 
@@ -10,9 +12,10 @@
 ## 🎯 QUICK HEALTH CHECK (Run First)
 
 ### 1. Overall System Health
+
 ```sql
 -- Quick health snapshot
-SELECT 
+SELECT
     'AI Messages (24h)' as metric,
     COUNT(*) as value
 FROM ai_messages
@@ -20,7 +23,7 @@ WHERE created_at >= NOW() - INTERVAL '24 hours'
 
 UNION ALL
 
-SELECT 
+SELECT
     'Emotion Records (24h)',
     COUNT(*)
 FROM emotion_history
@@ -28,7 +31,7 @@ WHERE created_at >= NOW() - INTERVAL '24 hours'
 
 UNION ALL
 
-SELECT 
+SELECT
     'Active Conversations (24h)',
     COUNT(DISTINCT conversation_id)
 FROM ai_messages
@@ -36,12 +39,13 @@ WHERE created_at >= NOW() - INTERVAL '24 hours'
 
 UNION ALL
 
-SELECT 
+SELECT
     'Database Size (MB)',
     ROUND(pg_database_size(current_database()) / 1024.0 / 1024.0, 2)::numeric;
 ```
 
 **Expected Results:**
+
 - AI Messages: Should match production volume
 - Emotion Records: Should be ~100% of AI Messages
 - Active Conversations: Normal user engagement
@@ -52,9 +56,10 @@ SELECT
 ## ⚡ PERFORMANCE MONITORING
 
 ### 2. Query Performance (PostgreSQL Stats)
+
 ```sql
 -- Top 10 slowest queries affecting new features
-SELECT 
+SELECT
     substring(query from 1 for 80) as query_start,
     calls,
     ROUND(mean_exec_time::numeric, 2) as avg_time_ms,
@@ -63,7 +68,7 @@ SELECT
 FROM pg_stat_statements
 WHERE query ILIKE ANY(ARRAY[
     '%ai_messages%',
-    '%ai_conversations%', 
+    '%ai_conversations%',
     '%emotion_history%',
     '%bookings%'
 ])
@@ -73,20 +78,23 @@ LIMIT 10;
 ```
 
 **Expected Results:**
+
 - avg_time_ms < 100ms for SELECT queries
 - avg_time_ms < 200ms for INSERT queries
 - max_time_ms < 500ms for all queries
 
 **Alert If:**
+
 - Any query avg_time_ms > 300ms
 - Any query max_time_ms > 1000ms
 
 ---
 
 ### 3. Index Usage Analysis
+
 ```sql
 -- Verify indexes are being used (not just existing)
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,
@@ -101,19 +109,22 @@ ORDER BY idx_scan DESC;
 ```
 
 **Expected Results:**
+
 - idx_scan > 0 for all indexes (means they're being used)
 - High idx_scan for conversation_id, customer_id indexes
 
 **Alert If:**
+
 - idx_scan = 0 for primary indexes (not being used)
 - idx_tup_read very high but idx_tup_fetch low (inefficient index)
 
 ---
 
 ### 4. Table Size & Growth Rate
+
 ```sql
 -- Monitor table growth (run daily to compare)
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as total_size,
@@ -126,10 +137,12 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ```
 
 **Expected Results:**
+
 - Steady growth proportional to user activity
 - Indexes ~10-30% of table size
 
 **Alert If:**
+
 - Growth rate >1GB/day unexpectedly
 - Indexes >50% of table size
 
@@ -138,9 +151,10 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ## 📈 BUSINESS METRICS
 
 ### 5. AI Message Volume & Response Time
+
 ```sql
 -- Daily message volume with conversation breakdown
-SELECT 
+SELECT
     DATE(created_at) as date,
     COUNT(*) as total_messages,
     COUNT(DISTINCT conversation_id) as unique_conversations,
@@ -154,6 +168,7 @@ ORDER BY date DESC;
 ```
 
 **Expected Results:**
+
 - Stable or growing message volume
 - avg_messages_per_conversation: 3-8 (normal conversation)
 - user_messages ≈ ai_messages (balanced conversation)
@@ -161,15 +176,16 @@ ORDER BY date DESC;
 ---
 
 ### 6. Emotion Detection Coverage
+
 ```sql
 -- Verify emotion detection running on all messages
-SELECT 
+SELECT
     DATE(m.created_at) as date,
     COUNT(m.id) as total_messages,
     COUNT(e.id) as messages_with_emotion,
     ROUND(100.0 * COUNT(e.id) / COUNT(m.id), 2) as coverage_percent
 FROM ai_messages m
-LEFT JOIN emotion_history e ON e.conversation_id = m.conversation_id 
+LEFT JOIN emotion_history e ON e.conversation_id = m.conversation_id
     AND DATE(e.created_at) = DATE(m.created_at)
 WHERE m.created_at >= NOW() - INTERVAL '7 days'
 GROUP BY DATE(m.created_at)
@@ -177,17 +193,20 @@ ORDER BY date DESC;
 ```
 
 **Expected Results:**
+
 - coverage_percent: 95-100% (emotion detection working)
 
 **Alert If:**
+
 - coverage_percent < 90% (background tasks failing)
 
 ---
 
 ### 7. Emotion Distribution Analysis
+
 ```sql
 -- Analyze customer emotions (JSON extraction)
-SELECT 
+SELECT
     DATE(created_at) as date,
     emotion_data->>'primary_emotion' as emotion,
     COUNT(*) as count,
@@ -200,20 +219,23 @@ ORDER BY date DESC, count DESC;
 ```
 
 **Expected Results:**
+
 - Mostly positive/neutral emotions
 - Negative emotions <20%
 - High intensity negatives flagged for review
 
 **Alert If:**
+
 - Negative emotions >30% (customer satisfaction issue)
 - High intensity negative emotions increasing
 
 ---
 
 ### 8. Booking Performance & Follow-ups
+
 ```sql
 -- Booking creation with follow-up scheduling
-SELECT 
+SELECT
     DATE(created_at) as date,
     COUNT(*) as total_bookings,
     COUNT(CASE WHEN status = 'confirmed' THEN 1 END) as confirmed_bookings,
@@ -226,6 +248,7 @@ ORDER BY date DESC;
 ```
 
 **Expected Results:**
+
 - confirmation_rate: >80%
 - No increase in pending bookings
 
@@ -234,11 +257,12 @@ ORDER BY date DESC;
 ## 🔍 BACKGROUND TASK MONITORING
 
 ### 9. Background Task Success Rate
+
 ```sql
 -- Compare message creation to emotion processing
 -- (They should be nearly equal if background tasks working)
 WITH message_counts AS (
-    SELECT 
+    SELECT
         DATE(created_at) as date,
         COUNT(*) as messages
     FROM ai_messages
@@ -246,14 +270,14 @@ WITH message_counts AS (
     GROUP BY DATE(created_at)
 ),
 emotion_counts AS (
-    SELECT 
+    SELECT
         DATE(created_at) as date,
         COUNT(*) as emotions
     FROM emotion_history
     WHERE created_at >= NOW() - INTERVAL '7 days'
     GROUP BY DATE(created_at)
 )
-SELECT 
+SELECT
     m.date,
     m.messages,
     COALESCE(e.emotions, 0) as emotions,
@@ -264,18 +288,21 @@ ORDER BY m.date DESC;
 ```
 
 **Expected Results:**
+
 - success_rate_percent: 95-100%
 
 **Alert If:**
+
 - success_rate_percent < 90% (background tasks failing)
 - Gap between messages and emotions growing
 
 ---
 
 ### 10. Background Task Latency
+
 ```sql
 -- Check if emotion records are created promptly after messages
-SELECT 
+SELECT
     DATE(m.created_at) as date,
     ROUND(AVG(EXTRACT(EPOCH FROM (e.created_at - m.created_at))), 2) as avg_delay_seconds,
     ROUND(MAX(EXTRACT(EPOCH FROM (e.created_at - m.created_at))), 2) as max_delay_seconds,
@@ -290,10 +317,12 @@ ORDER BY date DESC;
 ```
 
 **Expected Results:**
+
 - avg_delay_seconds: 1-5 seconds (background task executing quickly)
 - max_delay_seconds: <30 seconds
 
 **Alert If:**
+
 - avg_delay_seconds > 30 seconds
 - max_delay_seconds > 300 seconds (5 minutes)
 
@@ -302,9 +331,10 @@ ORDER BY date DESC;
 ## 🚨 ERROR MONITORING
 
 ### 11. Failed Queries & Errors
+
 ```sql
 -- Check for query errors in pg_stat_database
-SELECT 
+SELECT
     datname,
     xact_rollback as transactions_rolled_back,
     conflicts as conflicts_detected,
@@ -316,20 +346,23 @@ WHERE datname = current_database();
 ```
 
 **Expected Results:**
+
 - xact_rollback: Low (< 1% of total transactions)
 - conflicts: 0
 - deadlocks: 0
 
 **Alert If:**
+
 - deadlocks > 0 (database contention issue)
 - xact_rollback increasing rapidly
 
 ---
 
 ### 12. Connection Pool Status
+
 ```sql
 -- Monitor database connections
-SELECT 
+SELECT
     COUNT(*) as total_connections,
     COUNT(CASE WHEN state = 'active' THEN 1 END) as active_connections,
     COUNT(CASE WHEN state = 'idle' THEN 1 END) as idle_connections,
@@ -341,12 +374,14 @@ WHERE datname = current_database()
 ```
 
 **Expected Results:**
+
 - total_connections: <50% of max (usually 20/100)
 - active_connections: 1-10 (normal activity)
 - idle_in_transaction: 0 (no stuck transactions)
 - longest_idle_seconds: <300 (5 minutes)
 
 **Alert If:**
+
 - total_connections >80% of max
 - idle_in_transaction >5 (transaction leaks)
 - longest_idle_seconds >600 (10 minutes)
@@ -356,10 +391,11 @@ WHERE datname = current_database()
 ## 📊 OPTIMIZATION VALIDATION
 
 ### 13. UPSERT Performance (Phase 2A.2)
+
 ```sql
 -- Verify UPSERT is faster than SELECT+INSERT
 -- Check conversation creation timing
-SELECT 
+SELECT
     DATE(created_at) as date,
     COUNT(*) as conversations_created,
     COUNT(DISTINCT thread_id) as unique_threads
@@ -370,30 +406,34 @@ ORDER BY date DESC;
 ```
 
 **Validation:**
+
 - Should see no race condition duplicates
 - Conversation creation should be instantaneous
 
 ---
 
 ### 14. Background Task Effectiveness (Phase 2A.3)
+
 ```sql
 -- Verify emotion stats are not blocking message storage
 -- Check for any messages without emotion analysis
-SELECT 
+SELECT
     COUNT(*) as messages_without_emotion,
     ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM ai_messages WHERE created_at >= NOW() - INTERVAL '24 hours'), 2) as percent_missing
 FROM ai_messages m
-LEFT JOIN emotion_history e ON e.conversation_id = m.conversation_id 
-    AND e.created_at >= m.created_at 
+LEFT JOIN emotion_history e ON e.conversation_id = m.conversation_id
+    AND e.created_at >= m.created_at
     AND e.created_at <= m.created_at + INTERVAL '1 hour'
 WHERE m.created_at >= NOW() - INTERVAL '24 hours'
     AND e.id IS NULL;
 ```
 
 **Expected Results:**
+
 - messages_without_emotion: <5% (some legitimate misses due to timing)
 
 **Alert If:**
+
 - percent_missing >10% (background tasks not running)
 
 ---
@@ -401,6 +441,7 @@ WHERE m.created_at >= NOW() - INTERVAL '24 hours'
 ## 🎯 ALERTING THRESHOLDS
 
 ### Critical Alerts (Page On-Call)
+
 ```sql
 -- Run every 5 minutes
 -- Alert if ANY of these conditions true:
@@ -421,7 +462,7 @@ WHERE (
     SELECT COUNT(*) FROM emotion_history WHERE created_at >= NOW() - INTERVAL '1 hour'
 );
 
--- 3. Database connection exhaustion  
+-- 3. Database connection exhaustion
 SELECT 'CRITICAL: Connection pool exhausted' as alert
 WHERE (
     SELECT COUNT(*) FROM pg_stat_activity WHERE datname = current_database()
@@ -435,6 +476,7 @@ WHERE datname = current_database()
 ```
 
 ### Warning Alerts (Notify Team)
+
 ```sql
 -- Run every 15 minutes
 
@@ -458,7 +500,7 @@ WHERE (
 -- 3. High database load
 SELECT 'WARNING: Database load high' as alert
 WHERE (
-    SELECT COUNT(*) FROM pg_stat_activity 
+    SELECT COUNT(*) FROM pg_stat_activity
     WHERE state = 'active' AND datname = current_database()
 ) > 20; -- 20 concurrent active queries
 ```
@@ -468,17 +510,20 @@ WHERE (
 ## 📅 SCHEDULED MONITORING
 
 ### Hourly (First 24 Hours Post-Deployment)
+
 - [ ] Run Quick Health Check (#1)
 - [ ] Check Query Performance (#2)
 - [ ] Verify Background Task Success (#9)
 
 ### Daily (First Week)
+
 - [ ] AI Message Volume (#5)
 - [ ] Emotion Detection Coverage (#6)
 - [ ] Booking Performance (#8)
 - [ ] Table Size & Growth (#4)
 
 ### Weekly (Ongoing)
+
 - [ ] Index Usage Analysis (#3)
 - [ ] Emotion Distribution (#7)
 - [ ] Full Performance Review
@@ -489,9 +534,10 @@ WHERE (
 ## 🔧 TROUBLESHOOTING QUERIES
 
 ### If Response Times Are Slow
+
 ```sql
 -- Find blocking queries
-SELECT 
+SELECT
     pid,
     now() - pg_stat_activity.query_start AS duration,
     query,
@@ -505,6 +551,7 @@ ORDER BY duration DESC;
 ```
 
 ### If Background Tasks Failing
+
 ```sql
 -- Check for recent errors (requires application logging)
 -- Adjust based on your logging setup
@@ -517,9 +564,10 @@ LIMIT 20;
 ```
 
 ### If Database Growing Too Fast
+
 ```sql
 -- Find largest tables
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
@@ -535,14 +583,16 @@ LIMIT 10;
 
 **If metrics outside expected ranges:**
 
-1. **Critical Alerts** → Immediate rollback (see PRODUCTION_DEPLOYMENT_CHECKLIST.md)
+1. **Critical Alerts** → Immediate rollback (see
+   PRODUCTION_DEPLOYMENT_CHECKLIST.md)
 2. **Warning Alerts** → Investigate within 30 minutes
 3. **Informational** → Review within 24 hours
 
 **Contact:**
-- On-Call Engineer: _____________
-- Database Admin: _____________
-- Team Lead: _____________
+
+- On-Call Engineer: ******\_******
+- Database Admin: ******\_******
+- Team Lead: ******\_******
 
 ---
 

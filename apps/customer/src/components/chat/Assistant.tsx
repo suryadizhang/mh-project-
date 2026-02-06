@@ -322,7 +322,7 @@ export default function Assistant({ page }: AssistantProps) {
           // Sanitize user input - use keyword category instead of raw text (PII protection)
           const getSanitizedIntent = (message: string): string => {
             const lowerMessage = message.toLowerCase();
-            const foundKeyword = aiCanHandleKeywords.find(k => lowerMessage.includes(k));
+            const foundKeyword = aiCanHandleKeywords.find((k) => lowerMessage.includes(k));
             return foundKeyword || 'general_inquiry';
           };
 
@@ -559,10 +559,11 @@ export default function Assistant({ page }: AssistantProps) {
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl p-2 ${message.type === 'user'
-                ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
-                : 'bg-gray-100 text-gray-800'
-                }`}
+              className={`max-w-[80%] rounded-2xl p-2 ${
+                message.type === 'user'
+                  ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
+                  : 'bg-gray-100 text-gray-800'
+              }`}
             >
               <div className="flex items-start space-x-2">
                 {message.type === 'assistant' && (
@@ -937,7 +938,7 @@ export default function Assistant({ page }: AssistantProps) {
                     window.open(
                       'https://www.facebook.com/people/My-hibachi/61577483702847/',
                       '_blank',
-                      'noopener,noreferrer'
+                      'noopener,noreferrer',
                     );
                   };
 

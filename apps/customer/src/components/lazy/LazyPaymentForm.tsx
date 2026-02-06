@@ -40,7 +40,7 @@ const DynamicPaymentForm = dynamic<PaymentFormProps>(
   {
     loading: () => <PaymentFormSkeleton />,
     ssr: false, // Stripe Elements requires window object
-  }
+  },
 );
 
 export default function LazyPaymentForm(props: PaymentFormProps) {

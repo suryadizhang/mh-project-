@@ -1,16 +1,18 @@
 # 🚀 PRODUCTION DEPLOYMENT CHECKLIST
+
 ## Phase 2A+2C Performance Optimization
 
-**Deployment Date:** _____________  
-**Deployed By:** _____________  
+**Deployment Date:** ******\_******  
+**Deployed By:** ******\_******  
 **PR:** #3 (feature/tool-calling-phase-1)  
-**Expected Duration:** 30-45 minutes  
+**Expected Duration:** 30-45 minutes
 
 ---
 
 ## ⚠️ PRE-DEPLOYMENT CHECKLIST
 
 ### 1. Code Review & Approval
+
 - [ ] PR #3 reviewed and approved by team lead
 - [ ] All CI/CD checks passed (tests, builds, linting)
 - [ ] No merge conflicts with main branch
@@ -18,19 +20,23 @@
 - [ ] Documentation reviewed and accurate
 
 ### 2. Database Readiness
+
 - [ ] **Verify indexes deployed** (45/45 performance indexes)
   ```sql
   -- Run in Supabase SQL Editor:
-  SELECT COUNT(*) FROM pg_indexes 
-  WHERE indexname LIKE 'idx_%' 
+  SELECT COUNT(*) FROM pg_indexes
+  WHERE indexname LIKE 'idx_%'
   AND schemaname IN ('core', 'identity', 'lead', 'newsletter', 'integra', 'feedback');
   -- Expected: 14+ indexes
   ```
-- [ ] Database backup completed (timestamp: _________)
-- [ ] Tables exist: `ai_conversations`, `ai_messages`, `emotion_history`
-- [ ] Database connection pool configured (pool_size=20, max_overflow=10)
+- [ ] Database backup completed (timestamp: ****\_****)
+- [ ] Tables exist: `ai_conversations`, `ai_messages`,
+      `emotion_history`
+- [ ] Database connection pool configured (pool_size=20,
+      max_overflow=10)
 
 ### 3. Environment Variables
+
 - [ ] `.env` file backed up
 - [ ] All required environment variables present:
   - [ ] `DATABASE_URL` (Supabase connection string)
@@ -40,15 +46,20 @@
   - [ ] `TWILIO_AUTH_TOKEN` (properly in .env, not committed)
 
 ### 4. Backup Current Production
+
 - [ ] Create git tag for current production: `git tag v1.0-pre-phase2`
-- [ ] Backup current backend code: `cp -r apps/backend apps/backend.backup.$(date +%Y%m%d)`
-- [ ] Export current environment: `cp .env .env.backup.$(date +%Y%m%d)`
+- [ ] Backup current backend code:
+      `cp -r apps/backend apps/backend.backup.$(date +%Y%m%d)`
+- [ ] Export current environment:
+      `cp .env .env.backup.$(date +%Y%m%d)`
 - [ ] Document current performance baseline (if not already done)
 
 ### 5. Dependencies Check
+
 - [ ] Python dependencies updated: `pip install -r requirements.txt`
 - [ ] No conflicting package versions
-- [ ] All imports working: `python -c "from api.ai.memory import postgresql_memory"`
+- [ ] All imports working:
+      `python -c "from api.ai.memory import postgresql_memory"`
 - [ ] No missing packages
 
 ---
@@ -56,8 +67,10 @@
 ## 🚀 DEPLOYMENT STEPS
 
 ### Step 1: Merge to Main (5 minutes)
+
 - [ ] Final review of PR #3
-- [ ] Merge PR using **"Squash and merge"** or **"Merge commit"** (your preference)
+- [ ] Merge PR using **"Squash and merge"** or **"Merge commit"**
+      (your preference)
 - [ ] Verify merge successful on GitHub
 - [ ] Pull latest main branch locally:
   ```bash
@@ -68,6 +81,7 @@
 ### Step 2: Deploy Backend to VPS (15-20 minutes)
 
 #### Option A: Using Plesk Git Integration
+
 - [ ] Login to Plesk panel
 - [ ] Navigate to Git section
 - [ ] Click "Pull Updates" or "Deploy"
@@ -76,6 +90,7 @@
 - [ ] Check deployment logs for errors
 
 #### Option B: Manual SSH Deployment
+
 ```bash
 # SSH into VPS
 ssh user@your-vps-ip
@@ -103,6 +118,7 @@ sudo supervisorctl restart myhibachi-api
 ```
 
 ### Step 3: Verify Deployment (5 minutes)
+
 - [ ] Check application is running:
   ```bash
   curl https://your-api-domain.com/health
@@ -117,6 +133,7 @@ sudo supervisorctl restart myhibachi-api
 - [ ] Check no import errors in logs
 
 ### Step 4: Smoke Tests (5 minutes)
+
 - [ ] **Test 1: Health Check**
   ```bash
   curl https://your-api-domain.com/health
@@ -128,15 +145,14 @@ sudo supervisorctl restart myhibachi-api
     -d '{"message": "Hello, test message", "customer_id": "test-123"}'
   ```
   Expected: Response in <1000ms ✅
-  
 - [ ] **Test 3: Booking Creation**
   ```bash
   # Use your existing booking API endpoint
   # Expected: Response in <500ms ✅
   ```
-  
 - [ ] **Test 4: Background Tasks**
-  - Check emotion_history table for new entries (should populate async)
+  - Check emotion_history table for new entries (should populate
+    async)
   - Check logs for "Background task completed" messages
 
 ---
@@ -144,11 +160,11 @@ sudo supervisorctl restart myhibachi-api
 ## 📊 POST-DEPLOYMENT MONITORING (First 2 Hours)
 
 ### Immediate Checks (0-15 minutes)
+
 - [ ] **Response Times** (every 5 minutes for first 30 min)
   - [ ] API health endpoint: <100ms
   - [ ] store_message: <1000ms (target 745ms)
   - [ ] Booking creation: <500ms (target 367ms)
-  
 - [ ] **Error Rates**
   - [ ] Check application logs for errors
   - [ ] Monitor error tracking (Sentry, etc. if configured)
@@ -157,15 +173,17 @@ sudo supervisorctl restart myhibachi-api
 - [ ] **Database Performance**
   ```sql
   -- Check query performance
-  SELECT query, mean_exec_time, calls 
-  FROM pg_stat_statements 
+  SELECT query, mean_exec_time, calls
+  FROM pg_stat_statements
   WHERE query LIKE '%ai_messages%' OR query LIKE '%emotion_history%'
-  ORDER BY mean_exec_time DESC 
+  ORDER BY mean_exec_time DESC
   LIMIT 10;
   ```
 
 ### First Hour Monitoring
+
 - [ ] **Memory Usage**
+
   ```bash
   # Check application memory
   ps aux | grep python | grep myhibachi
@@ -183,6 +201,7 @@ sudo supervisorctl restart myhibachi-api
   - Expected P95: <420ms (booking)
 
 ### First 2 Hours Monitoring
+
 - [ ] **User Impact**
   - [ ] No user complaints
   - [ ] No increase in support tickets
@@ -200,10 +219,11 @@ sudo supervisorctl restart myhibachi-api
 ### Metrics to Track
 
 #### Performance Metrics (Compare to Baseline)
+
 ```
 Baseline (Before Phase 2):
 ├─ store_message: 2000ms average
-├─ Booking creation: 305ms average  
+├─ Booking creation: 305ms average
 ├─ Total user journey: 4281ms
 └─ Background tasks: Blocking (1931ms)
 
@@ -215,6 +235,7 @@ Expected (After Phase 2):
 ```
 
 #### Success Metrics
+
 - [ ] **Response Time:** P95 < 850ms (store_message)
 - [ ] **Response Time:** P95 < 420ms (booking)
 - [ ] **Background Task Success Rate:** >99%
@@ -222,6 +243,7 @@ Expected (After Phase 2):
 - [ ] **Database Query Time:** <270ms per query average
 
 #### Business Metrics
+
 - [ ] **Booking Conversion Rate:** Stable or improved
 - [ ] **User Satisfaction:** No decline in ratings
 - [ ] **System Uptime:** >99.9%
@@ -229,9 +251,10 @@ Expected (After Phase 2):
 ### Monitoring Queries (Run Daily)
 
 **1. Average Response Times:**
+
 ```sql
 -- If using application logging table
-SELECT 
+SELECT
     DATE(created_at) as date,
     AVG(response_time_ms) as avg_response_time,
     PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY response_time_ms) as p95_response_time
@@ -242,9 +265,10 @@ GROUP BY DATE(created_at);
 ```
 
 **2. Background Task Success Rate:**
+
 ```sql
 -- Check emotion_history entries (should match ai_messages count)
-SELECT 
+SELECT
     DATE(created_at) as date,
     COUNT(*) as emotion_records
 FROM emotion_history
@@ -252,7 +276,7 @@ WHERE created_at >= NOW() - INTERVAL '24 hours'
 GROUP BY DATE(created_at);
 
 -- Compare to message count
-SELECT 
+SELECT
     DATE(created_at) as date,
     COUNT(*) as message_count
 FROM ai_messages
@@ -263,9 +287,10 @@ GROUP BY DATE(created_at);
 ```
 
 **3. Database Performance:**
+
 ```sql
 -- Query execution times
-SELECT 
+SELECT
     substring(query from 1 for 50) as query_start,
     calls,
     mean_exec_time,
@@ -281,7 +306,9 @@ LIMIT 10;
 ## 🔄 ROLLBACK PROCEDURES
 
 ### When to Rollback
+
 Trigger rollback if ANY of these occur:
+
 - [ ] P95 response time >1500ms (worse than baseline)
 - [ ] Error rate >5%
 - [ ] Database connection failures
@@ -292,6 +319,7 @@ Trigger rollback if ANY of these occur:
 ### Rollback Steps (15-20 minutes)
 
 #### Step 1: Stop Current Deployment
+
 ```bash
 # SSH into VPS
 ssh user@your-vps-ip
@@ -302,6 +330,7 @@ sudo systemctl stop myhibachi-api
 ```
 
 #### Step 2: Restore Previous Code
+
 ```bash
 # Navigate to project directory
 cd /path/to/myhibachi-backend
@@ -318,12 +347,14 @@ cp .env.backup.YYYYMMDD .env
 ```
 
 #### Step 3: Reinstall Dependencies (if needed)
+
 ```bash
 # If requirements.txt changed
 pip install -r requirements.txt
 ```
 
 #### Step 4: Restart Application
+
 ```bash
 # Restart with previous version
 sudo systemctl start myhibachi-api
@@ -334,12 +365,14 @@ curl https://your-api-domain.com/health
 ```
 
 #### Step 5: Verify Rollback Success
+
 - [ ] Application responding normally
 - [ ] Response times back to baseline (2000ms for store_message is OK)
 - [ ] No errors in logs
 - [ ] Users can book normally
 
 #### Step 6: Document & Communicate
+
 - [ ] Document what went wrong
 - [ ] Notify team of rollback
 - [ ] Create GitHub issue with rollback details
@@ -352,18 +385,21 @@ curl https://your-api-domain.com/health
 Deployment is considered **SUCCESSFUL** if after 48 hours:
 
 ### Performance ✅
+
 - [x] store_message P95 < 850ms
-- [x] Booking creation P95 < 420ms  
+- [x] Booking creation P95 < 420ms
 - [x] Overall journey < 1500ms
 - [x] Background tasks 100% async (0ms blocking)
 
 ### Stability ✅
+
 - [x] Error rate < 0.1%
 - [x] No memory leaks
 - [x] Database connections stable
 - [x] Background task success rate >99%
 
 ### Business ✅
+
 - [x] No increase in support tickets
 - [x] Booking conversion rate stable/improved
 - [x] User satisfaction maintained
@@ -374,48 +410,54 @@ Deployment is considered **SUCCESSFUL** if after 48 hours:
 ## 📞 EMERGENCY CONTACTS
 
 **If issues occur:**
+
 1. **Immediate:** Trigger rollback (see above)
 2. **Notify:** Team lead / On-call engineer
 3. **Document:** Create incident report
 4. **Follow-up:** Schedule post-mortem meeting
 
 **Key Contacts:**
-- Developer: _____________
-- DevOps: _____________  
-- On-Call: _____________
-- Database Admin: _____________
+
+- Developer: ******\_******
+- DevOps: ******\_******
+- On-Call: ******\_******
+- Database Admin: ******\_******
 
 ---
 
 ## 📝 DEPLOYMENT NOTES
 
-**Deployment Start Time:** _____________  
-**Deployment End Time:** _____________  
-**Total Duration:** _____________
+**Deployment Start Time:** ******\_******  
+**Deployment End Time:** ******\_******  
+**Total Duration:** ******\_******
 
 **Issues Encountered:**
+
 - [ ] None ✅
 - [ ] Minor (list below)
 - [ ] Major (rollback required)
 
 **Notes:**
+
 ```
 [Add any observations, warnings, or notes here]
 ```
 
 **Final Status:**
+
 - [ ] ✅ Deployment Successful
 - [ ] ⚠️ Deployment Successful with Minor Issues
 - [ ] ❌ Deployment Failed - Rolled Back
 
-**Signed Off By:** _____________  
-**Date:** _____________
+**Signed Off By:** ******\_******  
+**Date:** ******\_******
 
 ---
 
 ## 📚 REFERENCE DOCUMENTATION
 
-- **Performance Optimization Report:** `PERFORMANCE_OPTIMIZATION_FINAL_REPORT.md`
+- **Performance Optimization Report:**
+  `PERFORMANCE_OPTIMIZATION_FINAL_REPORT.md`
 - **Deep Performance Analysis:** `DEEP_PERFORMANCE_ANALYSIS.md`
 - **Project Status Report:** `PROJECT_STATUS_NOVEMBER_2025.md`
 - **SQL Indexes Guide:** `database/INDEX_DEPLOYMENT_GUIDE.md`

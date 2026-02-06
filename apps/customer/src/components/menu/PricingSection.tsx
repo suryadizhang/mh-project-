@@ -1,9 +1,9 @@
-import { menuData } from '@/data/menu'
-import styles from '@/styles/menu/pricing.module.css'
-import type { PricingTier } from '@/types/data'
+import { menuData } from '@/data/menu';
+import styles from '@/styles/menu/pricing.module.css';
+import type { PricingTier } from '@/types/data';
 
 export default function PricingSection() {
-  const { pricing } = menuData
+  const { pricing } = menuData;
 
   return (
     <div className={styles.pricingCard}>
@@ -67,5 +67,5 @@ export default function PricingSection() {
         </div>
       </div>
     </div>
-  )
+  );
 }

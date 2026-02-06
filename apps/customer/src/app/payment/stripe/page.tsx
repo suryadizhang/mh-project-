@@ -161,17 +161,20 @@ export default function StripePaymentPage() {
       setIsLoadingIntent(true);
       setError('');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/payments/create-intent`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/payments/create-intent`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: Math.round(amount * 100), // Convert to cents
+            currency: 'usd',
+            payment_method_types: ['card'],
+          }),
         },
-        body: JSON.stringify({
-          amount: Math.round(amount * 100), // Convert to cents
-          currency: 'usd',
-          payment_method_types: ['card'],
-        }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error('Failed to create payment intent');
@@ -333,8 +336,18 @@ export default function StripePaymentPage() {
         {/* Security Badge */}
         <div className="mt-6 text-center">
           <p className="flex items-center justify-center gap-2 text-sm text-gray-600">
-            <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            <svg
+              className="h-5 w-5 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
             </svg>
             PCI DSS Compliant - Secured by Stripe
           </p>

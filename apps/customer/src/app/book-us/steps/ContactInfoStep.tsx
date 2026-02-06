@@ -6,4 +6,3 @@
  */
 
 export { ContactInfoStep } from '@/components/booking/steps';
-

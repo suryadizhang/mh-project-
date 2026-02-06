@@ -1,21 +1,21 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
+import { useState } from 'react';
 
 interface FaqSearchProps {
-  value: string
-  onChange: (query: string) => void
-  resultsCount: number
+  value: string;
+  onChange: (query: string) => void;
+  resultsCount: number;
 }
 
 export function FaqSearch({ value, onChange, resultsCount }: FaqSearchProps) {
-  const [isFocused, setIsFocused] = useState(false)
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
-      onChange('')
+      onChange('');
     }
-  }
+  };
 
   return (
     <div className="faq-search-container">
@@ -25,7 +25,7 @@ export function FaqSearch({ value, onChange, resultsCount }: FaqSearchProps) {
           type="text"
           placeholder="Search FAQs... (Press / to focus)"
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
@@ -56,5 +56,5 @@ export function FaqSearch({ value, onChange, resultsCount }: FaqSearchProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

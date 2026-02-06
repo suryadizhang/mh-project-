@@ -65,8 +65,9 @@ export default function OptimizedImage({
   const imageProps = {
     src,
     alt,
-    className: `optimized-image ${isLoading ? 'loading' : 'loaded'
-      } ${className}`,
+    className: `optimized-image ${
+      isLoading ? 'loading' : 'loaded'
+    } ${className}`,
     onLoad: handleLoad,
     onError: handleError,
     quality,

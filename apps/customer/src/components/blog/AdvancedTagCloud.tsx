@@ -67,11 +67,11 @@ const AdvancedTagCloud: React.FC<AdvancedTagCloudProps> = ({
         .slice(0, maxTags);
 
       // Calculate tag sizes and weights based on count
-      const maxCount = Math.max(...tagArray.map(t => t.count));
-      const minCount = Math.min(...tagArray.map(t => t.count));
+      const maxCount = Math.max(...tagArray.map((t) => t.count));
+      const minCount = Math.min(...tagArray.map((t) => t.count));
       const range = maxCount - minCount || 1;
 
-      tagArray.forEach(tag => {
+      tagArray.forEach((tag) => {
         const normalized = (tag.count - minCount) / range;
 
         // Set size
@@ -112,15 +112,24 @@ const AdvancedTagCloud: React.FC<AdvancedTagCloudProps> = ({
         return `hsl(${hue}, 70%, 50%)`;
       case 'categorical':
         const categories = [
-          'text-blue-600', 'text-purple-600', 'text-pink-600',
-          'text-red-600', 'text-orange-600', 'text-yellow-600',
-          'text-green-600', 'text-teal-600', 'text-cyan-600'
+          'text-blue-600',
+          'text-purple-600',
+          'text-pink-600',
+          'text-red-600',
+          'text-orange-600',
+          'text-yellow-600',
+          'text-green-600',
+          'text-teal-600',
+          'text-cyan-600',
         ];
         return categories[hash % categories.length];
       case 'monochrome':
         const intensities = [
-          'text-slate-400', 'text-slate-500', 'text-slate-600',
-          'text-slate-700', 'text-slate-800'
+          'text-slate-400',
+          'text-slate-500',
+          'text-slate-600',
+          'text-slate-700',
+          'text-slate-800',
         ];
         return intensities[hash % intensities.length];
       default:

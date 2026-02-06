@@ -85,11 +85,7 @@ export function MessageReadReceipt({
 
       case 'sent':
         return (
-          <Check
-            size={iconSize}
-            className="text-gray-400"
-            aria-label="Sent"
-          />
+          <Check size={iconSize} className="text-gray-400" aria-label="Sent" />
         );
 
       case 'delivered':

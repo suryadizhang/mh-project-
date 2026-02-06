@@ -20,7 +20,12 @@ export function ActionButtons({
         <Edit className="w-4 h-4 mr-1" />
         {editLabel}
       </Button>
-      <Button variant="destructive" size="sm" onClick={onDelete} className="bg-red-600 hover:bg-red-700 text-white">
+      <Button
+        variant="destructive"
+        size="sm"
+        onClick={onDelete}
+        className="bg-red-600 hover:bg-red-700 text-white"
+      >
         <Trash2 className="w-4 h-4 mr-1" />
         {deleteLabel}
       </Button>

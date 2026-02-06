@@ -1,8 +1,8 @@
-import { menuData } from '@/data/menu'
-import styles from '@/styles/menu/service-areas.module.css'
+import { menuData } from '@/data/menu';
+import styles from '@/styles/menu/service-areas.module.css';
 
 export default function ServiceAreas() {
-  const { serviceAreas } = menuData
+  const { serviceAreas } = menuData;
 
   return (
     <div className={styles.serviceAreas}>
@@ -51,5 +51,5 @@ export default function ServiceAreas() {
         </p>
       </div>
     </div>
-  )
+  );
 }

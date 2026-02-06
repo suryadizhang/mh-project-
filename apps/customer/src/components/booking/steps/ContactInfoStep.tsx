@@ -18,12 +18,16 @@ const getStyles = (variant: StepVariant = 'booking') => {
       section: 'mb-6',
       title: 'text-xl font-bold text-gray-900 inline-flex items-center mb-4',
       description: 'text-gray-600 mb-6',
-      input: 'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all',
-      inputError: 'w-full px-4 py-3 bg-white border border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all',
+      input:
+        'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all',
+      inputError:
+        'w-full px-4 py-3 bg-white border border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all',
       label: 'block text-sm font-semibold text-gray-700 mb-2',
       errorText: 'text-sm text-red-600 mt-1',
-      button: 'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg',
-      buttonDisabled: 'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white bg-gray-400 cursor-not-allowed',
+      button:
+        'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg',
+      buttonDisabled:
+        'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white bg-gray-400 cursor-not-allowed',
       grid: 'grid grid-cols-1 gap-6 md:grid-cols-2',
     };
   }
@@ -38,8 +42,10 @@ const getStyles = (variant: StepVariant = 'booking') => {
     inputError: 'form-control is-invalid',
     label: 'form-label required',
     errorText: 'invalid-feedback',
-    button: 'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg',
-    buttonDisabled: 'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white bg-gray-400 cursor-not-allowed',
+    button:
+      'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg',
+    buttonDisabled:
+      'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white bg-gray-400 cursor-not-allowed',
     grid: 'grid grid-cols-1 gap-4 md:grid-cols-2',
   };
 };
@@ -67,7 +73,8 @@ export function ContactInfoStep({
           Contact Information
         </h3>
         <p className={styles.description}>
-          <strong>Let&apos;s start with your details!</strong> This helps us personalize your hibachi experience.
+          <strong>Let&apos;s start with your details!</strong> This helps us personalize your
+          hibachi experience.
         </p>
 
         <div className={styles.grid}>
@@ -83,9 +90,7 @@ export function ContactInfoStep({
                 {...register('name', { required: 'Name is required' })}
                 placeholder="Enter your full name"
               />
-              {errors.name && (
-                <div className={styles.errorText}>{errors.name.message}</div>
-              )}
+              {errors.name && <div className={styles.errorText}>{errors.name.message}</div>}
             </div>
           </div>
 
@@ -107,9 +112,7 @@ export function ContactInfoStep({
                 })}
                 placeholder="your.email@example.com"
               />
-              {errors.email && (
-                <div className={styles.errorText}>{errors.email.message}</div>
-              )}
+              {errors.email && <div className={styles.errorText}>{errors.email.message}</div>}
             </div>
           </div>
         </div>
@@ -125,9 +128,7 @@ export function ContactInfoStep({
             {...register('phone', { required: 'Phone number is required' })}
             placeholder="(555) 123-4567"
           />
-          {errors.phone && (
-            <div className={styles.errorText}>{errors.phone.message}</div>
-          )}
+          {errors.phone && <div className={styles.errorText}>{errors.phone.message}</div>}
         </div>
       </div>
 

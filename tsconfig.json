@@ -14,10 +14,7 @@
     "isolatedModules": true,
     "jsx": "preserve"
   },
-  "include": [
-    "apps/**/*",
-    "packages/**/*"
-  ],
+  "include": ["apps/**/*", "packages/**/*"],
   "exclude": [
     "node_modules",
     ".next",

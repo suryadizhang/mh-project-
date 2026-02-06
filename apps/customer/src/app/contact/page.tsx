@@ -1,15 +1,15 @@
-import '@/styles/contact.css'
-import '@/styles/base.css'
+import '@/styles/contact.css';
+import '@/styles/base.css';
 
-import { Metadata } from 'next'
+import { Metadata } from 'next';
 
-import MetaMessenger from '@/components/chat/MetaMessenger'
-import ConsentBar from '@/components/consent/ConsentBar'
+import MetaMessenger from '@/components/chat/MetaMessenger';
+import ConsentBar from '@/components/consent/ConsentBar';
 
-import ContactPageClient from './ContactPageClient'
+import ContactPageClient from './ContactPageClient';
 
 // Force dynamic rendering to prevent conflicts with contact.html redirect page
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Book Private Hibachi Chef | Bay Area & Sacramento Catering Contact',
@@ -21,9 +21,9 @@ export const metadata: Metadata = {
     title: 'Book Private Hibachi Chef | Bay Area & Sacramento Catering',
     description:
       'Contact MyHibachi for premium private hibachi chef services across Northern California.',
-    type: 'website'
-  }
-}
+    type: 'website',
+  },
+};
 
 export default function ContactPage() {
   return (
@@ -32,5 +32,5 @@ export default function ContactPage() {
       <ConsentBar />
       <MetaMessenger />
     </>
-  )
+  );
 }

@@ -627,10 +627,11 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
 
   return (
     <div
-      className={`fixed z-50 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${isExpanded
-        ? 'right-2 bottom-4 left-2 max-h-[85vh] sm:right-4 sm:left-auto sm:h-[540px] sm:w-[720px] md:h-[560px] md:w-[840px] lg:h-[580px] lg:w-[960px]'
-        : 'right-2 bottom-20 h-[70vh] max-h-[570px] w-[calc(100vw-1rem)] max-w-[380px] sm:right-4 sm:h-[540px] sm:w-[360px] md:h-[570px] md:w-[380px]'
-        }`}
+      className={`fixed z-50 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${
+        isExpanded
+          ? 'right-2 bottom-4 left-2 max-h-[85vh] sm:right-4 sm:left-auto sm:h-[540px] sm:w-[720px] md:h-[560px] md:w-[840px] lg:h-[580px] lg:w-[960px]'
+          : 'right-2 bottom-20 h-[70vh] max-h-[570px] w-[calc(100vw-1rem)] max-w-[380px] sm:right-4 sm:h-[540px] sm:w-[360px] md:h-[570px] md:w-[380px]'
+      }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between rounded-t-2xl bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-3 text-white">
@@ -789,10 +790,11 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl p-3 ${message.type === 'user'
-                ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
-                : 'bg-gray-100 text-gray-800'
-                }`}
+              className={`max-w-[85%] rounded-2xl p-3 ${
+                message.type === 'user'
+                  ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
+                  : 'bg-gray-100 text-gray-800'
+              }`}
             >
               <div className="flex items-start space-x-2">
                 {message.type === 'assistant' && (

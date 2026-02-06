@@ -13,7 +13,7 @@ export default function QRCodeSkeleton() {
       <span className="sr-only">Generating QR code...</span>
 
       {/* QR Code skeleton */}
-      <div className="h-64 w-64 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse border-4 border-gray-300 dark:border-gray-600" />
+      <div className="h-64 w-64 animate-pulse rounded-lg border-4 border-gray-300 bg-gray-200 dark:border-gray-600 dark:bg-gray-700" />
     </div>
   );
 }

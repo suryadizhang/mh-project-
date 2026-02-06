@@ -77,7 +77,9 @@ export function MenuItemDialog({
               <Input
                 id="menu-name"
                 value={formData.name}
-                onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  onFormChange({ ...formData, name: e.target.value })
+                }
                 placeholder="e.g., Hibachi Chicken"
                 className="bg-white"
               />
@@ -88,7 +90,12 @@ export function MenuItemDialog({
               <Input
                 id="menu-description"
                 value={formData.description || ''}
-                onChange={(e) => onFormChange({ ...formData, description: e.target.value || null })}
+                onChange={e =>
+                  onFormChange({
+                    ...formData,
+                    description: e.target.value || null,
+                  })
+                }
                 placeholder="Optional description"
                 className="bg-white"
               />
@@ -110,7 +117,12 @@ export function MenuItemDialog({
                   type="number"
                   step="0.01"
                   value={formData.price}
-                  onChange={(e) => onFormChange({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                  onChange={e =>
+                    onFormChange({
+                      ...formData,
+                      price: parseFloat(e.target.value) || 0,
+                    })
+                  }
                   className="bg-white"
                 />
               </div>
@@ -119,7 +131,12 @@ export function MenuItemDialog({
                 <Label htmlFor="menu-category">Category *</Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value: string) => onFormChange({ ...formData, category: value as 'base_pricing' | 'protein' | 'side' })}
+                  onValueChange={(value: string) =>
+                    onFormChange({
+                      ...formData,
+                      category: value as 'base_pricing' | 'protein' | 'side',
+                    })
+                  }
                 >
                   <SelectTrigger id="menu-category" className="bg-white">
                     <SelectValue />
@@ -137,16 +154,24 @@ export function MenuItemDialog({
               <Label htmlFor="menu-subcategory">Subcategory</Label>
               <Select
                 value={formData.subcategory || ''}
-                onValueChange={(value: string) => onFormChange({ ...formData, subcategory: value || null })}
+                onValueChange={(value: string) =>
+                  onFormChange({ ...formData, subcategory: value || null })
+                }
               >
                 <SelectTrigger id="menu-subcategory" className="bg-white">
                   <SelectValue placeholder="Select subcategory (optional)" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">None</SelectItem>
-                  <SelectItem value="poultry">🍗 Poultry (Chicken, Duck)</SelectItem>
-                  <SelectItem value="fish">🐟 Fish (Salmon - Safe for shellfish allergies)</SelectItem>
-                  <SelectItem value="shellfish">🦐 Shellfish (Shrimp, Scallops, Lobster - ⚠️ Allergen)</SelectItem>
+                  <SelectItem value="poultry">
+                    🍗 Poultry (Chicken, Duck)
+                  </SelectItem>
+                  <SelectItem value="fish">
+                    🐟 Fish (Salmon - Safe for shellfish allergies)
+                  </SelectItem>
+                  <SelectItem value="shellfish">
+                    🦐 Shellfish (Shrimp, Scallops, Lobster - ⚠️ Allergen)
+                  </SelectItem>
                   <SelectItem value="beef">🥩 Beef</SelectItem>
                   <SelectItem value="vegetarian">🥗 Vegetarian</SelectItem>
                   <SelectItem value="tofu">🧀 Tofu</SelectItem>
@@ -160,18 +185,29 @@ export function MenuItemDialog({
             <div className="space-y-2">
               <Label htmlFor="menu-tags">Tags (Multi-select)</Label>
               <div className="bg-white p-3 rounded-md border space-y-2">
-                <p className="text-xs text-gray-500 mb-2">Select all that apply:</p>
+                <p className="text-xs text-gray-500 mb-2">
+                  Select all that apply:
+                </p>
 
                 {/* Allergen Tags */}
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-red-600">⚠️ Allergen Tags (FDA Top 9)</p>
+                  <p className="text-xs font-semibold text-red-600">
+                    ⚠️ Allergen Tags (FDA Top 9)
+                  </p>
                   <div className="grid grid-cols-2 gap-2">
-                    {['contains_shellfish', 'contains_eggs', 'contains_fish'].map(tag => (
-                      <label key={tag} className="flex items-center space-x-2 text-sm">
+                    {[
+                      'contains_shellfish',
+                      'contains_eggs',
+                      'contains_fish',
+                    ].map(tag => (
+                      <label
+                        key={tag}
+                        className="flex items-center space-x-2 text-sm"
+                      >
                         <input
                           type="checkbox"
                           checked={formData.tags?.includes(tag)}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newTags = e.target.checked
                               ? [...(formData.tags || []), tag]
                               : (formData.tags || []).filter(t => t !== tag);
@@ -179,7 +215,9 @@ export function MenuItemDialog({
                           }}
                           className="rounded"
                         />
-                        <span>{tag.replace('contains_', '').replace('_', ' ')}</span>
+                        <span>
+                          {tag.replace('contains_', '').replace('_', ' ')}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -187,14 +225,27 @@ export function MenuItemDialog({
 
                 {/* Dietary Tags */}
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-green-600">✅ Dietary Tags (Allergen-Friendly!)</p>
+                  <p className="text-xs font-semibold text-green-600">
+                    ✅ Dietary Tags (Allergen-Friendly!)
+                  </p>
                   <div className="grid grid-cols-3 gap-2">
-                    {['vegan', 'vegetarian', 'gluten_free', 'dairy_free', 'nut_free', 'sesame_free', 'can_be_gluten_free'].map(tag => (
-                      <label key={tag} className="flex items-center space-x-2 text-sm">
+                    {[
+                      'vegan',
+                      'vegetarian',
+                      'gluten_free',
+                      'dairy_free',
+                      'nut_free',
+                      'sesame_free',
+                      'can_be_gluten_free',
+                    ].map(tag => (
+                      <label
+                        key={tag}
+                        className="flex items-center space-x-2 text-sm"
+                      >
                         <input
                           type="checkbox"
                           checked={formData.tags?.includes(tag)}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newTags = e.target.checked
                               ? [...(formData.tags || []), tag]
                               : (formData.tags || []).filter(t => t !== tag);
@@ -210,14 +261,19 @@ export function MenuItemDialog({
 
                 {/* Religious/Cultural Tags */}
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-purple-600">🕌 Religious/Cultural (Certified!)</p>
+                  <p className="text-xs font-semibold text-purple-600">
+                    🕌 Religious/Cultural (Certified!)
+                  </p>
                   <div className="grid grid-cols-2 gap-2">
                     {['halal', 'kosher_style'].map(tag => (
-                      <label key={tag} className="flex items-center space-x-2 text-sm">
+                      <label
+                        key={tag}
+                        className="flex items-center space-x-2 text-sm"
+                      >
                         <input
                           type="checkbox"
                           checked={formData.tags?.includes(tag)}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newTags = e.target.checked
                               ? [...(formData.tags || []), tag]
                               : (formData.tags || []).filter(t => t !== tag);
@@ -233,14 +289,19 @@ export function MenuItemDialog({
 
                 {/* Cooking Style Tags */}
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-blue-600">🔥 Cooking Style</p>
+                  <p className="text-xs font-semibold text-blue-600">
+                    🔥 Cooking Style
+                  </p>
                   <div className="grid grid-cols-2 gap-2">
                     {['grilled', 'fried', 'steamed', 'raw'].map(tag => (
-                      <label key={tag} className="flex items-center space-x-2 text-sm">
+                      <label
+                        key={tag}
+                        className="flex items-center space-x-2 text-sm"
+                      >
                         <input
                           type="checkbox"
                           checked={formData.tags?.includes(tag)}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newTags = e.target.checked
                               ? [...(formData.tags || []), tag]
                               : (formData.tags || []).filter(t => t !== tag);
@@ -256,14 +317,27 @@ export function MenuItemDialog({
 
                 {/* Special Tags */}
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold text-yellow-600">⭐ Special</p>
+                  <p className="text-xs font-semibold text-yellow-600">
+                    ⭐ Special
+                  </p>
                   <div className="grid grid-cols-3 gap-2">
-                    {['premium', 'customer_favorite', 'high_protein', 'customizable', 'kid_friendly', 'chef_special', 'seasonal'].map(tag => (
-                      <label key={tag} className="flex items-center space-x-2 text-sm">
+                    {[
+                      'premium',
+                      'customer_favorite',
+                      'high_protein',
+                      'customizable',
+                      'kid_friendly',
+                      'chef_special',
+                      'seasonal',
+                    ].map(tag => (
+                      <label
+                        key={tag}
+                        className="flex items-center space-x-2 text-sm"
+                      >
                         <input
                           type="checkbox"
                           checked={formData.tags?.includes(tag)}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newTags = e.target.checked
                               ? [...(formData.tags || []), tag]
                               : (formData.tags || []).filter(t => t !== tag);
@@ -278,7 +352,8 @@ export function MenuItemDialog({
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                Tags help AI understand allergens, dietary restrictions, and item characteristics
+                Tags help AI understand allergens, dietary restrictions, and
+                item characteristics
               </p>
             </div>
           </div>
@@ -292,14 +367,23 @@ export function MenuItemDialog({
                 <Switch
                   id="menu-included"
                   checked={formData.is_included}
-                  onCheckedChange={(checked) => onFormChange({ ...formData, is_included: checked })}
+                  onCheckedChange={checked =>
+                    onFormChange({ ...formData, is_included: checked })
+                  }
                 />
-                <Label htmlFor="menu-included" className="flex items-center gap-2">
+                <Label
+                  htmlFor="menu-included"
+                  className="flex items-center gap-2"
+                >
                   Included in base
                   {formData.is_included ? (
-                    <span className="text-xs text-green-600">(No extra charge)</span>
+                    <span className="text-xs text-green-600">
+                      (No extra charge)
+                    </span>
                   ) : (
-                    <span className="text-xs text-gray-500">(Additional cost)</span>
+                    <span className="text-xs text-gray-500">
+                      (Additional cost)
+                    </span>
                   )}
                 </Label>
               </div>
@@ -308,14 +392,23 @@ export function MenuItemDialog({
                 <Switch
                   id="menu-active"
                   checked={formData.is_active}
-                  onCheckedChange={(checked) => onFormChange({ ...formData, is_active: checked })}
+                  onCheckedChange={checked =>
+                    onFormChange({ ...formData, is_active: checked })
+                  }
                 />
-                <Label htmlFor="menu-active" className="flex items-center gap-2">
+                <Label
+                  htmlFor="menu-active"
+                  className="flex items-center gap-2"
+                >
                   Active
                   {formData.is_active ? (
-                    <span className="text-xs text-green-600">(Visible to customers)</span>
+                    <span className="text-xs text-green-600">
+                      (Visible to customers)
+                    </span>
                   ) : (
-                    <span className="text-xs text-gray-500">(Hidden from customers)</span>
+                    <span className="text-xs text-gray-500">
+                      (Hidden from customers)
+                    </span>
                   )}
                 </Label>
               </div>
@@ -327,7 +420,12 @@ export function MenuItemDialog({
                 id="menu-order"
                 type="number"
                 value={formData.display_order}
-                onChange={(e) => onFormChange({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                onChange={e =>
+                  onFormChange({
+                    ...formData,
+                    display_order: parseInt(e.target.value) || 0,
+                  })
+                }
                 className="bg-white"
               />
             </div>

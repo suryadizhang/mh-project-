@@ -2,7 +2,8 @@
 
 ## 🎯 Single Source of Truth
 
-**`core/metrics.py`** is the **ONLY** place where the metrics registry is created.
+**`core/metrics.py`** is the **ONLY** place where the metrics registry
+is created.
 
 ### ✅ Correct Pattern: Import Registry
 
@@ -68,12 +69,15 @@ voice_call_duration = Histogram(
 ## 🔒 Preventing Double Registration
 
 ### Problem
+
 During tests, modules can be imported multiple times, causing:
+
 ```
 ValueError: Duplicated timeseries in CollectorRegistry
 ```
 
 ### Solution 1: Module-Level Guard (Preferred)
+
 ```python
 # Only define metrics at module level - they auto-register on first import
 from core.metrics import registry
@@ -84,6 +88,7 @@ my_metric = Counter("my_metric_total", "...", registry=registry)
 ```
 
 ### Solution 2: Try/Except for Tests
+
 ```python
 try:
     my_metric = Counter("my_metric_total", "...", registry=registry)
@@ -98,6 +103,7 @@ except ValueError:
 ## 📈 Using Existing Metrics
 
 ### Core HTTP Metrics
+
 ```python
 from core.metrics import request_count, request_duration
 
@@ -107,6 +113,7 @@ request_duration.labels(method="GET", endpoint="/api/users").observe(0.123)
 ```
 
 ### Security Metrics
+
 ```python
 from core.metrics import security_violations
 
@@ -115,6 +122,7 @@ security_violations.labels(violation_type="rate_limit_exceeded").inc()
 ```
 
 ### Cache Metrics
+
 ```python
 from core.metrics import cache_hits, cache_misses
 
@@ -125,6 +133,7 @@ cache_misses.labels(cache_key_prefix="booking").inc()
 ## 🧪 Testing with Metrics
 
 ### conftest.py Setup
+
 ```python
 import pytest
 from prometheus_client import REGISTRY
@@ -139,9 +148,9 @@ def clear_metrics():
             REGISTRY.unregister(collector)
         except Exception:
             pass
-    
+
     yield
-    
+
     # Cleanup after test
     collectors = list(REGISTRY._collector_to_names.keys())
     for collector in collectors:
@@ -152,13 +161,14 @@ def clear_metrics():
 ```
 
 ### Using Custom Registry in Tests
+
 ```python
 from core.metrics import registry  # Use our custom registry, not REGISTRY
 
 def test_my_metric():
     """Test metric recording"""
     from services.my_module.metrics import my_metric
-    
+
     initial_value = my_metric._value.get()
     my_metric.inc()
     assert my_metric._value.get() == initial_value + 1
@@ -168,7 +178,8 @@ def test_my_metric():
 
 1. **Always import `registry` from `core.metrics`**
 2. **Define metrics at module level** (not inside functions)
-3. **Use descriptive metric names** with domain prefix (e.g., `voice_calls_total`, not `calls`)
+3. **Use descriptive metric names** with domain prefix (e.g.,
+   `voice_calls_total`, not `calls`)
 4. **Document your labels** - what values do they accept?
 5. **Use appropriate metric types**:
    - **Counter**: Monotonically increasing (requests, errors)
@@ -187,6 +198,7 @@ curl http://localhost:8000/metrics
 ```
 
 Output:
+
 ```
 # HELP voice_calls_total Total voice calls
 # TYPE voice_calls_total counter
@@ -206,7 +218,8 @@ voice_call_duration_seconds_bucket{status="completed",le="10.0"} 25.0
 
 **Cause**: Metric is being registered twice
 
-**Solution**: 
+**Solution**:
+
 1. Check you're importing `registry` from `core.metrics`
 2. Ensure metric is defined at module level, not in function
 3. Don't manually call `registry.register()`
@@ -216,6 +229,7 @@ voice_call_duration_seconds_bucket{status="completed",le="10.0"} 25.0
 **Cause**: Wrong import path or missing src in PYTHONPATH
 
 **Solution**:
+
 ```python
 # Add to conftest.py or test runner
 import sys
@@ -228,7 +242,8 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 **Cause**: Using wrong registry or metrics not initialized
 
-**Solution**: Verify you're using `registry` from `core.metrics`, not `REGISTRY` from prometheus_client
+**Solution**: Verify you're using `registry` from `core.metrics`, not
+`REGISTRY` from prometheus_client
 
 ## 📚 References
 

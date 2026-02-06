@@ -1,7 +1,9 @@
 # 📱 Customer Review Newsfeed - Facebook/Instagram Style
 
 ## Overview
-Public-facing customer review blog page with infinite scroll, image gallery, and social engagement features.
+
+Public-facing customer review blog page with infinite scroll, image
+gallery, and social engagement features.
 
 **Pattern:** Facebook Newsfeed + Instagram Feed + Yelp Reviews
 
@@ -43,31 +45,31 @@ export default function CustomerReviewsPage() {
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  
+
   const observerTarget = useRef<HTMLDivElement>(null)
-  
+
   const fetchReviews = useCallback(async (pageNum: number) => {
     if (loading) return
-    
+
     setLoading(true)
-    
+
     try {
       const response = await fetch(
         `/api/customer-reviews/approved-reviews?page=${pageNum}&per_page=10`
       )
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch reviews')
       }
-      
+
       const data = await response.json()
-      
+
       if (pageNum === 1) {
         setReviews(data.reviews)
       } else {
         setReviews(prev => [...prev, ...data.reviews])
       }
-      
+
       setHasMore(data.pagination.page < data.pagination.pages)
     } catch (error) {
       console.error('Error fetching reviews:', error)
@@ -75,12 +77,12 @@ export default function CustomerReviewsPage() {
       setLoading(false)
     }
   }, [loading])
-  
+
   // Initial load
   useEffect(() => {
     fetchReviews(1)
   }, [])
-  
+
   // Infinite scroll with Intersection Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -95,19 +97,19 @@ export default function CustomerReviewsPage() {
       },
       { threshold: 0.1 }
     )
-    
+
     const currentTarget = observerTarget.current
     if (currentTarget) {
       observer.observe(currentTarget)
     }
-    
+
     return () => {
       if (currentTarget) {
         observer.unobserve(currentTarget)
       }
     }
   }, [hasMore, loading, fetchReviews])
-  
+
   const handleLike = async (reviewId: number) => {
     // Optimistic update
     setReviews(prev =>
@@ -117,7 +119,7 @@ export default function CustomerReviewsPage() {
           : review
       )
     )
-    
+
     try {
       await fetch(`/api/customer-reviews/${reviewId}/like`, {
         method: 'POST'
@@ -133,7 +135,7 @@ export default function CustomerReviewsPage() {
       )
     }
   }
-  
+
   const handleHelpful = async (reviewId: number) => {
     setReviews(prev =>
       prev.map(review =>
@@ -142,7 +144,7 @@ export default function CustomerReviewsPage() {
           : review
       )
     )
-    
+
     try {
       await fetch(`/api/customer-reviews/${reviewId}/helpful`, {
         method: 'POST'
@@ -157,7 +159,7 @@ export default function CustomerReviewsPage() {
       )
     }
   }
-  
+
   const handleShare = async (review: CustomerReview) => {
     if (navigator.share) {
       try {
@@ -175,7 +177,7 @@ export default function CustomerReviewsPage() {
       alert('Link copied to clipboard!')
     }
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -199,7 +201,7 @@ export default function CustomerReviewsPage() {
               <div className="text-sm text-red-100">Would Recommend</div>
             </div>
           </div>
-          
+
           <button
             onClick={() => window.location.href = '/submit-review'}
             className="mt-8 px-8 py-3 bg-white text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-all shadow-lg"
@@ -208,7 +210,7 @@ export default function CustomerReviewsPage() {
           </button>
         </div>
       </div>
-      
+
       {/* Reviews Feed */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-6">
@@ -235,7 +237,7 @@ export default function CustomerReviewsPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Rating */}
                   <div className="flex items-center gap-1">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -250,18 +252,18 @@ export default function CustomerReviewsPage() {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Review Title */}
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
                   {review.title}
                 </h3>
-                
+
                 {/* Review Content */}
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {review.content}
                 </p>
               </div>
-              
+
               {/* Image Gallery */}
               {review.images && review.images.length > 0 && (
                 <div className={`
@@ -286,7 +288,7 @@ export default function CustomerReviewsPage() {
                         fill
                         className="object-cover hover:scale-105 transition-transform duration-300"
                       />
-                      
+
                       {/* Show "+X more" overlay on 6th image */}
                       {index === 5 && review.images.length > 6 && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -299,7 +301,7 @@ export default function CustomerReviewsPage() {
                   ))}
                 </div>
               )}
-              
+
               {/* Engagement Actions */}
               <div className="px-6 py-4 border-t border-gray-100">
                 <div className="flex items-center justify-between">
@@ -314,7 +316,7 @@ export default function CustomerReviewsPage() {
                         {review.likes_count > 0 && review.likes_count}
                       </span>
                     </button>
-                    
+
                     {/* Helpful Button */}
                     <button
                       onClick={() => handleHelpful(review.id)}
@@ -325,7 +327,7 @@ export default function CustomerReviewsPage() {
                         {review.helpful_count > 0 && `${review.helpful_count} helpful`}
                       </span>
                     </button>
-                    
+
                     {/* Share Button */}
                     <button
                       onClick={() => handleShare(review)}
@@ -340,17 +342,17 @@ export default function CustomerReviewsPage() {
             </div>
           ))}
         </div>
-        
+
         {/* Loading Indicator */}
         {loading && (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-red-600" />
           </div>
         )}
-        
+
         {/* Intersection Observer Target */}
         <div ref={observerTarget} className="h-10" />
-        
+
         {/* End of Feed */}
         {!hasMore && reviews.length > 0 && (
           <div className="text-center py-8 text-gray-500">
@@ -363,7 +365,7 @@ export default function CustomerReviewsPage() {
             </button>
           </div>
         )}
-        
+
         {/* Empty State */}
         {!loading && reviews.length === 0 && (
           <div className="text-center py-16">
@@ -385,7 +387,7 @@ export default function CustomerReviewsPage() {
           </div>
         )}
       </div>
-      
+
       {/* Image Lightbox */}
       {selectedImage && (
         <div
@@ -400,7 +402,7 @@ export default function CustomerReviewsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          
+
           <div className="relative max-w-5xl max-h-[90vh] w-full h-full">
             <Image
               src={selectedImage}
@@ -437,7 +439,7 @@ async def like_review(
 ):
     """
     Like a customer review
-    
+
     Features:
     - Atomic increment (no race conditions)
     - Fast response
@@ -447,14 +449,14 @@ async def like_review(
         CustomerReviewBlogPost.id == review_id,
         CustomerReviewBlogPost.status == 'approved'
     ).first()
-    
+
     if not review:
         raise HTTPException(status_code=404, detail="Review not found")
-    
+
     # Atomic increment
     review.likes_count += 1
     db.commit()
-    
+
     return {
         'success': True,
         'likes_count': review.likes_count
@@ -470,13 +472,13 @@ async def mark_helpful(
         CustomerReviewBlogPost.id == review_id,
         CustomerReviewBlogPost.status == 'approved'
     ).first()
-    
+
     if not review:
         raise HTTPException(status_code=404, detail="Review not found")
-    
+
     review.helpful_count += 1
     db.commit()
-    
+
     return {
         'success': True,
         'helpful_count': review.helpful_count
@@ -495,7 +497,7 @@ async def mark_helpful(
   .image-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .image-grid-single {
     grid-template-columns: 1fr;
     max-height: 600px;
@@ -507,7 +509,7 @@ async def mark_helpful(
   .image-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .image-grid-single {
     grid-template-columns: 1fr;
     aspect-ratio: 4/3;
@@ -558,11 +560,12 @@ async def mark_helpful(
 
 ```typescript
 // apps/customer/src/app/reviews/layout.tsx
-import { Metadata } from 'next'
+import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Customer Reviews & Stories | YourBrand',
-  description: 'Read authentic customer reviews and experiences from our happy clients. See photos, ratings, and detailed stories from real customers.',
+  description:
+    'Read authentic customer reviews and experiences from our happy clients. See photos, ratings, and detailed stories from real customers.',
   openGraph: {
     title: 'Customer Reviews & Stories',
     description: 'See what our customers are saying',
@@ -574,13 +577,17 @@ export const metadata: Metadata = {
     title: 'Customer Reviews',
     description: 'Authentic customer experiences',
   },
-}
+};
 
 // Individual review page
 // apps/customer/src/app/reviews/[reviewId]/page.tsx
-export async function generateMetadata({ params }: { params: { reviewId: string } }): Promise<Metadata> {
-  const review = await fetchReview(params.reviewId)
-  
+export async function generateMetadata({
+  params,
+}: {
+  params: { reviewId: string };
+}): Promise<Metadata> {
+  const review = await fetchReview(params.reviewId);
+
   return {
     title: `${review.title} - Customer Review`,
     description: review.content.substring(0, 155),
@@ -591,7 +598,7 @@ export async function generateMetadata({ params }: { params: { reviewId: string 
       type: 'article',
       publishedTime: review.created_at,
     },
-  }
+  };
 }
 ```
 
@@ -607,7 +614,7 @@ export function trackReviewView(reviewId: number) {
     window.gtag('event', 'view_review', {
       review_id: reviewId,
       event_category: 'engagement',
-    })
+    });
   }
 }
 
@@ -616,7 +623,7 @@ export function trackReviewLike(reviewId: number) {
     window.gtag('event', 'like_review', {
       review_id: reviewId,
       event_category: 'engagement',
-    })
+    });
   }
 }
 
@@ -626,15 +633,15 @@ export function trackReviewShare(reviewId: number, method: string) {
       content_type: 'review',
       content_id: reviewId,
       method: method,
-    })
+    });
   }
 }
 
 // Usage in component
 const handleLike = async (reviewId: number) => {
-  trackReviewLike(reviewId)
+  trackReviewLike(reviewId);
   // ... existing like logic
-}
+};
 ```
 
 ---
@@ -642,6 +649,7 @@ const handleLike = async (reviewId: number) => {
 ## Performance Optimizations
 
 ### 1. Image Lazy Loading
+
 ```typescript
 // Blur placeholder for images
 <Image
@@ -656,6 +664,7 @@ const handleLike = async (reviewId: number) => {
 ```
 
 ### 2. Virtual Scrolling (for 1000+ reviews)
+
 ```bash
 npm install @tanstack/react-virtual
 ```
@@ -696,46 +705,48 @@ return (
 ```
 
 ### 3. Intersection Observer for Analytics
+
 ```typescript
 useEffect(() => {
   const observer = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          const reviewId = entry.target.getAttribute('data-review-id')
+          const reviewId =
+            entry.target.getAttribute('data-review-id');
           if (reviewId) {
-            trackReviewView(parseInt(reviewId))
+            trackReviewView(parseInt(reviewId));
           }
         }
-      })
+      });
     },
     { threshold: 0.5 } // 50% visible
-  )
-  
+  );
+
   document.querySelectorAll('[data-review-id]').forEach(el => {
-    observer.observe(el)
-  })
-  
-  return () => observer.disconnect()
-}, [reviews])
+    observer.observe(el);
+  });
+
+  return () => observer.disconnect();
+}, [reviews]);
 ```
 
 ---
 
 ## Features Comparison
 
-| Feature | Our Implementation | Facebook | Instagram | Yelp |
-|---------|-------------------|----------|-----------|------|
-| Infinite Scroll | ✅ | ✅ | ✅ | ❌ |
-| Image Gallery | ✅ (Up to 10) | ✅ | ✅ | ✅ (Limited) |
-| Like Button | ✅ | ✅ | ✅ | ❌ |
-| Share Button | ✅ | ✅ | ✅ | ✅ |
-| Image Lightbox | ✅ | ✅ | ✅ | ✅ |
-| Real-time Updates | ✅ (WebSocket) | ✅ | ✅ | ❌ |
-| Mobile Optimized | ✅ | ✅ | ✅ | ✅ |
-| SEO Friendly | ✅ | ❌ | ❌ | ✅ |
-| Admin Approval | ✅ | ❌ | ❌ | ✅ |
-| External Reviews | ✅ (Google/Yelp) | ❌ | ❌ | ❌ |
+| Feature           | Our Implementation | Facebook | Instagram | Yelp         |
+| ----------------- | ------------------ | -------- | --------- | ------------ |
+| Infinite Scroll   | ✅                 | ✅       | ✅        | ❌           |
+| Image Gallery     | ✅ (Up to 10)      | ✅       | ✅        | ✅ (Limited) |
+| Like Button       | ✅                 | ✅       | ✅        | ❌           |
+| Share Button      | ✅                 | ✅       | ✅        | ✅           |
+| Image Lightbox    | ✅                 | ✅       | ✅        | ✅           |
+| Real-time Updates | ✅ (WebSocket)     | ✅       | ✅        | ❌           |
+| Mobile Optimized  | ✅                 | ✅       | ✅        | ✅           |
+| SEO Friendly      | ✅                 | ❌       | ❌        | ✅           |
+| Admin Approval    | ✅                 | ❌       | ❌        | ✅           |
+| External Reviews  | ✅ (Google/Yelp)   | ❌       | ❌        | ❌           |
 
 ---
 
@@ -750,4 +761,5 @@ useEffect(() => {
 7. **Optimize image loading** with blur placeholders
 8. **Add virtual scrolling** if expecting 1000+ reviews
 
-This gives you a **production-ready, enterprise-grade customer review blog system** like Facebook/Instagram! 🚀
+This gives you a **production-ready, enterprise-grade customer review
+blog system** like Facebook/Instagram! 🚀

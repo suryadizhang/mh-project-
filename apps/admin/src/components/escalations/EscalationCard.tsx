@@ -184,9 +184,7 @@ export function EscalationCard({ escalation }: EscalationCardProps) {
             </span>
           </div>
 
-          <p className="text-gray-700 mb-3 line-clamp-2">
-            {escalation.reason}
-          </p>
+          <p className="text-gray-700 mb-3 line-clamp-2">{escalation.reason}</p>
 
           <div className="flex items-center space-x-4 text-sm text-gray-600">
             <div className="flex items-center space-x-1">

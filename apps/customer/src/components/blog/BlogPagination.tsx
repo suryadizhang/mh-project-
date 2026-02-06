@@ -1,64 +1,64 @@
-'use client'
+'use client';
 
 import type { BlogPost } from '@my-hibachi/blog-types';
-import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface BlogPaginationProps {
-  posts: BlogPost[]
-  postsPerPage?: number
-  onPageChange: (paginatedPosts: BlogPost[], currentPage: number, totalPages: number) => void
+  posts: BlogPost[];
+  postsPerPage?: number;
+  onPageChange: (paginatedPosts: BlogPost[], currentPage: number, totalPages: number) => void;
 }
 
 export default function BlogPagination({
   posts,
   postsPerPage = 9,
-  onPageChange
+  onPageChange,
 }: BlogPaginationProps) {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [loadMore, setLoadMore] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loadMore, setLoadMore] = useState(false);
 
-  const totalPages = Math.ceil(posts.length / postsPerPage)
-  const startIndex = (currentPage - 1) * postsPerPage
-  const endIndex = loadMore ? currentPage * postsPerPage : startIndex + postsPerPage
-  const currentPosts = posts.slice(0, endIndex)
+  const totalPages = Math.ceil(posts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = loadMore ? currentPage * postsPerPage : startIndex + postsPerPage;
+  const currentPosts = posts.slice(0, endIndex);
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    setLoadMore(false)
-    const start = (page - 1) * postsPerPage
-    const end = start + postsPerPage
-    const paginatedPosts = posts.slice(start, end)
-    onPageChange(paginatedPosts, page, totalPages)
+    setCurrentPage(page);
+    setLoadMore(false);
+    const start = (page - 1) * postsPerPage;
+    const end = start + postsPerPage;
+    const paginatedPosts = posts.slice(start, end);
+    onPageChange(paginatedPosts, page, totalPages);
 
     // Scroll to top of blog section
     document.querySelector('[data-page="blog"] .blog-section')?.scrollIntoView({
-      behavior: 'smooth'
-    })
-  }
+      behavior: 'smooth',
+    });
+  };
 
   const handleLoadMore = () => {
-    const nextPage = currentPage + 1
-    setCurrentPage(nextPage)
-    setLoadMore(true)
-    const morePosts = posts.slice(0, nextPage * postsPerPage)
-    onPageChange(morePosts, nextPage, totalPages)
-  }
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    setLoadMore(true);
+    const morePosts = posts.slice(0, nextPage * postsPerPage);
+    onPageChange(morePosts, nextPage, totalPages);
+  };
 
   const resetPagination = () => {
-    setCurrentPage(1)
-    setLoadMore(false)
-    const firstPagePosts = posts.slice(0, postsPerPage)
-    onPageChange(firstPagePosts, 1, totalPages)
-  }
+    setCurrentPage(1);
+    setLoadMore(false);
+    const firstPagePosts = posts.slice(0, postsPerPage);
+    onPageChange(firstPagePosts, 1, totalPages);
+  };
 
   // Update when posts change
   useEffect(() => {
-    resetPagination()
-  }, [posts.length]) // eslint-disable-line react-hooks/exhaustive-deps
+    resetPagination();
+  }, [posts.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (posts.length <= postsPerPage) {
-    return null
+    return null;
   }
 
   return (
@@ -66,20 +66,20 @@ export default function BlogPagination({
       {loadMore ? (
         // Load More Mode
         <div className="blog-load-more">
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="mb-4 text-sm text-gray-600">
             Showing {currentPosts.length} of {posts.length} articles
           </p>
 
-          <div className="flex gap-4 justify-center">
+          <div className="flex justify-center gap-4">
             {currentPage < totalPages && (
               <button onClick={handleLoadMore} className="blog-load-more-btn">
                 Load More Articles
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="h-4 w-4" />
               </button>
             )}
 
             <button onClick={resetPagination} className="blog-pagination-btn">
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="h-4 w-4" />
               Start Over
             </button>
           </div>
@@ -92,21 +92,21 @@ export default function BlogPagination({
             disabled={currentPage === 1}
             className="blog-pagination-btn"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="h-4 w-4" />
             Previous
           </button>
 
           {/* Page Numbers */}
           {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-            let pageNum
+            let pageNum;
             if (totalPages <= 5) {
-              pageNum = i + 1
+              pageNum = i + 1;
             } else if (currentPage <= 3) {
-              pageNum = i + 1
+              pageNum = i + 1;
             } else if (currentPage >= totalPages - 2) {
-              pageNum = totalPages - 4 + i
+              pageNum = totalPages - 4 + i;
             } else {
-              pageNum = currentPage - 2 + i
+              pageNum = currentPage - 2 + i;
             }
 
             return (
@@ -117,7 +117,7 @@ export default function BlogPagination({
               >
                 {pageNum}
               </button>
-            )
+            );
           })}
 
           {totalPages > 5 && currentPage < totalPages - 2 && (
@@ -135,7 +135,7 @@ export default function BlogPagination({
             className="blog-pagination-btn"
           >
             Next
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="h-4 w-4" />
           </button>
 
           {/* Load More Option */}
@@ -150,7 +150,7 @@ export default function BlogPagination({
       )}
 
       {/* Results Summary */}
-      <div className="text-center mt-4">
+      <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
           {loadMore
             ? `Showing ${currentPosts.length} of ${posts.length} articles`
@@ -158,5 +158,5 @@ export default function BlogPagination({
         </p>
       </div>
     </div>
-  )
+  );
 }

@@ -5,9 +5,9 @@
 
 export default function ChatWidgetSkeleton() {
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed right-4 bottom-4 z-50">
       <div
-        className="h-14 w-14 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse shadow-lg"
+        className="h-14 w-14 animate-pulse rounded-full bg-gray-200 shadow-lg dark:bg-gray-700"
         aria-label="Loading chat widget..."
         role="status"
       >

@@ -4,7 +4,12 @@ import { Check, Copy, ExternalLink, Mail, Phone, QrCode, Smartphone } from 'luci
 import QRCodeGenerator from 'qrcode';
 import { useState } from 'react';
 
-import { ProtectedPhone, ProtectedEmail, useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
+import {
+  ProtectedPhone,
+  ProtectedEmail,
+  useProtectedPhone,
+  useProtectedPaymentEmail,
+} from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
@@ -251,7 +256,9 @@ export default function AlternativePaymentOptions({
               <div className="flex items-center justify-between rounded bg-white p-3">
                 <div>
                   <div className="text-sm font-medium text-gray-900">Phone</div>
-                  <div className="font-mono text-purple-700">{protectedPhoneFormatted || 'Loading...'}</div>
+                  <div className="font-mono text-purple-700">
+                    {protectedPhoneFormatted || 'Loading...'}
+                  </div>
                 </div>
                 <button
                   onClick={() => copyToClipboard(protectedPhoneFormatted || '', 'phone')}
@@ -339,7 +346,9 @@ export default function AlternativePaymentOptions({
                       <div className="mt-2 space-y-1">
                         <div>
                           Email:{' '}
-                          <span className="font-mono font-medium">{paymentEmail || 'Loading...'}</span>
+                          <span className="font-mono font-medium">
+                            {paymentEmail || 'Loading...'}
+                          </span>
                         </div>
                         <div>
                           Amount:{' '}
@@ -501,10 +510,14 @@ export default function AlternativePaymentOptions({
           <li>• Include the memo/note exactly as shown for faster processing</li>
           <li>• Payments are typically verified within 1-2 business hours</li>
           <li>• You&apos;ll receive email confirmation once payment is verified</li>
-          <li>• For questions, use our <a href="/contact" className="underline">contact form</a></li>
+          <li>
+            • For questions, use our{' '}
+            <a href="/contact" className="underline">
+              contact form
+            </a>
+          </li>
         </ul>
       </div>
     </div>
   );
 }
-

@@ -162,8 +162,9 @@ const LazyImage = React.memo(
             src={src}
             alt={alt}
             onLoad={() => setIsLoaded(true)}
-            className={`${className || ''} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+            className={`${className || ''} transition-opacity duration-300 ${
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
           />
         )}
       </div>

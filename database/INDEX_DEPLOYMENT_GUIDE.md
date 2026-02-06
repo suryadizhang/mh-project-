@@ -22,7 +22,8 @@
 2. Navigate to your project
 3. Click **SQL Editor** in left sidebar
 4. Click **New Query**
-5. Copy entire contents of `database/migrations/001_create_performance_indexes.sql`
+5. Copy entire contents of
+   `database/migrations/001_create_performance_indexes.sql`
 6. Paste into SQL editor
 7. Click **Run** (green play button)
 8. Wait ~2 minutes for completion
@@ -51,20 +52,20 @@ psql -h your_host -U postgres -d postgres -f "database/migrations/001_create_per
 
 ### **50+ Indexes Across 13 Tables**
 
-| Table | Indexes | Impact |
-|-------|---------|--------|
-| `bookings` | 6 | 50x faster queries |
-| `customers` | 4 | 10x faster search |
-| `messages` | 5 | 100x faster inbox |
-| `leads` | 5 | 25x faster pipeline |
-| `threads` | 4 | 50x faster threads |
-| `customer_reviews` | 5 | 40x faster reviews |
-| `newsletter_subscribers` | 3 | 30x faster lists |
-| `newsletter_campaigns` | 2 | 40x faster scheduling |
-| `qr_codes` | 2 | Instant lookups |
-| `qr_scans` | 2 | 50x faster analytics |
-| `station_users` | 3 | 100x faster RBAC |
-| `audit_logs` | 4 | 60x faster compliance |
+| Table                    | Indexes | Impact                |
+| ------------------------ | ------- | --------------------- |
+| `bookings`               | 6       | 50x faster queries    |
+| `customers`              | 4       | 10x faster search     |
+| `messages`               | 5       | 100x faster inbox     |
+| `leads`                  | 5       | 25x faster pipeline   |
+| `threads`                | 4       | 50x faster threads    |
+| `customer_reviews`       | 5       | 40x faster reviews    |
+| `newsletter_subscribers` | 3       | 30x faster lists      |
+| `newsletter_campaigns`   | 2       | 40x faster scheduling |
+| `qr_codes`               | 2       | Instant lookups       |
+| `qr_scans`               | 2       | 50x faster analytics  |
+| `station_users`          | 3       | 100x faster RBAC      |
+| `audit_logs`             | 4       | 60x faster compliance |
 
 **Total Disk Space:** ~50-100MB (negligible)  
 **Creation Time:** 2-5 minutes  
@@ -75,6 +76,7 @@ psql -h your_host -U postgres -d postgres -f "database/migrations/001_create_per
 ## ⚡ Expected Performance Improvements
 
 ### **Before Indexes (Slow)**
+
 ```sql
 -- Customer booking history: 2,500ms ❌
 SELECT * FROM bookings WHERE customer_id = 1;
@@ -87,6 +89,7 @@ SELECT * FROM messages WHERE thread_id = 1;
 ```
 
 ### **After Indexes (Fast)**
+
 ```sql
 -- Customer booking history: 5ms ✅ (500x faster!)
 SELECT * FROM bookings WHERE customer_id = 1;
@@ -107,7 +110,7 @@ SELECT * FROM messages WHERE thread_id = 1;
 Run this query in SQL editor:
 
 ```sql
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,
@@ -141,28 +144,29 @@ Run these test queries BEFORE and AFTER to see improvement:
 ```sql
 -- Test 1: Customer booking history
 EXPLAIN ANALYZE
-SELECT * FROM bookings 
-WHERE customer_id = 1 
-ORDER BY booking_date DESC 
+SELECT * FROM bookings
+WHERE customer_id = 1
+ORDER BY booking_date DESC
 LIMIT 20;
 -- Look for "Index Scan using idx_bookings_customer_id"
 
 -- Test 2: Recent bookings
 EXPLAIN ANALYZE
-SELECT * FROM bookings 
-ORDER BY created_at DESC 
+SELECT * FROM bookings
+ORDER BY created_at DESC
 LIMIT 50;
 -- Look for "Index Scan using idx_bookings_created_at"
 
 -- Test 3: Inbox messages
 EXPLAIN ANALYZE
-SELECT * FROM messages 
-WHERE thread_id = 1 
+SELECT * FROM messages
+WHERE thread_id = 1
 ORDER BY created_at DESC;
 -- Look for "Index Scan using idx_messages_thread_id"
 ```
 
 **Success Criteria:**
+
 - Query plans show "Index Scan" (not "Seq Scan")
 - Execution time < 20ms for all queries
 - No table scans on large tables
@@ -183,7 +187,7 @@ ORDER BY created_at DESC;
 
 ```sql
 -- Find slowest queries (should see dramatic improvement)
-SELECT 
+SELECT
     query,
     calls,
     mean_exec_time,
@@ -215,7 +219,7 @@ REINDEX DATABASE myhibachi;
 
 ```sql
 -- Check index usage statistics
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,
@@ -237,21 +241,24 @@ ORDER BY idx_scan DESC;
 
 ### **Issue: "Index already exists" error**
 
-**Solution:** Normal if re-running script. All `CREATE INDEX` commands use `IF NOT EXISTS` so safe to run multiple times.
+**Solution:** Normal if re-running script. All `CREATE INDEX` commands
+use `IF NOT EXISTS` so safe to run multiple times.
 
 ---
 
 ### **Issue: Index creation taking too long (>10 minutes)**
 
 **Possible Causes:**
+
 - Large dataset (millions of rows)
 - High concurrent traffic
 - Low server resources
 
 **Solution:**
+
 ```sql
 -- Check index creation progress
-SELECT 
+SELECT
     pid,
     now() - pg_stat_activity.query_start AS duration,
     query
@@ -267,12 +274,13 @@ SELECT pg_cancel_backend(pid);
 ### **Issue: Database running out of disk space**
 
 **Diagnosis:**
+
 ```sql
 -- Check database size
 SELECT pg_size_pretty(pg_database_size('postgres'));
 
 -- Check table + index sizes
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS total_size
@@ -281,13 +289,15 @@ WHERE schemaname = 'public'
 ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ```
 
-**Solution:** Indexes typically add 5-15% overhead. If space critical, drop least-used indexes.
+**Solution:** Indexes typically add 5-15% overhead. If space critical,
+drop least-used indexes.
 
 ---
 
 ### **Issue: Queries still slow after indexes**
 
 **Diagnosis:**
+
 ```sql
 -- Check if indexes are being used
 EXPLAIN ANALYZE your_slow_query_here;
@@ -296,11 +306,13 @@ EXPLAIN ANALYZE your_slow_query_here;
 ```
 
 **Possible Causes:**
+
 1. Query not optimized for indexes
 2. Statistics outdated
 3. Index bloat
 
 **Solution:**
+
 ```sql
 -- Update statistics
 ANALYZE tablename;
@@ -331,13 +343,13 @@ EXPLAIN (ANALYZE, BUFFERS) your_query;
 
 Track these after deployment:
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Avg API Response Time** | ~800ms | ~50ms | **16x faster** |
-| **Dashboard Load Time** | 3-5s | <500ms | **6-10x faster** |
-| **Search Query Time** | 2-3s | <50ms | **40-60x faster** |
-| **Inbox Load Time** | 4-6s | <200ms | **20-30x faster** |
-| **Database CPU Usage** | High | Low | **60% reduction** |
+| Metric                    | Before | After  | Improvement       |
+| ------------------------- | ------ | ------ | ----------------- |
+| **Avg API Response Time** | ~800ms | ~50ms  | **16x faster**    |
+| **Dashboard Load Time**   | 3-5s   | <500ms | **6-10x faster**  |
+| **Search Query Time**     | 2-3s   | <50ms  | **40-60x faster** |
+| **Inbox Load Time**       | 4-6s   | <200ms | **20-30x faster** |
+| **Database CPU Usage**    | High   | Low    | **60% reduction** |
 
 ---
 

@@ -21,7 +21,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_API_URL: z
     .string()
     .url('NEXT_PUBLIC_API_URL must be a valid URL')
-    .refine((url) => url.startsWith('http://') || url.startsWith('https://'), {
+    .refine(url => url.startsWith('http://') || url.startsWith('https://'), {
       message: 'NEXT_PUBLIC_API_URL must start with http:// or https://',
     }),
 
@@ -40,7 +40,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_WS_URL: z
     .string()
     .url('NEXT_PUBLIC_WS_URL must be a valid URL')
-    .refine((url) => url.startsWith('ws://') || url.startsWith('wss://'), {
+    .refine(url => url.startsWith('ws://') || url.startsWith('wss://'), {
       message: 'NEXT_PUBLIC_WS_URL must start with ws:// or wss://',
     })
     .optional(),
@@ -52,7 +52,9 @@ const envSchema = z.object({
     .optional(),
 
   // Environment Type
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
 });
 
 /**
@@ -78,7 +80,9 @@ try {
     error.issues.forEach((err: z.ZodIssue) => {
       console.error(`  • ${err.path.join('.')}: ${err.message}`);
     });
-    console.error('\nPlease check your .env.local file and ensure all required variables are set correctly.\n');
+    console.error(
+      '\nPlease check your .env.local file and ensure all required variables are set correctly.\n'
+    );
     throw new Error('Invalid environment configuration');
   }
   throw error;

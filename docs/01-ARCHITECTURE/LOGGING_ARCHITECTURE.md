@@ -1,15 +1,17 @@
 # My Hibachi - Logging & Audit Architecture
 
-**Created:** 2025-01-30
-**Version:** 2.0.0
-**Status:** Active
-**Relates To:** [Security](../../apps/backend/src/core/security/), [Audit Service](../../apps/backend/src/services/audit_service.py)
+**Created:** 2025-01-30 **Version:** 2.0.0 **Status:** Active
+**Relates To:** [Security](../../apps/backend/src/core/security/),
+[Audit Service](../../apps/backend/src/services/audit_service.py)
 
 ---
 
 ## Overview
 
-This document describes the unified logging and audit trail architecture for the My Hibachi platform. The system provides comprehensive tracking of all business-critical operations, security events, and data changes.
+This document describes the unified logging and audit trail
+architecture for the My Hibachi platform. The system provides
+comprehensive tracking of all business-critical operations, security
+events, and data changes.
 
 ---
 
@@ -98,7 +100,8 @@ CREATE INDEX idx_audit_logs_action ON security.audit_logs(action);
 
 ### 2. `security.security_events` (Security-Specific Events)
 
-This table tracks security-critical events (login attempts, access violations, etc).
+This table tracks security-critical events (login attempts, access
+violations, etc).
 
 ```sql
 CREATE TABLE security.security_events (
@@ -193,7 +196,8 @@ async def get_audit_trail(
 
 **Location:** `apps/backend/src/core/security/audit.py`
 
-**Purpose:** Low-level security event logging with file + database persistence.
+**Purpose:** Low-level security event logging with file + database
+persistence.
 
 **Key Functions:**
 
@@ -290,7 +294,8 @@ user_actions = await get_audit_trail(
 
 ### ✅ ALLOWED: Operational Logs (with prefixes)
 
-These logs are intentional and provide visibility into system operations:
+These logs are intentional and provide visibility into system
+operations:
 
 ```typescript
 // Good: Operational log with clear prefix
@@ -312,33 +317,33 @@ console.log('here');
 
 ### Files with Intentional Operational Logs
 
-| File | Purpose | Keep |
-|------|---------|------|
-| `email-automation-init.ts` | Email automation startup | ✅ Yes |
-| `email-scheduler.ts` | Scheduled email processing | ✅ Yes |
-| `advancedAutomation.ts` | GMB/Directory automation | ✅ Yes |
-| `logger.ts` | Centralized logging utility | ✅ Yes |
+| File                       | Purpose                     | Keep   |
+| -------------------------- | --------------------------- | ------ |
+| `email-automation-init.ts` | Email automation startup    | ✅ Yes |
+| `email-scheduler.ts`       | Scheduled email processing  | ✅ Yes |
+| `advancedAutomation.ts`    | GMB/Directory automation    | ✅ Yes |
+| `logger.ts`                | Centralized logging utility | ✅ Yes |
 
 ---
 
 ## Severity Levels
 
-| Level | Use Case | Example |
-|-------|----------|---------|
-| `info` | Normal operations | User logged in, booking created |
-| `warning` | Unusual but not critical | Failed login attempt, rate limit hit |
-| `error` | Operation failed | Payment processing error, API failure |
+| Level      | Use Case                      | Example                                 |
+| ---------- | ----------------------------- | --------------------------------------- |
+| `info`     | Normal operations             | User logged in, booking created         |
+| `warning`  | Unusual but not critical      | Failed login attempt, rate limit hit    |
+| `error`    | Operation failed              | Payment processing error, API failure   |
 | `critical` | Security/data integrity issue | Multiple failed logins, data corruption |
 
 ---
 
 ## Retention Policy
 
-| Table | Retention | Notes |
-|-------|-----------|-------|
-| `security.audit_logs` | 7 years | Legal compliance requirement |
-| `security.security_events` | 2 years | Security analysis |
-| File logs (`logs/*.log`) | 90 days | Disk space management |
+| Table                      | Retention | Notes                        |
+| -------------------------- | --------- | ---------------------------- |
+| `security.audit_logs`      | 7 years   | Legal compliance requirement |
+| `security.security_events` | 2 years   | Security analysis            |
+| File logs (`logs/*.log`)   | 90 days   | Disk space management        |
 
 ---
 
@@ -346,19 +351,27 @@ console.log('here');
 
 **File:** `database/migrations/015_create_audit_logs_table.sql`
 
-This migration creates both audit tables if they don't exist. Run this on any new environment.
+This migration creates both audit tables if they don't exist. Run this
+on any new environment.
 
 ---
 
 ## Best Practices
 
-1. **Always log entity changes** - Create, update, delete operations on business entities
-2. **Include old/new values** - For update operations, capture what changed
-3. **Capture request context** - IP address, user agent, request ID when available
-4. **Use appropriate severity** - Don't overuse 'critical' or underuse 'warning'
-5. **Don't log sensitive data** - Never log passwords, full credit card numbers, PII
-6. **Be consistent with entity types** - Use snake_case: `booking`, `customer`, `payment`
-7. **Test audit logging** - Include audit trail verification in integration tests
+1. **Always log entity changes** - Create, update, delete operations
+   on business entities
+2. **Include old/new values** - For update operations, capture what
+   changed
+3. **Capture request context** - IP address, user agent, request ID
+   when available
+4. **Use appropriate severity** - Don't overuse 'critical' or underuse
+   'warning'
+5. **Don't log sensitive data** - Never log passwords, full credit
+   card numbers, PII
+6. **Be consistent with entity types** - Use snake_case: `booking`,
+   `customer`, `payment`
+7. **Test audit logging** - Include audit trail verification in
+   integration tests
 
 ---
 

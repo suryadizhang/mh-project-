@@ -24,7 +24,7 @@ export const useApi = <T = any>() => {
 
     try {
       const { method = 'GET', headers = {}, body } = options;
-      
+
       const config: RequestInit = {
         method,
         headers: {
@@ -38,13 +38,13 @@ export const useApi = <T = any>() => {
       }
 
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       setState({
         data,
         error: null,
@@ -53,7 +53,8 @@ export const useApi = <T = any>() => {
 
       return data;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+      const errorMessage =
+        error instanceof Error ? error.message : 'An error occurred';
       setState({
         data: null,
         error: errorMessage,
@@ -63,17 +64,29 @@ export const useApi = <T = any>() => {
     }
   }, []);
 
-  const get = useCallback((url: string, headers?: Record<string, string>) => 
-    request(url, { method: 'GET', headers }), [request]);
+  const get = useCallback(
+    (url: string, headers?: Record<string, string>) =>
+      request(url, { method: 'GET', headers }),
+    [request]
+  );
 
-  const post = useCallback((url: string, body?: any, headers?: Record<string, string>) => 
-    request(url, { method: 'POST', body, headers }), [request]);
+  const post = useCallback(
+    (url: string, body?: any, headers?: Record<string, string>) =>
+      request(url, { method: 'POST', body, headers }),
+    [request]
+  );
 
-  const put = useCallback((url: string, body?: any, headers?: Record<string, string>) => 
-    request(url, { method: 'PUT', body, headers }), [request]);
+  const put = useCallback(
+    (url: string, body?: any, headers?: Record<string, string>) =>
+      request(url, { method: 'PUT', body, headers }),
+    [request]
+  );
 
-  const del = useCallback((url: string, headers?: Record<string, string>) => 
-    request(url, { method: 'DELETE', headers }), [request]);
+  const del = useCallback(
+    (url: string, headers?: Record<string, string>) =>
+      request(url, { method: 'DELETE', headers }),
+    [request]
+  );
 
   return {
     ...state,

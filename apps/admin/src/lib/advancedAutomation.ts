@@ -4,28 +4,28 @@
 
 // 1. Google My Business Post Generator
 export interface GMBPost {
-  id: string
-  title: string
-  content: string
-  cta: string
-  location: string
-  eventType?: string
-  image?: string
-  publishDate: Date
-  status: 'draft' | 'scheduled' | 'published'
+  id: string;
+  title: string;
+  content: string;
+  cta: string;
+  location: string;
+  eventType?: string;
+  image?: string;
+  publishDate: Date;
+  status: 'draft' | 'scheduled' | 'published';
   engagement?: {
-    views: number
-    clicks: number
-    calls: number
-  }
+    views: number;
+    clicks: number;
+    calls: number;
+  };
 }
 
 export class GMBPostManager {
-  private posts: GMBPost[] = []
+  private posts: GMBPost[] = [];
 
   generateWeeklyPosts(location: string): GMBPost[] {
-    const baseDate = new Date()
-    const weeklyPosts: GMBPost[] = []
+    const baseDate = new Date();
+    const weeklyPosts: GMBPost[] = [];
 
     // Weekly post templates with location-specific content
     const postTemplates = [
@@ -33,33 +33,33 @@ export class GMBPostManager {
         title: `Fresh ${location} Hibachi Experience!`,
         content: `🔥 Experience authentic Japanese hibachi cuisine in ${location}! Watch our skilled chefs create culinary magic right at your table. Fresh ingredients, stunning knife work, and unforgettable flavors await you.`,
         cta: 'Book Your Table Now',
-        eventType: 'dining'
+        eventType: 'dining',
       },
       {
         title: `${location}'s Premier Private Hibachi Events`,
         content: `🎉 Transform your special occasion into an extraordinary experience! Our private hibachi chefs bring the restaurant experience to your ${location} home or venue. Perfect for birthdays, anniversaries, and celebrations.`,
         cta: 'Schedule Private Event',
-        eventType: 'private'
+        eventType: 'private',
       },
       {
         title: `Lunch Special Alert - ${location}`,
         content: `🍱 Beat the lunch rush with our express hibachi lunch menu in ${location}! Fresh sushi, hibachi bowls, and chef specials available 11:30 AM - 2:30 PM. Quick service, authentic flavors.`,
         cta: 'Order Online',
-        eventType: 'lunch'
+        eventType: 'lunch',
       },
       {
         title: `Date Night Perfect in ${location}`,
         content: `💕 Looking for the perfect date night in ${location}? Our intimate hibachi tables create the perfect romantic atmosphere. Watch the culinary show while enjoying premium steaks and fresh seafood.`,
         cta: 'Reserve for Two',
-        eventType: 'romance'
+        eventType: 'romance',
       },
       {
         title: `Family Fun Hibachi in ${location}`,
         content: `👨‍👩‍👧‍👦 Create lasting memories with family hibachi dining in ${location}! Our entertaining chefs keep kids amazed while adults enjoy premium Japanese cuisine. Fun for all ages!`,
         cta: 'Book Family Table',
-        eventType: 'family'
-      }
-    ]
+        eventType: 'family',
+      },
+    ];
 
     postTemplates.forEach((template, index) => {
       const post: GMBPost = {
@@ -70,31 +70,32 @@ export class GMBPostManager {
         location,
         eventType: template.eventType,
         publishDate: new Date(baseDate.getTime() + index * 24 * 60 * 60 * 1000),
-        status: 'draft'
-      }
-      weeklyPosts.push(post)
-    })
+        status: 'draft',
+      };
+      weeklyPosts.push(post);
+    });
 
-    this.posts.push(...weeklyPosts)
-    return weeklyPosts
+    this.posts.push(...weeklyPosts);
+    return weeklyPosts;
   }
 
   schedulePost(post: GMBPost): boolean {
     try {
-      post.status = 'scheduled'
+      post.status = 'scheduled';
       // Integration with GMB API would go here
-      console.log(`Scheduled GMB post for ${post.location}: ${post.title}`)
-      return true
+      console.log(`Scheduled GMB post for ${post.location}: ${post.title}`);
+      return true;
     } catch (error) {
-      console.error('Failed to schedule GMB post:', error)
-      return false
+      console.error('Failed to schedule GMB post:', error);
+      return false;
     }
   }
 
   getScheduledPosts(location?: string): GMBPost[] {
     return this.posts.filter(
-      post => post.status === 'scheduled' && (!location || post.location === location)
-    )
+      post =>
+        post.status === 'scheduled' && (!location || post.location === location)
+    );
   }
 
   generateEventPosts(location: string, eventType: string): GMBPost[] {
@@ -103,26 +104,27 @@ export class GMBPostManager {
         {
           title: `Birthday Magic in ${location}!`,
           content: `🎂 Make birthdays unforgettable with hibachi entertainment in ${location}! Our chefs create a spectacular show while preparing fresh, delicious meals. Free birthday dessert included!`,
-          cta: 'Book Birthday Celebration'
-        }
+          cta: 'Book Birthday Celebration',
+        },
       ],
       corporate: [
         {
           title: `Corporate Events Done Right - ${location}`,
           content: `💼 Impress clients and reward teams with premium hibachi dining in ${location}. Private rooms available, group menus, and professional service for your business events.`,
-          cta: 'Plan Corporate Event'
-        }
+          cta: 'Plan Corporate Event',
+        },
       ],
       graduation: [
         {
           title: `Celebrate Graduation in ${location}!`,
           content: `🎓 Honor achievements with family hibachi dining in ${location}! Our celebration atmosphere and chef entertainment make graduation dinners truly special.`,
-          cta: 'Reserve Graduation Table'
-        }
-      ]
-    }
+          cta: 'Reserve Graduation Table',
+        },
+      ],
+    };
 
-    const templates = eventTemplates[eventType as keyof typeof eventTemplates] || []
+    const templates =
+      eventTemplates[eventType as keyof typeof eventTemplates] || [];
     return templates.map((template, index) => ({
       id: `gmb-event-${location.toLowerCase()}-${eventType}-${Date.now()}-${index}`,
       title: template.title,
@@ -131,39 +133,50 @@ export class GMBPostManager {
       location,
       eventType,
       publishDate: new Date(),
-      status: 'draft' as const
-    }))
+      status: 'draft' as const,
+    }));
   }
 
   getPerformanceMetrics(location: string): Record<string, number> {
-    const locationPosts = this.posts.filter(post => post.location === location)
+    const locationPosts = this.posts.filter(post => post.location === location);
 
     return {
       totalPosts: locationPosts.length,
-      scheduledPosts: locationPosts.filter(p => p.status === 'scheduled').length,
-      publishedPosts: locationPosts.filter(p => p.status === 'published').length,
-      totalViews: locationPosts.reduce((sum, post) => sum + (post.engagement?.views || 0), 0),
-      totalClicks: locationPosts.reduce((sum, post) => sum + (post.engagement?.clicks || 0), 0),
-      totalCalls: locationPosts.reduce((sum, post) => sum + (post.engagement?.calls || 0), 0)
-    }
+      scheduledPosts: locationPosts.filter(p => p.status === 'scheduled')
+        .length,
+      publishedPosts: locationPosts.filter(p => p.status === 'published')
+        .length,
+      totalViews: locationPosts.reduce(
+        (sum, post) => sum + (post.engagement?.views || 0),
+        0
+      ),
+      totalClicks: locationPosts.reduce(
+        (sum, post) => sum + (post.engagement?.clicks || 0),
+        0
+      ),
+      totalCalls: locationPosts.reduce(
+        (sum, post) => sum + (post.engagement?.calls || 0),
+        0
+      ),
+    };
   }
 }
 
 // 2. Directory Submission Manager
 export interface DirectoryListing {
-  id: string
-  name: string
-  url: string
-  category: string
-  location: string
-  priority: number
-  submissionDate?: Date
-  status: 'pending' | 'submitted' | 'verified' | 'rejected'
-  contactEmail?: string
+  id: string;
+  name: string;
+  url: string;
+  category: string;
+  location: string;
+  priority: number;
+  submissionDate?: Date;
+  status: 'pending' | 'submitted' | 'verified' | 'rejected';
+  contactEmail?: string;
   loginCredentials?: {
-    username: string
-    password: string
-  }
+    username: string;
+    password: string;
+  };
 }
 
 export class DirectoryManager {
@@ -175,7 +188,7 @@ export class DirectoryManager {
       category: 'Reviews',
       location: '',
       priority: 1,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'google',
@@ -184,7 +197,7 @@ export class DirectoryManager {
       category: 'Maps',
       location: '',
       priority: 1,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'tripadvisor',
@@ -193,7 +206,7 @@ export class DirectoryManager {
       category: 'Travel',
       location: '',
       priority: 2,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'foursquare',
@@ -202,7 +215,7 @@ export class DirectoryManager {
       category: 'Local',
       location: '',
       priority: 2,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'facebook',
@@ -211,7 +224,7 @@ export class DirectoryManager {
       category: 'Social',
       location: '',
       priority: 1,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'nextdoor',
@@ -220,7 +233,7 @@ export class DirectoryManager {
       category: 'Neighborhood',
       location: '',
       priority: 3,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'yellowpages',
@@ -229,7 +242,7 @@ export class DirectoryManager {
       category: 'Directory',
       location: '',
       priority: 2,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'whitepages',
@@ -238,7 +251,7 @@ export class DirectoryManager {
       category: 'Directory',
       location: '',
       priority: 3,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'opentable',
@@ -247,7 +260,7 @@ export class DirectoryManager {
       category: 'Restaurant',
       location: '',
       priority: 1,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'grubhub',
@@ -256,7 +269,7 @@ export class DirectoryManager {
       category: 'Delivery',
       location: '',
       priority: 2,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'doordash',
@@ -265,7 +278,7 @@ export class DirectoryManager {
       category: 'Delivery',
       location: '',
       priority: 2,
-      status: 'pending'
+      status: 'pending',
     },
     {
       id: 'ubereats',
@@ -274,64 +287,66 @@ export class DirectoryManager {
       category: 'Delivery',
       location: '',
       priority: 2,
-      status: 'pending'
-    }
-  ]
+      status: 'pending',
+    },
+  ];
 
   getDirectoriesForLocation(location: string): DirectoryListing[] {
     return this.directories.map(dir => ({
       ...dir,
       location,
-      status: 'pending' as const
-    }))
+      status: 'pending' as const,
+    }));
   }
 
   submitToDirectory(directoryId: string, location: string): boolean {
     try {
-      const directory = this.directories.find(d => d.id === directoryId)
-      if (!directory) return false
+      const directory = this.directories.find(d => d.id === directoryId);
+      if (!directory) return false;
 
       // Submission logic would go here
-      console.log(`Submitting ${location} to ${directory.name}`)
+      console.log(`Submitting ${location} to ${directory.name}`);
 
-      directory.location = location
-      directory.status = 'submitted'
-      directory.submissionDate = new Date()
+      directory.location = location;
+      directory.status = 'submitted';
+      directory.submissionDate = new Date();
 
-      return true
+      return true;
     } catch (error) {
-      console.error(`Failed to submit to directory ${directoryId}:`, error)
-      return false
+      console.error(`Failed to submit to directory ${directoryId}:`, error);
+      return false;
     }
   }
 
   getSubmissionStatus(location: string): Record<string, string> {
-    const locationDirectories = this.directories.filter(d => d.location === location)
-    const statusMap: Record<string, string> = {}
+    const locationDirectories = this.directories.filter(
+      d => d.location === location
+    );
+    const statusMap: Record<string, string> = {};
 
     locationDirectories.forEach(dir => {
-      statusMap[dir.name] = dir.status
-    })
+      statusMap[dir.name] = dir.status;
+    });
 
-    return statusMap
+    return statusMap;
   }
 }
 
 // 3. Local Citation Builder
 export interface Citation {
-  id: string
-  businessName: string
-  address: string
-  phone: string
-  website: string
-  location: string
-  source: string
-  status: 'active' | 'pending' | 'inactive'
-  lastChecked: Date
+  id: string;
+  businessName: string;
+  address: string;
+  phone: string;
+  website: string;
+  location: string;
+  source: string;
+  status: 'active' | 'pending' | 'inactive';
+  lastChecked: Date;
 }
 
 export class CitationBuilder {
-  private citations: Citation[] = []
+  private citations: Citation[] = [];
 
   buildCitation(location: string): Citation {
     const citation: Citation = {
@@ -343,11 +358,11 @@ export class CitationBuilder {
       location,
       source: 'automated',
       status: 'pending',
-      lastChecked: new Date()
-    }
+      lastChecked: new Date(),
+    };
 
-    this.citations.push(citation)
-    return citation
+    this.citations.push(citation);
+    return citation;
   }
 
   private getLocationAddress(location: string): string {
@@ -360,84 +375,91 @@ export class CitationBuilder {
       'Santa Clara': '987 Homestead Rd, Santa Clara, CA 95051',
       Sunnyvale: '147 Murphy Ave, Sunnyvale, CA 94086',
       Sacramento: '258 K St, Sacramento, CA 95814',
-      Fremont: '369 Fremont Blvd, Fremont, CA 94536'
-    }
-    return addresses[location] || `123 Main St, ${location}, CA`
+      Fremont: '369 Fremont Blvd, Fremont, CA 94536',
+    };
+    return addresses[location] || `123 Main St, ${location}, CA`;
   }
 
   private getLocationPhone(location: string): string {
     // Generate consistent phone numbers for each location
-    const basePhone = '(555) 123-'
-    const locationCode = location.length.toString().padStart(4, '0')
-    return basePhone + locationCode
+    const basePhone = '(555) 123-';
+    const locationCode = location.length.toString().padStart(4, '0');
+    return basePhone + locationCode;
   }
 
   getCitationsForLocation(location: string): Citation[] {
-    return this.citations.filter(c => c.location === location)
+    return this.citations.filter(c => c.location === location);
   }
 
   validateCitations(location: string): Record<string, boolean> {
-    const locationCitations = this.getCitationsForLocation(location)
-    const validationResults: Record<string, boolean> = {}
+    const locationCitations = this.getCitationsForLocation(location);
+    const validationResults: Record<string, boolean> = {};
 
     locationCitations.forEach(citation => {
       // Citation validation logic would go here
       const isValid =
-        citation.businessName.length > 0 && citation.address.length > 0 && citation.phone.length > 0
-      validationResults[citation.id] = isValid
-    })
+        citation.businessName.length > 0 &&
+        citation.address.length > 0 &&
+        citation.phone.length > 0;
+      validationResults[citation.id] = isValid;
+    });
 
-    return validationResults
+    return validationResults;
   }
 }
 
 // 4. Review Management System
 export interface ReviewResponse {
-  id: string
-  reviewId: string
-  platform: string
-  response: string
-  tone: 'professional' | 'friendly' | 'grateful'
-  autoGenerated: boolean
-  location: string
-  createdAt: Date
+  id: string;
+  reviewId: string;
+  platform: string;
+  response: string;
+  tone: 'professional' | 'friendly' | 'grateful';
+  autoGenerated: boolean;
+  location: string;
+  createdAt: Date;
 }
 
 export class ReviewManager {
-  private responses: ReviewResponse[] = []
+  private responses: ReviewResponse[] = [];
   private responseTemplates = {
     positive: [
       "Thank you so much for the wonderful review! We're thrilled you enjoyed your hibachi experience with us. We look forward to serving you again soon!",
       "We're delighted to hear about your great experience! Your feedback means the world to our team. Thank you for choosing us!",
-      "Thank you for taking the time to share your positive experience! We're so happy we could make your visit special."
+      "Thank you for taking the time to share your positive experience! We're so happy we could make your visit special.",
     ],
     neutral: [
       "Thank you for your feedback! We appreciate you taking the time to share your experience with us. We're always working to improve and hope to see you again soon.",
-      "We appreciate your honest feedback and are glad you visited us. We'd love the opportunity to provide you with an even better experience next time!"
+      "We appreciate your honest feedback and are glad you visited us. We'd love the opportunity to provide you with an even better experience next time!",
     ],
     negative: [
       'Thank you for bringing this to our attention. We sincerely apologize for falling short of your expectations. Please contact us directly so we can make this right.',
       "We're sorry to hear about your experience and appreciate you taking the time to provide feedback. We'd like to discuss this further - please reach out to us directly.",
-      "Your feedback is important to us, and we apologize for the disappointing experience. We'd appreciate the chance to speak with you directly to resolve this matter."
-    ]
-  }
+      "Your feedback is important to us, and we apologize for the disappointing experience. We'd appreciate the chance to speak with you directly to resolve this matter.",
+    ],
+  };
 
-  generateResponse(reviewRating: number, reviewText: string, location: string): ReviewResponse {
-    let tone: 'professional' | 'friendly' | 'grateful' = 'professional'
-    let templates: string[] = []
+  generateResponse(
+    reviewRating: number,
+    reviewText: string,
+    location: string
+  ): ReviewResponse {
+    let tone: 'professional' | 'friendly' | 'grateful' = 'professional';
+    let templates: string[] = [];
 
     if (reviewRating >= 4) {
-      templates = this.responseTemplates.positive
-      tone = 'grateful'
+      templates = this.responseTemplates.positive;
+      tone = 'grateful';
     } else if (reviewRating === 3) {
-      templates = this.responseTemplates.neutral
-      tone = 'friendly'
+      templates = this.responseTemplates.neutral;
+      tone = 'friendly';
     } else {
-      templates = this.responseTemplates.negative
-      tone = 'professional'
+      templates = this.responseTemplates.negative;
+      tone = 'professional';
     }
 
-    const randomTemplate = templates[Math.floor(Math.random() * templates.length)]
+    const randomTemplate =
+      templates[Math.floor(Math.random() * templates.length)];
 
     const response: ReviewResponse = {
       id: `response-${Date.now()}`,
@@ -447,31 +469,31 @@ export class ReviewManager {
       tone,
       autoGenerated: true,
       location,
-      createdAt: new Date()
-    }
+      createdAt: new Date(),
+    };
 
-    this.responses.push(response)
-    return response
+    this.responses.push(response);
+    return response;
   }
 
   getResponsesForLocation(location: string): ReviewResponse[] {
-    return this.responses.filter(r => r.location === location)
+    return this.responses.filter(r => r.location === location);
   }
 }
 
 // 5. Social Media Content Manager
 export interface SocialPost {
-  id: string
-  platform: string
-  content: string
-  hashtags: string[]
-  location: string
-  scheduledTime: Date
-  status: 'draft' | 'scheduled' | 'published'
+  id: string;
+  platform: string;
+  content: string;
+  hashtags: string[];
+  location: string;
+  scheduledTime: Date;
+  status: 'draft' | 'scheduled' | 'published';
 }
 
 export class SocialMediaManager {
-  private posts: SocialPost[] = []
+  private posts: SocialPost[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   generateInstagramCaptions(location: string, eventType: string): SocialPost[] {
@@ -483,8 +505,8 @@ export class SocialMediaManager {
           '#JapaneseCuisine',
           '#HibachiShow',
           '#FreshIngredients',
-          `#${location.replace(' ', '')}`
-        ]
+          `#${location.replace(' ', '')}`,
+        ],
       },
       {
         content: `Date night perfection in ${location} ✨ Intimate hibachi dining where every meal is a performance and every bite is memorable. Book your romantic evening!`,
@@ -493,10 +515,10 @@ export class SocialMediaManager {
           '#RomanticDining',
           '#HibachiExperience',
           `#${location.replace(' ', '')}`,
-          '#PerfectEvening'
-        ]
-      }
-    ]
+          '#PerfectEvening',
+        ],
+      },
+    ];
 
     return captions.map((caption, index) => ({
       id: `instagram-${location.toLowerCase()}-${Date.now()}-${index}`,
@@ -505,41 +527,45 @@ export class SocialMediaManager {
       hashtags: caption.hashtags,
       location,
       scheduledTime: new Date(Date.now() + index * 4 * 60 * 60 * 1000), // 4 hours apart
-      status: 'draft' as const
-    }))
+      status: 'draft' as const,
+    }));
   }
 
   generateFacebookPosts(location: string): SocialPost[] {
     const posts = [
       `Experience the art of hibachi dining in ${location}! Our skilled chefs combine fresh ingredients with entertaining culinary skills to create an unforgettable dining experience. Book your table today!`,
-      `Looking for the perfect venue for your next celebration in ${location}? Our hibachi tables accommodate groups of all sizes, and our chefs love putting on a show for special occasions!`
-    ]
+      `Looking for the perfect venue for your next celebration in ${location}? Our hibachi tables accommodate groups of all sizes, and our chefs love putting on a show for special occasions!`,
+    ];
 
     return posts.map((content, index) => ({
       id: `facebook-${location.toLowerCase()}-${Date.now()}-${index}`,
       platform: 'facebook',
       content,
-      hashtags: [`#MyHibachi${location.replace(' ', '')}`, '#HibachiDining', '#JapaneseCuisine'],
+      hashtags: [
+        `#MyHibachi${location.replace(' ', '')}`,
+        '#HibachiDining',
+        '#JapaneseCuisine',
+      ],
       location,
       scheduledTime: new Date(Date.now() + index * 6 * 60 * 60 * 1000), // 6 hours apart
-      status: 'draft' as const
-    }))
+      status: 'draft' as const,
+    }));
   }
 }
 
 // 6. SEO Monitoring System
 export interface SEOMetrics {
-  keyword: string
-  location: string
-  position: number
-  searchVolume: number
-  difficulty: number
-  lastChecked: Date
-  trend: 'up' | 'down' | 'stable'
+  keyword: string;
+  location: string;
+  position: number;
+  searchVolume: number;
+  difficulty: number;
+  lastChecked: Date;
+  trend: 'up' | 'down' | 'stable';
 }
 
 export class SEOMonitor {
-  private keywords: SEOMetrics[] = []
+  private keywords: SEOMetrics[] = [];
 
   initializeKeywordTracking(location: string): SEOMetrics[] {
     const baseKeywords = [
@@ -550,8 +576,8 @@ export class SEOMonitor {
       'hibachi catering',
       'japanese steakhouse',
       'hibachi grill',
-      'teppanyaki restaurant'
-    ]
+      'teppanyaki restaurant',
+    ];
 
     const locationKeywords = baseKeywords.map(keyword => ({
       keyword: `${keyword} ${location}`,
@@ -560,93 +586,102 @@ export class SEOMonitor {
       searchVolume: Math.floor(Math.random() * 1000) + 100,
       difficulty: Math.floor(Math.random() * 100) + 1,
       lastChecked: new Date(),
-      trend: 'stable' as const
-    }))
+      trend: 'stable' as const,
+    }));
 
-    this.keywords.push(...locationKeywords)
-    return locationKeywords
+    this.keywords.push(...locationKeywords);
+    return locationKeywords;
   }
 
   checkKeywordPositions(location: string): Record<string, number> {
-    const locationKeywords = this.keywords.filter(k => k.location === location)
-    const positions: Record<string, number> = {}
+    const locationKeywords = this.keywords.filter(k => k.location === location);
+    const positions: Record<string, number> = {};
 
     locationKeywords.forEach(keyword => {
       // Simulate position checking
-      const newPosition = Math.max(1, keyword.position + (Math.random() * 6 - 3))
-      keyword.position = Math.floor(newPosition)
-      keyword.lastChecked = new Date()
+      const newPosition = Math.max(
+        1,
+        keyword.position + (Math.random() * 6 - 3)
+      );
+      keyword.position = Math.floor(newPosition);
+      keyword.lastChecked = new Date();
 
       // Update trend
-      if (newPosition < keyword.position - 2) keyword.trend = 'up'
-      else if (newPosition > keyword.position + 2) keyword.trend = 'down'
-      else keyword.trend = 'stable'
+      if (newPosition < keyword.position - 2) keyword.trend = 'up';
+      else if (newPosition > keyword.position + 2) keyword.trend = 'down';
+      else keyword.trend = 'stable';
 
-      positions[keyword.keyword] = keyword.position
-    })
+      positions[keyword.keyword] = keyword.position;
+    });
 
-    return positions
+    return positions;
   }
 
   getTopKeywords(location: string, limit: number = 10): SEOMetrics[] {
     return this.keywords
       .filter(k => k.location === location)
       .sort((a, b) => a.position - b.position)
-      .slice(0, limit)
+      .slice(0, limit);
   }
 
   getSEOSummary(location: string): Record<string, unknown> {
-    const locationKeywords = this.keywords.filter(k => k.location === location)
+    const locationKeywords = this.keywords.filter(k => k.location === location);
 
     return {
       totalKeywords: locationKeywords.length,
       averagePosition:
-        locationKeywords.reduce((sum, k) => sum + k.position, 0) / locationKeywords.length,
+        locationKeywords.reduce((sum, k) => sum + k.position, 0) /
+        locationKeywords.length,
       topTenKeywords: locationKeywords.filter(k => k.position <= 10).length,
       improvingKeywords: locationKeywords.filter(k => k.trend === 'up').length,
-      decliningKeywords: locationKeywords.filter(k => k.trend === 'down').length
-    }
+      decliningKeywords: locationKeywords.filter(k => k.trend === 'down')
+        .length,
+    };
   }
 }
 
 // 7. Email Marketing Automation
 export interface EmailCampaign {
-  id: string
-  name: string
-  subject: string
-  content: string
-  location: string
-  targetAudience: string
-  scheduledDate: Date
-  status: 'draft' | 'scheduled' | 'sent'
+  id: string;
+  name: string;
+  subject: string;
+  content: string;
+  location: string;
+  targetAudience: string;
+  scheduledDate: Date;
+  status: 'draft' | 'scheduled' | 'sent';
   metrics: {
-    sent: number
-    opened: number
-    clicked: number
-    converted: number
-  }
+    sent: number;
+    opened: number;
+    clicked: number;
+    converted: number;
+  };
 }
 
 export class EmailMarketingManager {
-  private campaigns: EmailCampaign[] = []
+  private campaigns: EmailCampaign[] = [];
 
-  createLocationCampaign(location: string, campaignType: string): EmailCampaign {
+  createLocationCampaign(
+    location: string,
+    campaignType: string
+  ): EmailCampaign {
     const campaigns = {
       welcome: {
         subject: `Welcome to My Hibachi ${location} Family!`,
-        content: `Thank you for joining our hibachi family in ${location}! Get ready for exclusive offers, event invitations, and insider access to the best hibachi experience in town.`
+        content: `Thank you for joining our hibachi family in ${location}! Get ready for exclusive offers, event invitations, and insider access to the best hibachi experience in town.`,
       },
       birthday: {
         subject: `🎂 Special Birthday Offer for ${location} Diners!`,
-        content: `Celebrate your special day with us in ${location}! Enjoy complimentary birthday hibachi dessert and our famous chef entertainment. Book your birthday celebration today!`
+        content: `Celebrate your special day with us in ${location}! Enjoy complimentary birthday hibachi dessert and our famous chef entertainment. Book your birthday celebration today!`,
       },
       holiday: {
         subject: `Holiday Celebrations at My Hibachi ${location}`,
-        content: `Make your holidays memorable with family hibachi dining in ${location}. Special holiday menus, group accommodations, and festive atmosphere await!`
-      }
-    }
+        content: `Make your holidays memorable with family hibachi dining in ${location}. Special holiday menus, group accommodations, and festive atmosphere await!`,
+      },
+    };
 
-    const template = campaigns[campaignType as keyof typeof campaigns] || campaigns.welcome
+    const template =
+      campaigns[campaignType as keyof typeof campaigns] || campaigns.welcome;
 
     const campaign: EmailCampaign = {
       id: `email-${location.toLowerCase()}-${campaignType}-${Date.now()}`,
@@ -661,24 +696,24 @@ export class EmailMarketingManager {
         sent: 0,
         opened: 0,
         clicked: 0,
-        converted: 0
-      }
-    }
+        converted: 0,
+      },
+    };
 
-    this.campaigns.push(campaign)
-    return campaign
+    this.campaigns.push(campaign);
+    return campaign;
   }
 
   getCampaignsForLocation(location: string): EmailCampaign[] {
-    return this.campaigns.filter(c => c.location === location)
+    return this.campaigns.filter(c => c.location === location);
   }
 
   scheduleCampaign(campaignId: string): boolean {
-    const campaign = this.campaigns.find(c => c.id === campaignId)
-    if (!campaign) return false
+    const campaign = this.campaigns.find(c => c.id === campaignId);
+    if (!campaign) return false;
 
-    campaign.status = 'scheduled'
-    return true
+    campaign.status = 'scheduled';
+    return true;
   }
 }
 
@@ -693,22 +728,22 @@ export class AnalyticsManager {
         averagePosition: 15.3,
         topTenKeywords: 8,
         improvingKeywords: 12,
-        decliningKeywords: 3
+        decliningKeywords: 3,
       },
       localSEOMetrics: {
         gmbViews: 1250,
         gmbClicks: 89,
         directionsRequests: 45,
         phoneCallClicks: 23,
-        websiteClicks: 78
+        websiteClicks: 78,
       },
       contentPerformance: {
         blogViews: 890,
         socialEngagement: 234,
         emailOpenRate: 0.24,
-        emailClickRate: 0.08
-      }
-    }
+        emailClickRate: 0.08,
+      },
+    };
   }
 
   getLocationAnalytics(location: string): Record<string, unknown> {
@@ -718,50 +753,50 @@ export class AnalyticsManager {
         organicTraffic: Math.floor(Math.random() * 2000) + 500,
         localSearches: Math.floor(Math.random() * 1500) + 300,
         conversions: Math.floor(Math.random() * 50) + 10,
-        revenue: Math.floor(Math.random() * 5000) + 1000
-      }
-    }
+        revenue: Math.floor(Math.random() * 5000) + 1000,
+      },
+    };
   }
 }
 
 // 9. Master Automation Manager
 export class AutomationManager {
-  private gmbManager: GMBPostManager
-  private directoryManager: DirectoryManager
-  private citationBuilder: CitationBuilder
-  private reviewManager: ReviewManager
-  private socialManager: SocialMediaManager
-  private seoMonitor: SEOMonitor
-  private emailManager: EmailMarketingManager
-  private analyticsManager: AnalyticsManager
+  private gmbManager: GMBPostManager;
+  private directoryManager: DirectoryManager;
+  private citationBuilder: CitationBuilder;
+  private reviewManager: ReviewManager;
+  private socialManager: SocialMediaManager;
+  private seoMonitor: SEOMonitor;
+  private emailManager: EmailMarketingManager;
+  private analyticsManager: AnalyticsManager;
 
   constructor() {
-    this.gmbManager = new GMBPostManager()
-    this.directoryManager = new DirectoryManager()
-    this.citationBuilder = new CitationBuilder()
-    this.reviewManager = new ReviewManager()
-    this.socialManager = new SocialMediaManager()
-    this.seoMonitor = new SEOMonitor()
-    this.emailManager = new EmailMarketingManager()
-    this.analyticsManager = new AnalyticsManager()
+    this.gmbManager = new GMBPostManager();
+    this.directoryManager = new DirectoryManager();
+    this.citationBuilder = new CitationBuilder();
+    this.reviewManager = new ReviewManager();
+    this.socialManager = new SocialMediaManager();
+    this.seoMonitor = new SEOMonitor();
+    this.emailManager = new EmailMarketingManager();
+    this.analyticsManager = new AnalyticsManager();
   }
 
   runFullAutomation(location: string): Record<string, unknown> {
     // Generate weekly GMB posts
-    const gmbPosts = this.gmbManager.generateWeeklyPosts(location)
+    const gmbPosts = this.gmbManager.generateWeeklyPosts(location);
 
     // Schedule social media content
-    this.socialManager.generateInstagramCaptions(location, 'Birthday')
-    this.socialManager.generateFacebookPosts(location)
+    this.socialManager.generateInstagramCaptions(location, 'Birthday');
+    this.socialManager.generateFacebookPosts(location);
 
     // Initialize SEO monitoring
-    this.seoMonitor.initializeKeywordTracking(location)
+    this.seoMonitor.initializeKeywordTracking(location);
 
     // Create welcome email campaign
-    this.emailManager.createLocationCampaign(location, 'welcome')
+    this.emailManager.createLocationCampaign(location, 'welcome');
 
     // Generate analytics report
-    const analyticsReport = this.analyticsManager.generateSEOReport(location)
+    const analyticsReport = this.analyticsManager.generateSEOReport(location);
 
     return {
       location,
@@ -770,8 +805,8 @@ export class AutomationManager {
       keywordTrackingInitialized: true,
       emailCampaignCreated: true,
       socialContentScheduled: true,
-      analyticsReport
-    }
+      analyticsReport,
+    };
   }
 
   getAutomationDashboard(): Record<string, unknown> {
@@ -781,7 +816,7 @@ export class AutomationManager {
       activeKeywords: 216,
       emailCampaigns: 18,
       socialPosts: 89,
-      automationStatus: 'active'
-    }
+      automationStatus: 'active',
+    };
   }
 }

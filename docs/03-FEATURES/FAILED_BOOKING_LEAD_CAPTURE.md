@@ -1,13 +1,20 @@
 # Failed Booking Lead Capture Implementation ✅
 
 ## Overview
-Automatically captures lead information when booking attempts fail due to slot unavailability, date conflicts, or system errors. This ensures no potential customer is lost and enables proactive follow-up with alternative options.
+
+Automatically captures lead information when booking attempts fail due
+to slot unavailability, date conflicts, or system errors. This ensures
+no potential customer is lost and enables proactive follow-up with
+alternative options.
 
 ## Implementation Date
+
 October 26, 2025
 
 ## Business Value
-- **Revenue Recovery**: Convert failed bookings into sales opportunities
+
+- **Revenue Recovery**: Convert failed bookings into sales
+  opportunities
 - **Customer Satisfaction**: Proactive outreach shows we care
 - **Data Intelligence**: Track high-demand dates/times
 - **CRM Pipeline**: Qualified leads with clear intent to book
@@ -17,10 +24,14 @@ October 26, 2025
 ## Implementation Details
 
 ### File Modified
-**File**: `apps/customer/src/components/booking/BookingFormContainer.tsx`
+
+**File**:
+`apps/customer/src/components/booking/BookingFormContainer.tsx`
 
 ### Backend Update
+
 **File**: `apps/backend/src/api/app/models/lead_newsletter.py`
+
 - Added `BOOKING_FAILED = "booking_failed"` to `LeadSource` enum
 
 ---
@@ -32,25 +43,32 @@ October 26, 2025
 The system now detects three types of booking failures:
 
 #### A. Slot Unavailable
+
 **Trigger**: Time slot booked by another customer during submission
-**Detection**: Error message contains "slot", "booked", "unavailable", or "time"
-**User Message**: 
-> "Sorry, this time slot is no longer available. We've saved your information and will contact you with alternative times."
+**Detection**: Error message contains "slot", "booked", "unavailable",
+or "time" **User Message**:
+
+> "Sorry, this time slot is no longer available. We've saved your
+> information and will contact you with alternative times."
 
 **Lead Notes**: `slot_unavailable`
 
-#### B. Date Unavailable  
-**Trigger**: Entire date is fully booked
-**Detection**: Error message contains "date"
-**User Message**:
-> "Sorry, this date is no longer available. We've saved your information and will contact you with alternative dates."
+#### B. Date Unavailable
+
+**Trigger**: Entire date is fully booked **Detection**: Error message
+contains "date" **User Message**:
+
+> "Sorry, this date is no longer available. We've saved your
+> information and will contact you with alternative dates."
 
 **Lead Notes**: `date_unavailable`
 
 #### C. General Booking Failure
-**Trigger**: Any other API error or exception
-**User Message**:
-> "Sorry, there was an error submitting your booking. Please try again or contact us directly."
+
+**Trigger**: Any other API error or exception **User Message**:
+
+> "Sorry, there was an error submitting your booking. Please try again
+> or contact us directly."
 
 **Lead Notes**: `booking_failed` or `booking_error`
 
@@ -58,18 +76,21 @@ The system now detects three types of booking failures:
 
 ### 2. Lead Capture Function ✅
 
-Created `captureFailedBookingLead()` function with the following capabilities:
+Created `captureFailedBookingLead()` function with the following
+capabilities:
 
 #### Function Signature
+
 ```typescript
 const captureFailedBookingLead = async (
   bookingData: BookingFormData,
   failureReason: string,
   errorDetails?: unknown
-) => Promise<void>
+) => Promise<void>;
 ```
 
 #### Lead Data Structure
+
 ```typescript
 {
   source: 'BOOKING_FAILED',
@@ -80,7 +101,7 @@ const captureFailedBookingLead = async (
       verified: false
     },
     {
-      channel: 'EMAIL', 
+      channel: 'EMAIL',
       handle_or_address: email,
       verified: false
     }
@@ -106,10 +127,12 @@ const captureFailedBookingLead = async (
 ## Captured Information
 
 ### Customer Contact (Dual Channel)
+
 - **SMS**: Phone number for quick text follow-up
 - **EMAIL**: Email address for detailed alternatives
 
 ### Event Details
+
 - **Preferred Date**: Exact date customer wanted
 - **Preferred Time**: Time slot customer selected
 - **Guest Count**: Number of attendees
@@ -117,12 +140,15 @@ const captureFailedBookingLead = async (
 - **ZIP Code**: For service area validation
 
 ### Context Data
+
 - **Service Type**: Always "hibachi_catering"
 - **Estimated Budget**: Calculated as guest_count × $65
-- **Failure Reason**: slot_unavailable | date_unavailable | booking_failed | booking_error
+- **Failure Reason**: slot_unavailable | date_unavailable |
+  booking_failed | booking_error
 - **Error Details**: Technical error message (for debugging)
 
 ### Marketing Tracking
+
 - **UTM Source**: website
 - **UTM Medium**: booking_form
 - **UTM Campaign**: failed_booking_recovery
@@ -132,12 +158,14 @@ const captureFailedBookingLead = async (
 ## User Experience Flow
 
 ### Normal Booking Flow
+
 1. User fills booking form (contact info, event details, addresses)
 2. Reviews and confirms booking agreement
 3. Submits booking
 4. ✅ **Success**: Redirected to `/booking-success`
 
 ### Failed Booking Flow (NEW)
+
 1. User fills booking form (contact info, event details, addresses)
 2. Reviews and confirms booking agreement
 3. Submits booking
@@ -154,24 +182,30 @@ const captureFailedBookingLead = async (
 ## Error Detection Logic
 
 ### Implementation
+
 ```typescript
-const errorMessage = typeof errorData === 'object' && errorData !== null && 'detail' in errorData
-  ? String(errorData.detail)
-  : 'Unknown error';
+const errorMessage =
+  typeof errorData === 'object' &&
+  errorData !== null &&
+  'detail' in errorData
+    ? String(errorData.detail)
+    : 'Unknown error';
 
 let failureReason = 'booking_failed';
 let userMessage = 'Sorry, there was an error...';
 
 // Check for slot/time issues
-if (errorMessage.toLowerCase().includes('slot') ||
-    errorMessage.toLowerCase().includes('booked') ||
-    errorMessage.toLowerCase().includes('unavailable') ||
-    errorMessage.toLowerCase().includes('time')) {
+if (
+  errorMessage.toLowerCase().includes('slot') ||
+  errorMessage.toLowerCase().includes('booked') ||
+  errorMessage.toLowerCase().includes('unavailable') ||
+  errorMessage.toLowerCase().includes('time')
+) {
   failureReason = 'slot_unavailable';
   userMessage = 'Sorry, this time slot is no longer available...';
 }
 
-// Check for date issues  
+// Check for date issues
 else if (errorMessage.toLowerCase().includes('date')) {
   failureReason = 'date_unavailable';
   userMessage = 'Sorry, this date is no longer available...';
@@ -181,6 +215,7 @@ await captureFailedBookingLead(formData, failureReason, errorData);
 ```
 
 ### Keywords Monitored
+
 - **Slot issues**: "slot", "booked", "unavailable", "time"
 - **Date issues**: "date"
 
@@ -189,9 +224,11 @@ await captureFailedBookingLead(formData, failureReason, errorData);
 ## Non-Blocking Design
 
 ### Key Principle
+
 Lead capture NEVER disrupts user experience
 
 ### Implementation
+
 ```typescript
 try {
   // Attempt lead capture
@@ -203,6 +240,7 @@ try {
 ```
 
 ### Benefits
+
 - If lead API fails, user still sees error message
 - Booking failure alert always shown
 - No double-errors if lead capture fails
@@ -213,11 +251,13 @@ try {
 ## Testing Checklist
 
 ### Setup
+
 - [ ] Ensure backend is running
 - [ ] Verify `/api/leads` endpoint is accessible
 - [ ] Check BOOKING_FAILED is in LeadSource enum
 
 ### Slot Unavailable Scenario
+
 - [ ] Fill booking form completely
 - [ ] Select a date and time
 - [ ] Have another user book the same slot simultaneously
@@ -228,18 +268,22 @@ try {
 - [ ] Verify both SMS and EMAIL contacts captured
 
 ### Date Unavailable Scenario
+
 - [ ] Fill booking form for a fully booked date
 - [ ] Submit booking
 - [ ] Verify error message mentions date unavailability
 - [ ] Check lead captured with 'date_unavailable' reason
 
 ### General Failure Scenario
+
 - [ ] Stop backend API
 - [ ] Fill and submit booking form
 - [ ] Verify generic error message shown
-- [ ] Restart backend and check if lead was queued (if retry logic exists)
+- [ ] Restart backend and check if lead was queued (if retry logic
+      exists)
 
 ### Data Verification
+
 - [ ] Query leads table for BOOKING_FAILED source
 - [ ] Verify all contact information present
 - [ ] Check preferred_date and preferred_time in context
@@ -252,13 +296,16 @@ try {
 ## Backend Lead Processing
 
 ### Automatic Scoring
+
 Leads from failed bookings should score higher because:
+
 - ✅ **High Intent**: Customer already filled complete booking form
 - ✅ **Immediate Need**: Customer has specific date/time in mind
 - ✅ **Budget Confirmed**: Guest count indicates budget capacity
 - ✅ **Location Verified**: Address provided, service area confirmed
 
 ### Recommended Actions
+
 1. **Immediate Alert**: Notify sales team within 5 minutes
 2. **Quick Response**: Call/text within 1 hour
 3. **Alternative Offers**: Provide 3-5 nearby date/time options
@@ -271,10 +318,11 @@ Leads from failed bookings should score higher because:
 ### Response Templates
 
 #### For Slot Unavailable
+
 ```
 Hi [Name],
 
-Thanks for trying to book with My Hibachi! That time slot was just taken, 
+Thanks for trying to book with My Hibachi! That time slot was just taken,
 but we have these alternatives on [date]:
 
 • 12:00 PM - 2:00 PM (2 spots available)
@@ -290,14 +338,15 @@ Reply YES + preferred time, or call [phone].
 ```
 
 #### For Date Unavailable
+
 ```
 Hi [Name],
 
-We just got your booking request for [date]. Unfortunately, that date 
+We just got your booking request for [date]. Unfortunately, that date
 is fully booked, but we have great availability:
 
 • [date + 1 day] - All time slots open
-• [date + 2 days] - All time slots open  
+• [date + 2 days] - All time slots open
 • [next weekend] - Prime evening slots
 
 Same great hibachi experience, just a slightly different date!
@@ -308,19 +357,20 @@ Which works best for your [guest count] guests?
 ```
 
 #### For General Failure
+
 ```
 Hi [Name],
 
-We received your booking request but encountered a technical issue. 
+We received your booking request but encountered a technical issue.
 No worries - we're here to help!
 
 Your details:
 • Date: [preferred date]
-• Time: [preferred time]  
+• Time: [preferred time]
 • Guests: [guest count]
 • Location: [city, state]
 
-I'm confirming availability now. Can I give you a call at [phone] 
+I'm confirming availability now. Can I give you a call at [phone]
 to finalize your booking?
 
 - My Hibachi Team
@@ -331,21 +381,25 @@ to finalize your booking?
 ## Logging & Monitoring
 
 ### Successful Lead Capture
+
 ```
 logger.info('Failed booking lead captured successfully')
 ```
 
 ### Lead Capture Failure
+
 ```
 logger.warn('Failed to capture booking failure lead', { status: response.status })
 ```
 
 ### General Error
+
 ```
 logger.error('Error capturing failed booking lead', error as Error)
 ```
 
 ### Metrics to Track
+
 - **Daily failed bookings**: Count by reason (slot/date/error)
 - **Lead capture rate**: % of failures that generate leads
 - **Conversion rate**: % of failed booking leads that convert
@@ -357,6 +411,7 @@ logger.error('Error capturing failed booking lead', error as Error)
 ## Database Schema
 
 ### Lead Record Example
+
 ```json
 {
   "id": "uuid",
@@ -371,7 +426,7 @@ logger.error('Error capturing failed booking lead', error as Error)
       "verified": false
     },
     {
-      "channel": "EMAIL", 
+      "channel": "EMAIL",
       "handle_or_address": "customer@example.com",
       "verified": false
     }
@@ -398,12 +453,14 @@ logger.error('Error capturing failed booking lead', error as Error)
 ## Security & Privacy
 
 ### PII Handling
+
 - ✅ No PII logged to console (name, phone, email, address)
 - ✅ Error details sanitized before logging
 - ✅ Lead data encrypted at rest in database
 - ✅ HTTPS required for lead submission
 
 ### User Consent
+
 - ✅ User provided information voluntarily for booking
 - ✅ Privacy policy covers lead capture and follow-up
 - ✅ User can opt out of communications
@@ -414,16 +471,19 @@ logger.error('Error capturing failed booking lead', error as Error)
 ## Performance Considerations
 
 ### Non-Blocking Execution
+
 - Lead capture runs asynchronously
 - Does not delay error message display
 - Fails silently without blocking UI
 
 ### API Timeout
+
 - Lead submission has reasonable timeout
 - Won't hang indefinitely if backend slow
 - Retry logic can be added if needed
 
 ### Database Impact
+
 - Minimal - single INSERT operation
 - No complex queries or joins
 - Indexed fields for fast retrieval
@@ -433,39 +493,53 @@ logger.error('Error capturing failed booking lead', error as Error)
 ## Future Enhancements
 
 ### Phase 2 Ideas
-- [ ] **Automatic Alternative Suggestions**: Show available slots immediately on failure
-- [ ] **SMS Confirmation**: Send instant SMS with lead reference number
+
+- [ ] **Automatic Alternative Suggestions**: Show available slots
+      immediately on failure
+- [ ] **SMS Confirmation**: Send instant SMS with lead reference
+      number
 - [ ] **Email Follow-Up**: Automated email with calendar links
-- [ ] **Priority Booking Link**: One-click booking for alternative slots
-- [ ] **Waitlist Feature**: Automatically add to waitlist for preferred date/time
+- [ ] **Priority Booking Link**: One-click booking for alternative
+      slots
+- [ ] **Waitlist Feature**: Automatically add to waitlist for
+      preferred date/time
 - [ ] **Price Adjustment**: Offer discount for alternative dates
-- [ ] **Real-Time Availability**: Check slot availability before form submission
+- [ ] **Real-Time Availability**: Check slot availability before form
+      submission
 - [ ] **Multi-Day Suggestions**: AI suggests 3 best alternative dates
-- [ ] **Customer Portal**: Allow customer to view and modify lead preferences
+- [ ] **Customer Portal**: Allow customer to view and modify lead
+      preferences
 
 ### Phase 3 Ideas
-- [ ] **Predictive Analytics**: Predict which alternatives customer most likely to accept
+
+- [ ] **Predictive Analytics**: Predict which alternatives customer
+      most likely to accept
 - [ ] **Smart Routing**: Route high-value leads to senior sales staff
-- [ ] **A/B Testing**: Test different error messages and follow-up timing
-- [ ] **Conversion Tracking**: Full funnel from failed booking → lead → booking → payment
+- [ ] **A/B Testing**: Test different error messages and follow-up
+      timing
+- [ ] **Conversion Tracking**: Full funnel from failed booking → lead
+      → booking → payment
 
 ---
 
 ## Success Metrics
 
 ### Immediate Goals (Week 1)
+
 - ✅ 100% of failed bookings generate leads
 - ✅ All contact information captured correctly
 - ✅ Lead data structure validated
 - ✅ No performance degradation
 
 ### Short-Term Goals (Month 1)
+
 - 🎯 50%+ recovery rate (failed bookings that eventually book)
 - 🎯 <1 hour average response time to leads
 - 🎯 80%+ lead quality score (hot/warm)
 - 🎯 Customer satisfaction with follow-up process
 
 ### Long-Term Goals (Quarter 1)
+
 - 🎯 70%+ recovery rate
 - 🎯 <30 min average response time
 - 🎯 $X revenue recovered from failed bookings
@@ -475,20 +549,22 @@ logger.error('Error capturing failed booking lead', error as Error)
 
 ## Conclusion
 
-Successfully implemented comprehensive failed booking lead capture system that:
+Successfully implemented comprehensive failed booking lead capture
+system that:
 
-✅ **Detects** all booking failure scenarios
-✅ **Captures** complete customer and event information  
-✅ **Classifies** failures for targeted follow-up
-✅ **Alerts** sales team for quick response
-✅ **Preserves** user experience with contextual messaging
-✅ **Enables** proactive customer service and revenue recovery
+✅ **Detects** all booking failure scenarios ✅ **Captures** complete
+customer and event information  
+✅ **Classifies** failures for targeted follow-up ✅ **Alerts** sales
+team for quick response ✅ **Preserves** user experience with
+contextual messaging ✅ **Enables** proactive customer service and
+revenue recovery
 
 **Status**: ✅ IMPLEMENTATION COMPLETE - READY FOR TESTING
 
 **Next Actions**:
+
 1. Test all failure scenarios
-2. Train sales team on follow-up procedures  
+2. Train sales team on follow-up procedures
 3. Set up lead notification system
 4. Monitor conversion rates
 5. Refine messaging based on feedback
@@ -496,6 +572,7 @@ Successfully implemented comprehensive failed booking lead capture system that:
 ---
 
 ## Related Documentation
+
 - `LEAD_GENERATION_COMPLETE.md` - Quote and Chat lead capture
 - `COMPREHENSIVE_AUDIT_COMPLETE.md` - Full system audit
 - Backend API docs - Lead management endpoints

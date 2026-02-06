@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 
 interface ResponsiveImageProps {
-  src: string
-  alt: string
-  priority?: boolean
-  className?: string
-  fill?: boolean
-  sizes?: string
-  quality?: number
-  placeholder?: 'blur' | 'empty'
-  onLoad?: () => void
-  onError?: () => void
+  src: string;
+  alt: string;
+  priority?: boolean;
+  className?: string;
+  fill?: boolean;
+  sizes?: string;
+  quality?: number;
+  placeholder?: 'blur' | 'empty';
+  onLoad?: () => void;
+  onError?: () => void;
 }
 
 export default function ResponsiveImage({
@@ -26,50 +26,50 @@ export default function ResponsiveImage({
   quality = 85,
   placeholder = 'empty',
   onLoad,
-  onError
+  onError,
 }: ResponsiveImageProps) {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [hasError, setHasError] = useState(false)
-  const [isInView, setIsInView] = useState(priority)
-  const imgRef = useRef<HTMLDivElement>(null)
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [isInView, setIsInView] = useState(priority);
+  const imgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (priority) return
+    if (priority) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsInView(true)
-          observer.disconnect()
+          setIsInView(true);
+          observer.disconnect();
         }
       },
       {
         threshold: 0.1,
-        rootMargin: '50px 0px'
-      }
-    )
+        rootMargin: '50px 0px',
+      },
+    );
 
-    const currentRef = imgRef.current
+    const currentRef = imgRef.current;
     if (currentRef) {
-      observer.observe(currentRef)
+      observer.observe(currentRef);
     }
 
     return () => {
       if (currentRef) {
-        observer.unobserve(currentRef)
+        observer.unobserve(currentRef);
       }
-    }
-  }, [priority])
+    };
+  }, [priority]);
 
   const handleLoad = () => {
-    setIsLoaded(true)
-    onLoad?.()
-  }
+    setIsLoaded(true);
+    onLoad?.();
+  };
 
   const handleError = () => {
-    setHasError(true)
-    onError?.()
-  }
+    setHasError(true);
+    onError?.();
+  };
 
   // Determine optimal sizes based on layout
   const responsiveSizes =
@@ -81,7 +81,7 @@ export default function ResponsiveImage({
     (max-width: 1024px) 1024px,
     (max-width: 1280px) 1280px,
     1536px
-  `
+  `;
 
   return (
     <div
@@ -90,7 +90,7 @@ export default function ResponsiveImage({
       style={{
         position: fill ? 'absolute' : 'relative',
         width: fill ? '100%' : 'auto',
-        height: fill ? '100%' : 'auto'
+        height: fill ? '100%' : 'auto',
       }}
     >
       {/* Loading skeleton */}
@@ -125,7 +125,7 @@ export default function ResponsiveImage({
           onError={handleError}
           style={{
             objectFit: 'cover',
-            transition: 'opacity 0.3s ease-in-out'
+            transition: 'opacity 0.3s ease-in-out',
           }}
         />
       )}
@@ -225,5 +225,5 @@ export default function ResponsiveImage({
         }
       `}</style>
     </div>
-  )
+  );
 }

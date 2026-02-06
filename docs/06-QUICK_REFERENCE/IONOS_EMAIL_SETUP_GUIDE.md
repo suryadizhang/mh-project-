@@ -1,7 +1,8 @@
 # 📧 IONOS Email Setup Guide for MyHibachi
 
 **Service:** IONOS Business Email (smtp.ionos.com)  
-**Purpose:** Send booking confirmations, review requests, and notifications  
+**Purpose:** Send booking confirmations, review requests, and
+notifications  
 **Time to Setup:** 5 minutes
 
 ---
@@ -10,9 +11,11 @@
 
 You need **3 pieces of information** from your IONOS account:
 
-1. **Email Address** - Your business email (e.g., `bookings@myhibachichef.com`)
+1. **Email Address** - Your business email (e.g.,
+   `bookings@myhibachichef.com`)
 2. **Email Password** - The password for this email account
-3. **SMTP Settings** - Server details (usually same for all IONOS accounts)
+3. **SMTP Settings** - Server details (usually same for all IONOS
+   accounts)
 
 ---
 
@@ -30,7 +33,8 @@ You need **3 pieces of information** from your IONOS account:
    - Or go directly to: https://my.ionos.com/email
 
 3. **Find Your Email Account**
-   - Look for your business email (e.g., `bookings@myhibachichef.com`, `info@myhibachichef.com`, or `cs@myhibachichef.com`)
+   - Look for your business email (e.g., `bookings@myhibachichef.com`,
+     `info@myhibachichef.com`, or `cs@myhibachichef.com`)
    - Click on it to view settings
 
 4. **Get SMTP Settings**
@@ -43,7 +47,8 @@ You need **3 pieces of information** from your IONOS account:
      - **Encryption:** TLS/STARTTLS (port 587) or SSL (port 465)
 
 5. **Get/Reset Password**
-   - If you don't know the password, click **Change Password** or **Reset Password**
+   - If you don't know the password, click **Change Password** or
+     **Reset Password**
    - Set a new password and save it securely
 
 ---
@@ -55,13 +60,15 @@ If you use IONOS webmail:
 1. Go to: https://mail.ionos.com/
 2. Log in with your email and password
 3. If login works, that's your email password!
-4. Go to **Settings → Email Accounts → Server Settings** for SMTP details
+4. Go to **Settings → Email Accounts → Server Settings** for SMTP
+   details
 
 ---
 
 ### Option 3: Check Existing Email Client
 
-If you already have this email set up in Outlook, Apple Mail, or Thunderbird:
+If you already have this email set up in Outlook, Apple Mail, or
+Thunderbird:
 
 1. Open your email client
 2. Go to **Account Settings**
@@ -140,17 +147,17 @@ try:
     server.starttls()
     server.login(smtp_user, smtp_password)
     print('\n✅ SMTP LOGIN SUCCESSFUL!')
-    
+
     # Send test email
     msg = MIMEText('This is a test email from MyHibachi backend')
     msg['Subject'] = 'MyHibachi Test Email'
     msg['From'] = smtp_user
     msg['To'] = 'your-test-email@gmail.com'  # Your personal email
-    
+
     server.send_message(msg)
     print('✅ TEST EMAIL SENT!')
     server.quit()
-    
+
 except Exception as e:
     print(f'\n❌ ERROR: {e}')
 "
@@ -199,25 +206,30 @@ npm run dev
 ### Error: "Authentication failed"
 
 **Causes:**
+
 - Wrong password
 - Wrong email address
 - 2FA enabled (need app-specific password)
 
 **Solutions:**
+
 1. Reset password in IONOS dashboard
 2. Verify email address is correct (full address, not just username)
-3. If 2FA is enabled, generate an app-specific password in IONOS settings
+3. If 2FA is enabled, generate an app-specific password in IONOS
+   settings
 
 ---
 
 ### Error: "Connection timed out" or "Cannot connect to server"
 
 **Causes:**
+
 - Firewall blocking port 587
 - Wrong SMTP host
 - Internet connection issue
 
 **Solutions:**
+
 1. Try port 465 with SSL instead:
    ```bash
    SMTP_PORT=465
@@ -232,10 +244,12 @@ npm run dev
 ### Error: "Relay access denied"
 
 **Causes:**
+
 - SMTP authentication not enabled
 - Using wrong "From" address
 
 **Solutions:**
+
 1. Ensure `SMTP_USER` and `FROM_EMAIL` match
 2. Verify authentication is enabled in IONOS
 3. Check if email account is active (not suspended)
@@ -245,20 +259,24 @@ npm run dev
 ### Error: "SSL/TLS handshake failed"
 
 **Causes:**
+
 - Wrong encryption settings
 - Outdated Python SSL library
 
 **Solutions:**
+
 1. Try different port/encryption combo:
+
    ```bash
    # TLS on port 587
    SMTP_PORT=587
    SMTP_USE_TLS=True
-   
+
    # Or SSL on port 465
    SMTP_PORT=465
    SMTP_USE_TLS=False
    ```
+
 2. Update Python SSL: `pip install --upgrade certifi`
 
 ---
@@ -266,11 +284,13 @@ npm run dev
 ### Email sends but recipient doesn't receive
 
 **Causes:**
+
 - Email in spam folder
 - Email blocked by recipient's server
 - Email address typo
 
 **Solutions:**
+
 1. Check spam/junk folder
 2. Whitelist sender email in recipient's settings
 3. Verify recipient email address is correct
@@ -282,14 +302,15 @@ npm run dev
 
 Based on typical MyHibachi setup:
 
-| Email Address | Purpose |
-|---------------|---------|
+| Email Address                | Purpose               |
+| ---------------------------- | --------------------- |
 | `bookings@myhibachichef.com` | Booking confirmations |
-| `info@myhibachichef.com` | General inquiries |
-| `cs@myhibachichef.com` | Customer service |
-| `noreply@myhibachichef.com` | Automated emails |
+| `info@myhibachichef.com`     | General inquiries     |
+| `cs@myhibachichef.com`       | Customer service      |
+| `noreply@myhibachichef.com`  | Automated emails      |
 
-**Which one to use?** 
+**Which one to use?**
+
 - Use `bookings@` for booking-related emails (recommended)
 - Use `info@` for general communications
 - Use `noreply@` if you don't want customers to reply
@@ -299,20 +320,25 @@ Based on typical MyHibachi setup:
 ## 🔐 Security Best Practices
 
 ### Password Security
+
 - ✅ Use a strong, unique password (20+ characters)
 - ✅ Store password in `.env` file (never commit to Git)
 - ✅ Don't share password with anyone
 - ❌ Don't use same password for multiple services
 
 ### Email Account Security
+
 - ✅ Enable 2FA in IONOS if available
 - ✅ Regularly review sent emails log
 - ✅ Use separate email for automated emails vs personal use
 - ✅ Monitor for suspicious activity
 
 ### Production Deployment
+
 For production (when deploying to live server):
-- Use environment variables manager (AWS Secrets Manager, Azure Key Vault)
+
+- Use environment variables manager (AWS Secrets Manager, Azure Key
+  Vault)
 - Rotate passwords every 90 days
 - Use different credentials for production vs development
 - Enable email rate limiting to prevent abuse
@@ -358,12 +384,14 @@ Setup complete when you can check all these:
 ## 🆘 Still Having Issues?
 
 ### IONOS Support
+
 - **Website:** https://www.ionos.com/help
 - **Phone Support:** Check your IONOS dashboard for support number
 - **Email Support:** Often available through IONOS control panel
 - **Documentation:** https://www.ionos.com/help/email/
 
 ### Common Support Questions to Ask:
+
 1. "What are the SMTP server settings for my email account?"
 2. "How do I reset my email password?"
 3. "Is my email account active and able to send emails?"
@@ -392,6 +420,7 @@ CUSTOMER_APP_URL=http://localhost:3000
 ```
 
 **Replace:**
+
 - `bookings@myhibachichef.com` → Your actual IONOS email
 - `MySecureP@ssw0rd123!` → Your actual IONOS password
 
@@ -402,4 +431,5 @@ CUSTOMER_APP_URL=http://localhost:3000
 **Difficulty:** Easy  
 **Impact:** Critical for booking system functionality
 
-**Next Step:** After setup, test with [QUICK_ACTION_CHECKLIST.md](./QUICK_ACTION_CHECKLIST.md)
+**Next Step:** After setup, test with
+[QUICK_ACTION_CHECKLIST.md](./QUICK_ACTION_CHECKLIST.md)

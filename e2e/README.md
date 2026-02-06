@@ -2,7 +2,9 @@
 
 ## 📋 Overview
 
-This E2E testing suite validates the entire MyHibachi system as it would run in production, testing all integrations between:
+This E2E testing suite validates the entire MyHibachi system as it
+would run in production, testing all integrations between:
+
 - **Customer Frontend** (Next.js)
 - **Admin Frontend** (Next.js)
 - **Backend API** (FastAPI)
@@ -17,17 +19,24 @@ This E2E testing suite validates the entire MyHibachi system as it would run in 
 ## 🎯 Testing Strategy
 
 ### **Phase 1: Quick Tests (Frontend Only)**
+
 Tests UI, navigation, component rendering
+
 - **Runtime:** 2-5 minutes
 - **Services needed:** Frontend apps only
 
 ### **Phase 2: Integration Tests (Frontend + Backend)**
+
 Tests API calls, booking creation, data flow
+
 - **Runtime:** 10-15 minutes
 - **Services needed:** Frontend + Backend + Database
 
 ### **Phase 3: Full E2E Tests (Production Simulation)**
-Tests complete user journeys including payments, notifications, real-time updates
+
+Tests complete user journeys including payments, notifications,
+real-time updates
+
 - **Runtime:** 20-30 minutes
 - **Services needed:** All services running
 
@@ -36,6 +45,7 @@ Tests complete user journeys including payments, notifications, real-time update
 ## 🚀 Quick Start
 
 ### **1. Run Quick Tests (Development)**
+
 ```bash
 # Start only customer frontend
 npm run dev:customer
@@ -45,6 +55,7 @@ npx playwright test --project=customer --grep @smoke
 ```
 
 ### **2. Run Full Local Tests (Pre-Production)**
+
 ```bash
 # Option A: Using Docker Compose (Recommended)
 docker-compose up -d
@@ -72,6 +83,7 @@ npx playwright test
 ```
 
 ### **3. Run Production Tests (After Deploy)**
+
 ```bash
 # Test live production site
 BASE_URL=https://yourdomain.com npx playwright test --config=playwright.prod.config.ts
@@ -157,6 +169,7 @@ npx playwright test --grep-invert @slow
 ### **Critical Path Tests (Must Pass)**
 
 #### 1. **Customer Booking Flow** (@e2e @critical)
+
 - [ ] User can view homepage
 - [ ] User can navigate to booking page
 - [ ] User can select event date
@@ -167,6 +180,7 @@ npx playwright test --grep-invert @slow
 - [ ] Confirmation email is sent
 
 #### 2. **Payment Processing** (@payment @critical)
+
 - [ ] Stripe payment intent created
 - [ ] User can enter card details
 - [ ] Payment is processed successfully
@@ -175,6 +189,7 @@ npx playwright test --grep-invert @slow
 - [ ] Receipt email sent
 
 #### 3. **Admin Booking Management** (@admin @critical)
+
 - [ ] Admin can log in
 - [ ] Admin can view all bookings
 - [ ] Admin can view booking details
@@ -185,18 +200,21 @@ npx playwright test --grep-invert @slow
 ### **Important Tests (Should Pass)**
 
 #### 4. **Real-time Updates** (@realtime @important)
+
 - [ ] New booking appears in admin dashboard (WebSocket)
 - [ ] Booking status changes reflect immediately
 - [ ] Notifications appear in real-time
 - [ ] Read receipts update correctly
 
 #### 5. **WhatsApp Notifications** (@notifications @important)
+
 - [ ] Booking confirmation sent via WhatsApp
 - [ ] Payment confirmation sent via WhatsApp
 - [ ] Reminder sent via WhatsApp
 - [ ] Admin notification sent via WhatsApp
 
 #### 6. **Alternative Payment Methods** (@payment @important)
+
 - [ ] Zelle payment instructions shown
 - [ ] Venmo payment instructions shown
 - [ ] Manual payment confirmation by admin
@@ -205,6 +223,7 @@ npx playwright test --grep-invert @slow
 ### **Nice to Have Tests**
 
 #### 7. **User Experience** (@ux)
+
 - [ ] Form validation works
 - [ ] Error messages display correctly
 - [ ] Loading states show properly
@@ -212,6 +231,7 @@ npx playwright test --grep-invert @slow
 - [ ] Mobile responsive design
 
 #### 8. **Performance** (@performance)
+
 - [ ] Page load time < 3 seconds
 - [ ] API response time < 500ms
 - [ ] WebSocket connection < 1 second
@@ -222,14 +242,15 @@ npx playwright test --grep-invert @slow
 ## 🔧 Configuration
 
 ### **Local Development**
+
 ```typescript
 // playwright.config.ts (current)
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
-  use: { 
+  use: {
     baseURL: 'http://127.0.0.1:3000',
-    headless: true 
+    headless: true,
   },
   projects: [
     { name: 'customer', testDir: 'e2e/customer' },
@@ -239,28 +260,29 @@ export default defineConfig({
 ```
 
 ### **Production Testing**
+
 ```typescript
 // playwright.prod.config.ts (to be created)
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
   retries: 2, // Retry failed tests on production
-  use: { 
+  use: {
     baseURL: process.env.PROD_URL || 'https://yourdomain.com',
     headless: true,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
   projects: [
-    { 
-      name: 'customer-prod', 
+    {
+      name: 'customer-prod',
       testDir: 'e2e/customer',
-      use: { baseURL: 'https://customer.yourdomain.com' }
+      use: { baseURL: 'https://customer.yourdomain.com' },
     },
-    { 
-      name: 'admin-prod', 
+    {
+      name: 'admin-prod',
       testDir: 'e2e/admin',
-      use: { baseURL: 'https://admin.yourdomain.com' }
+      use: { baseURL: 'https://admin.yourdomain.com' },
     },
   ],
 });
@@ -270,22 +292,23 @@ export default defineConfig({
 
 ## ⚙️ Services Dependency Matrix
 
-| Test Type | Customer | Admin | Backend | DB | Redis | Celery | Stripe | WhatsApp |
-|-----------|----------|-------|---------|----|----|--------|--------|----------|
-| **Smoke Tests** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Navigation** | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Booking Creation** | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Payment Processing** | ✅ | ❌ | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **Admin Management** | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Real-time Updates** | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **Notifications** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
-| **Full E2E** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Test Type              | Customer | Admin | Backend | DB  | Redis | Celery | Stripe | WhatsApp |
+| ---------------------- | -------- | ----- | ------- | --- | ----- | ------ | ------ | -------- |
+| **Smoke Tests**        | ✅       | ✅    | ❌      | ❌  | ❌    | ❌     | ❌     | ❌       |
+| **Navigation**         | ✅       | ✅    | ❌      | ❌  | ❌    | ❌     | ❌     | ❌       |
+| **Booking Creation**   | ✅       | ❌    | ✅      | ✅  | ❌    | ❌     | ❌     | ❌       |
+| **Payment Processing** | ✅       | ❌    | ✅      | ✅  | ❌    | ❌     | ✅     | ❌       |
+| **Admin Management**   | ❌       | ✅    | ✅      | ✅  | ❌    | ❌     | ❌     | ❌       |
+| **Real-time Updates**  | ✅       | ✅    | ✅      | ✅  | ✅    | ❌     | ❌     | ❌       |
+| **Notifications**      | ✅       | ✅    | ✅      | ✅  | ✅    | ✅     | ❌     | ✅       |
+| **Full E2E**           | ✅       | ✅    | ✅      | ✅  | ✅    | ✅     | ✅     | ✅       |
 
 ---
 
 ## 📈 CI/CD Integration
 
 ### **Pre-Deployment Tests**
+
 ```yaml
 # .github/workflows/e2e-tests.yml
 name: E2E Tests
@@ -311,6 +334,7 @@ jobs:
 ```
 
 ### **Post-Deployment Tests**
+
 ```yaml
 # .github/workflows/production-tests.yml
 name: Production Smoke Tests
@@ -377,6 +401,7 @@ npx playwright show-report
 ## 📚 Best Practices
 
 ### **1. Test Data Management**
+
 ```typescript
 // e2e/helpers/test-data.ts
 export const testBooking = {
@@ -385,29 +410,34 @@ export const testBooking = {
   phone: '555-0123',
   eventDate: '2025-12-25',
   guestCount: 20,
-  menuItems: ['Hibachi Chicken', 'Fried Rice']
+  menuItems: ['Hibachi Chicken', 'Fried Rice'],
 };
 
 export const testPayment = {
   cardNumber: '4242424242424242', // Stripe test card
   expiry: '12/25',
-  cvc: '123'
+  cvc: '123',
 };
 ```
 
 ### **2. Authentication Helpers**
+
 ```typescript
 // e2e/helpers/auth-helpers.ts
 export async function loginAsAdmin(page: Page) {
   await page.goto('/admin/login');
   await page.fill('[name="email"]', 'admin@myhibachi.com');
-  await page.fill('[name="password"]', process.env.TEST_ADMIN_PASSWORD!);
+  await page.fill(
+    '[name="password"]',
+    process.env.TEST_ADMIN_PASSWORD!
+  );
   await page.click('button[type="submit"]');
   await page.waitForURL('**/admin/dashboard');
 }
 ```
 
 ### **3. Wait for Backend**
+
 ```typescript
 // e2e/helpers/wait-helpers.ts
 export async function waitForBackend(baseURL: string) {
@@ -429,12 +459,14 @@ export async function waitForBackend(baseURL: string) {
 ## 🔍 Monitoring & Reporting
 
 ### **Test Results Dashboard**
+
 - View HTML report: `npx playwright show-report`
 - Screenshots on failure: `playwright-report/screenshots/`
 - Videos on failure: `playwright-report/videos/`
 - Traces: `playwright-report/traces/`
 
 ### **Metrics to Track**
+
 - Test pass rate (aim for 95%+)
 - Test execution time
 - Flaky test detection
@@ -447,21 +479,25 @@ export async function waitForBackend(baseURL: string) {
 ### **Common Issues:**
 
 **Tests timeout:**
+
 - Increase timeout in `playwright.config.ts`
 - Check if all services are running
 - Check network connectivity
 
 **Element not found:**
+
 - Use `--headed` mode to see what's happening
 - Check if selectors changed
 - Wait for proper loading states
 
 **Payment tests fail:**
+
 - Verify Stripe test keys are set
 - Check webhook endpoint is accessible
 - Use Stripe test cards only
 
 **WebSocket tests fail:**
+
 - Ensure Redis is running
 - Check CORS settings
 - Verify WebSocket port is accessible
@@ -505,5 +541,4 @@ After deploying to production:
 
 ---
 
-**Last Updated:** November 10, 2025
-**Maintained By:** MyHibachi Team
+**Last Updated:** November 10, 2025 **Maintained By:** MyHibachi Team

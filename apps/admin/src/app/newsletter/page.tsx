@@ -4,7 +4,13 @@ import { Mail, Plus, Send, TrendingUp, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import CampaignList from './components/CampaignList';
@@ -55,7 +61,9 @@ export default function NewsletterPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Newsletter Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Newsletter Management
+          </h1>
           <p className="mt-1 text-gray-600">
             Manage email campaigns, subscribers, and analytics
           </p>
@@ -70,11 +78,15 @@ export default function NewsletterPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Subscribers</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Subscribers
+            </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSubscribers.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {stats.totalSubscribers.toLocaleString()}
+            </div>
             <p className="text-xs text-muted-foreground">
               {stats.activeSubscribers.toLocaleString()} active
             </p>
@@ -83,7 +95,9 @@ export default function NewsletterPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Campaigns Sent</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Campaigns Sent
+            </CardTitle>
             <Send className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -94,22 +108,30 @@ export default function NewsletterPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Open Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg. Open Rate
+            </CardTitle>
             <Mail className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageOpenRate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold">
+              {stats.averageOpenRate.toFixed(1)}%
+            </div>
             <p className="text-xs text-muted-foreground">Industry avg: 21.3%</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Click Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg. Click Rate
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageClickRate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold">
+              {stats.averageClickRate.toFixed(1)}%
+            </div>
             <p className="text-xs text-muted-foreground">Industry avg: 2.6%</p>
           </CardContent>
         </Card>
@@ -149,7 +171,8 @@ export default function NewsletterPage() {
             <CardHeader>
               <CardTitle>Audience Segments</CardTitle>
               <CardDescription>
-                Create targeted segments based on subscriber behavior and preferences
+                Create targeted segments based on subscriber behavior and
+                preferences
               </CardDescription>
             </CardHeader>
             <CardContent>

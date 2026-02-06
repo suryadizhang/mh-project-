@@ -1,6 +1,6 @@
-import { Calculator, Calendar, MessageCircle } from 'lucide-react'
+import { Calculator, Calendar, MessageCircle } from 'lucide-react';
 
-import styles from '@/styles/menu/cta.module.css'
+import styles from '@/styles/menu/cta.module.css';
 
 export default function CTASection() {
   return (
@@ -43,5 +43,5 @@ export default function CTASection() {
         </div>
       </div>
     </div>
-  )
+  );
 }

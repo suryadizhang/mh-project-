@@ -168,7 +168,9 @@ function CallbackContent() {
               // Store refresh token if provided (for token refresh support)
               if (loginData?.refresh_token) {
                 tokenManager.setRefreshToken(loginData.refresh_token);
-                console.log('[OAuth Callback] Station login refresh token stored');
+                console.log(
+                  '[OAuth Callback] Station login refresh token stored'
+                );
               }
               login(loginData.access_token, loginData.station_context);
               setStatus('success');

@@ -1,9 +1,9 @@
-import { menuData } from '@/data/menu'
-import styles from '@/styles/menu/proteins.module.css'
-import type { ProteinCategory, ProteinItem } from '@/types/data'
+import { menuData } from '@/data/menu';
+import styles from '@/styles/menu/proteins.module.css';
+import type { ProteinCategory, ProteinItem } from '@/types/data';
 
 export default function ProteinsSection() {
-  const { proteins } = menuData
+  const { proteins } = menuData;
 
   return (
     <div className={styles.proteinsCard}>
@@ -42,5 +42,5 @@ export default function ProteinsSection() {
         </div>
       </div>
     </div>
-  )
+  );
 }

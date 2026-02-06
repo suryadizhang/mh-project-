@@ -150,7 +150,10 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
             slug: post.slug,
             excerpt: post.excerpt,
             category: post.category,
-            author: typeof post.author === 'string' ? post.author : post.author?.name || 'My Hibachi Team',
+            author:
+              typeof post.author === 'string'
+                ? post.author
+                : post.author?.name || 'My Hibachi Team',
             date: post.date,
             matchType: bestMatch.type,
             matchText: bestMatch.text,

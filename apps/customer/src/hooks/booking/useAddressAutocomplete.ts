@@ -65,7 +65,7 @@ export interface UseAddressAutocompleteReturn {
  * ```
  */
 export function useAddressAutocomplete(
-  options: UseAddressAutocompleteOptions = {}
+  options: UseAddressAutocompleteOptions = {},
 ): UseAddressAutocompleteReturn {
   const { country = 'us', onAddressSelect, onError } = options;
 
@@ -81,14 +81,11 @@ export function useAddressAutocomplete(
     if (!inputRef.current || !window.google?.maps?.places) return;
 
     try {
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(
-        inputRef.current,
-        {
-          types: ['address'],
-          componentRestrictions: { country },
-          fields: ['formatted_address', 'address_components', 'geometry'],
-        }
-      );
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ['address'],
+        componentRestrictions: { country },
+        fields: ['formatted_address', 'address_components', 'geometry'],
+      });
 
       if (!autocompleteRef.current) return;
 
@@ -130,9 +127,9 @@ export function useAddressAutocomplete(
           formattedAddress: place.formatted_address || '',
           coordinates: place.geometry?.location
             ? {
-              lat: place.geometry.location.lat(),
-              lng: place.geometry.location.lng(),
-            }
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              }
             : undefined,
         };
 
@@ -165,9 +162,7 @@ export function useAddressAutocomplete(
     }
 
     // Load the script
-    const existingScript = document.querySelector(
-      'script[src*="maps.googleapis.com/maps/api/js"]'
-    );
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
 
     if (existingScript) {
       // Script is loading, wait for it

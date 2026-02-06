@@ -2,7 +2,9 @@
 
 ## Overview
 
-This guide explains how to use the Super Admin panel to manage notification groups, add/remove team members, and configure which groups receive which notifications.
+This guide explains how to use the Super Admin panel to manage
+notification groups, add/remove team members, and configure which
+groups receive which notifications.
 
 ---
 
@@ -30,6 +32,7 @@ python initialize_notification_groups.py
 ```
 
 This creates 5 default groups:
+
 - **All Admins** - All events, all stations
 - **Customer Service Team** - All events, all stations
 - **Booking Management Team** - Booking events only
@@ -45,24 +48,31 @@ cd apps/backend
 python create_station_groups.py
 ```
 
-This automatically creates one notification group for **each active station**:
-- **Station Managers - [Station Name]** - All station events for that specific station
+This automatically creates one notification group for **each active
+station**:
+
+- **Station Managers - [Station Name]** - All station events for that
+  specific station
 
 Example groups created:
+
 - "Station Managers - Sacramento" (only Sacramento bookings/payments)
 - "Station Managers - Oakland" (only Oakland bookings/payments)
 - "Station Managers - San Francisco" (only SF bookings/payments)
 
 **To view station groups:**
+
 ```bash
 python create_station_groups.py list
 ```
 
 ### 3. Add Team Members
 
-Add members via API or admin panel (see [Member Management](#member-management) section).
+Add members via API or admin panel (see
+[Member Management](#member-management) section).
 
 **Example: Add station manager**
+
 ```bash
 curl -X POST http://localhost:8000/api/admin/notification-groups/{station-group-id}/members \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -80,7 +90,7 @@ curl -X POST http://localhost:8000/api/admin/notification-groups/{station-group-
 https://your-domain.com/admin/notifications/groups
 ```
 
-*Note: Only users with super_admin role can access this panel.*
+_Note: Only users with super_admin role can access this panel._
 
 ---
 
@@ -89,11 +99,13 @@ https://your-domain.com/admin/notifications/groups
 ### View All Groups
 
 **API Endpoint:**
+
 ```http
 GET /api/admin/notification-groups
 ```
 
 **Example Response:**
+
 ```json
 {
   "groups": [
@@ -114,6 +126,7 @@ GET /api/admin/notification-groups
 ### Create New Group
 
 **API Endpoint:**
+
 ```http
 POST /api/admin/notification-groups
 Content-Type: application/json
@@ -127,6 +140,7 @@ Content-Type: application/json
 ```
 
 **UI Actions:**
+
 1. Click "Create New Group" button
 2. Fill in group details:
    - **Name**: Unique group name
@@ -138,6 +152,7 @@ Content-Type: application/json
 ### Update Group
 
 **API Endpoint:**
+
 ```http
 PATCH /api/admin/notification-groups/{group_id}
 Content-Type: application/json
@@ -149,6 +164,7 @@ Content-Type: application/json
 ```
 
 **UI Actions:**
+
 1. Click "Edit" button on group card
 2. Modify fields
 3. Click "Update"
@@ -156,11 +172,13 @@ Content-Type: application/json
 ### Delete Group
 
 **API Endpoint:**
+
 ```http
 DELETE /api/admin/notification-groups/{group_id}
 ```
 
 **UI Actions:**
+
 1. Click "Delete" button on group card
 2. Confirm deletion
 3. All members and event subscriptions are removed
@@ -174,6 +192,7 @@ DELETE /api/admin/notification-groups/{group_id}
 ### Add Team Member to Group
 
 **API Endpoint:**
+
 ```http
 POST /api/admin/notification-groups/{group_id}/members
 Content-Type: application/json
@@ -190,6 +209,7 @@ Content-Type: application/json
 ```
 
 **UI Actions:**
+
 1. Open group details
 2. Click "Add Member" button
 3. Fill in member details:
@@ -206,11 +226,13 @@ Content-Type: application/json
 ### View Group Members
 
 **API Endpoint:**
+
 ```http
 GET /api/admin/notification-groups/{group_id}/members
 ```
 
 **Example Response:**
+
 ```json
 {
   "members": [
@@ -233,6 +255,7 @@ GET /api/admin/notification-groups/{group_id}/members
 ### Update Member Preferences
 
 **API Endpoint:**
+
 ```http
 PATCH /api/admin/notification-groups/{group_id}/members/{member_id}
 Content-Type: application/json
@@ -245,6 +268,7 @@ Content-Type: application/json
 ```
 
 **UI Actions:**
+
 1. Click "Edit" on member card
 2. Update preferences
 3. Click "Save"
@@ -252,11 +276,13 @@ Content-Type: application/json
 ### Remove Member from Group
 
 **API Endpoint:**
+
 ```http
 DELETE /api/admin/notification-groups/{group_id}/members/{member_id}
 ```
 
 **UI Actions:**
+
 1. Click "Remove" button on member card
 2. Confirm removal
 
@@ -266,19 +292,20 @@ DELETE /api/admin/notification-groups/{group_id}/members/{member_id}
 
 ### Available Event Types
 
-| Event Type | Description |
-|------------|-------------|
-| `new_booking` | New booking created |
-| `booking_edit` | Existing booking modified |
-| `booking_cancellation` | Booking cancelled |
-| `payment_received` | Payment confirmed |
-| `review_received` | Customer review submitted |
-| `complaint_received` | Customer complaint filed |
-| `all` | Subscribe to all events |
+| Event Type             | Description               |
+| ---------------------- | ------------------------- |
+| `new_booking`          | New booking created       |
+| `booking_edit`         | Existing booking modified |
+| `booking_cancellation` | Booking cancelled         |
+| `payment_received`     | Payment confirmed         |
+| `review_received`      | Customer review submitted |
+| `complaint_received`   | Customer complaint filed  |
+| `all`                  | Subscribe to all events   |
 
 ### Add Event Subscription
 
 **API Endpoint:**
+
 ```http
 POST /api/admin/notification-groups/{group_id}/events
 Content-Type: application/json
@@ -289,6 +316,7 @@ Content-Type: application/json
 ```
 
 **UI Actions:**
+
 1. Open group details
 2. Go to "Event Subscriptions" tab
 3. Toggle event types on/off
@@ -297,11 +325,13 @@ Content-Type: application/json
 ### Remove Event Subscription
 
 **API Endpoint:**
+
 ```http
 DELETE /api/admin/notification-groups/{group_id}/events/{event_id}
 ```
 
 **UI Actions:**
+
 1. Open group details
 2. Go to "Event Subscriptions" tab
 3. Toggle event type off
@@ -313,7 +343,8 @@ DELETE /api/admin/notification-groups/{group_id}/events/{event_id}
 
 ### How It Works
 
-Notification groups support station-based filtering to ensure teams only receive notifications for events at their assigned station.
+Notification groups support station-based filtering to ensure teams
+only receive notifications for events at their assigned station.
 
 **Two Types of Groups:**
 
@@ -329,11 +360,13 @@ Notification groups support station-based filtering to ensure teams only receive
 
 ### Automatic Station Group Creation
 
-The system **automatically** creates and manages notification groups for stations:
+The system **automatically** creates and manages notification groups
+for stations:
 
 **🤖 Automatic Actions:**
 
 1. **When you CREATE a station:**
+
    ```
    POST /api/admin/stations
    {
@@ -342,13 +375,14 @@ The system **automatically** creates and manages notification groups for station
      "state": "CA",
      ...
    }
-   
+
    ✅ Station created
    ✅ Notification group "Station Managers - Sacramento" auto-created
    ✅ Subscribed to all station events automatically
    ```
 
 2. **When you UPDATE a station name/location:**
+
    ```
    PUT /api/admin/stations/{id}
    {
@@ -356,28 +390,30 @@ The system **automatically** creates and manages notification groups for station
      "city": "Sacramento",
      "state": "CA"
    }
-   
+
    ✅ Station updated
    ✅ Notification group renamed to "Station Managers - Sacramento Downtown"
    ✅ Description updated with new location
    ```
 
 3. **When you DEACTIVATE a station:**
+
    ```
    PUT /api/admin/stations/{id}
    {
      "status": "inactive"  ← Station deactivated
    }
-   
+
    ✅ Station deactivated
    ✅ Notification group deactivated (members stop receiving notifications)
    ✅ Group preserved for reactivation
    ```
 
 4. **When you DELETE a station:**
+
    ```
    DELETE /api/admin/stations/{id}
-   
+
    ✅ Station deleted
    ✅ Notification group deleted (all members removed)
    ✅ Event subscriptions removed
@@ -385,7 +421,8 @@ The system **automatically** creates and manages notification groups for station
 
 **� Manual Script (Optional)**
 
-If you need to create notification groups for existing stations (one-time bulk operation):
+If you need to create notification groups for existing stations
+(one-time bulk operation):
 
 ```bash
 cd apps/backend
@@ -393,11 +430,13 @@ python create_station_groups.py
 ```
 
 **This script is only needed for:**
+
 - Migrating existing stations that were created before this feature
 - Rebuilding groups if they were accidentally deleted
 - Initial setup if automatic creation was disabled
 
 **To view all station groups:**
+
 ```bash
 python create_station_groups.py list
 ```
@@ -407,6 +446,7 @@ python create_station_groups.py list
 **Scenario**: New booking created at Sacramento station
 
 1. **System Queries Groups:**
+
    ```sql
    SELECT * FROM notification_groups WHERE
      (station_id = 'sacramento-uuid' OR station_id IS NULL)
@@ -415,9 +455,12 @@ python create_station_groups.py list
 
 2. **Groups Matched:**
    - ✅ "All Admins" (station_id = null) → Receives notification
-   - ✅ "Station Managers - Sacramento" (station_id = sacramento-uuid) → Receives notification
-   - ❌ "Station Managers - Oakland" (station_id = oakland-uuid) → Does NOT receive
-   - ❌ "Station Managers - San Francisco" (station_id = sf-uuid) → Does NOT receive
+   - ✅ "Station Managers - Sacramento" (station_id = sacramento-uuid)
+     → Receives notification
+   - ❌ "Station Managers - Oakland" (station_id = oakland-uuid) →
+     Does NOT receive
+   - ❌ "Station Managers - San Francisco" (station_id = sf-uuid) →
+     Does NOT receive
 
 3. **Notification Sent To:**
    - All members of "All Admins" group
@@ -427,6 +470,7 @@ python create_station_groups.py list
 ### Setting Station Filter
 
 **When Creating Group:**
+
 ```json
 {
   "name": "Oakland Station Team",
@@ -435,6 +479,7 @@ python create_station_groups.py list
 ```
 
 **When Updating Group:**
+
 ```json
 PATCH /api/admin/notification-groups/{group_id}
 {
@@ -443,6 +488,7 @@ PATCH /api/admin/notification-groups/{group_id}
 ```
 
 **Remove Station Filter (receive from all stations):**
+
 ```json
 PATCH /api/admin/notification-groups/{group_id}
 {
@@ -453,6 +499,7 @@ PATCH /api/admin/notification-groups/{group_id}
 ### Use Cases
 
 ✅ **Station Managers** - Only receive notifications for their station
+
 ```json
 {
   "name": "Sacramento Managers",
@@ -462,6 +509,7 @@ PATCH /api/admin/notification-groups/{group_id}
 ```
 
 ✅ **Corporate Team** - Receive notifications from all stations
+
 ```json
 {
   "name": "Corporate Team",
@@ -477,6 +525,7 @@ PATCH /api/admin/notification-groups/{group_id}
 ### Authentication
 
 All endpoints require:
+
 ```http
 Authorization: Bearer <super-admin-jwt-token>
 ```
@@ -489,21 +538,21 @@ https://your-domain.com/api/admin/notification-groups
 
 ### Endpoints Summary
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | List all groups |
-| `POST` | `/` | Create new group |
-| `GET` | `/{id}` | Get group details |
-| `PATCH` | `/{id}` | Update group |
-| `DELETE` | `/{id}` | Delete group |
-| `POST` | `/{id}/members` | Add member |
-| `GET` | `/{id}/members` | List members |
-| `PATCH` | `/{id}/members/{member_id}` | Update member |
-| `DELETE` | `/{id}/members/{member_id}` | Remove member |
-| `POST` | `/{id}/events` | Add event subscription |
-| `DELETE` | `/{id}/events/{event_id}` | Remove event subscription |
-| `POST` | `/initialize-defaults` | Create default groups |
-| `GET` | `/event-types` | List available event types |
+| Method   | Endpoint                    | Description                |
+| -------- | --------------------------- | -------------------------- |
+| `GET`    | `/`                         | List all groups            |
+| `POST`   | `/`                         | Create new group           |
+| `GET`    | `/{id}`                     | Get group details          |
+| `PATCH`  | `/{id}`                     | Update group               |
+| `DELETE` | `/{id}`                     | Delete group               |
+| `POST`   | `/{id}/members`             | Add member                 |
+| `GET`    | `/{id}/members`             | List members               |
+| `PATCH`  | `/{id}/members/{member_id}` | Update member              |
+| `DELETE` | `/{id}/members/{member_id}` | Remove member              |
+| `POST`   | `/{id}/events`              | Add event subscription     |
+| `DELETE` | `/{id}/events/{event_id}`   | Remove event subscription  |
+| `POST`   | `/initialize-defaults`      | Create default groups      |
+| `GET`    | `/event-types`              | List available event types |
 
 ---
 
@@ -516,6 +565,7 @@ https://your-domain.com/api/admin/notification-groups
 **Steps:**
 
 **Option A: Automatic (Recommended)**
+
 ```bash
 # After creating Sacramento station in database
 cd apps/backend
@@ -530,6 +580,7 @@ python create_station_groups.py
 **Option B: Manual**
 
 1. **Create Station Manager Group**
+
 ```http
 POST /api/admin/notification-groups
 {
@@ -540,6 +591,7 @@ POST /api/admin/notification-groups
 ```
 
 2. **Add Station Managers**
+
 ```http
 POST /api/admin/notification-groups/{group_id}/members
 {
@@ -550,6 +602,7 @@ POST /api/admin/notification-groups/{group_id}/members
 ```
 
 3. **Subscribe to Relevant Events**
+
 ```http
 POST /api/admin/notification-groups/{group_id}/events
 { "event_type": "new_booking" }
@@ -571,8 +624,10 @@ POST /api/admin/notification-groups/{group_id}/events
 ```
 
 **Result:**
+
 - Sacramento managers receive notifications ONLY for Sacramento events
-- Corporate "All Admins" group still receives notifications from ALL stations
+- Corporate "All Admins" group still receives notifications from ALL
+  stations
 - No duplicate notifications (system deduplicates by phone)
 
 ### Scenario 2: Team Member Changes Preferences
@@ -604,6 +659,7 @@ PATCH /api/admin/notification-groups/{group_id}
 ```
 
 To re-enable:
+
 ```http
 PATCH /api/admin/notification-groups/{group_id}
 {
@@ -618,6 +674,7 @@ PATCH /api/admin/notification-groups/{group_id}
 **Steps:**
 
 1. **Create Group**
+
 ```http
 POST /api/admin/notification-groups
 {
@@ -627,6 +684,7 @@ POST /api/admin/notification-groups
 ```
 
 2. **Add Members**
+
 ```http
 POST /api/admin/notification-groups/{group_id}/members
 {
@@ -638,6 +696,7 @@ POST /api/admin/notification-groups/{group_id}/members
 ```
 
 3. **Subscribe to Payment Events Only**
+
 ```http
 POST /api/admin/notification-groups/{group_id}/events
 {
@@ -688,11 +747,13 @@ graph TD
 ### 1. Group Organization
 
 ✅ **DO**:
+
 - Create specific groups for different roles
 - Use clear, descriptive names
 - Document group purposes
 
 ❌ **DON'T**:
+
 - Create too many overlapping groups
 - Use vague names like "Team 1"
 - Leave descriptions empty
@@ -700,11 +761,13 @@ graph TD
 ### 2. Member Management
 
 ✅ **DO**:
+
 - Keep member lists up to date
 - Remove inactive members
 - Respect member preferences
 
 ❌ **DON'T**:
+
 - Add members without permission
 - Ignore "Do Not Disturb" preferences
 - Keep ex-employees in groups
@@ -712,11 +775,13 @@ graph TD
 ### 3. Event Subscriptions
 
 ✅ **DO**:
+
 - Subscribe groups to relevant events only
 - Review subscriptions regularly
 - Use "all" sparingly
 
 ❌ **DON'T**:
+
 - Subscribe everyone to everything
 - Ignore notification fatigue
 - Forget to update after process changes
@@ -724,11 +789,13 @@ graph TD
 ### 4. Station Filtering
 
 ✅ **DO**:
+
 - Use station filters for station managers
 - Keep corporate teams station-agnostic
 - Test filters after setup
 
 ❌ **DON'T**:
+
 - Filter groups that need all-station access
 - Forget to update when stations change
 - Leave station_id orphaned
@@ -740,6 +807,7 @@ graph TD
 ### Issue: Members Not Receiving Notifications
 
 **Possible Causes:**
+
 1. Group is inactive (`is_active = false`)
 2. Member is inactive (`is_active = false`)
 3. Event type not subscribed
@@ -748,6 +816,7 @@ graph TD
 6. Twilio/WhatsApp credentials not configured
 
 **Solution:**
+
 ```bash
 # Check group status
 GET /api/admin/notification-groups/{group_id}
@@ -770,22 +839,27 @@ POST /api/test/send-notification
 ### Issue: Duplicate Notifications
 
 **Possible Causes:**
+
 1. Member in multiple groups
 2. Multiple event subscriptions
 3. Station filter misconfigured
 
 **Solution:**
+
 - System automatically deduplicates by phone number
-- If still occurring, check for duplicate phone numbers with different formats
+- If still occurring, check for duplicate phone numbers with different
+  formats
 
 ### Issue: Wrong Group Receiving Notifications
 
 **Possible Causes:**
+
 1. Station filter incorrect
 2. Event subscription wrong
 3. Group not active
 
 **Solution:**
+
 ```http
 # Update station filter
 PATCH /api/admin/notification-groups/{group_id}
@@ -845,7 +919,7 @@ const NotificationGroupsPanel: React.FC = () => {
   return (
     <div className="notification-groups-panel">
       <h1>Notification Groups</h1>
-      
+
       <button onClick={() => setShowCreateModal(true)}>
         Create New Group
       </button>
@@ -868,7 +942,8 @@ const NotificationGroupsPanel: React.FC = () => {
 
 - **super_admin role ONLY** can access notification groups
 - Regular admins cannot view or modify groups
-- Station managers can only view their station's groups (future feature)
+- Station managers can only view their station's groups (future
+  feature)
 
 ### Data Privacy
 
@@ -879,6 +954,7 @@ const NotificationGroupsPanel: React.FC = () => {
 ### Audit Logging
 
 All actions are logged:
+
 - Group creation/modification/deletion
 - Member addition/removal
 - Event subscription changes
@@ -889,7 +965,8 @@ All actions are logged:
 ## Migration & Setup Checklist
 
 - [ ] Run database migration: `alembic upgrade head`
-- [ ] Initialize default groups: `python initialize_notification_groups.py`
+- [ ] Initialize default groups:
+      `python initialize_notification_groups.py`
 - [ ] Register router in `main.py`
 - [ ] Restart backend server
 - [ ] Test API endpoints with Postman
@@ -907,12 +984,12 @@ All actions are logged:
 ## Support
 
 For technical support or feature requests:
+
 - **Email**: dev@myhibachichef.com
 - **Docs**: See `BACKEND_WHATSAPP_INTEGRATION_COMPLETE.md`
 - **API Reference**: See `API_DOCUMENTATION.md`
 
 ---
 
-**Last Updated**: October 30, 2025
-**Version**: 1.0.0
-**Status**: ✅ Production Ready
+**Last Updated**: October 30, 2025 **Version**: 1.0.0 **Status**: ✅
+Production Ready

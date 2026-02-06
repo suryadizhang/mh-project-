@@ -206,11 +206,11 @@ export default function TestimonialsSection() {
           aria-roledescription="carousel"
         >
           {/* Swipe hint for mobile */}
-          <div className="md:hidden text-center text-sm text-gray-500 mb-4">
+          <div className="mb-4 text-center text-sm text-gray-500 md:hidden">
             <span className="inline-flex items-center gap-1">
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="h-4 w-4" />
               Swipe to navigate
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="h-4 w-4" />
             </span>
           </div>
 
@@ -220,16 +220,20 @@ export default function TestimonialsSection() {
 
             {/* Testimonial Content with Animation */}
             <div
-              className={`relative z-10 transition-all duration-500 ease-out ${slideDirection === 'right'
-                ? 'animate-in slide-in-from-right-4 fade-in'
-                : 'animate-in slide-in-from-left-4 fade-in'
-                }`}
+              className={`relative z-10 transition-all duration-500 ease-out ${
+                slideDirection === 'right'
+                  ? 'animate-in slide-in-from-right-4 fade-in'
+                  : 'animate-in slide-in-from-left-4 fade-in'
+              }`}
               key={currentIndex}
             >
               {/* Rating Stars */}
               <div className="mb-6 flex justify-center">
                 {[...Array(currentTestimonial.rating)].map((_, i) => (
-                  <Star key={i} className="mx-1 h-6 w-6 fill-yellow-400 text-yellow-400 transition-transform hover:scale-110" />
+                  <Star
+                    key={i}
+                    className="mx-1 h-6 w-6 fill-yellow-400 text-yellow-400 transition-transform hover:scale-110"
+                  />
                 ))}
               </div>
 
@@ -264,18 +268,18 @@ export default function TestimonialsSection() {
           {/* Enhanced Navigation Arrows - Hidden on mobile, visible on desktop */}
           <button
             onClick={prevTestimonial}
-            className="absolute top-1/2 left-0 md:left-4 z-10 -translate-y-1/2 rounded-full bg-white p-3 md:p-4 shadow-lg transition-all duration-300 hover:bg-gray-50 hover:scale-110 hover:shadow-xl hidden md:flex items-center justify-center group"
+            className="group absolute top-1/2 left-0 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white p-3 shadow-lg transition-all duration-300 hover:scale-110 hover:bg-gray-50 hover:shadow-xl md:left-4 md:flex md:p-4"
             aria-label="Previous testimonial"
           >
-            <ChevronLeft className="h-6 w-6 text-gray-600 group-hover:text-red-600 transition-colors" />
+            <ChevronLeft className="h-6 w-6 text-gray-600 transition-colors group-hover:text-red-600" />
           </button>
 
           <button
             onClick={nextTestimonial}
-            className="absolute top-1/2 right-0 md:right-4 z-10 -translate-y-1/2 rounded-full bg-white p-3 md:p-4 shadow-lg transition-all duration-300 hover:bg-gray-50 hover:scale-110 hover:shadow-xl hidden md:flex items-center justify-center group"
+            className="group absolute top-1/2 right-0 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white p-3 shadow-lg transition-all duration-300 hover:scale-110 hover:bg-gray-50 hover:shadow-xl md:right-4 md:flex md:p-4"
             aria-label="Next testimonial"
           >
-            <ChevronRight className="h-6 w-6 text-gray-600 group-hover:text-red-600 transition-colors" />
+            <ChevronRight className="h-6 w-6 text-gray-600 transition-colors group-hover:text-red-600" />
           </button>
         </div>
 
@@ -287,10 +291,11 @@ export default function TestimonialsSection() {
               <button
                 key={index}
                 onClick={() => goToTestimonial(index)}
-                className={`relative h-3 rounded-full transition-all duration-500 ${index === currentIndex
-                  ? 'w-8 bg-gradient-to-r from-red-500 to-orange-500'
-                  : 'w-3 bg-gray-300 hover:bg-gray-400'
-                  }`}
+                className={`relative h-3 rounded-full transition-all duration-500 ${
+                  index === currentIndex
+                    ? 'w-8 bg-gradient-to-r from-red-500 to-orange-500'
+                    : 'w-3 bg-gray-300 hover:bg-gray-400'
+                }`}
                 aria-label={`Go to testimonial from ${testimonial.name}`}
                 aria-current={index === currentIndex ? 'true' : 'false'}
               />
@@ -305,10 +310,11 @@ export default function TestimonialsSection() {
           {/* Auto-play toggle */}
           <button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className={`text-sm px-4 py-1.5 rounded-full transition-all duration-300 ${isAutoPlaying
-              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+            className={`rounded-full px-4 py-1.5 text-sm transition-all duration-300 ${
+              isAutoPlaying
+                ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
           >
             {isAutoPlaying ? '⏸ Auto-playing' : '▶ Resume auto-play'}
           </button>

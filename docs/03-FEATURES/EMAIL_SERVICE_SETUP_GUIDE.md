@@ -2,7 +2,9 @@
 
 ## IONOS Business Email Setup
 
-Your MH Webapps project is configured to use IONOS Business Email SMTP for transactional emails (booking confirmations, receipts, admin notifications).
+Your MH Webapps project is configured to use IONOS Business Email SMTP
+for transactional emails (booking confirmations, receipts, admin
+notifications).
 
 ---
 
@@ -10,8 +12,10 @@ Your MH Webapps project is configured to use IONOS Business Email SMTP for trans
 
 Before deployment, you'll need these IONOS email credentials:
 
-1. **Email Address**: Your IONOS business email (e.g., `bookings@myhibachichef.com`)
-2. **SMTP Password**: Your IONOS email password or app-specific password
+1. **Email Address**: Your IONOS business email (e.g.,
+   `bookings@myhibachichef.com`)
+2. **SMTP Password**: Your IONOS email password or app-specific
+   password
 3. **SMTP Server**: Usually `smtp.ionos.com` or `smtp.1and1.com`
 4. **SMTP Port**: `587` (recommended) or `465` (SSL)
 
@@ -20,11 +24,13 @@ Before deployment, you'll need these IONOS email credentials:
 ## 🔒 Security: Never Commit Secrets!
 
 ### ✅ What IS safe (already in repo):
+
 - `.env.example` files with placeholder values
 - Configuration code without actual credentials
 - Email templates (HTML files)
 
 ### ❌ What is NEVER committed:
+
 - `.env` files with real credentials
 - Any file containing actual passwords
 - SMTP credentials in code
@@ -104,6 +110,7 @@ Frontend apps don't need email credentials (backend handles emails).
 1. **Login to Plesk**
 2. **Go to**: Websites & Domains → Your Domain → Environment Variables
 3. **Add variables**:
+
    ```
    SMTP_HOST=smtp.ionos.com
    SMTP_PORT=587
@@ -119,16 +126,19 @@ Frontend apps don't need email credentials (backend handles emails).
 #### Method B: .env file on VPS (Alternative)
 
 1. **SSH into VPS**:
+
    ```bash
    ssh your-user@your-vps-ip
    ```
 
 2. **Navigate to app directory**:
+
    ```bash
    cd /var/www/vhosts/myhibachichef.com/apps/backend
    ```
 
 3. **Create .env file** (never commit this!):
+
    ```bash
    nano .env
    ```
@@ -136,6 +146,7 @@ Frontend apps don't need email credentials (backend handles emails).
 4. **Add credentials** (same format as local dev)
 
 5. **Set secure permissions**:
+
    ```bash
    chmod 600 .env
    chown www-data:www-data .env
@@ -152,29 +163,30 @@ Frontend apps don't need email credentials (backend handles emails).
 
 #### Step 1: Add Secrets to GitHub
 
-1. **Go to**: GitHub → Your Repo → Settings → Secrets and variables → Actions
+1. **Go to**: GitHub → Your Repo → Settings → Secrets and variables →
+   Actions
 2. **Click**: "New repository secret"
 3. **Add each secret**:
 
    ```
    Name: SMTP_HOST
    Value: smtp.ionos.com
-   
+
    Name: SMTP_PORT
    Value: 587
-   
+
    Name: SMTP_USER
    Value: bookings@myhibachichef.com
-   
+
    Name: SMTP_PASSWORD
    Value: YourSecurePassword123!
-   
+
    Name: SMTP_USE_TLS
    Value: True
-   
+
    Name: FROM_EMAIL
    Value: bookings@myhibachichef.com
-   
+
    Name: EMAILS_FROM_NAME
    Value: My Hibachi Chef
    ```
@@ -193,10 +205,10 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Deploy to VPS
         env:
           # Email secrets from GitHub
@@ -280,6 +292,7 @@ asyncio.run(send_booking_confirmation(test_booking))
 **Cause**: Wrong credentials or IONOS requires app-specific password
 
 **Solution**:
+
 1. Verify username/password in IONOS control panel
 2. Try generating app-specific password in IONOS
 3. Check if 2FA is enabled (may require app password)
@@ -289,6 +302,7 @@ asyncio.run(send_booking_confirmation(test_booking))
 **Cause**: Firewall blocking port 587 or wrong SMTP server
 
 **Solution**:
+
 1. Verify SMTP host: `smtp.ionos.com` or `smtp.1and1.com`
 2. Try port 465 with SSL instead of 587 with TLS
 3. Check VPS firewall allows outbound on ports 587/465
@@ -298,6 +312,7 @@ asyncio.run(send_booking_confirmation(test_booking))
 **Cause**: FROM_EMAIL doesn't match SMTP_USER
 
 **Solution**:
+
 ```bash
 # IONOS requires these to match exactly:
 SMTP_USER=bookings@myhibachichef.com
@@ -309,7 +324,9 @@ FROM_EMAIL=bookings@myhibachichef.com  # ← Must be identical!
 **Causes**: SPF, DKIM, DMARC not configured
 
 **Solution**:
+
 1. **Add SPF record** in DNS:
+
    ```
    TXT @ "v=spf1 include:_spf.ionos.com ~all"
    ```
@@ -317,6 +334,7 @@ FROM_EMAIL=bookings@myhibachichef.com  # ← Must be identical!
 2. **Enable DKIM** in IONOS control panel (email settings)
 
 3. **Add DMARC record**:
+
    ```
    TXT _dmarc "v=DMARC1; p=quarantine; rua=mailto:postmaster@myhibachichef.com"
    ```
@@ -351,6 +369,7 @@ tail -f /var/log/myhibachi-backend/app.log
 ## 🎯 Quick Reference
 
 ### IONOS SMTP Settings
+
 ```
 Host: smtp.ionos.com (or smtp.1and1.com)
 Port: 587 (TLS) or 465 (SSL)
@@ -359,6 +378,7 @@ From: Must match username
 ```
 
 ### Environment Variables
+
 ```bash
 # Required for all deployments
 SMTP_HOST=smtp.ionos.com
@@ -370,6 +390,7 @@ FROM_EMAIL=your-email@yourdomain.com
 ```
 
 ### Files to Never Commit
+
 ```
 ❌ .env
 ❌ .env.local
@@ -382,8 +403,9 @@ FROM_EMAIL=your-email@yourdomain.com
 
 ## 📞 Support
 
-**IONOS Email Issues**: Contact IONOS support (they're very responsive)
-**Code Issues**: Check logs at `apps/backend/src/api/app/services/email_service.py`
+**IONOS Email Issues**: Contact IONOS support (they're very
+responsive) **Code Issues**: Check logs at
+`apps/backend/src/api/app/services/email_service.py`
 **Configuration**: See this guide or `.env.example`
 
 ---

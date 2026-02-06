@@ -106,13 +106,11 @@ NEXT_PUBLIC_FB_APP_ID=YOUR_REAL_APP_ID_HERE  # ← Update this
 ### **After Setup:**
 
 1. **Development Test:**
-
    - Visit `http://localhost:3000/contact`
    - Click "💬 Chat on Messenger" button
    - Should open Messenger widget
 
 2. **Production Test:**
-
    - Deploy to your domain
    - Test Messenger button
    - Verify messages reach your business page

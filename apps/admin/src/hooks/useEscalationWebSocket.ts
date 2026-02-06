@@ -30,11 +30,11 @@ export interface EscalationData {
   id: string;
   priority?: 'low' | 'medium' | 'high' | 'urgent';
   status?:
-  | 'pending'
-  | 'assigned'
-  | 'in_progress'
-  | 'waiting_customer'
-  | 'resolved';
+    | 'pending'
+    | 'assigned'
+    | 'in_progress'
+    | 'waiting_customer'
+    | 'resolved';
   customer_phone?: string;
   reason?: string;
   method?: 'sms' | 'call' | 'email';
@@ -87,7 +87,10 @@ export interface UseEscalationWebSocketResult {
 const WS_BASE_URL =
   process.env.NEXT_PUBLIC_WS_URL ||
   (process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(/^https/, 'wss')
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(
+        /^https/,
+        'wss'
+      )
     : typeof window !== 'undefined' && window.location.hostname !== 'localhost'
       ? 'wss://mhapi.mysticdatanode.net'
       : 'ws://localhost:8000');
@@ -101,8 +104,9 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const [lastEvent, setLastEvent] =
-    useState<EscalationWebSocketMessage | null>(null);
+  const [lastEvent, setLastEvent] = useState<EscalationWebSocketMessage | null>(
+    null
+  );
   const [stats, setStats] = useState<EscalationStats>({
     pending: 0,
     assigned: 0,
@@ -145,9 +149,12 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
       const validToken = await tokenManager.ensureValidToken();
 
       if (!validToken) {
-        logger.error(new Error('Token refresh failed - unable to get valid token'), {
-          context: 'escalation_websocket_auth',
-        });
+        logger.error(
+          new Error('Token refresh failed - unable to get valid token'),
+          {
+            context: 'escalation_websocket_auth',
+          }
+        );
         setConnectionError('Authentication expired. Please log in again.');
         setIsConnecting(false);
         // Logout and redirect to login page
@@ -261,10 +268,9 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
           }, RECONNECT_INTERVAL);
         } else if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
           setConnectionError('Maximum reconnection attempts reached');
-          logger.error(
-            new Error('Maximum reconnection attempts reached'),
-            { context: 'escalation_websocket' }
-          );
+          logger.error(new Error('Maximum reconnection attempts reached'), {
+            context: 'escalation_websocket',
+          });
         }
       };
 
@@ -282,7 +288,9 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
           setConnectionError(errorMessage);
         } else {
           // Silent fail for pre-auth - this is expected
-          logger.debug('WebSocket connection not established (awaiting authentication)');
+          logger.debug(
+            'WebSocket connection not established (awaiting authentication)'
+          );
         }
         setIsConnecting(false);
       };

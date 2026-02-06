@@ -7,26 +7,26 @@
  * @module blogIndex
  */
 
-import type { BlogPost } from '@my-hibachi/blog-types'
-import { Document } from 'flexsearch'
+import type { BlogPost } from '@my-hibachi/blog-types';
+import { Document } from 'flexsearch';
 
-import { getAuthorName } from './helpers'
+import { getAuthorName } from './helpers';
 
 /**
  * Searchable document type with required index signature for FlexSearch
  * Contains flattened BlogPost data optimized for search
  */
 interface SearchableDocument {
-  id: string | number
-  title: string
-  excerpt: string
-  content: string
-  category: string
-  serviceArea: string
-  eventType: string
-  keywords: string
-  author: string
-  [key: string]: string | number
+  id: string | number;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  serviceArea: string;
+  eventType: string;
+  keywords: string;
+  author: string;
+  [key: string]: string | number;
 }
 
 /**
@@ -43,21 +43,21 @@ function toSearchableDocument(post: BlogPost): SearchableDocument {
     serviceArea: post.serviceArea,
     eventType: post.eventType,
     keywords: post.keywords.join(' '),
-    author: getAuthorName(post.author)
-  }
+    author: getAuthorName(post.author),
+  };
 }
 
 // FlexSearch index instance
-let searchIndex: Document<SearchableDocument, true> | null = null
+let searchIndex: Document<SearchableDocument, true> | null = null;
 // Store original posts for returning full BlogPost objects
-const postsStore: Map<string | number, BlogPost> = new Map()
+const postsStore: Map<string | number, BlogPost> = new Map();
 
 /**
  * Initialize FlexSearch index with blog posts
  * Should be called once when the app starts or when posts are updated
  */
 export async function initializeBlogSearch(
-  posts: BlogPost[]
+  posts: BlogPost[],
 ): Promise<Document<SearchableDocument, true>> {
   // Create new document index with custom configuration
   const index = new Document<SearchableDocument, true>({
@@ -71,31 +71,31 @@ export async function initializeBlogSearch(
         'serviceArea',
         'eventType',
         'keywords',
-        'author'
+        'author',
       ],
-      store: true
+      store: true,
     },
     tokenize: 'forward',
     context: {
       resolution: 9,
       depth: 3,
-      bidirectional: true
+      bidirectional: true,
     },
-    cache: 100
-  })
+    cache: 100,
+  });
 
   // Clear and rebuild posts store
-  postsStore.clear()
+  postsStore.clear();
 
   // Add all posts to index
   for (const post of posts) {
-    const searchableDoc = toSearchableDocument(post)
-    index.add(searchableDoc)
-    postsStore.set(post.id, post)
+    const searchableDoc = toSearchableDocument(post);
+    index.add(searchableDoc);
+    postsStore.set(post.id, post);
   }
 
-  searchIndex = index
-  return index
+  searchIndex = index;
+  return index;
 }
 
 /**
@@ -106,56 +106,53 @@ export async function initializeBlogSearch(
  * @param limit - Maximum number of results (default: 10)
  * @returns Array of matching BlogPost objects
  */
-export async function searchBlogPosts(
-  query: string,
-  limit: number = 10
-): Promise<BlogPost[]> {
+export async function searchBlogPosts(query: string, limit: number = 10): Promise<BlogPost[]> {
   if (!searchIndex) {
-    console.warn('Search index not initialized. Call initializeBlogSearch() first.')
-    return []
+    console.warn('Search index not initialized. Call initializeBlogSearch() first.');
+    return [];
   }
 
   if (!query || query.trim().length < 2) {
-    return []
+    return [];
   }
 
   try {
     // Perform search across all indexed fields
     const results = await searchIndex.search(query, limit, {
-      enrich: true
-    })
+      enrich: true,
+    });
 
     // Extract posts from results and return original BlogPost objects
-    const posts: BlogPost[] = []
-    const seenIds = new Set<string | number>()
+    const posts: BlogPost[] = [];
+    const seenIds = new Set<string | number>();
 
     for (const fieldResults of results) {
       if (fieldResults.result) {
         for (const item of fieldResults.result) {
-          const doc = (item as { doc: SearchableDocument }).doc
-          const post = postsStore.get(doc.id)
+          const doc = (item as { doc: SearchableDocument }).doc;
+          const post = postsStore.get(doc.id);
 
           // Avoid duplicates and ensure post exists
           if (post && !seenIds.has(post.id)) {
-            seenIds.add(post.id)
-            posts.push(post)
+            seenIds.add(post.id);
+            posts.push(post);
 
             if (posts.length >= limit) {
-              break
+              break;
             }
           }
         }
       }
 
       if (posts.length >= limit) {
-        break
+        break;
       }
     }
 
-    return posts
+    return posts;
   } catch (error) {
-    console.error('Error searching blog posts:', error)
-    return []
+    console.error('Error searching blog posts:', error);
+    return [];
   }
 }
 
@@ -166,14 +163,9 @@ export async function searchBlogPosts(
  * @param limit - Maximum number of results
  * @returns Array of matching BlogPost objects
  */
-export async function searchByCategory(
-  category: string,
-  limit: number = 10
-): Promise<BlogPost[]> {
-  const results = await searchBlogPosts(category, limit * 2)
-  return results
-    .filter(post => post.category === category)
-    .slice(0, limit)
+export async function searchByCategory(category: string, limit: number = 10): Promise<BlogPost[]> {
+  const results = await searchBlogPosts(category, limit * 2);
+  return results.filter((post) => post.category === category).slice(0, limit);
 }
 
 /**
@@ -185,12 +177,10 @@ export async function searchByCategory(
  */
 export async function searchByServiceArea(
   serviceArea: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<BlogPost[]> {
-  const results = await searchBlogPosts(serviceArea, limit * 2)
-  return results
-    .filter(post => post.serviceArea === serviceArea)
-    .slice(0, limit)
+  const results = await searchBlogPosts(serviceArea, limit * 2);
+  return results.filter((post) => post.serviceArea === serviceArea).slice(0, limit);
 }
 
 /**
@@ -202,12 +192,10 @@ export async function searchByServiceArea(
  */
 export async function searchByEventType(
   eventType: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<BlogPost[]> {
-  const results = await searchBlogPosts(eventType, limit * 2)
-  return results
-    .filter(post => post.eventType === eventType)
-    .slice(0, limit)
+  const results = await searchBlogPosts(eventType, limit * 2);
+  return results.filter((post) => post.eventType === eventType).slice(0, limit);
 }
 
 /**
@@ -218,12 +206,9 @@ export async function searchByEventType(
  * @param limit - Maximum number of suggestions
  * @returns Array of suggested search terms (post titles)
  */
-export async function getSearchSuggestions(
-  query: string,
-  limit: number = 5
-): Promise<string[]> {
-  const posts = await searchBlogPosts(query, limit)
-  return posts.map(post => post.title)
+export async function getSearchSuggestions(query: string, limit: number = 5): Promise<string[]> {
+  const posts = await searchBlogPosts(query, limit);
+  return posts.map((post) => post.title);
 }
 
 /**
@@ -231,9 +216,9 @@ export async function getSearchSuggestions(
  * Should be called when posts are added, updated, or removed
  */
 export async function rebuildSearchIndex(posts: BlogPost[]): Promise<void> {
-  searchIndex = null
-  postsStore.clear()
-  await initializeBlogSearch(posts)
+  searchIndex = null;
+  postsStore.clear();
+  await initializeBlogSearch(posts);
 }
 
 /**
@@ -241,11 +226,11 @@ export async function rebuildSearchIndex(posts: BlogPost[]): Promise<void> {
  * Useful for debugging and monitoring
  */
 export function getSearchIndexStatus(): {
-  initialized: boolean
-  size: number
+  initialized: boolean;
+  size: number;
 } {
   return {
     initialized: searchIndex !== null,
-    size: searchIndex ? Object.keys(searchIndex).length : 0
-  }
+    size: searchIndex ? Object.keys(searchIndex).length : 0,
+  };
 }

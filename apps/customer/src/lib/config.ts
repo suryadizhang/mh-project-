@@ -30,12 +30,9 @@ const envSchema = z.object({
     .string()
     .min(1, 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is required')
     .startsWith('pk_', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must start with pk_')
-    .refine(
-      (key) => key.startsWith('pk_test_') || key.startsWith('pk_live_'),
-      {
-        message: 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must be pk_test_* or pk_live_*',
-      }
-    ),
+    .refine((key) => key.startsWith('pk_test_') || key.startsWith('pk_live_'), {
+      message: 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY must be pk_test_* or pk_live_*',
+    }),
 
   // Google Analytics
   NEXT_PUBLIC_GA_ID: z
@@ -96,7 +93,9 @@ try {
     error.errors.forEach((err) => {
       console.error(`  • ${err.path.join('.')}: ${err.message}`);
     });
-    console.error('\nPlease check your .env.local file and ensure all required variables are set correctly.\n');
+    console.error(
+      '\nPlease check your .env.local file and ensure all required variables are set correctly.\n',
+    );
     throw new Error('Invalid environment configuration');
   }
   throw error;

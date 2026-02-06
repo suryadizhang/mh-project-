@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test'
+import { defineConfig, devices } from '@playwright/test';
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -21,7 +21,7 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry'
+    trace: 'on-first-retry',
   },
 
   /* Configure projects for major browsers */
@@ -30,23 +30,23 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: {
         ...devices['iPhone 12'],
-        viewport: { width: 375, height: 667 }
-      }
+        viewport: { width: 375, height: 667 },
+      },
     },
     {
       name: 'Tablet iPad',
       use: {
         ...devices['iPad'],
-        viewport: { width: 768, height: 1024 }
-      }
+        viewport: { width: 768, height: 1024 },
+      },
     },
     {
       name: 'Desktop Chrome',
       use: {
         ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 720 }
-      }
-    }
+        viewport: { width: 1280, height: 720 },
+      },
+    },
   ],
 
   /* Run your local dev server before starting the tests */
@@ -54,6 +54,6 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000 // 2 minutes
-  }
-})
+    timeout: 120 * 1000, // 2 minutes
+  },
+});

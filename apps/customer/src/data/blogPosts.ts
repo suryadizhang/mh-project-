@@ -2,23 +2,23 @@
 // ===============================================
 
 export interface BlogPost {
-  id: number
-  title: string
-  slug: string
-  excerpt: string
-  content?: string
-  metaDescription: string
-  keywords: string[]
-  author: string
-  date: string
-  readTime: string
-  category: string
-  serviceArea: string
-  eventType: string
-  featured?: boolean
-  seasonal?: boolean
-  image?: string
-  imageAlt?: string
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content?: string;
+  metaDescription: string;
+  keywords: string[];
+  author: string;
+  date: string;
+  readTime: string;
+  category: string;
+  serviceArea: string;
+  eventType: string;
+  featured?: boolean;
+  seasonal?: boolean;
+  image?: string;
+  imageAlt?: string;
 }
 
 export const blogPosts: BlogPost[] = [
@@ -39,7 +39,7 @@ export const blogPosts: BlogPost[] = [
       'mobile hibachi chef',
       'san francisco catering',
       'live cooking show',
-      'hibachi at home'
+      'hibachi at home',
     ],
     author: 'Chef Takeshi',
     date: 'August 14, 2025',
@@ -47,7 +47,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Service Areas',
     serviceArea: 'Bay Area',
     eventType: 'General',
-    featured: true
+    featured: true,
   },
   {
     id: 2,
@@ -62,7 +62,7 @@ export const blogPosts: BlogPost[] = [
       'romantic dinner at home',
       'date night catering',
       'couples hibachi',
-      'romantic dining'
+      'romantic dining',
     ],
     author: 'Chef Maria',
     date: 'August 10, 2025',
@@ -74,7 +74,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/date-night-hibachi.svg',
     imageAlt:
-      'Romantic couple enjoying intimate hibachi date night at home with candles, wine, and premium cuisine'
+      'Romantic couple enjoying intimate hibachi date night at home with candles, wine, and premium cuisine',
   },
   {
     id: 3,
@@ -89,7 +89,7 @@ export const blogPosts: BlogPost[] = [
       'hibachi birthday',
       'mobile hibachi sacramento',
       'party catering sacramento',
-      'birthday entertainment'
+      'birthday entertainment',
     ],
     author: 'Sarah Chen',
     date: 'August 8, 2025',
@@ -99,7 +99,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Birthday',
     featured: true,
     image: '/images/blog/birthday-hibachi-party.svg',
-    imageAlt: 'Birthday hibachi celebration with cake, balloons, and party atmosphere'
+    imageAlt: 'Birthday hibachi celebration with cake, balloons, and party atmosphere',
   },
   {
     id: 4,
@@ -114,7 +114,7 @@ export const blogPosts: BlogPost[] = [
       'business catering san jose',
       'team building activities',
       'corporate hibachi',
-      'office catering'
+      'office catering',
     ],
     author: 'David Kim',
     date: 'February 6, 2025',
@@ -125,7 +125,7 @@ export const blogPosts: BlogPost[] = [
     featured: true,
     image: '/images/blog/corporate-hibachi-event.svg',
     imageAlt:
-      'Corporate hibachi event with professional team building and business executives dining together'
+      'Corporate hibachi event with professional team building and business executives dining together',
   },
   {
     id: 5,
@@ -140,7 +140,7 @@ export const blogPosts: BlogPost[] = [
       'unique wedding reception',
       'hibachi wedding',
       'interactive wedding dining',
-      'bay area weddings'
+      'bay area weddings',
     ],
     author: 'Chef Yuki',
     date: 'February 4, 2025',
@@ -150,7 +150,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Wedding',
     image: '/images/blog/wedding-hibachi-celebration.svg',
     imageAlt:
-      'Elegant wedding hibachi celebration with bride, groom, wedding party, floral decorations, unity candles, and chef performance'
+      'Elegant wedding hibachi celebration with bride, groom, wedding party, floral decorations, unity candles, and chef performance',
   },
   {
     id: 6,
@@ -165,7 +165,7 @@ export const blogPosts: BlogPost[] = [
       'hibachi graduation',
       'mobile chef oakland',
       'celebration catering oakland',
-      'party entertainment'
+      'party entertainment',
     ],
     author: 'Michelle Park',
     date: 'February 2, 2025',
@@ -175,7 +175,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Graduation',
     image: '/images/blog/graduation-celebration-hibachi.svg',
     imageAlt:
-      'Graduate in cap and gown with proud family, academic symbols, graduation decorations, and celebration feast'
+      'Graduate in cap and gown with proud family, academic symbols, graduation decorations, and celebration feast',
   },
   {
     id: 7,
@@ -190,7 +190,7 @@ export const blogPosts: BlogPost[] = [
       'outdoor hibachi spring',
       'garden party catering',
       'seasonal menu',
-      'fresh ingredients'
+      'fresh ingredients',
     ],
     author: 'Chef Takeshi',
     date: 'January 30, 2025',
@@ -201,7 +201,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/spring-garden-hibachi.svg',
     imageAlt:
-      'Spring hibachi catering in garden setting with cherry blossoms and fresh seasonal ingredients'
+      'Spring hibachi catering in garden setting with cherry blossoms and fresh seasonal ingredients',
   },
   {
     id: 8,
@@ -216,7 +216,7 @@ export const blogPosts: BlogPost[] = [
       'holiday party ideas',
       'mobile hibachi fremont',
       'winter party catering',
-      'holiday entertaining'
+      'holiday entertaining',
     ],
     author: 'Carlos Rodriguez',
     date: 'January 28, 2025',
@@ -226,7 +226,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Holiday',
     image: '/images/blog/holiday-hibachi-celebration.svg',
     imageAlt:
-      'Holiday hibachi celebration with festive decorations, snow, and winter party atmosphere'
+      'Holiday hibachi celebration with festive decorations, snow, and winter party atmosphere',
   },
   {
     id: 9,
@@ -241,7 +241,7 @@ export const blogPosts: BlogPost[] = [
       'backyard catering',
       'outdoor hibachi',
       'summer party ideas',
-      'mobile hibachi summer'
+      'mobile hibachi summer',
     ],
     author: 'Chef Maria',
     date: 'January 26, 2025',
@@ -252,7 +252,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/poolside-hibachi-party.svg',
     imageAlt:
-      'Summer poolside hibachi party with floating guests, pool umbrellas, tropical drinks, and chef by the water'
+      'Summer poolside hibachi party with floating guests, pool umbrellas, tropical drinks, and chef by the water',
   },
   {
     id: 10,
@@ -267,7 +267,7 @@ export const blogPosts: BlogPost[] = [
       'romantic hibachi dinner',
       'anniversary catering',
       'intimate dining',
-      'couples hibachi'
+      'couples hibachi',
     ],
     author: 'Sophie Chen',
     date: 'January 24, 2025',
@@ -277,7 +277,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Anniversary',
     image: '/images/blog/anniversary-hibachi-celebration.svg',
     imageAlt:
-      'Romantic anniversary hibachi celebration with candles, wine glasses, and heart decorations'
+      'Romantic anniversary hibachi celebration with candles, wine glasses, and heart decorations',
   },
   {
     id: 11,
@@ -292,7 +292,7 @@ export const blogPosts: BlogPost[] = [
       'children hibachi party',
       'kid-friendly catering',
       'birthday entertainment roseville',
-      'family hibachi'
+      'family hibachi',
     ],
     author: 'Lisa Wong',
     date: 'January 22, 2025',
@@ -302,7 +302,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Kids Birthday',
     image: '/images/blog/birthday-hibachi-party.svg',
     imageAlt:
-      'Kids birthday hibachi party with balloons, birthday cake, and children enjoying cooking show'
+      'Kids birthday hibachi party with balloons, birthday cake, and children enjoying cooking show',
   },
   {
     id: 12,
@@ -317,14 +317,14 @@ export const blogPosts: BlogPost[] = [
       'team building catering',
       'business retreat dining',
       'corporate hibachi folsom',
-      'group catering'
+      'group catering',
     ],
     author: 'Michael Kim',
     date: 'January 20, 2025',
     readTime: '7 min read',
     category: 'Corporate',
     serviceArea: 'Folsom',
-    eventType: 'Corporate Retreat'
+    eventType: 'Corporate Retreat',
   },
   {
     id: 13,
@@ -342,14 +342,14 @@ export const blogPosts: BlogPost[] = [
       'college hibachi',
       'student party catering',
       'affordable hibachi davis',
-      'group discounts'
+      'group discounts',
     ],
     author: 'Amanda Lee',
     date: 'January 18, 2025',
     readTime: '5 min read',
     category: 'Student',
     serviceArea: 'Davis',
-    eventType: 'University Party'
+    eventType: 'University Party',
   },
   {
     id: 14,
@@ -364,7 +364,7 @@ export const blogPosts: BlogPost[] = [
       'large group catering',
       'family hibachi',
       'reunion catering stockton',
-      'multi-generational dining'
+      'multi-generational dining',
     ],
     author: 'Robert Martinez',
     date: 'January 16, 2025',
@@ -374,7 +374,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Family Reunion',
     image: '/images/blog/family-hibachi-gathering.svg',
     imageAlt:
-      'Multi-generational family hibachi gathering with grandparents, parents, and children around large table'
+      'Multi-generational family hibachi gathering with grandparents, parents, and children around large table',
   },
   {
     id: 15,
@@ -389,7 +389,7 @@ export const blogPosts: BlogPost[] = [
       'cultural celebration catering',
       'hibachi quinceanera',
       'traditional party catering',
-      'hispanic celebrations'
+      'hispanic celebrations',
     ],
     author: 'Elena Flores',
     date: 'January 14, 2025',
@@ -399,7 +399,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Quinceañera',
     image: '/images/blog/quinceanera-celebration-hibachi.svg',
     imageAlt:
-      'Elegant quinceañera celebration hibachi scene with birthday girl in princess dress and tiara, family in formal attire, mariachi musicians, cultural decorations, and traditional coming-of-age celebration'
+      'Elegant quinceañera celebration hibachi scene with birthday girl in princess dress and tiara, family in formal attire, mariachi musicians, cultural decorations, and traditional coming-of-age celebration',
   },
   {
     id: 16,
@@ -417,14 +417,14 @@ export const blogPosts: BlogPost[] = [
       'wine pairing hibachi',
       'livermore catering',
       'sophisticated dining',
-      'wine country events'
+      'wine country events',
     ],
     author: 'Chef Thomas',
     date: 'January 12, 2025',
     readTime: '8 min read',
     category: 'Wine Country',
     serviceArea: 'Livermore',
-    eventType: 'Wine Tasting'
+    eventType: 'Wine Tasting',
   },
   {
     id: 17,
@@ -439,7 +439,7 @@ export const blogPosts: BlogPost[] = [
       'seasonal hibachi menu',
       'autumn party catering',
       'seasonal ingredients',
-      'fall entertaining'
+      'fall entertaining',
     ],
     author: 'Chef Yuki',
     date: 'January 10, 2025',
@@ -450,7 +450,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/autumn-harvest-hibachi.svg',
     imageAlt:
-      'Autumn harvest hibachi with fall leaves, pumpkins, seasonal vegetables, and thanksgiving elements'
+      'Autumn harvest hibachi with fall leaves, pumpkins, seasonal vegetables, and thanksgiving elements',
   },
   {
     id: 18,
@@ -468,7 +468,7 @@ export const blogPosts: BlogPost[] = [
       'nye party catering',
       'countdown celebration',
       'party hibachi',
-      'holiday entertaining'
+      'holiday entertaining',
     ],
     author: 'DJ Park',
     date: 'January 8, 2025',
@@ -476,7 +476,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Holidays',
     serviceArea: 'All Areas',
     eventType: 'New Years',
-    seasonal: true
+    seasonal: true,
   },
   {
     id: 19,
@@ -494,7 +494,7 @@ export const blogPosts: BlogPost[] = [
       'brunch catering',
       'pamper mom',
       'mothers day dining',
-      'special occasion hibachi'
+      'special occasion hibachi',
     ],
     author: 'Grace Liu',
     date: 'January 6, 2025',
@@ -502,7 +502,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Holidays',
     serviceArea: 'All Areas',
     eventType: 'Mothers Day',
-    seasonal: true
+    seasonal: true,
   },
   {
     id: 20,
@@ -520,7 +520,7 @@ export const blogPosts: BlogPost[] = [
       'dad party catering',
       'grilling entertainment',
       'fathers day dining',
-      'masculine celebration'
+      'masculine celebration',
     ],
     author: 'Chef Mike',
     date: 'January 4, 2025',
@@ -528,7 +528,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Holidays',
     serviceArea: 'All Areas',
     eventType: 'Fathers Day',
-    seasonal: true
+    seasonal: true,
   },
   {
     id: 21,
@@ -546,14 +546,14 @@ export const blogPosts: BlogPost[] = [
       'gender reveal catering',
       'baby celebration',
       'pregnancy party',
-      'interactive baby shower'
+      'interactive baby shower',
     ],
     author: 'Jennifer Chen',
     date: 'January 2, 2025',
     readTime: '5 min read',
     category: 'Celebrations',
     serviceArea: 'All Areas',
-    eventType: 'Baby Shower'
+    eventType: 'Baby Shower',
   },
   {
     id: 22,
@@ -568,7 +568,7 @@ export const blogPosts: BlogPost[] = [
       'career celebration',
       'retirement catering',
       'achievement dining',
-      'professional celebration'
+      'professional celebration',
     ],
     author: 'Harold Kim',
     date: 'December 30, 2024',
@@ -578,7 +578,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Retirement',
     image: '/images/blog/retirement-celebration-hibachi.svg',
     imageAlt:
-      'Elegant retirement celebration hibachi scene with honored retiree, family members, golden watch, career memorabilia, retirement gifts, and festive atmosphere celebrating years of achievement'
+      'Elegant retirement celebration hibachi scene with honored retiree, family members, golden watch, career memorabilia, retirement gifts, and festive atmosphere celebrating years of achievement',
   },
   {
     id: 23,
@@ -596,14 +596,14 @@ export const blogPosts: BlogPost[] = [
       'corporate holiday catering',
       'workplace celebration',
       'team bonding dining',
-      'business holiday party'
+      'business holiday party',
     ],
     author: 'Patricia Wong',
     date: 'December 28, 2024',
     readTime: '7 min read',
     category: 'Corporate',
     serviceArea: 'All Areas',
-    eventType: 'Office Party'
+    eventType: 'Office Party',
   },
   {
     id: 24,
@@ -621,14 +621,14 @@ export const blogPosts: BlogPost[] = [
       'japanese cooking culture',
       'hibachi entertainment',
       'cooking show',
-      'cultural dining'
+      'cultural dining',
     ],
     author: 'Chef Takeshi',
     date: 'December 26, 2024',
     readTime: '8 min read',
     category: 'Educational',
     serviceArea: 'All Areas',
-    eventType: 'Educational'
+    eventType: 'Educational',
   },
   {
     id: 25,
@@ -646,7 +646,7 @@ export const blogPosts: BlogPost[] = [
       'fresh ingredients',
       'seasonal cooking',
       'menu adaptation',
-      'quality ingredients'
+      'quality ingredients',
     ],
     author: 'Chef Maria',
     date: 'December 24, 2024',
@@ -654,7 +654,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Educational',
     serviceArea: 'All Areas',
     eventType: 'Educational',
-    seasonal: true
+    seasonal: true,
   },
 
   // NEW EVENT-SPECIFIC COMPREHENSIVE POSTS (August 2025)
@@ -671,7 +671,7 @@ export const blogPosts: BlogPost[] = [
       'outdoor hibachi chef',
       'private chef at home',
       'BBQ alternative',
-      'Bay Area backyard parties'
+      'Bay Area backyard parties',
     ],
     author: 'Chef Takeshi',
     date: 'August 16, 2025',
@@ -682,7 +682,7 @@ export const blogPosts: BlogPost[] = [
     featured: true,
     image: '/images/blog/outdoor-hibachi-adventure.svg',
     imageAlt:
-      'Outdoor hibachi adventure with family enjoying fresh air, nature setting, and backyard cooking'
+      'Outdoor hibachi adventure with family enjoying fresh air, nature setting, and backyard cooking',
   },
   {
     id: 27,
@@ -697,7 +697,7 @@ export const blogPosts: BlogPost[] = [
       'waterside catering',
       'summer hibachi party',
       'poolside chef',
-      'Bay Area pool parties'
+      'Bay Area pool parties',
     ],
     author: 'Chef Maria',
     date: 'August 15, 2025',
@@ -705,7 +705,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Summer Events',
     serviceArea: 'Bay Area',
     eventType: 'Pool Party',
-    seasonal: true
+    seasonal: true,
   },
   {
     id: 28,
@@ -720,7 +720,7 @@ export const blogPosts: BlogPost[] = [
       'educational hibachi',
       'kids cooking show',
       'school event catering',
-      'Sacramento school parties'
+      'Sacramento school parties',
     ],
     author: 'Sarah Chen',
     date: 'August 14, 2025',
@@ -730,7 +730,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'School Party',
     image: '/images/blog/school-event-hibachi.svg',
     imageAlt:
-      'School event hibachi with students, teachers, educational chef, playground, and interactive cooking demonstrations for learning'
+      'School event hibachi with students, teachers, educational chef, playground, and interactive cooking demonstrations for learning',
   },
   {
     id: 29,
@@ -748,7 +748,7 @@ export const blogPosts: BlogPost[] = [
       'San Jose business catering',
       'team building activities',
       'corporate event entertainment',
-      'professional hibachi'
+      'professional hibachi',
     ],
     author: 'David Kim',
     date: 'August 13, 2025',
@@ -756,7 +756,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Corporate',
     serviceArea: 'San Jose',
     eventType: 'Corporate Event',
-    featured: true
+    featured: true,
   },
   {
     id: 30,
@@ -774,14 +774,14 @@ export const blogPosts: BlogPost[] = [
       'Napa Valley events',
       'wine country hibachi',
       'sophisticated outdoor dining',
-      'vineyard party catering'
+      'vineyard party catering',
     ],
     author: 'Chef Thomas',
     date: 'August 12, 2025',
     readTime: '9 min read',
     category: 'Wine Country',
     serviceArea: 'Napa Valley',
-    eventType: 'Vineyard Event'
+    eventType: 'Vineyard Event',
   },
   {
     id: 31,
@@ -799,7 +799,7 @@ export const blogPosts: BlogPost[] = [
       'seasonal hibachi catering',
       'Bay Area holiday events',
       'festive dining',
-      'winter party catering'
+      'winter party catering',
     ],
     author: 'Chef Yuki',
     date: 'August 11, 2025',
@@ -807,7 +807,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Holidays',
     serviceArea: 'Bay Area',
     eventType: 'Holiday Party',
-    seasonal: true
+    seasonal: true,
   },
   {
     id: 32,
@@ -825,14 +825,14 @@ export const blogPosts: BlogPost[] = [
       'private birthday catering',
       'kids birthday hibachi party',
       'Bay Area birthday catering',
-      'fun live cooking show'
+      'fun live cooking show',
     ],
     author: 'Rebecca Thompson',
     date: 'August 10, 2025',
     readTime: '8 min read',
     category: 'Birthday',
     serviceArea: 'Sacramento',
-    eventType: 'Birthday'
+    eventType: 'Birthday',
   },
   {
     id: 33,
@@ -850,14 +850,14 @@ export const blogPosts: BlogPost[] = [
       'Bay Area graduation catering',
       'academic celebration dining',
       'milestone party catering',
-      'interactive graduation entertainment'
+      'interactive graduation entertainment',
     ],
     author: 'James Chen',
     date: 'August 9, 2025',
     readTime: '7 min read',
     category: 'Celebrations',
     serviceArea: 'Bay Area',
-    eventType: 'Graduation'
+    eventType: 'Graduation',
   },
   {
     id: 34,
@@ -875,14 +875,14 @@ export const blogPosts: BlogPost[] = [
       'unique wedding food ideas',
       'Sacramento wedding hibachi',
       'wedding rehearsal dinner hibachi',
-      'live chef wedding experience'
+      'live chef wedding experience',
     ],
     author: 'Amanda Park',
     date: 'August 8, 2025',
     readTime: '9 min read',
     category: 'Weddings',
     serviceArea: 'Bay Area',
-    eventType: 'Wedding'
+    eventType: 'Wedding',
   },
   {
     id: 35,
@@ -897,7 +897,7 @@ export const blogPosts: BlogPost[] = [
       'game day hibachi chef',
       'sports party catering',
       'interactive sports viewing food',
-      'Bay Area game day hibachi'
+      'Bay Area game day hibachi',
     ],
     author: 'Tony Rodriguez',
     date: 'August 7, 2025',
@@ -907,7 +907,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Sports Party',
     image: '/images/blog/sports-victory-celebration-hibachi.svg',
     imageAlt:
-      'Sports victory celebration hibachi scene with championship team, trophies, medals, sports equipment, victory balloons, and team celebration atmosphere'
+      'Sports victory celebration hibachi scene with championship team, trophies, medals, sports equipment, victory balloons, and team celebration atmosphere',
   },
   {
     id: 36,
@@ -922,7 +922,7 @@ export const blogPosts: BlogPost[] = [
       'community hibachi events',
       'Sacramento neighborhood parties',
       'block party entertainment',
-      'community building dining'
+      'community building dining',
     ],
     author: 'Rebecca Chen',
     date: 'August 6, 2025',
@@ -932,7 +932,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Block Party',
     image: '/images/blog/outdoor-hibachi-party.svg',
     imageAlt:
-      'Outdoor neighborhood hibachi party with portable grill, community gathering, folding chairs, string lights, and picnic atmosphere'
+      'Outdoor neighborhood hibachi party with portable grill, community gathering, folding chairs, string lights, and picnic atmosphere',
   },
   {
     id: 37,
@@ -947,7 +947,7 @@ export const blogPosts: BlogPost[] = [
       'large group catering',
       'family hibachi',
       'reunion catering stockton',
-      'multi-generational dining'
+      'multi-generational dining',
     ],
     author: 'Carmen Martinez',
     date: 'August 5, 2025',
@@ -957,7 +957,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Family Reunion',
     image: '/images/blog/stockton-family-reunion-hibachi.svg',
     imageAlt:
-      'Multi-generational family reunion with hibachi cooking, grandparents, parents, children, teenagers, family banner, balloons, picnic tables, and photo booth area'
+      'Multi-generational family reunion with hibachi cooking, grandparents, parents, children, teenagers, family banner, balloons, picnic tables, and photo booth area',
   },
   {
     id: 38,
@@ -973,7 +973,7 @@ export const blogPosts: BlogPost[] = [
       'outdoor hibachi',
       'summer party ideas',
       'mobile hibachi summer',
-      'Sacramento summer events'
+      'Sacramento summer events',
     ],
     author: 'Jennifer Kim',
     date: 'August 4, 2025',
@@ -984,7 +984,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/sacramento-summer-hibachi-bbq-alternative.svg',
     imageAlt:
-      'Summer hibachi catering as BBQ alternative with professional chef, cool shade setup, fresh seafood, elegant outdoor dining vs hot traditional BBQ'
+      'Summer hibachi catering as BBQ alternative with professional chef, cool shade setup, fresh seafood, elegant outdoor dining vs hot traditional BBQ',
   },
   {
     id: 39,
@@ -999,7 +999,7 @@ export const blogPosts: BlogPost[] = [
       'San Francisco NYE catering',
       'hibachi party ideas',
       'countdown celebration food',
-      'luxury chef experience'
+      'luxury chef experience',
     ],
     author: 'Alexandra Chen',
     date: 'August 3, 2025',
@@ -1010,7 +1010,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/bay-area-new-years-eve-hibachi.svg',
     imageAlt:
-      "New Year's Eve hibachi celebration with countdown clock, fireworks, formal dining, champagne service, Bay Area skyline, and elegant party atmosphere"
+      "New Year's Eve hibachi celebration with countdown clock, fireworks, formal dining, champagne service, Bay Area skyline, and elegant party atmosphere",
   },
   {
     id: 40,
@@ -1025,7 +1025,7 @@ export const blogPosts: BlogPost[] = [
       'outdoor event food station',
       'mobile hibachi chef',
       'Northern California festivals',
-      'hibachi show cooking'
+      'hibachi show cooking',
     ],
     author: 'Maria Santos',
     date: 'August 2, 2025',
@@ -1036,7 +1036,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/california-seasonal-festival-hibachi.svg',
     imageAlt:
-      'California seasonal festival with mobile hibachi catering, professional chef cooking, festival crowd, colorful tents, balloons, and community celebration atmosphere'
+      'California seasonal festival with mobile hibachi catering, professional chef cooking, festival crowd, colorful tents, balloons, and community celebration atmosphere',
   },
 
   // HYPER-TARGETED LOCATION-SPECIFIC POSTS (August 2025)
@@ -1053,7 +1053,7 @@ export const blogPosts: BlogPost[] = [
       'private hibachi chef San Francisco',
       'San Francisco party catering',
       'Bay Area hibachi chef in San Francisco',
-      'SF birthday & holiday hibachi'
+      'SF birthday & holiday hibachi',
     ],
     author: 'Chef Takeshi',
     date: 'August 16, 2025',
@@ -1065,7 +1065,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: false,
     image: '/images/blog/san-francisco-hibachi-private-chef.svg',
     imageAlt:
-      'San Francisco private hibachi chef experience with Golden Gate Bridge view, elegant apartment dining, premium place settings, and sophisticated city atmosphere'
+      'San Francisco private hibachi chef experience with Golden Gate Bridge view, elegant apartment dining, premium place settings, and sophisticated city atmosphere',
   },
   {
     id: 42,
@@ -1080,7 +1080,7 @@ export const blogPosts: BlogPost[] = [
       'Silicon Valley hibachi chef',
       'San Jose corporate catering hibachi',
       'tech company party catering San Jose',
-      'hibachi for San Jose backyard parties'
+      'hibachi for San Jose backyard parties',
     ],
     author: 'David Kim',
     date: 'August 16, 2025',
@@ -1092,7 +1092,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: false,
     image: '/images/blog/silicon-valley-tech-corporate-hibachi.svg',
     imageAlt:
-      'Silicon Valley tech corporate hibachi catering with modern office buildings, tech employees, team building event, high-tech grill setup, and innovative atmosphere'
+      'Silicon Valley tech corporate hibachi catering with modern office buildings, tech employees, team building event, high-tech grill setup, and innovative atmosphere',
   },
   {
     id: 43,
@@ -1110,7 +1110,7 @@ export const blogPosts: BlogPost[] = [
       'East Bay hibachi chef for parties',
       'Oakland birthday party catering',
       'hibachi show in East Bay backyard',
-      'private hibachi chef Oakland'
+      'private hibachi chef Oakland',
     ],
     author: 'Michelle Park',
     date: 'August 16, 2025',
@@ -1118,7 +1118,7 @@ export const blogPosts: BlogPost[] = [
     category: 'East Bay Events',
     serviceArea: 'Oakland',
     eventType: 'Backyard Entertainment',
-    seasonal: false
+    seasonal: false,
   },
   {
     id: 44,
@@ -1133,7 +1133,7 @@ export const blogPosts: BlogPost[] = [
       'corporate hibachi chef Santa Clara',
       'Silicon Valley hibachi dining',
       'Santa Clara backyard hibachi',
-      'Santa Clara party catering hibachi'
+      'Santa Clara party catering hibachi',
     ],
     author: 'Chef Thomas',
     date: 'August 16, 2025',
@@ -1144,7 +1144,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: false,
     image: '/images/blog/santa-clara-corporate-backyard-hibachi.svg',
     imageAlt:
-      'Santa Clara hibachi catering for Silicon Valley professionals with corporate office buildings, backyard party setup, tech executives, and family dining'
+      'Santa Clara hibachi catering for Silicon Valley professionals with corporate office buildings, backyard party setup, tech executives, and family dining',
   },
   {
     id: 45,
@@ -1159,7 +1159,7 @@ export const blogPosts: BlogPost[] = [
       'backyard hibachi chef Sunnyvale',
       'Sunnyvale party catering',
       'hibachi dining experience Sunnyvale',
-      'private hibachi chef for Sunnyvale homes'
+      'private hibachi chef for Sunnyvale homes',
     ],
     author: 'Sarah Chen',
     date: 'August 16, 2025',
@@ -1170,7 +1170,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: false,
     image: '/images/blog/sunnyvale-private-home-hibachi.svg',
     imageAlt:
-      'Sunnyvale private home hibachi dining experience with elegant residential setting, professional chef, family gathering, and restaurant-quality presentation'
+      'Sunnyvale private home hibachi dining experience with elegant residential setting, professional chef, family gathering, and restaurant-quality presentation',
   },
   {
     id: 46,
@@ -1185,7 +1185,7 @@ export const blogPosts: BlogPost[] = [
       'tech party hibachi Mountain View',
       'hibachi chef for Mountain View homes',
       'backyard hibachi party Mountain View',
-      'corporate hibachi catering in Mountain View'
+      'corporate hibachi catering in Mountain View',
     ],
     author: 'Alex Rodriguez',
     date: 'August 16, 2025',
@@ -1196,7 +1196,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: false,
     image: '/images/blog/mountain-view-tech-party-hibachi.svg',
     imageAlt:
-      'Mountain View tech party hibachi with Google campus influence, Silicon Valley innovation, corporate and backyard events, tech employees, and modern atmosphere'
+      'Mountain View tech party hibachi with Google campus influence, Silicon Valley innovation, corporate and backyard events, tech employees, and modern atmosphere',
   },
   {
     id: 47,
@@ -1211,7 +1211,7 @@ export const blogPosts: BlogPost[] = [
       'Stanford hibachi private chef',
       'Palo Alto backyard hibachi parties',
       'luxury hibachi catering Palo Alto',
-      'wedding hibachi chef Palo Alto'
+      'wedding hibachi chef Palo Alto',
     ],
     author: 'Chef Yuki',
     date: 'August 16, 2025',
@@ -1223,7 +1223,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: false,
     image: '/images/blog/palo-alto-luxury-stanford-hibachi.svg',
     imageAlt:
-      'Palo Alto luxury hibachi catering with Stanford University influence, elegant mansion setting, fine dining, and premium private chef experience'
+      'Palo Alto luxury hibachi catering with Stanford University influence, elegant mansion setting, fine dining, and premium private chef experience',
   },
 
   // LOCATION + EVENT TYPE COMBINATION POSTS
@@ -1240,7 +1240,7 @@ export const blogPosts: BlogPost[] = [
       'Silicon Valley hibachi trend',
       'San Jose home catering',
       'tech worker party catering',
-      'interactive dining San Jose'
+      'interactive dining San Jose',
     ],
     author: 'David Kim',
     date: 'August 16, 2025',
@@ -1251,7 +1251,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: false,
     image: '/images/blog/san-jose-backyard-hibachi-trend.svg',
     imageAlt:
-      'San Jose backyard hibachi trend with Silicon Valley tech workers, modern home setting, social media buzz, and trending interactive dining experience'
+      'San Jose backyard hibachi trend with Silicon Valley tech workers, modern home setting, social media buzz, and trending interactive dining experience',
   },
   {
     id: 49,
@@ -1266,7 +1266,7 @@ export const blogPosts: BlogPost[] = [
       'Stanford area business catering',
       'Palo Alto team building',
       'university corporate events',
-      'professional hibachi Stanford'
+      'professional hibachi Stanford',
     ],
     author: 'Jennifer Chen',
     date: 'August 16, 2025',
@@ -1274,7 +1274,7 @@ export const blogPosts: BlogPost[] = [
     category: 'University Corporate',
     serviceArea: 'Palo Alto',
     eventType: 'Stanford Corporate',
-    seasonal: false
+    seasonal: false,
   },
   {
     id: 50,
@@ -1292,7 +1292,7 @@ export const blogPosts: BlogPost[] = [
       'SF hibachi at home',
       'city apartment hibachi',
       'rooftop hibachi SF',
-      'urban holiday catering'
+      'urban holiday catering',
     ],
     author: 'Chef Takeshi',
     date: 'August 16, 2025',
@@ -1300,7 +1300,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Urban Holidays',
     serviceArea: 'San Francisco',
     eventType: 'Holiday Urban',
-    seasonal: true
+    seasonal: true,
   },
   {
     id: 51,
@@ -1318,7 +1318,7 @@ export const blogPosts: BlogPost[] = [
       'Oakland wedding catering',
       'unique wedding reception Oakland',
       'East Bay hibachi chef',
-      'interactive wedding dining'
+      'interactive wedding dining',
     ],
     author: 'Amanda Park',
     date: 'August 16, 2025',
@@ -1326,7 +1326,7 @@ export const blogPosts: BlogPost[] = [
     category: 'East Bay Weddings',
     serviceArea: 'Oakland',
     eventType: 'Wedding Reception',
-    seasonal: false
+    seasonal: false,
   },
   {
     id: 52,
@@ -1344,7 +1344,7 @@ export const blogPosts: BlogPost[] = [
       'Google office hibachi',
       'LinkedIn party catering',
       'startup birthday celebrations',
-      'tech employee parties'
+      'tech employee parties',
     ],
     author: 'Alex Rodriguez',
     date: 'August 16, 2025',
@@ -1352,7 +1352,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Tech Birthdays',
     serviceArea: 'Mountain View',
     eventType: 'Tech Birthday',
-    seasonal: false
+    seasonal: false,
   },
   {
     id: 53,
@@ -1370,7 +1370,7 @@ export const blogPosts: BlogPost[] = [
       'multi-generational dining Sunnyvale',
       'family reunion hibachi',
       'grandparent visit catering',
-      'Sunnyvale home events'
+      'Sunnyvale home events',
     ],
     author: 'Sarah Chen',
     date: 'August 16, 2025',
@@ -1378,7 +1378,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Family Celebrations',
     serviceArea: 'Sunnyvale',
     eventType: 'Family Multi-Gen',
-    seasonal: false
+    seasonal: false,
   },
   {
     id: 54,
@@ -1396,7 +1396,7 @@ export const blogPosts: BlogPost[] = [
       'Silicon Valley graduation parties',
       'Stanford graduation catering',
       'SCU celebration hibachi',
-      'tech graduate parties'
+      'tech graduate parties',
     ],
     author: 'Dr. Jennifer Park',
     date: 'August 16, 2025',
@@ -1404,7 +1404,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Academic Success',
     serviceArea: 'Santa Clara',
     eventType: 'Graduate Celebration',
-    seasonal: false
+    seasonal: false,
   },
 
   // WORLD-CLASS SEO POSTS - INTEGRATED FROM WORLDCLASSSEO.TS
@@ -1428,7 +1428,7 @@ export const blogPosts: BlogPost[] = [
       'private hibachi chef San Jose',
       'San Jose backyard party catering',
       'Silicon Valley home hibachi',
-      'tech family hibachi parties'
+      'tech family hibachi parties',
     ],
     author: 'Chef David Kim',
     date: 'August 20, 2025',
@@ -1436,7 +1436,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Outdoor Events',
     serviceArea: 'San Jose',
     eventType: 'Backyard Party',
-    featured: true
+    featured: true,
   },
   {
     id: 56,
@@ -1454,7 +1454,7 @@ export const blogPosts: BlogPost[] = [
       'Stanford area business catering',
       'Palo Alto team building hibachi',
       'corporate chef Palo Alto',
-      'business event catering Stanford'
+      'business event catering Stanford',
     ],
     author: 'Jennifer Chen',
     date: 'August 25, 2025',
@@ -1462,7 +1462,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Corporate',
     serviceArea: 'Palo Alto',
     eventType: 'Corporate',
-    featured: true
+    featured: true,
   },
   {
     id: 57,
@@ -1477,7 +1477,7 @@ export const blogPosts: BlogPost[] = [
       'Google area party catering',
       'Mountain View tech birthday',
       'hibachi birthday Mountain View',
-      'tech worker celebration catering'
+      'tech worker celebration catering',
     ],
     author: 'Alex Rodriguez',
     date: 'September 1, 2025',
@@ -1485,7 +1485,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Birthday',
     serviceArea: 'Mountain View',
     eventType: 'Birthday',
-    featured: true
+    featured: true,
   },
   {
     id: 58,
@@ -1500,7 +1500,7 @@ export const blogPosts: BlogPost[] = [
       'East Bay wedding catering',
       'Oakland wedding hibachi chef',
       'interactive wedding dining Oakland',
-      'unique wedding reception East Bay'
+      'unique wedding reception East Bay',
     ],
     author: 'Amanda Park',
     date: 'September 8, 2025',
@@ -1508,7 +1508,7 @@ export const blogPosts: BlogPost[] = [
     category: 'Weddings',
     serviceArea: 'Oakland',
     eventType: 'Wedding',
-    featured: true
+    featured: true,
   },
   {
     id: 59,
@@ -1523,7 +1523,7 @@ export const blogPosts: BlogPost[] = [
       'SCU graduation party catering',
       'Santa Clara graduation hibachi',
       'university graduation catering',
-      'academic celebration hibachi'
+      'academic celebration hibachi',
     ],
     author: 'Dr. Jennifer Park',
     date: 'September 15, 2025',
@@ -1533,7 +1533,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Graduation',
     image: '/images/blog/santa-clara-university-graduation-hibachi.svg',
     imageAlt:
-      'Santa Clara University graduation celebration with SCU campus buildings featuring Mission Santa Clara bell tower, academic ceremony venue with graduates in caps and gowns holding diplomas, proud families attending, hibachi chef in graduation cap preparing celebratory meal, SCU Broncos branding in cardinal red and gold colors, outdoor dining setup with academic books and graduation balloons'
+      'Santa Clara University graduation celebration with SCU campus buildings featuring Mission Santa Clara bell tower, academic ceremony venue with graduates in caps and gowns holding diplomas, proud families attending, hibachi chef in graduation cap preparing celebratory meal, SCU Broncos branding in cardinal red and gold colors, outdoor dining setup with academic books and graduation balloons',
   },
 
   // Month 2: Seasonal & Holiday Content
@@ -1550,7 +1550,7 @@ export const blogPosts: BlogPost[] = [
       'SF winter party catering',
       'San Francisco holiday catering',
       'apartment holiday party SF',
-      'winter hibachi San Francisco'
+      'winter hibachi San Francisco',
     ],
     author: 'Chef Takeshi',
     date: 'September 22, 2025',
@@ -1561,7 +1561,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/summer-hibachi-dining-seasonal.svg',
     imageAlt:
-      'Summer hibachi dining experience with bright sunny sky, outdoor hibachi setup with colorful seasonal grills, families in summer clothing enjoying fresh seasonal ingredients, patio umbrellas providing shade, hibachi chef in summer hat, vibrant garden flowers and trees, summer beverages and outdoor dining atmosphere with butterflies and seasonal elements'
+      'Summer hibachi dining experience with bright sunny sky, outdoor hibachi setup with colorful seasonal grills, families in summer clothing enjoying fresh seasonal ingredients, patio umbrellas providing shade, hibachi chef in summer hat, vibrant garden flowers and trees, summer beverages and outdoor dining atmosphere with butterflies and seasonal elements',
   },
   {
     id: 61,
@@ -1576,7 +1576,7 @@ export const blogPosts: BlogPost[] = [
       'Silicon Valley team building',
       'startup team hibachi',
       'tech company team building',
-      'startup celebration catering'
+      'startup celebration catering',
     ],
     author: 'David Kim',
     date: 'September 29, 2025',
@@ -1586,7 +1586,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Corporate Tech',
     image: '/images/blog/tech-startup-hibachi-silicon-valley.svg',
     imageAlt:
-      'Silicon Valley tech startup team building event with modern office buildings, diverse team of developers and product managers around hibachi setup, laptops and tech devices, startup company logos, innovative cooking experience bringing tech workers together in collaborative environment'
+      'Silicon Valley tech startup team building event with modern office buildings, diverse team of developers and product managers around hibachi setup, laptops and tech devices, startup company logos, innovative cooking experience bringing tech workers together in collaborative environment',
   },
   {
     id: 62,
@@ -1601,7 +1601,7 @@ export const blogPosts: BlogPost[] = [
       'multi-generational dining Sunnyvale',
       'family reunion catering',
       'Sunnyvale family party hibachi',
-      'multi-age party entertainment'
+      'multi-age party entertainment',
     ],
     author: 'Sarah Chen',
     date: 'October 6, 2025',
@@ -1611,7 +1611,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Family Reunion',
     image: '/images/blog/sunnyvale-family-reunion-multi-generation.svg',
     imageAlt:
-      'Sunnyvale family reunion with four generations gathered around hibachi setup, residential homes in background, grandparents with canes, parents, teenagers with phones, young children with toys, toddlers, multi-generational dining table with family-friendly atmosphere and warm community feeling'
+      'Sunnyvale family reunion with four generations gathered around hibachi setup, residential homes in background, grandparents with canes, parents, teenagers with phones, young children with toys, toddlers, multi-generational dining table with family-friendly atmosphere and warm community feeling',
   },
 
   // Month 4: Advanced Local SEO Content
@@ -1628,7 +1628,7 @@ export const blogPosts: BlogPost[] = [
       'pool party catering Bay Area',
       'summer hibachi entertainment',
       'backyard pool party chef',
-      'Bay Area summer catering'
+      'Bay Area summer catering',
     ],
     author: 'Chef Takeshi',
     date: 'October 13, 2025',
@@ -1639,7 +1639,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/bay-area-pool-party-hibachi-summer.svg',
     imageAlt:
-      'Bay Area pool party with hibachi chef cooking poolside, swimmers enjoying the pool, guests on loungers with sunglasses and sun hats, beach balls and pool umbrellas, summer beverages, poolside hibachi setup with colorful summer atmosphere and splash entertainment'
+      'Bay Area pool party with hibachi chef cooking poolside, swimmers enjoying the pool, guests on loungers with sunglasses and sun hats, beach balls and pool umbrellas, summer beverages, poolside hibachi setup with colorful summer atmosphere and splash entertainment',
   },
   {
     id: 64,
@@ -1654,7 +1654,7 @@ export const blogPosts: BlogPost[] = [
       'romantic hibachi Sacramento',
       'engagement party catering',
       'Sacramento couple celebration',
-      'interactive romantic dining'
+      'interactive romantic dining',
     ],
     author: 'Jennifer Chen',
     date: 'October 20, 2025',
@@ -1664,7 +1664,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Engagement',
     image: '/images/blog/sacramento-engagement-party-hibachi-romantic.svg',
     imageAlt:
-      'Sacramento engagement party hibachi romantic celebration featuring romantic pink sky with stars, Sacramento skyline with Capitol building dome, engaged couple in formal attire with engagement ring and bouquet, romantic hibachi chef in red outfit with heart-accented chef hat, celebration guests taking photos and giving gifts, heart-shaped hibachi grill arrangement with pink and red flames, romantic dining table with pink place settings, champagne and red wine, love and engagement zones, romantic candles, heart decorations, and engagement flowers creating intimate Sacramento romance atmosphere'
+      'Sacramento engagement party hibachi romantic celebration featuring romantic pink sky with stars, Sacramento skyline with Capitol building dome, engaged couple in formal attire with engagement ring and bouquet, romantic hibachi chef in red outfit with heart-accented chef hat, celebration guests taking photos and giving gifts, heart-shaped hibachi grill arrangement with pink and red flames, romantic dining table with pink place settings, champagne and red wine, love and engagement zones, romantic candles, heart decorations, and engagement flowers creating intimate Sacramento romance atmosphere',
   },
   {
     id: 65,
@@ -1679,7 +1679,7 @@ export const blogPosts: BlogPost[] = [
       'anniversary catering Fremont',
       'milestone celebration hibachi',
       'Fremont romantic dining',
-      'anniversary party catering'
+      'anniversary party catering',
     ],
     author: 'Carlos Martinez',
     date: 'October 27, 2025',
@@ -1689,7 +1689,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Anniversary',
     image: '/images/blog/fremont-anniversary-celebration-hibachi-milestone.svg',
     imageAlt:
-      'Fremont anniversary celebration hibachi milestone featuring purple anniversary sky with golden stars, Fremont cityscape, anniversary couple in formal attire with golden jewelry and anniversary flowers, hibachi chef with 25th anniversary chef hat, family guests with photo albums and anniversary cards, golden anniversary hibachi grill arrangement with purple and gold flames, anniversary dining table with golden place settings, champagne and wine, milestone memory zones with 25th anniversary numbers, golden anniversary candles, and anniversary flowers creating memorable Fremont milestone atmosphere'
+      'Fremont anniversary celebration hibachi milestone featuring purple anniversary sky with golden stars, Fremont cityscape, anniversary couple in formal attire with golden jewelry and anniversary flowers, hibachi chef with 25th anniversary chef hat, family guests with photo albums and anniversary cards, golden anniversary hibachi grill arrangement with purple and gold flames, anniversary dining table with golden place settings, champagne and wine, milestone memory zones with 25th anniversary numbers, golden anniversary candles, and anniversary flowers creating memorable Fremont milestone atmosphere',
   },
   {
     id: 66,
@@ -1704,7 +1704,7 @@ export const blogPosts: BlogPost[] = [
       'baby shower catering',
       'interactive baby shower entertainment',
       'Pleasanton family celebrations',
-      'pregnancy celebration catering'
+      'pregnancy celebration catering',
     ],
     author: 'Michelle Wong',
     date: 'November 3, 2025',
@@ -1714,7 +1714,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Baby Shower',
     image: '/images/blog/pleasanton-baby-shower-hibachi-interactive.svg',
     imageAlt:
-      'Pleasanton baby shower hibachi interactive entertainment featuring soft baby-themed sky with fluffy white clouds, Pleasanton suburban skyline, expecting mother in pink maternity dress with baby crown and baby bump, hibachi chef with baby footprint chef hat, baby shower guests with baby toys, rattles, blankets, clothes and diaper cake, baby-themed hibachi grill arrangement with pink and blue gentle flames, baby shower dining table with themed place settings, pink lemonade and blue punch, baby celebration zones, baby items like bottles and pacifiers, baby shower balloons in pink, blue and cream, creating joyful Pleasanton new life celebration atmosphere'
+      'Pleasanton baby shower hibachi interactive entertainment featuring soft baby-themed sky with fluffy white clouds, Pleasanton suburban skyline, expecting mother in pink maternity dress with baby crown and baby bump, hibachi chef with baby footprint chef hat, baby shower guests with baby toys, rattles, blankets, clothes and diaper cake, baby-themed hibachi grill arrangement with pink and blue gentle flames, baby shower dining table with themed place settings, pink lemonade and blue punch, baby celebration zones, baby items like bottles and pacifiers, baby shower balloons in pink, blue and cream, creating joyful Pleasanton new life celebration atmosphere',
   },
   {
     id: 67,
@@ -1729,7 +1729,7 @@ export const blogPosts: BlogPost[] = [
       'retirement catering',
       'career celebration hibachi',
       'professional milestone dining',
-      'Hayward celebration catering'
+      'Hayward celebration catering',
     ],
     author: 'Robert Kim',
     date: 'November 10, 2025',
@@ -1739,7 +1739,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Retirement',
     image: '/images/blog/hayward-retirement-party-hibachi-career-achievements.svg',
     imageAlt:
-      'Hayward retirement party hibachi career achievements featuring professional blue sky with achievement stars, Hayward corporate skyline with company buildings, retirement honoree in professional blue suit with 30-year service pin and gold retirement watch, professional hibachi chef in navy outfit, colleagues with presentation frames and achievement plaques, HR manager with awards, team members with business cards and retirement gifts, professional hibachi grill arrangement with gold and blue achievement flames, executive dining table with premium place settings, wine and champagne, career achievement zones with 30 years milestone markers, professional trophies, creating distinguished Hayward professional retirement celebration atmosphere'
+      'Hayward retirement party hibachi career achievements featuring professional blue sky with achievement stars, Hayward corporate skyline with company buildings, retirement honoree in professional blue suit with 30-year service pin and gold retirement watch, professional hibachi chef in navy outfit, colleagues with presentation frames and achievement plaques, HR manager with awards, team members with business cards and retirement gifts, professional hibachi grill arrangement with gold and blue achievement flames, executive dining table with premium place settings, wine and champagne, career achievement zones with 30 years milestone markers, professional trophies, creating distinguished Hayward professional retirement celebration atmosphere',
   },
   {
     id: 68,
@@ -1757,14 +1757,14 @@ export const blogPosts: BlogPost[] = [
       'business networking hibachi',
       'executive event catering',
       'professional networking events',
-      'Redwood City business catering'
+      'Redwood City business catering',
     ],
     author: 'Patricia Chen',
     date: 'November 17, 2025',
     readTime: '8 min read',
     category: 'Professional',
     serviceArea: 'Redwood City',
-    eventType: 'Networking'
+    eventType: 'Networking',
   },
   {
     id: 69,
@@ -1779,7 +1779,7 @@ export const blogPosts: BlogPost[] = [
       'housewarming party catering',
       'new home celebration',
       'San Mateo home events',
-      'welcome party hibachi'
+      'welcome party hibachi',
     ],
     author: 'Lisa Rodriguez',
     date: 'November 24, 2025',
@@ -1789,7 +1789,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Housewarming',
     image: '/images/blog/san-mateo-housewarming-hibachi-welcome-home.svg',
     imageAlt:
-      'San Mateo housewarming hibachi welcome home featuring golden welcome sky with warm stars, San Mateo residential area with featured new home with welcome mat and windows, new homeowners in golden and brown outfits with house keys and home deed, housewarming hibachi chef with house-accented chef hat, neighbors and friends with welcome baskets, housewarming gifts, plants and home decorations, welcome home hibachi grill arrangement with golden and cream flames, housewarming dining table with themed place settings, golden cider and wine, welcome home zones, moving boxes, home sweet home decorations, creating perfect San Mateo first impression atmosphere'
+      'San Mateo housewarming hibachi welcome home featuring golden welcome sky with warm stars, San Mateo residential area with featured new home with welcome mat and windows, new homeowners in golden and brown outfits with house keys and home deed, housewarming hibachi chef with house-accented chef hat, neighbors and friends with welcome baskets, housewarming gifts, plants and home decorations, welcome home hibachi grill arrangement with golden and cream flames, housewarming dining table with themed place settings, golden cider and wine, welcome home zones, moving boxes, home sweet home decorations, creating perfect San Mateo first impression atmosphere',
   },
   {
     id: 70,
@@ -1804,7 +1804,7 @@ export const blogPosts: BlogPost[] = [
       'hibachi instead of BBQ',
       'summer party catering Milpitas',
       'outdoor hibachi entertainment',
-      'BBQ alternative catering'
+      'BBQ alternative catering',
     ],
     author: 'Tony Kim',
     date: 'December 1, 2025',
@@ -1815,7 +1815,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/milpitas-summer-bbq-alternative-hibachi-catering.svg',
     imageAlt:
-      'Milpitas summer BBQ alternative hibachi catering featuring bright summer sky with golden sun and white clouds, Milpitas summer landscape, professional hibachi chef with summer sun-accented chef hat, happy summer party guests in vibrant outfits with sunglasses, sun hats, and visors enjoying tropical drinks and fresh seafood plates, premium hibachi grill arrangement with golden and coral flames, summer dining table with colorful place settings, tropical cocktails and refreshing beverages, hibachi beats BBQ comparison zones, beach balls and pool accessories, crossed-out traditional BBQ showing hibachi superiority, creating vibrant Milpitas summer party atmosphere with chef-quality outdoor dining'
+      'Milpitas summer BBQ alternative hibachi catering featuring bright summer sky with golden sun and white clouds, Milpitas summer landscape, professional hibachi chef with summer sun-accented chef hat, happy summer party guests in vibrant outfits with sunglasses, sun hats, and visors enjoying tropical drinks and fresh seafood plates, premium hibachi grill arrangement with golden and coral flames, summer dining table with colorful place settings, tropical cocktails and refreshing beverages, hibachi beats BBQ comparison zones, beach balls and pool accessories, crossed-out traditional BBQ showing hibachi superiority, creating vibrant Milpitas summer party atmosphere with chef-quality outdoor dining',
   },
 
   // Month 5: Niche Market Content
@@ -1832,7 +1832,7 @@ export const blogPosts: BlogPost[] = [
       'championship celebration catering',
       'sports team party',
       'victory party hibachi',
-      'Foster City team celebrations'
+      'Foster City team celebrations',
     ],
     author: 'Mark Johnson',
     date: 'December 8, 2025',
@@ -1842,7 +1842,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Sports Victory',
     image: '/images/blog/foster-city-sports-victory-celebration-hibachi-championship.svg',
     imageAlt:
-      'Foster City sports victory celebration hibachi championship featuring victory sky with golden fireworks, Foster City sports complex with championship stadium and scoreboard, winning team captain with championship trophy and jersey number 1, team players with victory medals and sports equipment, hibachi chef with MVP chef hat and trophy accent, coach with clipboard and whistle, team fans with victory banners, championship hibachi grill arrangement with golden and blue victory flames, victory dining table with championship place settings, victory champagne and sports drinks, sports victory zones, scattered sports equipment like basketballs and footballs, victory confetti, creating triumphant Foster City championship celebration atmosphere'
+      'Foster City sports victory celebration hibachi championship featuring victory sky with golden fireworks, Foster City sports complex with championship stadium and scoreboard, winning team captain with championship trophy and jersey number 1, team players with victory medals and sports equipment, hibachi chef with MVP chef hat and trophy accent, coach with clipboard and whistle, team fans with victory banners, championship hibachi grill arrangement with golden and blue victory flames, victory dining table with championship place settings, victory champagne and sports drinks, sports victory zones, scattered sports equipment like basketballs and footballs, victory confetti, creating triumphant Foster City championship celebration atmosphere',
   },
   {
     id: 72,
@@ -1857,7 +1857,7 @@ export const blogPosts: BlogPost[] = [
       'neighborhood community events',
       'block party catering',
       'Cupertino community building',
-      'neighborhood hibachi events'
+      'neighborhood hibachi events',
     ],
     author: 'Susan Park',
     date: 'December 15, 2025',
@@ -1867,7 +1867,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Block Party',
     image: '/images/blog/cupertino-block-party-hibachi-neighborhood-community.svg',
     imageAlt:
-      'Cupertino block party hibachi neighborhood community featuring residential street with diverse Cupertino houses, professional hibachi chef with white chef hat and grilling tools, neighborhood families and residents of all ages gathering around street hibachi setup, elderly couples, teens, children, and families in colorful casual attire, folding chairs and tables, colorful string lights connecting houses, community banner reading CUPERTINO BLOCK PARTY, neighborhood welcome sign, food plates with hibachi-grilled items, street with yellow lines, sidewalks, trees and landscaping, hibachi grill with golden flames and smoke, creating warm neighborhood community building atmosphere'
+      'Cupertino block party hibachi neighborhood community featuring residential street with diverse Cupertino houses, professional hibachi chef with white chef hat and grilling tools, neighborhood families and residents of all ages gathering around street hibachi setup, elderly couples, teens, children, and families in colorful casual attire, folding chairs and tables, colorful string lights connecting houses, community banner reading CUPERTINO BLOCK PARTY, neighborhood welcome sign, food plates with hibachi-grilled items, street with yellow lines, sidewalks, trees and landscaping, hibachi grill with golden flames and smoke, creating warm neighborhood community building atmosphere',
   },
   {
     id: 73,
@@ -1882,7 +1882,7 @@ export const blogPosts: BlogPost[] = [
       'NYE party catering',
       'countdown celebration hibachi',
       'Los Altos holiday parties',
-      'New Year celebration dining'
+      'New Year celebration dining',
     ],
     author: 'Alexander Chen',
     date: 'December 22, 2025',
@@ -1893,7 +1893,7 @@ export const blogPosts: BlogPost[] = [
     seasonal: true,
     image: '/images/blog/los-altos-new-years-eve-hibachi-countdown-2026.svg',
     imageAlt:
-      "Los Altos New Year's Eve hibachi countdown 2026 featuring luxury Los Altos night setting with elegant home, dramatic night sky with golden stars, magnificent golden clock showing almost midnight, 2026 text in golden letters, spectacular fireworks bursts in multiple colors, hibachi chef with 2026 chef hat holding champagne and spatula, sophisticated party guests in formal attire with party hats, tiaras, bow ties, and pearl necklaces, champagne bottles and elegant glasses with bubbles, premium hibachi grill with golden and white flames, elegant dining table with sophisticated place settings, HAPPY NEW YEAR LOS ALTOS 2026 banner, colorful confetti, warm window lighting, creating luxurious countdown celebration atmosphere"
+      "Los Altos New Year's Eve hibachi countdown 2026 featuring luxury Los Altos night setting with elegant home, dramatic night sky with golden stars, magnificent golden clock showing almost midnight, 2026 text in golden letters, spectacular fireworks bursts in multiple colors, hibachi chef with 2026 chef hat holding champagne and spatula, sophisticated party guests in formal attire with party hats, tiaras, bow ties, and pearl necklaces, champagne bottles and elegant glasses with bubbles, premium hibachi grill with golden and white flames, elegant dining table with sophisticated place settings, HAPPY NEW YEAR LOS ALTOS 2026 banner, colorful confetti, warm window lighting, creating luxurious countdown celebration atmosphere",
   },
   {
     id: 74,
@@ -1908,7 +1908,7 @@ export const blogPosts: BlogPost[] = [
       'cultural event catering',
       'festival hibachi entertainment',
       'Campbell community events',
-      'multicultural celebration catering'
+      'multicultural celebration catering',
     ],
     author: 'Maria Santos',
     date: 'December 29, 2025',
@@ -1918,7 +1918,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Cultural Festival',
     image: '/images/blog/campbell-cultural-festival-hibachi-diversity-celebration.svg',
     imageAlt:
-      'Campbell cultural festival hibachi diversity celebration featuring vibrant festival sky with warm sunset colors, colorful cultural tents representing Asia, Latin America, Europe, and Africa with distinctive designs and cultural symbols, central hibachi stage setup with multicultural chef wearing rainbow-colored chef hat, diverse festival crowd including Asian, Latino, European, and African families in traditional cultural clothing with authentic patterns and colors, children of different ethnicities, cultural food displays with variety of dishes, international flags on poles, CAMPBELL CULTURAL FESTIVAL banner, music notes, decorative lanterns, festival ground with interactive circles, cultural art elements, celebrating unity through food and interactive hibachi entertainment'
+      'Campbell cultural festival hibachi diversity celebration featuring vibrant festival sky with warm sunset colors, colorful cultural tents representing Asia, Latin America, Europe, and Africa with distinctive designs and cultural symbols, central hibachi stage setup with multicultural chef wearing rainbow-colored chef hat, diverse festival crowd including Asian, Latino, European, and African families in traditional cultural clothing with authentic patterns and colors, children of different ethnicities, cultural food displays with variety of dishes, international flags on poles, CAMPBELL CULTURAL FESTIVAL banner, music notes, decorative lanterns, festival ground with interactive circles, cultural art elements, celebrating unity through food and interactive hibachi entertainment',
   },
   {
     id: 75,
@@ -1933,7 +1933,7 @@ export const blogPosts: BlogPost[] = [
       'wine pairing hibachi',
       'sophisticated event catering',
       'Saratoga wine events',
-      'culinary wine pairing'
+      'culinary wine pairing',
     ],
     author: 'Chef Thomas Laurent',
     date: 'January 5, 2026',
@@ -1943,7 +1943,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Wine Tasting',
     image: '/images/blog/saratoga-wine-tasting-hibachi-sophisticated-pairing.svg',
     imageAlt:
-      'Saratoga wine tasting hibachi sophisticated pairing featuring elegant vineyard setting with purple-toned sky, golden sunset, rolling Saratoga hills with vineyard rows and grape clusters, sophisticated wine tasting pavilion with classical columns, master hibachi chef with wine-accented chef hat holding wine glass and spatula, wine connoisseur guests in formal attire with wine glasses and tasting notebooks, premium hibachi grill with wine-colored flames, extensive wine tasting table with Pinot, Chardonnay, Merlot, and Cabernet bottles, crystal wine glasses with different wine varieties, gourmet food pairings on elegant plates, SARATOGA WINE TASTING banner, wine barrels, ambient lighting, wine aroma visualization, creating sophisticated wine and hibachi pairing atmosphere'
+      'Saratoga wine tasting hibachi sophisticated pairing featuring elegant vineyard setting with purple-toned sky, golden sunset, rolling Saratoga hills with vineyard rows and grape clusters, sophisticated wine tasting pavilion with classical columns, master hibachi chef with wine-accented chef hat holding wine glass and spatula, wine connoisseur guests in formal attire with wine glasses and tasting notebooks, premium hibachi grill with wine-colored flames, extensive wine tasting table with Pinot, Chardonnay, Merlot, and Cabernet bottles, crystal wine glasses with different wine varieties, gourmet food pairings on elegant plates, SARATOGA WINE TASTING banner, wine barrels, ambient lighting, wine aroma visualization, creating sophisticated wine and hibachi pairing atmosphere',
   },
   {
     id: 76,
@@ -1959,7 +1959,7 @@ export const blogPosts: BlogPost[] = [
       'academic achievement catering',
       'research grant celebration',
       'Santa Clara university events',
-      'academic milestone dining'
+      'academic milestone dining',
     ],
     author: 'Dr. Kevin Park',
     date: 'January 12, 2026',
@@ -1969,7 +1969,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Academic Research',
     image: '/images/blog/santa-clara-university-research-celebration-hibachi-academic.svg',
     imageAlt:
-      'Santa Clara University research celebration hibachi academic achievement featuring university campus with academic building, classical columns, blue sky, innovation light bulb with glowing rays, DNA helix research symbol, academic hibachi chef with graduation cap chef hat holding PhD diploma and spatula, research faculty in lab coats with glasses and research papers, graduate students with ID badges and laptops, hibachi grill with blue and gold academic flames, research equipment including microscope and laboratory beakers, academic achievement table with prestigious journals including Nature, Science, Cell, and PNAS, research awards and grant trophies, RESEARCH ACHIEVEMENT CELEBRATION banner, mathematical formulas, academic stars, collaboration circles, creating scholarly celebration atmosphere'
+      'Santa Clara University research celebration hibachi academic achievement featuring university campus with academic building, classical columns, blue sky, innovation light bulb with glowing rays, DNA helix research symbol, academic hibachi chef with graduation cap chef hat holding PhD diploma and spatula, research faculty in lab coats with glasses and research papers, graduate students with ID badges and laptops, hibachi grill with blue and gold academic flames, research equipment including microscope and laboratory beakers, academic achievement table with prestigious journals including Nature, Science, Cell, and PNAS, research awards and grant trophies, RESEARCH ACHIEVEMENT CELEBRATION banner, mathematical formulas, academic stars, collaboration circles, creating scholarly celebration atmosphere',
   },
   {
     id: 77,
@@ -1984,7 +1984,7 @@ export const blogPosts: BlogPost[] = [
       'vineyard wedding catering',
       'winery hibachi events',
       'Morgan Hill wedding dining',
-      'vineyard romance catering'
+      'vineyard romance catering',
     ],
     author: 'Isabella Martinez',
     date: 'January 19, 2026',
@@ -1994,7 +1994,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Winery Wedding',
     image: '/images/blog/morgan-hill-winery-wedding-hibachi-vineyard-romance.svg',
     imageAlt:
-      'Morgan Hill winery wedding hibachi vineyard romance featuring romantic pink sunset sky, golden sun, rolling vineyard landscape with grape clusters, elegant wedding ceremony arch decorated with pink and white flowers, rustic winery building with warm glowing windows, wedding hibachi chef with rose-adorned chef hat and wedding ring, bride in white dress with veil and bouquet, groom in black tuxedo with bow tie and boutonniere, wedding guests in formal attire with hats and pearl necklaces, hibachi grill with romantic pink and gold flames, elegant white wedding reception table with wedding cake, champagne bottles, wedding gifts, romantic lighting, MORGAN HILL WINERY WEDDING banner, scattered rose petals, wedding hearts, decorated wine barrels, romantic hibachi smoke, white wedding doves, creating magical vineyard wedding atmosphere'
+      'Morgan Hill winery wedding hibachi vineyard romance featuring romantic pink sunset sky, golden sun, rolling vineyard landscape with grape clusters, elegant wedding ceremony arch decorated with pink and white flowers, rustic winery building with warm glowing windows, wedding hibachi chef with rose-adorned chef hat and wedding ring, bride in white dress with veil and bouquet, groom in black tuxedo with bow tie and boutonniere, wedding guests in formal attire with hats and pearl necklaces, hibachi grill with romantic pink and gold flames, elegant white wedding reception table with wedding cake, champagne bottles, wedding gifts, romantic lighting, MORGAN HILL WINERY WEDDING banner, scattered rose petals, wedding hearts, decorated wine barrels, romantic hibachi smoke, white wedding doves, creating magical vineyard wedding atmosphere',
   },
 
   // Month 6: Premium Experience Content
@@ -2011,7 +2011,7 @@ export const blogPosts: BlogPost[] = [
       'C-suite team building',
       'executive catering',
       'premium retreat dining',
-      'Los Gatos business retreats'
+      'Los Gatos business retreats',
     ],
     author: 'James Wilson',
     date: 'January 26, 2026',
@@ -2021,7 +2021,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Executive Retreat',
     image: '/images/blog/los-gatos-executive-retreat-hibachi-c-suite-team-building.svg',
     imageAlt:
-      'Los Gatos executive retreat hibachi C-suite team building featuring professional executive retreat center with corporate windows and entrance, hibachi chef with gold-accented chef hat holding business card and spatula, C-suite executives including CEO with luxury watch and portfolio, CFO with glasses and financial reports, CTO with tech device, and COO with executive briefcase, all in formal business attire, premium hibachi grill with blue and gold executive flames, sophisticated conference table with strategy documents, budget plans, roadmaps, and goals, executive beverages, LOS GATOS EXECUTIVE RETREAT banner, team building presentation screen, success metrics charts showing growth and profit, innovation icons for AI and IoT, team building collaboration circles, creating professional corporate team building atmosphere'
+      'Los Gatos executive retreat hibachi C-suite team building featuring professional executive retreat center with corporate windows and entrance, hibachi chef with gold-accented chef hat holding business card and spatula, C-suite executives including CEO with luxury watch and portfolio, CFO with glasses and financial reports, CTO with tech device, and COO with executive briefcase, all in formal business attire, premium hibachi grill with blue and gold executive flames, sophisticated conference table with strategy documents, budget plans, roadmaps, and goals, executive beverages, LOS GATOS EXECUTIVE RETREAT banner, team building presentation screen, success metrics charts showing growth and profit, innovation icons for AI and IoT, team building collaboration circles, creating professional corporate team building atmosphere',
   },
   {
     id: 79,
@@ -2036,7 +2036,7 @@ export const blogPosts: BlogPost[] = [
       'Garlic Capital hibachi',
       'food festival catering',
       'Gilroy festival events',
-      'garlic hibachi fusion'
+      'garlic hibachi fusion',
     ],
     author: 'Carlos Mendoza',
     date: 'February 2, 2026',
@@ -2046,7 +2046,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Food Festival',
     image: '/images/blog/gilroy-food-festival-garlic-capital-hibachi-integration.svg',
     imageAlt:
-      'Gilroy food festival garlic capital hibachi integration featuring golden festival sky, GILROY GARLIC FESTIVAL banner, giant decorative garlic bulbs, hibachi chef with garlic-decorated chef hat holding garlic and spatula, festival crowd wearing garlic necklaces and garlic-themed hats, garlic-infused hibachi flames in white and orange, food displays featuring garlic bread and garlic pasta, WELCOME TO GILROY GARLIC CAPITAL OF THE WORLD sign, garlic field elements scattered throughout, creating authentic Garlic Capital festival atmosphere with Asian fusion hibachi entertainment'
+      'Gilroy food festival garlic capital hibachi integration featuring golden festival sky, GILROY GARLIC FESTIVAL banner, giant decorative garlic bulbs, hibachi chef with garlic-decorated chef hat holding garlic and spatula, festival crowd wearing garlic necklaces and garlic-themed hats, garlic-infused hibachi flames in white and orange, food displays featuring garlic bread and garlic pasta, WELCOME TO GILROY GARLIC CAPITAL OF THE WORLD sign, garlic field elements scattered throughout, creating authentic Garlic Capital festival atmosphere with Asian fusion hibachi entertainment',
   },
   {
     id: 80,
@@ -2061,7 +2061,7 @@ export const blogPosts: BlogPost[] = [
       'ocean view wedding catering',
       'coastal hibachi events',
       'seaside wedding dining',
-      'Half Moon Bay weddings'
+      'Half Moon Bay weddings',
     ],
     author: 'Ocean Martinez',
     date: 'February 9, 2026',
@@ -2071,7 +2071,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Coastal Wedding',
     image: '/images/blog/half-moon-bay-coastal-wedding-hibachi-ocean-views.svg',
     imageAlt:
-      'Half Moon Bay coastal wedding hibachi ocean views featuring beautiful ocean sky with coastal cliffs, ocean waves, sandy beach, lighthouse with red roof, flying seagulls, coastal wedding hibachi chef with sailor-style chef hat holding seashell and spatula, bride with ocean breeze veil and beach bouquet, groom in coastal blue attire, wedding guests in sunhats and ocean-themed clothing, hibachi grill with ocean-colored blue and gold flames, fresh seafood display table with lobster, shrimp, scallops, and salmon, beach wedding decorations, scattered seashells, driftwood elements, ocean sunset reflection, HALF MOON BAY COASTAL WEDDING banner, creating romantic seaside wedding atmosphere with interactive dining'
+      'Half Moon Bay coastal wedding hibachi ocean views featuring beautiful ocean sky with coastal cliffs, ocean waves, sandy beach, lighthouse with red roof, flying seagulls, coastal wedding hibachi chef with sailor-style chef hat holding seashell and spatula, bride with ocean breeze veil and beach bouquet, groom in coastal blue attire, wedding guests in sunhats and ocean-themed clothing, hibachi grill with ocean-colored blue and gold flames, fresh seafood display table with lobster, shrimp, scallops, and salmon, beach wedding decorations, scattered seashells, driftwood elements, ocean sunset reflection, HALF MOON BAY COASTAL WEDDING banner, creating romantic seaside wedding atmosphere with interactive dining',
   },
   {
     id: 81,
@@ -2086,7 +2086,7 @@ export const blogPosts: BlogPost[] = [
       'venture capital catering',
       'Silicon Valley investment dining',
       'VC entertainment',
-      'investor dinner catering'
+      'investor dinner catering',
     ],
     author: 'Finance Chen',
     date: 'February 16, 2026',
@@ -2096,7 +2096,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'VC Dinner',
     image: '/images/blog/mountain-view-venture-capital-dinner-hibachi-silicon-valley.svg',
     imageAlt:
-      'Mountain View venture capital dinner hibachi Silicon Valley investment featuring tech company buildings with glowing windows in green, cyan, magenta, and yellow, tech-savvy hibachi chef with LED-accented chef hat holding smartphone and spatula, VC partner with luxury smartwatch and $100M investment portfolio, startup founder in hoodie with laptop, investment banker with gold tie pin and financial calculator, tech executive with smartwatch, hibachi grill with green investment success flames, premium investment dinner table with term sheet, Series A, valuation, and due diligence documents, business beverages, MOUNTAIN VIEW VC DINNER banner, tech innovation icons for AI, blockchain, SaaS, and fintech, dollar signs, growth and ROI charts, creating Silicon Valley investment entertainment atmosphere'
+      'Mountain View venture capital dinner hibachi Silicon Valley investment featuring tech company buildings with glowing windows in green, cyan, magenta, and yellow, tech-savvy hibachi chef with LED-accented chef hat holding smartphone and spatula, VC partner with luxury smartwatch and $100M investment portfolio, startup founder in hoodie with laptop, investment banker with gold tie pin and financial calculator, tech executive with smartwatch, hibachi grill with green investment success flames, premium investment dinner table with term sheet, Series A, valuation, and due diligence documents, business beverages, MOUNTAIN VIEW VC DINNER banner, tech innovation icons for AI, blockchain, SaaS, and fintech, dollar signs, growth and ROI charts, creating Silicon Valley investment entertainment atmosphere',
   },
   {
     id: 82,
@@ -2111,7 +2111,7 @@ export const blogPosts: BlogPost[] = [
       'sports victory catering',
       'team celebration hibachi',
       'Santa Clara championship parties',
-      'sports team entertainment'
+      'sports team entertainment',
     ],
     author: 'David Kim',
     date: 'February 23, 2026',
@@ -2121,7 +2121,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'Sports Victory',
     image: '/images/blog/santa-clara-sports-team-celebration-hibachi-victory-championship.svg',
     imageAlt:
-      "Santa Clara sports team celebration hibachi victory championship featuring golden victory sky, Santa Clara stadium with field and stadium lights, championship scoreboard showing CHAMPIONS FINAL 28-14 SANTA CLARA, victory hibachi chef with champion chef hat holding trophy and spatula, winning team captain with captain's armband and championship trophy, MVP star player with MVP medal, team players with victory medals and jersey numbers, coach with clipboard and whistle, team fans with foam fingers and team scarves, hibachi grill with red and gold championship flames, victory celebration table with championship trophies and awards, sports equipment including football and basketball, victory drinks, colorful confetti, team banners for SANTA CLARA VICTORY 2025, creating triumphant championship celebration atmosphere"
+      "Santa Clara sports team celebration hibachi victory championship featuring golden victory sky, Santa Clara stadium with field and stadium lights, championship scoreboard showing CHAMPIONS FINAL 28-14 SANTA CLARA, victory hibachi chef with champion chef hat holding trophy and spatula, winning team captain with captain's armband and championship trophy, MVP star player with MVP medal, team players with victory medals and jersey numbers, coach with clipboard and whistle, team fans with foam fingers and team scarves, hibachi grill with red and gold championship flames, victory celebration table with championship trophies and awards, sports equipment including football and basketball, victory drinks, colorful confetti, team banners for SANTA CLARA VICTORY 2025, creating triumphant championship celebration atmosphere",
   },
   {
     id: 83,
@@ -2136,7 +2136,7 @@ export const blogPosts: BlogPost[] = [
       'international festival catering',
       'global celebration hibachi',
       'Sunnyvale cultural events',
-      'multicultural festival catering'
+      'multicultural festival catering',
     ],
     author: 'Jennifer Chen',
     date: 'March 2, 2026',
@@ -2146,7 +2146,7 @@ export const blogPosts: BlogPost[] = [
     eventType: 'International Festival',
     image: '/images/blog/sunnyvale-international-festival-hibachi-global-celebrations.svg',
     imageAlt:
-      'Vibrant Sunnyvale International Festival scene with multicultural pavilions from Asia, Europe, Africa, and Americas, each represented by traditional colors and flags. Central hibachi station with global fusion chef wearing UN-flag inspired hat cooking with multicultural rainbow flames. Diverse international crowd including Asian delegation in traditional kimono and Asian formal wear, European group in lederhosen and dirndl styles, African representatives in traditional patterned clothing, and Americas delegation in poncho and regional attire. Festival features global cuisine displays including sushi, pasta, curry, and tacos on elegant presentation tables. Unity circle surrounds the cooking area with international flags and cultural music notes. Golden sky transitions through rainbow colors creating an atmosphere of global celebration and cultural harmony through hibachi entertainment.'
+      'Vibrant Sunnyvale International Festival scene with multicultural pavilions from Asia, Europe, Africa, and Americas, each represented by traditional colors and flags. Central hibachi station with global fusion chef wearing UN-flag inspired hat cooking with multicultural rainbow flames. Diverse international crowd including Asian delegation in traditional kimono and Asian formal wear, European group in lederhosen and dirndl styles, African representatives in traditional patterned clothing, and Americas delegation in poncho and regional attire. Festival features global cuisine displays including sushi, pasta, curry, and tacos on elegant presentation tables. Unity circle surrounds the cooking area with international flags and cultural music notes. Golden sky transitions through rainbow colors creating an atmosphere of global celebration and cultural harmony through hibachi entertainment.',
   },
   {
     id: 84,
@@ -2161,7 +2161,7 @@ export const blogPosts: BlogPost[] = [
       'pinnacle hibachi entertainment',
       'ultimate interactive dining',
       'premium Bay Area catering',
-      'elite hibachi experience'
+      'elite hibachi experience',
     ],
     author: 'Chef Takeshi',
     date: 'March 9, 2026',
@@ -2172,83 +2172,83 @@ export const blogPosts: BlogPost[] = [
     featured: true,
     image: '/images/blog/bay-area-ultimate-hibachi-experience-luxury-entertainment.svg',
     imageAlt:
-      'Bay Area Ultimate Hibachi Experience featuring golden premium sky with Bay Area skyline silhouette including SF, Silicon Valley, Peninsula, South Bay, and East Bay. Ultimate hibachi master station with multi-level rainbow flames and master chef wearing golden crown chef hat with MASTER badge. VIP guests including tech executive with luxury watch, celebrity with sunglasses and diamonds, wine connoisseur with crystal glass, and Michelin critic with notebook. Premium dining table with wagyu beef, ultimate sushi, seafood tower, and premium appetizers. Bordeaux, champagne, and sake wine selection. Live entertainment with microphone performer and orchestra violinist. Fireworks and ultimate smoke effects. Premium quality seals displaying ULTIMATE EXPERIENCE and BAY AREA EXCLUSIVE badges. Stats showing 5-star Michelin experience, celebrity chef approval, 100% premium ingredients creating the pinnacle of luxury hibachi entertainment.'
-  }
-]
+      'Bay Area Ultimate Hibachi Experience featuring golden premium sky with Bay Area skyline silhouette including SF, Silicon Valley, Peninsula, South Bay, and East Bay. Ultimate hibachi master station with multi-level rainbow flames and master chef wearing golden crown chef hat with MASTER badge. VIP guests including tech executive with luxury watch, celebrity with sunglasses and diamonds, wine connoisseur with crystal glass, and Michelin critic with notebook. Premium dining table with wagyu beef, ultimate sushi, seafood tower, and premium appetizers. Bordeaux, champagne, and sake wine selection. Live entertainment with microphone performer and orchestra violinist. Fireworks and ultimate smoke effects. Premium quality seals displaying ULTIMATE EXPERIENCE and BAY AREA EXCLUSIVE badges. Stats showing 5-star Michelin experience, celebrity chef approval, 100% premium ingredients creating the pinnacle of luxury hibachi entertainment.',
+  },
+];
 
 // Helper functions for filtering and organizing blog posts
 export const getFeaturedPosts = (): BlogPost[] => {
-  return blogPosts.filter(post => post.featured).slice(0, 8)
-}
+  return blogPosts.filter((post) => post.featured).slice(0, 8);
+};
 
 export const getSeasonalPosts = (): BlogPost[] => {
-  return blogPosts.filter(post => post.seasonal).slice(0, 6)
-}
+  return blogPosts.filter((post) => post.seasonal).slice(0, 6);
+};
 
 export const getPostsByServiceArea = (area: string): BlogPost[] => {
-  return blogPosts.filter(post => post.serviceArea === area || post.serviceArea === 'All Areas')
-}
+  return blogPosts.filter((post) => post.serviceArea === area || post.serviceArea === 'All Areas');
+};
 
 export const getPostsByEventType = (eventType: string): BlogPost[] => {
-  return blogPosts.filter(post => post.eventType.toLowerCase().includes(eventType.toLowerCase()))
-}
+  return blogPosts.filter((post) => post.eventType.toLowerCase().includes(eventType.toLowerCase()));
+};
 
 export const getPostsByCategory = (category: string): BlogPost[] => {
-  return blogPosts.filter(post => post.category === category)
-}
+  return blogPosts.filter((post) => post.category === category);
+};
 
 export const getRecentPosts = (limit: number = 10): BlogPost[] => {
-  return blogPosts.slice(0, limit)
-}
+  return blogPosts.slice(0, limit);
+};
 
 export const searchPosts = (query: string): BlogPost[] => {
-  const lowercaseQuery = query.toLowerCase()
+  const lowercaseQuery = query.toLowerCase();
   return blogPosts.filter(
-    post =>
+    (post) =>
       post.title.toLowerCase().includes(lowercaseQuery) ||
       post.excerpt.toLowerCase().includes(lowercaseQuery) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(lowercaseQuery)) ||
+      post.keywords.some((keyword) => keyword.toLowerCase().includes(lowercaseQuery)) ||
       post.serviceArea.toLowerCase().includes(lowercaseQuery) ||
-      post.eventType.toLowerCase().includes(lowercaseQuery)
-  )
-}
+      post.eventType.toLowerCase().includes(lowercaseQuery),
+  );
+};
 
 // New helper functions for better content organization
 export const getAllCategories = (): string[] => {
-  const categories = [...new Set(blogPosts.map(post => post.category))]
-  return categories.sort()
-}
+  const categories = [...new Set(blogPosts.map((post) => post.category))];
+  return categories.sort();
+};
 
 export const getAllServiceAreas = (): string[] => {
-  const areas = [...new Set(blogPosts.map(post => post.serviceArea))]
-  return areas.sort()
-}
+  const areas = [...new Set(blogPosts.map((post) => post.serviceArea))];
+  return areas.sort();
+};
 
 export const getAllEventTypes = (): string[] => {
-  const events = [...new Set(blogPosts.map(post => post.eventType))]
-  return events.sort()
-}
+  const events = [...new Set(blogPosts.map((post) => post.eventType))];
+  return events.sort();
+};
 
 export const getEventSpecificPosts = (): BlogPost[] => {
   // Returns the new comprehensive event-specific posts (IDs 26-40)
-  return blogPosts.filter(post => post.id >= 26)
-}
+  return blogPosts.filter((post) => post.id >= 26);
+};
 
 export const getPopularEventPosts = (): BlogPost[] => {
   // Returns posts for most popular event types
-  const popularEvents = ['Birthday', 'Wedding', 'Corporate Event', 'Backyard Party', 'Graduation']
+  const popularEvents = ['Birthday', 'Wedding', 'Corporate Event', 'Backyard Party', 'Graduation'];
   return blogPosts
-    .filter(post => popularEvents.some(event => post.eventType.includes(event)))
-    .slice(0, 10)
-}
+    .filter((post) => popularEvents.some((event) => post.eventType.includes(event)))
+    .slice(0, 10);
+};
 
 export const getLocationSpecificPosts = (location: string): BlogPost[] => {
   return blogPosts.filter(
-    post =>
+    (post) =>
       post.serviceArea.toLowerCase().includes(location.toLowerCase()) ||
       post.title.toLowerCase().includes(location.toLowerCase()) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(location.toLowerCase()))
-  )
-}
+      post.keywords.some((keyword) => keyword.toLowerCase().includes(location.toLowerCase())),
+  );
+};
 
-export default blogPosts
+export default blogPosts;

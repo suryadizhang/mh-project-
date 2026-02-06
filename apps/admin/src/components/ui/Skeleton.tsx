@@ -75,7 +75,9 @@ export function TableSkeleton({
  */
 export function CardSkeleton({ className = '' }: { className?: string }) {
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 p-6 ${className}`}>
+    <div
+      className={`bg-white rounded-lg border border-gray-200 p-6 ${className}`}
+    >
       <Skeleton className="h-6 w-1/3 mb-4" />
       <Skeleton className="h-4 w-full mb-2" />
       <Skeleton className="h-4 w-2/3 mb-4" />

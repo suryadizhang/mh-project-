@@ -57,7 +57,7 @@ export const prefetchReviews = async (page: number = 1) => {
     queryKey: ['reviews', page],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/customer-reviews/approved-reviews?page=${page}&per_page=20`
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/customer-reviews/approved-reviews?page=${page}&per_page=20`,
       );
 
       if (!response.ok) {
@@ -78,7 +78,7 @@ export const prefetchPendingReviews = async () => {
     queryKey: ['admin', 'pending-reviews'],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/admin/review-moderation/pending-reviews`
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/admin/review-moderation/pending-reviews`,
       );
 
       if (!response.ok) {
@@ -125,9 +125,9 @@ export const getCacheStats = () => {
 
   return {
     totalQueries: queries.length,
-    freshQueries: queries.filter(q => q.state.dataUpdatedAt > Date.now() - 5 * 60 * 1000).length,
-    staleQueries: queries.filter(q => q.state.dataUpdatedAt <= Date.now() - 5 * 60 * 1000).length,
-    fetchingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length,
+    freshQueries: queries.filter((q) => q.state.dataUpdatedAt > Date.now() - 5 * 60 * 1000).length,
+    staleQueries: queries.filter((q) => q.state.dataUpdatedAt <= Date.now() - 5 * 60 * 1000).length,
+    fetchingQueries: queries.filter((q) => q.state.fetchStatus === 'fetching').length,
   };
 };
 

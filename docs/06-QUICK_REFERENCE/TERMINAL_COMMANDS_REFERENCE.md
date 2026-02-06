@@ -3,30 +3,36 @@
 ## Currently Running Services
 
 ### Terminal 1: Backend API (Port 8000)
+
 ```powershell
 Set-Location "C:\Users\surya\projects\MH webapps\apps\backend"
 & "C:\Users\surya\projects\MH webapps\.venv\Scripts\Activate.ps1"
 $env:PYTHONPATH="src"
 uvicorn api.app.main:app --reload --port 8000 --host 0.0.0.0
 ```
+
 **Terminal ID**: bf2c1b44-2b1f-4483-8543-47ddbd8aa4c8  
 **Status**: ✅ Running  
 **URL**: http://localhost:8000
 
 ### Terminal 2: Customer Frontend (Port 3000)
+
 ```powershell
 Set-Location "C:\Users\surya\projects\MH webapps\apps\customer"
 npm run dev
 ```
+
 **Terminal ID**: 13e5dfc0-9012-4e5e-9419-ab1ae216582c  
 **Status**: ✅ Running  
 **URL**: http://localhost:3000
 
 ### Terminal 3: Admin Frontend (Port 3001)
+
 ```powershell
 Set-Location "C:\Users\surya\projects\MH webapps\apps\admin"
 npm run dev
 ```
+
 **Terminal ID**: 5326cd9b-c864-4a9a-91fb-7961f8e5ee56  
 **Status**: ✅ Running  
 **URL**: http://localhost:3001
@@ -52,11 +58,13 @@ If any service crashes or you need to restart:
 ## Database Commands
 
 ### Connect to PostgreSQL:
+
 ```powershell
 psql -U myhibachi_user -d myhibachi_platform
 ```
 
 ### Check migrations:
+
 ```powershell
 Set-Location "C:\Users\surya\projects\MH webapps\apps\backend"
 & "C:\Users\surya\projects\MH webapps\.venv\Scripts\Activate.ps1"
@@ -65,6 +73,7 @@ alembic history
 ```
 
 ### Run migrations:
+
 ```powershell
 alembic upgrade head
 ```
@@ -74,6 +83,7 @@ alembic upgrade head
 ## Useful Database Queries
 
 ### Check review system:
+
 ```sql
 SELECT * FROM feedback.customer_reviews ORDER BY created_at DESC LIMIT 10;
 SELECT * FROM feedback.discount_coupons ORDER BY created_at DESC LIMIT 10;
@@ -81,14 +91,16 @@ SELECT * FROM feedback.review_escalations ORDER BY created_at DESC LIMIT 10;
 ```
 
 ### Check QR tracking:
+
 ```sql
 SELECT * FROM marketing.qr_codes;
 SELECT * FROM marketing.qr_scans ORDER BY scanned_at DESC LIMIT 10;
 ```
 
 ### Check QR scan analytics:
+
 ```sql
-SELECT 
+SELECT
     qc.code,
     qc.type,
     qc.campaign_name,
@@ -120,16 +132,19 @@ Then restart the backend server.
 ## Test API with curl
 
 ### Health check:
+
 ```powershell
 curl http://localhost:8000/api/health
 ```
 
 ### Track QR scan:
+
 ```powershell
 curl -X POST http://localhost:8000/api/qr/scan/BC001 -H "Content-Type: application/json" -d '{}'
 ```
 
 ### List QR codes:
+
 ```powershell
 curl http://localhost:8000/api/qr/
 ```
@@ -138,25 +153,28 @@ curl http://localhost:8000/api/qr/
 
 ## Browser Testing URLs
 
-| Test | URL |
-|------|-----|
-| Customer Homepage | http://localhost:3000 |
-| Admin Dashboard | http://localhost:3001 |
-| API Documentation | http://localhost:8000/docs |
-| API Health Check | http://localhost:8000/api/health |
+| Test               | URL                                  |
+| ------------------ | ------------------------------------ |
+| Customer Homepage  | http://localhost:3000                |
+| Admin Dashboard    | http://localhost:3001                |
+| API Documentation  | http://localhost:8000/docs           |
+| API Health Check   | http://localhost:8000/api/health     |
 | Review Page (test) | http://localhost:3000/review/test-id |
-| QR Redirect Test | http://localhost:3000/contact.html |
-| Contact Page | http://localhost:3000/contact |
+| QR Redirect Test   | http://localhost:3000/contact.html   |
+| Contact Page       | http://localhost:3000/contact        |
 
 ---
 
 ## Development Tips
 
-1. **Hot Reload**: All three services support hot reload - just save your files
+1. **Hot Reload**: All three services support hot reload - just save
+   your files
 2. **Logs**: Watch the terminal output for errors and API calls
-3. **Database Changes**: After migration changes, restart backend server
+3. **Database Changes**: After migration changes, restart backend
+   server
 4. **Frontend Changes**: Next.js will auto-reload in browser
-5. **API Testing**: Use http://localhost:8000/docs for interactive testing
+5. **API Testing**: Use http://localhost:8000/docs for interactive
+   testing
 
 ---
 

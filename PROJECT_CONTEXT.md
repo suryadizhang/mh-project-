@@ -45,9 +45,9 @@ main (production) ← Only deploy-ready code
 
 ### Frontend (Vercel)
 
-| App      | Vercel Project | Root Directory  | Production URL         |
-| -------- | -------------- | --------------- | ---------------------- |
-| Customer | `mh-customer`  | `apps/customer` | myhibachichef.com      |
+| App      | Vercel Project | Root Directory  | Production URL           |
+| -------- | -------------- | --------------- | ------------------------ |
+| Customer | `mh-customer`  | `apps/customer` | myhibachichef.com        |
 | Admin    | `mh-admin`     | `apps/admin`    | admin.mysticdatanode.net |
 
 **Environment Variables (Vercel):**

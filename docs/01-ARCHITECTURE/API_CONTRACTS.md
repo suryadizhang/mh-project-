@@ -2,7 +2,8 @@
 
 **Last Updated:** December 16, 2025 **Purpose:** Define API
 request/response specifications **Base URL:**
-`https://mhapi.mysticdatanode.net` (prod) / `http://localhost:8000` (dev)
+`https://mhapi.mysticdatanode.net` (prod) / `http://localhost:8000`
+(dev)
 
 ---
 

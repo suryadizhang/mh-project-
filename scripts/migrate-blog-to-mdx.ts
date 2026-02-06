@@ -1,12 +1,12 @@
 /**
  * Blog Posts Migration Script - TypeScript Array → MDX Files
- * 
+ *
  * Converts the hardcoded blogPosts.ts array into individual MDX files
  * organized by year/month structure for scalability.
- * 
+ *
  * Usage:
  *   npx tsx scripts/migrate-blog-to-mdx.ts
- * 
+ *
  * Output:
  *   apps/customer/content/blog/posts/YYYY/MM/slug.mdx
  */
@@ -54,14 +54,24 @@ const OUTPUT_DIR = path.join(__dirname, '../apps/customer/content/blog/posts');
  */
 function escapeYaml(str: string): string {
   if (typeof str !== 'string') return str;
-  
+
   // If contains special characters, wrap in quotes and escape
-  if (str.includes(':') || str.includes('#') || str.includes('"') || str.includes("'") || 
-      str.includes('[') || str.includes(']') || str.includes('{') || str.includes('}') ||
-      str.includes('|') || str.includes('&') || str.includes('*')) {
+  if (
+    str.includes(':') ||
+    str.includes('#') ||
+    str.includes('"') ||
+    str.includes("'") ||
+    str.includes('[') ||
+    str.includes(']') ||
+    str.includes('{') ||
+    str.includes('}') ||
+    str.includes('|') ||
+    str.includes('&') ||
+    str.includes('*')
+  ) {
     return `"${str.replace(/"/g, '\\"')}"`;
   }
-  
+
   return str;
 }
 
@@ -123,7 +133,9 @@ function convertToMdx(post: BlogPost): string {
   if (post.seo) {
     frontmatter.push(`seo:`);
     frontmatter.push(`  metaTitle: ${escapeYaml(post.seo.metaTitle)}`);
-    frontmatter.push(`  metaDescription: ${escapeYaml(post.seo.metaDescription)}`);
+    frontmatter.push(
+      `  metaDescription: ${escapeYaml(post.seo.metaDescription)}`
+    );
     if (post.seo.canonicalUrl) {
       frontmatter.push(`  canonicalUrl: '${post.seo.canonicalUrl}'`);
     }
@@ -166,30 +178,29 @@ async function migrateBlogPosts() {
     try {
       // Get year/month for directory structure
       const { year, month } = getYearMonth(post.date);
-      
+
       // Create directory path
       const dirPath = path.join(OUTPUT_DIR, year, month);
       fs.mkdirSync(dirPath, { recursive: true });
-      
+
       // Create file path
       const fileName = `${post.slug}.mdx`;
       const filePath = path.join(dirPath, fileName);
-      
+
       // Convert to MDX
       const mdxContent = convertToMdx(post);
-      
+
       // Write file
       fs.writeFileSync(filePath, mdxContent, 'utf-8');
-      
+
       console.log(`✅ ${year}/${month}/${fileName}`);
       successCount++;
-      
     } catch (error) {
       console.error(`❌ Failed: ${post.slug} - ${error}`);
       errorCount++;
       errors.push({
         post: post.slug,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -200,7 +211,7 @@ async function migrateBlogPosts() {
   console.log(`✅ Successfully migrated: ${successCount} posts`);
   console.log(`❌ Failed: ${errorCount} posts`);
   console.log(`📁 Output directory: ${OUTPUT_DIR}`);
-  
+
   if (errors.length > 0) {
     console.log('\n⚠️  Errors encountered:');
     errors.forEach(({ post, error }) => {
@@ -210,12 +221,16 @@ async function migrateBlogPosts() {
 
   // Verify file count
   const verifyCount = countMdxFiles(OUTPUT_DIR);
-  console.log(`\n🔍 Verification: Found ${verifyCount} MDX files in output directory`);
-  
+  console.log(
+    `\n🔍 Verification: Found ${verifyCount} MDX files in output directory`
+  );
+
   if (verifyCount === blogPosts.length) {
     console.log('✅ Migration COMPLETE - All posts successfully migrated!\n');
   } else {
-    console.log(`⚠️  Warning: Expected ${blogPosts.length} files, found ${verifyCount}\n`);
+    console.log(
+      `⚠️  Warning: Expected ${blogPosts.length} files, found ${verifyCount}\n`
+    );
   }
 }
 
@@ -224,14 +239,14 @@ async function migrateBlogPosts() {
  */
 function countMdxFiles(dir: string): number {
   let count = 0;
-  
+
   function traverse(currentDir: string) {
     const items = fs.readdirSync(currentDir);
-    
+
     for (const item of items) {
       const fullPath = path.join(currentDir, item);
       const stat = fs.statSync(fullPath);
-      
+
       if (stat.isDirectory()) {
         traverse(fullPath);
       } else if (item.endsWith('.mdx')) {
@@ -239,11 +254,11 @@ function countMdxFiles(dir: string): number {
       }
     }
   }
-  
+
   if (fs.existsSync(dir)) {
     traverse(dir);
   }
-  
+
   return count;
 }
 

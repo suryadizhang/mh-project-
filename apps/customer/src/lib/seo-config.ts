@@ -3,7 +3,7 @@
 // SINGLE SOURCE OF TRUTH for contact info, social links, and branding
 // Do NOT hardcode these values elsewhere - import from here
 
-import type { Metadata } from 'next'
+import type { Metadata } from 'next';
 
 // Base SEO constants
 export const SITE_CONFIG = {
@@ -25,7 +25,7 @@ export const SITE_CONFIG = {
     'wedding hibachi',
     'corporate hibachi',
     'backyard hibachi',
-    'pool party hibachi'
+    'pool party hibachi',
   ],
   author: 'My Hibachi Chef Team',
   social: {
@@ -36,15 +36,15 @@ export const SITE_CONFIG = {
     facebookPageId: '61577483702847',
     facebookMessenger: 'https://m.me/61577483702847',
     yelp: 'https://www.yelp.com/biz/my-hibachi-fremont',
-    google: 'https://www.google.com/maps/place/My+hibachi/@37.8543835,-122.0808034,8z'
+    google: 'https://www.google.com/maps/place/My+hibachi/@37.8543835,-122.0808034,8z',
   },
   contact: {
     phone: '(916) 740-8768',
     phoneTel: '+19167408768',
     email: 'cs@myhibachichef.com',
-    serviceArea: 'Bay Area & Sacramento Region'
-  }
-} as const
+    serviceArea: 'Bay Area & Sacramento Region',
+  },
+} as const;
 
 // Generate page-specific metadata
 export function generatePageMetadata({
@@ -54,23 +54,23 @@ export function generatePageMetadata({
   path = '',
   images = [],
   noIndex = false,
-  canonical
+  canonical,
 }: {
-  title: string
-  description: string
-  keywords?: string[]
-  path?: string
-  images?: string[]
-  noIndex?: boolean
-  canonical?: string
+  title: string;
+  description: string;
+  keywords?: string[];
+  path?: string;
+  images?: string[];
+  noIndex?: boolean;
+  canonical?: string;
 }): Metadata {
-  const fullTitle = title.includes(SITE_CONFIG.name) ? title : `${title} | ${SITE_CONFIG.name}`
+  const fullTitle = title.includes(SITE_CONFIG.name) ? title : `${title} | ${SITE_CONFIG.name}`;
 
-  const url = `${SITE_CONFIG.url}${path}`
-  const allKeywords = [...SITE_CONFIG.keywords, ...keywords].join(', ')
+  const url = `${SITE_CONFIG.url}${path}`;
+  const allKeywords = [...SITE_CONFIG.keywords, ...keywords].join(', ');
 
-  const defaultImage = `${SITE_CONFIG.url}/images/myhibachi-logo.png`
-  const ogImages = images.length > 0 ? images : [defaultImage]
+  const defaultImage = `${SITE_CONFIG.url}/images/myhibachi-logo.png`;
+  const ogImages = images.length > 0 ? images : [defaultImage];
 
   return {
     title: fullTitle,
@@ -87,12 +87,12 @@ export function generatePageMetadata({
       title: fullTitle,
       description,
       siteName: SITE_CONFIG.name,
-      images: ogImages.map(image => ({
+      images: ogImages.map((image) => ({
         url: image,
         width: 1200,
         height: 630,
-        alt: title
-      }))
+        alt: title,
+      })),
     },
 
     twitter: {
@@ -100,19 +100,19 @@ export function generatePageMetadata({
       title: fullTitle,
       description,
       images: ogImages,
-      creator: '@myhibachichef'
+      creator: '@myhibachichef',
     },
 
     alternates: {
-      canonical: canonical || url
+      canonical: canonical || url,
     },
 
     other: {
       'business:contact_data:phone_number': SITE_CONFIG.contact.phone,
       'business:contact_data:email': SITE_CONFIG.contact.email,
-      'business:contact_data:region': SITE_CONFIG.contact.serviceArea
-    }
-  }
+      'business:contact_data:region': SITE_CONFIG.contact.serviceArea,
+    },
+  };
 }
 
 // Page-specific SEO configurations
@@ -128,8 +128,8 @@ export const PAGE_SEO = {
       'private teppanyaki chef',
       'hibachi birthday party',
       'corporate hibachi catering',
-      'wedding hibachi entertainment'
-    ]
+      'wedding hibachi entertainment',
+    ],
   },
 
   menu: {
@@ -142,8 +142,8 @@ export const PAGE_SEO = {
       'hibachi catering packages',
       'mobile hibachi menu',
       'Japanese steakhouse catering',
-      'hibachi food options'
-    ]
+      'hibachi food options',
+    ],
   },
 
   booking: {
@@ -155,8 +155,8 @@ export const PAGE_SEO = {
       'hibachi chef booking',
       'mobile hibachi reservation',
       'Bay Area hibachi booking',
-      'Sacramento hibachi scheduling'
-    ]
+      'Sacramento hibachi scheduling',
+    ],
   },
 
   quote: {
@@ -168,8 +168,8 @@ export const PAGE_SEO = {
       'mobile hibachi pricing',
       'hibachi cost calculator',
       'Bay Area hibachi prices',
-      'Sacramento hibachi rates'
-    ]
+      'Sacramento hibachi rates',
+    ],
   },
 
   contact: {
@@ -181,8 +181,8 @@ export const PAGE_SEO = {
       'hibachi catering contact',
       'mobile hibachi phone',
       'Bay Area hibachi contact',
-      'Sacramento hibachi booking'
-    ]
+      'Sacramento hibachi booking',
+    ],
   },
 
   blog: {
@@ -194,8 +194,8 @@ export const PAGE_SEO = {
       'hibachi party planning',
       'teppanyaki event tips',
       'hibachi birthday guides',
-      'corporate hibachi planning'
-    ]
+      'corporate hibachi planning',
+    ],
   },
 
   faqs: {
@@ -207,8 +207,8 @@ export const PAGE_SEO = {
       'hibachi questions',
       'mobile hibachi info',
       'hibachi catering help',
-      'teppanyaki catering guide'
-    ]
+      'teppanyaki catering guide',
+    ],
   },
 
   locations: {
@@ -220,14 +220,14 @@ export const PAGE_SEO = {
       'Bay Area hibachi coverage',
       'Sacramento hibachi service',
       'mobile hibachi locations',
-      'hibachi delivery areas'
-    ]
-  }
-} as const
+      'hibachi delivery areas',
+    ],
+  },
+} as const;
 
 // Location-specific SEO generator
 export function generateLocationSEO(city: string, state: string = 'California') {
-  const cityFormatted = city.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())
+  const cityFormatted = city.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
   return {
     title: `${cityFormatted} Hibachi Catering - Premium Mobile Teppanyaki Chef Services`,
@@ -239,9 +239,9 @@ export function generateLocationSEO(city: string, state: string = 'California') 
       `mobile hibachi ${cityFormatted.toLowerCase()}`,
       `${cityFormatted.toLowerCase()} Japanese catering`,
       `${cityFormatted.toLowerCase()} party catering`,
-      `private hibachi chef ${cityFormatted.toLowerCase()}`
-    ]
-  }
+      `private hibachi chef ${cityFormatted.toLowerCase()}`,
+    ],
+  };
 }
 
 // Structured data generators
@@ -261,9 +261,9 @@ export function generateOrganizationSchema() {
     address: {
       '@type': 'PostalAddress',
       addressRegion: 'CA',
-      addressCountry: 'US'
-    }
-  }
+      addressCountry: 'US',
+    },
+  };
 }
 
 export function generateLocalBusinessSchema() {
@@ -284,14 +284,14 @@ export function generateLocalBusinessSchema() {
       'Mountain View',
       'Palo Alto',
       'Santa Clara',
-      'Sunnyvale'
+      'Sunnyvale',
     ],
     serviceType: 'Mobile Hibachi Catering',
     priceRange: '$$',
     currenciesAccepted: 'USD',
     paymentAccepted: 'Cash, Credit Card, Venmo, Zelle',
-    openingHours: 'Mo-Su 09:00-21:00'
-  }
+    openingHours: 'Mo-Su 09:00-21:00',
+  };
 }
 
 export function generateServiceSchema() {
@@ -304,7 +304,7 @@ export function generateServiceSchema() {
     provider: {
       '@type': 'Organization',
       name: SITE_CONFIG.name,
-      url: SITE_CONFIG.url
+      url: SITE_CONFIG.url,
     },
     areaServed: SITE_CONFIG.contact.serviceArea,
     hasOfferCatalog: {
@@ -315,26 +315,26 @@ export function generateServiceSchema() {
           '@type': 'Offer',
           itemOffered: {
             '@type': 'Service',
-            name: 'Birthday Party Hibachi Catering'
-          }
+            name: 'Birthday Party Hibachi Catering',
+          },
         },
         {
           '@type': 'Offer',
           itemOffered: {
             '@type': 'Service',
-            name: 'Wedding Hibachi Catering'
-          }
+            name: 'Wedding Hibachi Catering',
+          },
         },
         {
           '@type': 'Offer',
           itemOffered: {
             '@type': 'Service',
-            name: 'Corporate Event Hibachi Catering'
-          }
-        }
-      ]
-    }
-  }
+            name: 'Corporate Event Hibachi Catering',
+          },
+        },
+      ],
+    },
+  };
 }
 
 // FAQ Schema generator
@@ -342,15 +342,15 @@ export function generateFAQSchema(faqs: Array<{ question: string; answer: string
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqs.map(faq => ({
+    mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
       name: faq.question,
       acceptedAnswer: {
         '@type': 'Answer',
-        text: faq.answer
-      }
-    }))
-  }
+        text: faq.answer,
+      },
+    })),
+  };
 }
 
 // Breadcrumb schema generator
@@ -362,7 +362,7 @@ export function generateBreadcrumbSchema(items: Array<{ name: string; url: strin
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: `${SITE_CONFIG.url}${item.url}`
-    }))
-  }
+      item: `${SITE_CONFIG.url}${item.url}`,
+    })),
+  };
 }

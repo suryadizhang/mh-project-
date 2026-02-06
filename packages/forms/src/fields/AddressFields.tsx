@@ -2,13 +2,26 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 import { MapPin, Building2 } from 'lucide-react';
-import type { FieldErrors, UseFormRegister, UseFormSetValue, Path, FieldValues } from 'react-hook-form';
-import { US_STATES, WEST_COAST_STATES, type StateCode, type FormLayout } from '../types';
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+  Path,
+  FieldValues,
+} from 'react-hook-form';
+import {
+  US_STATES,
+  WEST_COAST_STATES,
+  type StateCode,
+  type FormLayout,
+} from '../types';
 
 /**
  * Props for AddressFields component
  */
-export interface AddressFieldsProps<TFieldValues extends FieldValues = FieldValues> {
+export interface AddressFieldsProps<
+  TFieldValues extends FieldValues = FieldValues,
+> {
   /** react-hook-form register function */
   register: UseFormRegister<TFieldValues>;
   /** react-hook-form errors object */
@@ -133,10 +146,18 @@ export function AddressFields<TFieldValues extends FieldValues = FieldValues>({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Build field names with optional prefix
-  const streetField = (fieldPrefix ? `${fieldPrefix}Street` : 'street') as Path<TFieldValues>;
-  const cityField = (fieldPrefix ? `${fieldPrefix}City` : 'city') as Path<TFieldValues>;
-  const stateField = (fieldPrefix ? `${fieldPrefix}State` : 'state') as Path<TFieldValues>;
-  const zipcodeField = (fieldPrefix ? `${fieldPrefix}Zipcode` : 'zipcode') as Path<TFieldValues>;
+  const streetField = (
+    fieldPrefix ? `${fieldPrefix}Street` : 'street'
+  ) as Path<TFieldValues>;
+  const cityField = (
+    fieldPrefix ? `${fieldPrefix}City` : 'city'
+  ) as Path<TFieldValues>;
+  const stateField = (
+    fieldPrefix ? `${fieldPrefix}State` : 'state'
+  ) as Path<TFieldValues>;
+  const zipcodeField = (
+    fieldPrefix ? `${fieldPrefix}Zipcode` : 'zipcode'
+  ) as Path<TFieldValues>;
 
   // Get error for a field
   const getError = (field: string): string | undefined => {
@@ -167,11 +188,14 @@ export function AddressFields<TFieldValues extends FieldValues = FieldValues>({
       return;
     }
 
-    autocompleteRef.current = new googleMaps.maps.places.Autocomplete(inputRef.current, {
-      componentRestrictions: { country: 'us' },
-      fields: ['address_components', 'geometry', 'formatted_address'],
-      types: ['address'],
-    });
+    autocompleteRef.current = new googleMaps.maps.places.Autocomplete(
+      inputRef.current,
+      {
+        componentRestrictions: { country: 'us' },
+        fields: ['address_components', 'geometry', 'formatted_address'],
+        types: ['address'],
+      }
+    );
 
     autocompleteRef.current.addListener('place_changed', () => {
       const place = autocompleteRef.current?.getPlace();
@@ -231,7 +255,16 @@ export function AddressFields<TFieldValues extends FieldValues = FieldValues>({
         onGeocode({ lat, lng });
       }
     });
-  }, [enableAutocomplete, setValue, streetField, cityField, stateField, zipcodeField, onAddressSelect, onGeocode]);
+  }, [
+    enableAutocomplete,
+    setValue,
+    streetField,
+    cityField,
+    stateField,
+    zipcodeField,
+    onAddressSelect,
+    onGeocode,
+  ]);
 
   // Set up autocomplete when Google Maps is loaded
   useEffect(() => {
@@ -247,7 +280,10 @@ export function AddressFields<TFieldValues extends FieldValues = FieldValues>({
     }
 
     // Load Google Maps script if not present and API key provided
-    if (googleMapsApiKey && !document.querySelector('script[src*="maps.googleapis.com"]')) {
+    if (
+      googleMapsApiKey &&
+      !document.querySelector('script[src*="maps.googleapis.com"]')
+    ) {
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`;
       script.async = true;
@@ -263,22 +299,28 @@ export function AddressFields<TFieldValues extends FieldValues = FieldValues>({
   });
 
   // Combine refs callback
-  const setStreetRef = useCallback((el: HTMLInputElement | null) => {
-    inputRef.current = el;
-    streetRef(el);
-  }, [streetRef]);
+  const setStreetRef = useCallback(
+    (el: HTMLInputElement | null) => {
+      inputRef.current = el;
+      streetRef(el);
+    },
+    [streetRef]
+  );
 
   // Layout classes
-  const containerClass = layout === 'grid'
-    ? 'grid grid-cols-1 gap-4 md:grid-cols-6'
-    : layout === 'inline'
-      ? 'flex flex-wrap gap-4'
-      : 'space-y-4';
+  const containerClass =
+    layout === 'grid'
+      ? 'grid grid-cols-1 gap-4 md:grid-cols-6'
+      : layout === 'inline'
+        ? 'flex flex-wrap gap-4'
+        : 'space-y-4';
 
   return (
     <div className={`${containerClass} ${className}`}>
       {/* Street Address - Full width */}
-      <div className={layout === 'grid' ? 'md:col-span-6' : 'flex-1 min-w-full'}>
+      <div
+        className={layout === 'grid' ? 'md:col-span-6' : 'flex-1 min-w-full'}
+      >
         <div className="form-group">
           {showLabels && (
             <label htmlFor={streetField} className="form-label">
@@ -297,14 +339,14 @@ export function AddressFields<TFieldValues extends FieldValues = FieldValues>({
             disabled={disabled}
             autoComplete={enableAutocomplete ? 'off' : 'street-address'}
           />
-          {streetError && (
-            <div className="invalid-feedback">{streetError}</div>
-          )}
+          {streetError && <div className="invalid-feedback">{streetError}</div>}
         </div>
       </div>
 
       {/* City - 2/6 width */}
-      <div className={layout === 'grid' ? 'md:col-span-2' : 'flex-1 min-w-[150px]'}>
+      <div
+        className={layout === 'grid' ? 'md:col-span-2' : 'flex-1 min-w-[150px]'}
+      >
         <div className="form-group">
           {showLabels && (
             <label htmlFor={cityField} className="form-label">
@@ -325,14 +367,14 @@ export function AddressFields<TFieldValues extends FieldValues = FieldValues>({
               minLength: { value: 2, message: 'City name is too short' },
             })}
           />
-          {cityError && (
-            <div className="invalid-feedback">{cityError}</div>
-          )}
+          {cityError && <div className="invalid-feedback">{cityError}</div>}
         </div>
       </div>
 
       {/* State - 2/6 width */}
-      <div className={layout === 'grid' ? 'md:col-span-2' : 'flex-1 min-w-[100px]'}>
+      <div
+        className={layout === 'grid' ? 'md:col-span-2' : 'flex-1 min-w-[100px]'}
+      >
         <div className="form-group">
           {showLabels && (
             <label htmlFor={stateField} className="form-label">
@@ -350,20 +392,20 @@ export function AddressFields<TFieldValues extends FieldValues = FieldValues>({
             })}
           >
             <option value="">{placeholders.state || 'Select State'}</option>
-            {states.map((code) => (
+            {states.map(code => (
               <option key={code} value={code}>
                 {US_STATES[code]}
               </option>
             ))}
           </select>
-          {stateError && (
-            <div className="invalid-feedback">{stateError}</div>
-          )}
+          {stateError && <div className="invalid-feedback">{stateError}</div>}
         </div>
       </div>
 
       {/* ZIP Code - 2/6 width */}
-      <div className={layout === 'grid' ? 'md:col-span-2' : 'flex-1 min-w-[100px]'}>
+      <div
+        className={layout === 'grid' ? 'md:col-span-2' : 'flex-1 min-w-[100px]'}
+      >
         <div className="form-group">
           {showLabels && (
             <label htmlFor={zipcodeField} className="form-label">

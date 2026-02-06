@@ -1,22 +1,35 @@
 #!/usr/bin/env node
 /**
  * Button Migration Helper Script
- * 
+ *
  * This script helps identify all button usages across the app that need
  * to be migrated to the HibachiButton component.
- * 
+ *
  * Usage: node scripts/find-buttons.js
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const CUSTOMER_APP_DIR = path.join(__dirname, '..', 'apps', 'customer', 'src', 'app');
+const CUSTOMER_APP_DIR = path.join(
+  __dirname,
+  '..',
+  'apps',
+  'customer',
+  'src',
+  'app'
+);
 
 const buttonPatterns = [
   { pattern: /className="[^"]*btn[^"]*"/g, type: 'Bootstrap Button Classes' },
-  { pattern: /className="[^"]*bg-gradient-to-r[^"]*from-red[^"]*"/g, type: 'Inline Gradient Buttons' },
-  { pattern: /className="[^"]*border-2[^"]*border-red[^"]*"/g, type: 'Inline Outline Buttons' },
+  {
+    pattern: /className="[^"]*bg-gradient-to-r[^"]*from-red[^"]*"/g,
+    type: 'Inline Gradient Buttons',
+  },
+  {
+    pattern: /className="[^"]*border-2[^"]*border-red[^"]*"/g,
+    type: 'Inline Outline Buttons',
+  },
 ];
 
 function findButtonsInFile(filePath) {
@@ -86,7 +99,9 @@ function main() {
   });
 
   console.log('\n\n💡 Migration Steps:');
-  console.log('1. Import: import { HibachiButton } from "@/components/ui/button"');
+  console.log(
+    '1. Import: import { HibachiButton } from "@/components/ui/button"'
+  );
   console.log('2. Replace <a> with <HibachiButton>');
   console.log('3. Add props: href, variant, size');
   console.log('4. Test the page');

@@ -3,10 +3,7 @@
 import { Calendar, Filter, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import {
-  getMessageStatus,
-  MessageReadReceipt,
-} from './MessageReadReceipt';
+import { getMessageStatus, MessageReadReceipt } from './MessageReadReceipt';
 
 export interface HistoryMessage {
   message_id: string;
@@ -64,9 +61,7 @@ export function ConversationHistory({
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((msg) =>
-        msg.text.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter(msg => msg.text.toLowerCase().includes(query));
     }
 
     // Date filter
@@ -94,7 +89,7 @@ export function ConversationHistory({
     }
 
     if (startDate || endDate) {
-      filtered = filtered.filter((msg) => {
+      filtered = filtered.filter(msg => {
         const msgDate = new Date(msg.timestamp);
         if (startDate && msgDate < startDate) return false;
         if (endDate && msgDate > endDate) return false;
@@ -106,7 +101,14 @@ export function ConversationHistory({
       (a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
-  }, [smsMessages, searchQuery, messageType, dateRange, customStartDate, customEndDate]);
+  }, [
+    smsMessages,
+    searchQuery,
+    messageType,
+    dateRange,
+    customStartDate,
+    customEndDate,
+  ]);
 
   // Filter calls
   const filteredCalls = useMemo(() => {
@@ -139,7 +141,7 @@ export function ConversationHistory({
     }
 
     if (startDate || endDate) {
-      filtered = filtered.filter((call) => {
+      filtered = filtered.filter(call => {
         const callDate = new Date(call.started_at);
         if (startDate && callDate < startDate) return false;
         if (endDate && callDate > endDate) return false;
@@ -161,7 +163,7 @@ export function ConversationHistory({
       data: HistoryMessage | HistoryCall;
     }> = [];
 
-    filteredSmsMessages.forEach((msg) => {
+    filteredSmsMessages.forEach(msg => {
       items.push({
         type: 'sms',
         timestamp: msg.timestamp,
@@ -169,7 +171,7 @@ export function ConversationHistory({
       });
     });
 
-    filteredCalls.forEach((call) => {
+    filteredCalls.forEach(call => {
       items.push({
         type: 'call',
         timestamp: call.started_at,
@@ -279,7 +281,7 @@ export function ConversationHistory({
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Search in message content..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
@@ -292,7 +294,7 @@ export function ConversationHistory({
               Message Type
             </label>
             <div className="flex space-x-2">
-              {(['all', 'sms', 'calls'] as MessageType[]).map((type) => (
+              {(['all', 'sms', 'calls'] as MessageType[]).map(type => (
                 <button
                   key={type}
                   onClick={() => setMessageType(type)}
@@ -302,7 +304,11 @@ export function ConversationHistory({
                       : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                   }`}
                 >
-                  {type === 'all' ? 'All' : type === 'sms' ? 'SMS Only' : 'Calls Only'}
+                  {type === 'all'
+                    ? 'All'
+                    : type === 'sms'
+                      ? 'SMS Only'
+                      : 'Calls Only'}
                 </button>
               ))}
             </div>
@@ -314,27 +320,29 @@ export function ConversationHistory({
               Date Range
             </label>
             <div className="flex flex-wrap gap-2 mb-2">
-              {(['all', 'today', 'week', 'month', 'custom'] as DateRange[]).map((range) => (
-                <button
-                  key={range}
-                  onClick={() => setDateRange(range)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    dateRange === range
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {range === 'all'
-                    ? 'All Time'
-                    : range === 'today'
-                      ? 'Today'
-                      : range === 'week'
-                        ? 'Last 7 Days'
-                        : range === 'month'
-                          ? 'Last 30 Days'
-                          : 'Custom Range'}
-                </button>
-              ))}
+              {(['all', 'today', 'week', 'month', 'custom'] as DateRange[]).map(
+                range => (
+                  <button
+                    key={range}
+                    onClick={() => setDateRange(range)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      dateRange === range
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {range === 'all'
+                      ? 'All Time'
+                      : range === 'today'
+                        ? 'Today'
+                        : range === 'week'
+                          ? 'Last 7 Days'
+                          : range === 'month'
+                            ? 'Last 30 Days'
+                            : 'Custom Range'}
+                  </button>
+                )
+              )}
             </div>
 
             {/* Custom Date Inputs */}
@@ -352,7 +360,7 @@ export function ConversationHistory({
                     <input
                       type="date"
                       value={customStartDate}
-                      onChange={(e) => setCustomStartDate(e.target.value)}
+                      onChange={e => setCustomStartDate(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
                   </div>
@@ -369,7 +377,7 @@ export function ConversationHistory({
                     <input
                       type="date"
                       value={customEndDate}
-                      onChange={(e) => setCustomEndDate(e.target.value)}
+                      onChange={e => setCustomEndDate(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
                   </div>
@@ -439,7 +447,10 @@ export function ConversationHistory({
                       )}
                     </div>
                     <p className="text-sm whitespace-pre-wrap break-words">
-                      {searchQuery && msg.text.toLowerCase().includes(searchQuery.toLowerCase()) ? (
+                      {searchQuery &&
+                      msg.text
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ? (
                         // Highlight search terms
                         <span
                           dangerouslySetInnerHTML={{
@@ -487,7 +498,9 @@ export function ConversationHistory({
                           Phone Call
                         </p>
                         <p className="text-xs text-gray-600">
-                          {call.status === 'Completed' ? '✅ Completed' : call.status}
+                          {call.status === 'Completed'
+                            ? '✅ Completed'
+                            : call.status}
                         </p>
                       </div>
                     </div>

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Error Boundary Component
@@ -21,10 +21,10 @@
  * ```
  */
 
-import React from "react";
-import { ErrorBoundary as ReactErrorBoundary, FallbackProps } from "react-error-boundary";
+import React from 'react';
+import { ErrorBoundary as ReactErrorBoundary, FallbackProps } from 'react-error-boundary';
 
-import { logger } from "@/lib/logger";
+import { logger } from '@/lib/logger';
 
 interface ErrorFallbackProps extends FallbackProps {
   resetKeys?: string[];
@@ -37,7 +37,7 @@ interface ErrorFallbackProps extends FallbackProps {
 function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   React.useEffect(() => {
     // Log error details for debugging
-    logger.error("ErrorBoundary caught an error", error, {
+    logger.error('ErrorBoundary caught an error', error, {
       errorMessage: error?.message,
       errorStack: error?.stack,
       componentStack: error?.stack,
@@ -48,13 +48,14 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   }, [error]);
 
   // Determine if error is recoverable
-  const isNetworkError = error?.message?.includes("fetch") ||
-                         error?.message?.includes("network") ||
-                         error?.message?.includes("timeout");
+  const isNetworkError =
+    error?.message?.includes('fetch') ||
+    error?.message?.includes('network') ||
+    error?.message?.includes('timeout');
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           {/* Error Icon */}
           <svg
@@ -74,31 +75,29 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 
           {/* Error Title */}
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            {isNetworkError ? "Connection Problem" : "Something Went Wrong"}
+            {isNetworkError ? 'Connection Problem' : 'Something Went Wrong'}
           </h2>
 
           {/* Error Message */}
           <p className="mt-2 text-sm text-gray-600">
             {isNetworkError
               ? "We're having trouble connecting to our servers. Please check your internet connection and try again."
-              : "We encountered an unexpected error. Our team has been notified and is working on a fix."}
+              : 'We encountered an unexpected error. Our team has been notified and is working on a fix.'}
           </p>
 
           {/* Show error details in development */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="mt-4 p-4 bg-red-50 rounded-lg text-left">
-              <h3 className="text-sm font-semibold text-red-800 mb-2">
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 rounded-lg bg-red-50 p-4 text-left">
+              <h3 className="mb-2 text-sm font-semibold text-red-800">
                 Error Details (Development Only)
               </h3>
-              <pre className="text-xs text-red-700 overflow-auto max-h-40">
-                {error?.message}
-              </pre>
+              <pre className="max-h-40 overflow-auto text-xs text-red-700">{error?.message}</pre>
               {error?.stack && (
                 <details className="mt-2">
-                  <summary className="text-xs text-red-800 cursor-pointer hover:underline">
+                  <summary className="cursor-pointer text-xs text-red-800 hover:underline">
                     Stack Trace
                   </summary>
-                  <pre className="text-xs text-red-700 overflow-auto max-h-40 mt-1">
+                  <pre className="mt-1 max-h-40 overflow-auto text-xs text-red-700">
                     {error.stack}
                   </pre>
                 </details>
@@ -107,17 +106,12 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
           )}
 
           {/* Action Buttons */}
-          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <button
               onClick={resetErrorBoundary}
-              className="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+              className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-5 py-3 text-base font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
             >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -129,15 +123,10 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
             </button>
 
             <button
-              onClick={() => window.location.href = "/"}
-              className="inline-flex items-center justify-center px-5 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+              onClick={() => (window.location.href = '/')}
+              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-3 text-base font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
             >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -151,11 +140,8 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
 
           {/* Contact Support Link */}
           <p className="mt-6 text-xs text-gray-500">
-            If the problem persists, please{" "}
-            <a
-              href="/contact"
-              className="font-medium text-red-600 hover:text-red-500 underline"
-            >
+            If the problem persists, please{' '}
+            <a href="/contact" className="font-medium text-red-600 underline hover:text-red-500">
               contact our support team
             </a>
             .
@@ -188,16 +174,16 @@ export function ErrorBoundary({
   fallback,
   onReset,
   onError,
-  resetKeys = []
+  resetKeys = [],
 }: ErrorBoundaryProps) {
   const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
     // Log to console in development
-    if (process.env.NODE_ENV === "development") {
-      console.error("ErrorBoundary caught an error:", error, errorInfo);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
 
     // Log with our logger utility
-    logger.error("React Error Boundary triggered", error, {
+    logger.error('React Error Boundary triggered', error, {
       errorMessage: error.message,
       componentStack: errorInfo.componentStack,
       errorStack: error.stack,
@@ -213,7 +199,7 @@ export function ErrorBoundary({
   };
 
   const handleReset = () => {
-    logger.info("ErrorBoundary reset triggered");
+    logger.info('ErrorBoundary reset triggered');
 
     // Call custom reset handler if provided
     if (onReset) {
@@ -240,7 +226,7 @@ export function ErrorBoundary({
 export function FormErrorBoundary({
   children,
   formName,
-  onFormError
+  onFormError,
 }: {
   children: React.ReactNode;
   formName: string;
@@ -257,11 +243,7 @@ export function FormErrorBoundary({
     }
   };
 
-  return (
-    <ErrorBoundary onError={handleError}>
-      {children}
-    </ErrorBoundary>
-  );
+  return <ErrorBoundary onError={handleError}>{children}</ErrorBoundary>;
 }
 
 /**
@@ -270,23 +252,19 @@ export function FormErrorBoundary({
  */
 export function ApiErrorBoundary({
   children,
-  apiEndpoint
+  apiEndpoint,
 }: {
   children: React.ReactNode;
   apiEndpoint?: string;
 }) {
   const handleError = (error: Error, _errorInfo: React.ErrorInfo) => {
-    logger.error("API Error Boundary triggered", error, {
+    logger.error('API Error Boundary triggered', error, {
       apiEndpoint,
-      isNetworkError: error.message.includes("fetch") || error.message.includes("network"),
+      isNetworkError: error.message.includes('fetch') || error.message.includes('network'),
     });
   };
 
-  return (
-    <ErrorBoundary onError={handleError}>
-      {children}
-    </ErrorBoundary>
-  );
+  return <ErrorBoundary onError={handleError}>{children}</ErrorBoundary>;
 }
 
 export default ErrorBoundary;

@@ -164,7 +164,7 @@ export function logApiRequest(
   url: string,
   status?: number,
   duration?: number,
-  error?: Error
+  error?: Error,
 ): void {
   const context = {
     method,

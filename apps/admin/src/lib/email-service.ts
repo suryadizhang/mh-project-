@@ -1,108 +1,111 @@
-import { Resend } from 'resend'
+import { Resend } from 'resend';
 
 // Lazy initialization of Resend to prevent build errors
-let resend: Resend | null = null
+let resend: Resend | null = null;
 function getResendClient(): Resend {
   if (!resend) {
-    const apiKey = process.env.RESEND_API_KEY || 'fallback_key_for_build'
-    resend = new Resend(apiKey)
+    const apiKey = process.env.RESEND_API_KEY || 'fallback_key_for_build';
+    resend = new Resend(apiKey);
   }
-  return resend
+  return resend;
 }
 
 // Email templates and automation system
 interface EmailTemplate {
-  subject: string
-  html: string
-  text: string
+  subject: string;
+  html: string;
+  text: string;
 }
 
 interface BookingEmailData {
-  customerName: string
-  customerEmail: string
-  bookingId: string
-  eventDate: string
-  eventTime: string
-  guestCount: number
+  customerName: string;
+  customerEmail: string;
+  bookingId: string;
+  eventDate: string;
+  eventTime: string;
+  guestCount: number;
   venueAddress: {
-    street: string
-    city: string
-    state: string
-    zipcode: string
-  }
-  confirmationNumber: string
+    street: string;
+    city: string;
+    state: string;
+    zipcode: string;
+  };
+  confirmationNumber: string;
 }
 
 // Email sending history for audit and rate limiting
 interface EmailLog {
-  bookingId: string
-  emailType: 'confirmation' | 'review_request' | 'upsell'
-  recipientEmail: string
-  sentAt: string
-  status: 'sent' | 'failed' | 'queued'
-  resendMessageId?: string
-  error?: string
+  bookingId: string;
+  emailType: 'confirmation' | 'review_request' | 'upsell';
+  recipientEmail: string;
+  sentAt: string;
+  status: 'sent' | 'failed' | 'queued';
+  resendMessageId?: string;
+  error?: string;
 }
 
 // In-memory email log storage (replace with database in production)
-const emailLogs: EmailLog[] = []
+const emailLogs: EmailLog[] = [];
 
 // Rate limiting for email sending
-const emailRateLimit = new Map<string, { count: number; resetTime: number }>()
-const EMAIL_RATE_LIMIT = 5 // Max 5 emails per hour per recipient
-const EMAIL_RATE_WINDOW = 3600000 // 1 hour
+const emailRateLimit = new Map<string, { count: number; resetTime: number }>();
+const EMAIL_RATE_LIMIT = 5; // Max 5 emails per hour per recipient
+const EMAIL_RATE_WINDOW = 3600000; // 1 hour
 
 class MyHibachiEmailService {
   // Check email rate limiting
   private checkEmailRateLimit(email: string): boolean {
-    const now = Date.now()
-    const userRecord = emailRateLimit.get(email)
+    const now = Date.now();
+    const userRecord = emailRateLimit.get(email);
 
     if (!userRecord || now > userRecord.resetTime) {
-      emailRateLimit.set(email, { count: 1, resetTime: now + EMAIL_RATE_WINDOW })
-      return true
+      emailRateLimit.set(email, {
+        count: 1,
+        resetTime: now + EMAIL_RATE_WINDOW,
+      });
+      return true;
     }
 
     if (userRecord.count >= EMAIL_RATE_LIMIT) {
-      return false
+      return false;
     }
 
-    userRecord.count++
-    return true
+    userRecord.count++;
+    return true;
   }
 
   // Generate calendar links
   private generateCalendarLinks(bookingData: BookingEmailData): {
-    google: string
-    apple: string
-    ics: string
+    google: string;
+    apple: string;
+    ics: string;
   } {
-    const { customerName, eventDate, eventTime, venueAddress } = bookingData
+    const { customerName, eventDate, eventTime, venueAddress } = bookingData;
 
     // Convert event time to 24-hour format and create full datetime
     const timeMap: { [key: string]: string } = {
       '12PM': '12:00',
       '3PM': '15:00',
       '6PM': '18:00',
-      '9PM': '21:00'
-    }
+      '9PM': '21:00',
+    };
 
-    const eventStartTime = timeMap[eventTime]
-    const startDate = `${eventDate}T${eventStartTime}:00`
-    const endDate = `${eventDate}T${parseInt(eventStartTime.split(':')[0]) + 2}:00:00` // 2-hour duration
+    const eventStartTime = timeMap[eventTime];
+    const startDate = `${eventDate}T${eventStartTime}:00`;
+    const endDate = `${eventDate}T${parseInt(eventStartTime.split(':')[0]) + 2}:00:00`; // 2-hour duration
 
-    const title = `MyHibachi Experience - ${customerName}`
-    const description = `Private hibachi cooking experience with MyHibachi. Enjoy fresh, premium ingredients prepared right at your venue!`
-    const location = `${venueAddress.street}, ${venueAddress.city}, ${venueAddress.state} ${venueAddress.zipcode}`
+    const title = `MyHibachi Experience - ${customerName}`;
+    const description = `Private hibachi cooking experience with MyHibachi. Enjoy fresh, premium ingredients prepared right at your venue!`;
+    const location = `${venueAddress.street}, ${venueAddress.city}, ${venueAddress.state} ${venueAddress.zipcode}`;
 
     // Google Calendar link
-    const googleStartTime = startDate.replace(/[-:]/g, '').replace('T', 'T')
-    const googleEndTime = endDate.replace(/[-:]/g, '').replace('T', 'T')
+    const googleStartTime = startDate.replace(/[-:]/g, '').replace('T', 'T');
+    const googleEndTime = endDate.replace(/[-:]/g, '').replace('T', 'T');
     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
       title
     )}&dates=${googleStartTime}/${googleEndTime}&details=${encodeURIComponent(
       description
-    )}&location=${encodeURIComponent(location)}`
+    )}&location=${encodeURIComponent(location)}`;
 
     // Apple Calendar (webcal) link - simplified
     const appleUrl = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
@@ -115,7 +118,7 @@ SUMMARY:${title}
 DESCRIPTION:${description}
 LOCATION:${location}
 END:VEVENT
-END:VCALENDAR`
+END:VCALENDAR`;
 
     // ICS file content
     const icsContent = `BEGIN:VCALENDAR
@@ -130,30 +133,38 @@ DESCRIPTION:${description}
 LOCATION:${location}
 STATUS:CONFIRMED
 END:VEVENT
-END:VCALENDAR`
+END:VCALENDAR`;
 
     return {
       google: googleUrl,
       apple: appleUrl,
-      ics: icsContent
-    }
+      ics: icsContent,
+    };
   }
 
   // Generate booking confirmation email template
-  private generateConfirmationEmail(bookingData: BookingEmailData): EmailTemplate {
-    const { customerName, eventDate, eventTime, guestCount, venueAddress, confirmationNumber } =
-      bookingData
-    const calendarLinks = this.generateCalendarLinks(bookingData)
+  private generateConfirmationEmail(
+    bookingData: BookingEmailData
+  ): EmailTemplate {
+    const {
+      customerName,
+      eventDate,
+      eventTime,
+      guestCount,
+      venueAddress,
+      confirmationNumber,
+    } = bookingData;
+    const calendarLinks = this.generateCalendarLinks(bookingData);
 
     // Format date for display
     const displayDate = new Date(eventDate).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
-    })
+      day: 'numeric',
+    });
 
-    const subject = 'Your MyHibachi Experience is Confirmed!'
+    const subject = 'Your MyHibachi Experience is Confirmed!';
 
     const html = `
 <!DOCTYPE html>
@@ -248,7 +259,7 @@ END:VCALENDAR`
         </div>
     </div>
 </body>
-</html>`
+</html>`;
 
     const text = `
 Your MyHibachi Experience is Confirmed!
@@ -271,16 +282,16 @@ Phone: (123) 456-7890
 Email: bookings@myhibachi.com
 
 Thank you for choosing MyHibachi!
-myhibachi.com`
+myhibachi.com`;
 
-    return { subject, html, text }
+    return { subject, html, text };
   }
 
   // Generate review request email template
   private generateReviewEmail(bookingData: BookingEmailData): EmailTemplate {
-    const { customerName } = bookingData
+    const { customerName } = bookingData;
 
-    const subject = 'How Was Your Hibachi Experience? 🌟'
+    const subject = 'How Was Your Hibachi Experience? 🌟';
 
     const html = `
 <!DOCTYPE html>
@@ -341,7 +352,7 @@ myhibachi.com`
         </div>
     </div>
 </body>
-</html>`
+</html>`;
 
     const text = `
 🌟 How Was Your Hibachi Experience?
@@ -359,17 +370,18 @@ Planning another event? Visit myhibachi.com to book again!
 
 With gratitude,
 The MyHibachi Team
-myhibachi.com | (123) 456-7890`
+myhibachi.com | (123) 456-7890`;
 
-    return { subject, html, text }
+    return { subject, html, text };
   }
 
   // Generate upsell email template
   private generateUpsellEmail(bookingData: BookingEmailData): EmailTemplate {
-    const { customerName } = bookingData
-    const promoCode = `WELCOME10-${bookingData.bookingId.slice(-6)}`
+    const { customerName } = bookingData;
+    const promoCode = `WELCOME10-${bookingData.bookingId.slice(-6)}`;
 
-    const subject = 'Miss the Hibachi Experience? 🍤 Get 10% Off Your Next Show!'
+    const subject =
+      'Miss the Hibachi Experience? 🍤 Get 10% Off Your Next Show!';
 
     const html = `
 <!DOCTYPE html>
@@ -445,7 +457,7 @@ myhibachi.com | (123) 456-7890`
         </div>
     </div>
 </body>
-</html>`
+</html>`;
 
     const text = `
 🍤 Miss the Hibachi Experience?
@@ -469,9 +481,9 @@ Perfect occasions for hibachi:
 
 Can't wait to cook for you again,
 The MyHibachi Team
-myhibachi.com | (123) 456-7890`
+myhibachi.com | (123) 456-7890`;
 
-    return { subject, html, text }
+    return { subject, html, text };
   }
 
   // Send email with error handling and logging
@@ -483,8 +495,10 @@ myhibachi.com | (123) 456-7890`
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     // Check rate limiting
     if (!this.checkEmailRateLimit(to)) {
-      console.log(`[EMAIL RATE LIMITED] ${emailType} email to ${to} blocked due to rate limiting`)
-      return { success: false, error: 'Rate limited' }
+      console.log(
+        `[EMAIL RATE LIMITED] ${emailType} email to ${to} blocked due to rate limiting`
+      );
+      return { success: false, error: 'Rate limited' };
     }
 
     try {
@@ -496,9 +510,9 @@ myhibachi.com | (123) 456-7890`
         text: template.text,
         tags: [
           { name: 'type', value: emailType },
-          { name: 'booking_id', value: bookingId }
-        ]
-      })
+          { name: 'booking_id', value: bookingId },
+        ],
+      });
 
       // Log successful email
       const emailLog: EmailLog = {
@@ -507,12 +521,14 @@ myhibachi.com | (123) 456-7890`
         recipientEmail: to,
         sentAt: new Date().toISOString(),
         status: 'sent',
-        resendMessageId: result.data?.id
-      }
-      emailLogs.push(emailLog)
+        resendMessageId: result.data?.id,
+      };
+      emailLogs.push(emailLog);
 
-      console.log(`[EMAIL SENT] ${emailType} email sent to ${to} for booking ${bookingId}`)
-      return { success: true, messageId: result.data?.id }
+      console.log(
+        `[EMAIL SENT] ${emailType} email sent to ${to} for booking ${bookingId}`
+      );
+      return { success: true, messageId: result.data?.id };
     } catch (error) {
       // Log failed email
       const emailLog: EmailLog = {
@@ -521,64 +537,75 @@ myhibachi.com | (123) 456-7890`
         recipientEmail: to,
         sentAt: new Date().toISOString(),
         status: 'failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
-      emailLogs.push(emailLog)
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+      emailLogs.push(emailLog);
 
-      console.error(`[EMAIL ERROR] Failed to send ${emailType} email to ${to}:`, error)
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+      console.error(
+        `[EMAIL ERROR] Failed to send ${emailType} email to ${to}:`,
+        error
+      );
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 
   // Send booking confirmation email immediately
-  async sendBookingConfirmation(bookingData: BookingEmailData): Promise<boolean> {
-    const template = this.generateConfirmationEmail(bookingData)
+  async sendBookingConfirmation(
+    bookingData: BookingEmailData
+  ): Promise<boolean> {
+    const template = this.generateConfirmationEmail(bookingData);
     const result = await this.sendEmail(
       bookingData.customerEmail,
       template,
       bookingData.bookingId,
       'confirmation'
-    )
-    return result.success
+    );
+    return result.success;
   }
 
   // Send review request email (called by cron job)
   async sendReviewRequest(bookingData: BookingEmailData): Promise<boolean> {
-    const template = this.generateReviewEmail(bookingData)
+    const template = this.generateReviewEmail(bookingData);
     const result = await this.sendEmail(
       bookingData.customerEmail,
       template,
       bookingData.bookingId,
       'review_request'
-    )
-    return result.success
+    );
+    return result.success;
   }
 
   // Send upsell email (called by cron job)
   async sendUpsellEmail(bookingData: BookingEmailData): Promise<boolean> {
-    const template = this.generateUpsellEmail(bookingData)
+    const template = this.generateUpsellEmail(bookingData);
     const result = await this.sendEmail(
       bookingData.customerEmail,
       template,
       bookingData.bookingId,
       'upsell'
-    )
-    return result.success
+    );
+    return result.success;
   }
 
   // Get email history for a booking
   getEmailHistory(bookingId: string): EmailLog[] {
-    return emailLogs.filter(log => log.bookingId === bookingId)
+    return emailLogs.filter(log => log.bookingId === bookingId);
   }
 
   // Get all email logs with pagination
-  getAllEmailLogs(page: number = 1, limit: number = 50): { logs: EmailLog[]; total: number } {
-    const startIndex = (page - 1) * limit
-    const endIndex = startIndex + limit
+  getAllEmailLogs(
+    page: number = 1,
+    limit: number = 50
+  ): { logs: EmailLog[]; total: number } {
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
     return {
       logs: emailLogs.slice(startIndex, endIndex),
-      total: emailLogs.length
-    }
+      total: emailLogs.length,
+    };
   }
 
   // Admin function to manually resend email
@@ -589,43 +616,43 @@ myhibachi.com | (123) 456-7890`
   ): Promise<boolean> {
     console.log(
       `[EMAIL ADMIN] Manual resend requested for booking ${bookingId}, type: ${emailType}`
-    )
+    );
 
     switch (emailType) {
       case 'confirmation':
-        return await this.sendBookingConfirmation(bookingData)
+        return await this.sendBookingConfirmation(bookingData);
       case 'review_request':
-        return await this.sendReviewRequest(bookingData)
+        return await this.sendReviewRequest(bookingData);
       case 'upsell':
-        return await this.sendUpsellEmail(bookingData)
+        return await this.sendUpsellEmail(bookingData);
       default:
-        return false
+        return false;
     }
   }
 
   // Send custom email (for admin-generated emails like invoices)
   async sendCustomEmail(emailData: {
-    to: string
-    subject: string
-    html: string
-    text: string
+    to: string;
+    subject: string;
+    html: string;
+    text: string;
   }): Promise<boolean> {
     try {
       // Check rate limiting
       if (!this.checkEmailRateLimit(emailData.to)) {
-        console.log(`[EMAIL RATE LIMITED] Custom email to ${emailData.to}`)
-        return false
+        console.log(`[EMAIL RATE LIMITED] Custom email to ${emailData.to}`);
+        return false;
       }
 
-      const { to, subject, html, text } = emailData
+      const { to, subject, html, text } = emailData;
 
       const result = await getResendClient().emails.send({
         from: 'MyHibachi <noreply@myhibachi.com>',
         to: [to],
         subject,
         html,
-        text
-      })
+        text,
+      });
 
       // Log email
       const emailLog: EmailLog = {
@@ -634,14 +661,16 @@ myhibachi.com | (123) 456-7890`
         recipientEmail: to,
         sentAt: new Date().toISOString(),
         status: 'sent',
-        resendMessageId: result.data?.id
-      }
-      emailLogs.push(emailLog)
+        resendMessageId: result.data?.id,
+      };
+      emailLogs.push(emailLog);
 
-      console.log(`[EMAIL SENT] Custom email sent to ${to}, Message ID: ${result.data?.id}`)
-      return true
+      console.log(
+        `[EMAIL SENT] Custom email sent to ${to}, Message ID: ${result.data?.id}`
+      );
+      return true;
     } catch (error) {
-      console.error(`[EMAIL ERROR] Failed to send custom email:`, error)
+      console.error(`[EMAIL ERROR] Failed to send custom email:`, error);
 
       // Log failed email
       const emailLog: EmailLog = {
@@ -650,15 +679,15 @@ myhibachi.com | (123) 456-7890`
         recipientEmail: emailData.to,
         sentAt: new Date().toISOString(),
         status: 'failed',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
-      emailLogs.push(emailLog)
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+      emailLogs.push(emailLog);
 
-      return false
+      return false;
     }
   }
 }
 
 // Export singleton instance
-export const emailService = new MyHibachiEmailService()
-export type { BookingEmailData, EmailLog }
+export const emailService = new MyHibachiEmailService();
+export type { BookingEmailData, EmailLog };

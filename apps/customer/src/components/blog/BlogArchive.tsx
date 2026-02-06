@@ -44,30 +44,33 @@ export default function BlogArchive({ posts, onArchiveFilter, className = '' }: 
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
 
   const archiveData = useMemo(() => {
-    const grouped = posts.reduce((acc, post) => {
-      const date = new Date(post.date);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const monthName = MONTH_NAMES[date.getMonth()];
+    const grouped = posts.reduce(
+      (acc, post) => {
+        const date = new Date(post.date);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const monthName = MONTH_NAMES[date.getMonth()];
 
-      if (!acc[year]) {
-        acc[year] = {};
-      }
-      if (!acc[year][month]) {
-        acc[year][month] = {
-          year,
-          month,
-          monthName,
-          count: 0,
-          posts: [],
-        };
-      }
+        if (!acc[year]) {
+          acc[year] = {};
+        }
+        if (!acc[year][month]) {
+          acc[year][month] = {
+            year,
+            month,
+            monthName,
+            count: 0,
+            posts: [],
+          };
+        }
 
-      acc[year][month].count++;
-      acc[year][month].posts.push(post);
+        acc[year][month].count++;
+        acc[year][month].posts.push(post);
 
-      return acc;
-    }, {} as Record<number, Record<number, ArchiveItem>>);
+        return acc;
+      },
+      {} as Record<number, Record<number, ArchiveItem>>,
+    );
 
     // Convert to sorted yearly archives
     const yearlyArchives: YearlyArchive[] = Object.keys(grouped)

@@ -2,7 +2,9 @@
 
 ## Overview
 
-WhatsApp Business API provides official, reliable integration for sending notifications to customers. This guide covers complete setup for My Hibachi Chef.
+WhatsApp Business API provides official, reliable integration for
+sending notifications to customers. This guide covers complete setup
+for My Hibachi Chef.
 
 ---
 
@@ -11,6 +13,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 ### Option A: Meta WhatsApp Business Platform (Recommended)
 
 #### Prerequisites:
+
 - Facebook Business Manager account
 - Verified business
 - Phone number (not currently using WhatsApp)
@@ -19,6 +22,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 #### Step-by-Step Setup:
 
 ##### 1. Create Facebook Business Manager Account
+
 1. Go to https://business.facebook.com
 2. Click "Create Account"
 3. Enter business name: "My Hibachi Chef"
@@ -26,6 +30,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 5. Verify email
 
 ##### 2. Add WhatsApp Business Account
+
 1. Go to Business Settings → Accounts → WhatsApp Accounts
 2. Click "Add" → "Create a WhatsApp Business Account"
 3. Business name: "My Hibachi Chef"
@@ -34,15 +39,19 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 6. Business address: 47481 Towhee Street, Fremont, CA 94539
 
 ##### 3. Add Phone Number
+
 1. Click "Add phone number"
 2. Choose phone number type:
-   - **Option 1:** Get a new number from Meta ($Free with verification)
-   - **Option 2:** Use existing number (must not be on WhatsApp Personal)
+   - **Option 1:** Get a new number from Meta ($Free with
+     verification)
+   - **Option 2:** Use existing number (must not be on WhatsApp
+     Personal)
 3. For this project, use: **+1 916 740 8768** (your business line)
 4. Select country: United States
 5. Verify via SMS or voice call
 
 ##### 4. Verify Your Business
+
 1. Go to Business Settings → Business Info
 2. Upload documents:
    - Business license or registration
@@ -51,6 +60,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 3. Wait 1-3 business days for verification
 
 ##### 5. Create WhatsApp Business App
+
 1. Go to https://developers.facebook.com/apps
 2. Click "Create App"
 3. Select "Business" type
@@ -59,6 +69,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 6. Link to Business Manager account
 
 ##### 6. Configure WhatsApp Product
+
 1. In your app, click "Add Product"
 2. Select "WhatsApp" → "Set Up"
 3. Link your WhatsApp Business Account
@@ -69,6 +80,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
    - **Access Token:** `{save_this}`
 
 ##### 7. Configure Webhooks
+
 1. In WhatsApp settings, click "Configuration"
 2. Edit webhook:
    - **Callback URL:** `https://yourdomain.com/webhooks/whatsapp`
@@ -80,6 +92,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 4. Copy **Webhook Secret** for later
 
 ##### 8. Submit for Production Access
+
 1. Current status: Development (10 conversations/day limit)
 2. To go production (1,000 free conversations/month):
    - Complete business verification
@@ -91,6 +104,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 ### Option B: Twilio WhatsApp API (Faster Setup - 30 Minutes)
 
 #### Why Choose Twilio:
+
 - ✅ Faster setup (no business verification needed)
 - ✅ Pay-as-you-go pricing
 - ✅ Reliable infrastructure
@@ -98,6 +112,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 - ❌ Slightly higher cost than Meta direct
 
 #### Pricing:
+
 - **WhatsApp:** $0.005 per conversation (first 1,000 free)
 - **SMS Fallback:** $0.0075 per message
 - **Monthly minimum:** $0 (pay only for what you use)
@@ -105,6 +120,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 #### Setup Steps:
 
 ##### 1. Create Twilio Account
+
 1. Go to https://www.twilio.com/try-twilio
 2. Sign up with:
    - Email: cs@myhibachichef.com
@@ -113,6 +129,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 4. Choose "Messaging" as primary product
 
 ##### 2. Get WhatsApp Sandbox (Immediate Testing)
+
 1. Go to Console → Messaging → Try it out → Send a WhatsApp message
 2. You'll see sandbox number: **+1 (415) 523-8886**
 3. Join sandbox:
@@ -121,6 +138,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 4. You can now send/receive test messages
 
 ##### 3. Upgrade to Production WhatsApp
+
 1. Go to Console → Messaging → WhatsApp → Senders
 2. Click "New Sender"
 3. Select "Facebook Business Manager"
@@ -129,6 +147,7 @@ WhatsApp Business API provides official, reliable integration for sending notifi
    - **Option B:** Link your WhatsApp Business Account (recommended)
 
 ##### 4. For Linking Existing WhatsApp Business:
+
 1. Create WhatsApp Business Account (see Option A steps 1-6)
 2. In Twilio Console, click "Link existing account"
 3. Login to Facebook Business Manager
@@ -137,15 +156,18 @@ WhatsApp Business API provides official, reliable integration for sending notifi
 6. Complete setup (5-10 minutes)
 
 ##### 5. Get API Credentials
+
 1. Go to Console → Account → API Keys & Tokens
 2. Copy:
    - **Account SID:** `ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
    - **Auth Token:** `your_auth_token`
 3. Go to Messaging → WhatsApp → Senders
 4. Copy:
-   - **WhatsApp Sender:** `whatsapp:+14155238886` (sandbox) or your number
+   - **WhatsApp Sender:** `whatsapp:+14155238886` (sandbox) or your
+     number
 
 ##### 6. Set Up Webhooks (Optional)
+
 1. Console → Messaging → Settings → WhatsApp sandbox settings
 2. Set webhook URL: `https://yourdomain.com/webhooks/twilio-whatsapp`
 3. HTTP Method: POST
@@ -210,13 +232,15 @@ NOTIFICATION_QUIET_END=8
 
 ### Mock WhatsApp Service
 
-I'll create a mock service that logs notifications locally without requiring API credentials.
+I'll create a mock service that logs notifications locally without
+requiring API credentials.
 
 ---
 
 ## Part 4: Implementation Costs
 
 ### Meta WhatsApp Business Platform:
+
 - **Setup:** Free
 - **First 1,000 conversations/month:** Free
 - **After 1,000:** $0.005-$0.009 per conversation (varies by country)
@@ -224,6 +248,7 @@ I'll create a mock service that logs notifications locally without requiring API
 - **Phone number:** Free (Meta-provided)
 
 ### Twilio WhatsApp API:
+
 - **Setup:** Free
 - **Phone number:** $2/month (optional, can use Meta number)
 - **WhatsApp messages:** $0.005 per conversation
@@ -231,8 +256,10 @@ I'll create a mock service that logs notifications locally without requiring API
 - **No monthly minimum**
 
 ### Estimated Monthly Cost (100 notifications):
+
 - **Meta:** $0 (within free tier)
-- **Twilio:** $0.50 for WhatsApp + $0.75 for SMS fallback = **$1.25/month**
+- **Twilio:** $0.50 for WhatsApp + $0.75 for SMS fallback =
+  **$1.25/month**
 
 ---
 
@@ -241,18 +268,21 @@ I'll create a mock service that logs notifications locally without requiring API
 ### For My Hibachi Chef:
 
 **Phase 1 (Now): Development & Testing**
+
 - ✅ Use Twilio Sandbox (free, instant)
 - ✅ Test all notification types
 - ✅ Verify message templates
 - ✅ Timeline: 1-2 days
 
 **Phase 2 (Week 2): Production Setup**
+
 - ✅ Create Meta WhatsApp Business Account
 - ✅ Verify business (1-3 days wait)
 - ✅ Link to Twilio for easy management
 - ✅ Timeline: 1 week
 
 **Phase 3 (Week 3): Go Live**
+
 - ✅ Switch from sandbox to production number
 - ✅ Enable for all customers
 - ✅ Monitor delivery and costs
@@ -262,6 +292,7 @@ I'll create a mock service that logs notifications locally without requiring API
 ## Part 6: Quick Start (Testing Today)
 
 ### 1. Sign up for Twilio (10 minutes)
+
 ```bash
 # Go to: https://www.twilio.com/try-twilio
 # Enter: cs@myhibachichef.com
@@ -269,12 +300,14 @@ I'll create a mock service that logs notifications locally without requiring API
 ```
 
 ### 2. Get Sandbox Credentials (5 minutes)
+
 ```bash
 # Console → Messaging → Try it out → WhatsApp
 # Copy: Account SID, Auth Token, Sandbox number
 ```
 
 ### 3. Update `.env`
+
 ```env
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=your_auth_token
@@ -282,6 +315,7 @@ TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
 ```
 
 ### 4. Join Sandbox
+
 ```bash
 # 1. Save +1-415-523-8886 to your phone
 # 2. Send WhatsApp: "join <your-code>"
@@ -289,6 +323,7 @@ TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
 ```
 
 ### 5. Test Notification
+
 ```bash
 cd apps/backend
 python -c "
@@ -312,6 +347,7 @@ asyncio.run(send_payment_notification(
 ## Part 7: WhatsApp Message Templates (Required for Production)
 
 ### Template: New Booking Confirmation
+
 ```
 Hello {{1}}! 🎉
 
@@ -332,6 +368,7 @@ Questions? Reply here or call +19167408768
 ```
 
 ### Template: Payment Received
+
 ```
 Payment Confirmed! ✅
 
@@ -347,6 +384,7 @@ Looking forward to serving you on {{5}}!
 ```
 
 ### Template: Event Reminder (24 hours before)
+
 ```
 Reminder: Your Hibachi Event Tomorrow! 🔥
 
@@ -365,6 +403,7 @@ See you soon!
 ```
 
 ### Template: Review Request (After event)
+
 ```
 How was your hibachi experience? ⭐
 
@@ -385,18 +424,21 @@ As a thank you, get 10% off your next booking!
 ## Part 8: Next Steps
 
 ### Immediate (Today):
+
 1. ✅ Sign up for Twilio (10 min)
 2. ✅ Get sandbox credentials
 3. ✅ Test with your phone
 4. ✅ Verify notifications work
 
 ### This Week:
+
 1. Create Facebook Business Manager
 2. Add WhatsApp Business Account
 3. Start business verification process
 4. Create message templates
 
 ### Next Week:
+
 1. Complete business verification
 2. Link to Twilio (optional) or use Meta direct
 3. Submit templates for approval
@@ -407,18 +449,22 @@ As a thank you, get 10% off your next booking!
 ## Part 9: Troubleshooting
 
 ### "Cannot send to this number"
+
 - Number not in sandbox → Join sandbox first
 - Number not opted in → Customer needs to reply "START"
 
 ### "Insufficient permissions"
+
 - Check Access Token has messaging permissions
 - Verify WhatsApp Business Account is active
 
 ### "Template not found"
+
 - Template not approved yet → Use sandbox templates
 - Template name mismatch → Check exact name
 
 ### "Webhook failed"
+
 - Invalid URL → Check HTTPS and valid endpoint
 - Wrong verify token → Match webhook settings
 
@@ -427,19 +473,23 @@ As a thank you, get 10% off your next booking!
 ## Support
 
 **Twilio Support:**
+
 - Email: help@twilio.com
 - Phone: +1 (888) 908-9547
 - Docs: https://www.twilio.com/docs/whatsapp
 
 **Meta Support:**
+
 - Business Support: https://business.facebook.com/help
 - Developer Docs: https://developers.facebook.com/docs/whatsapp
 
 **My Implementation:**
+
 - Check logs: `apps/backend/logs/app.log`
 - Service file: `src/services/whatsapp_notification_service.py`
 
 ---
 
-**Recommended Start:** Twilio Sandbox (10 minutes, free, test immediately)
-**Production Goal:** Meta WhatsApp Business (1-2 weeks, free tier, official)
+**Recommended Start:** Twilio Sandbox (10 minutes, free, test
+immediately) **Production Goal:** Meta WhatsApp Business (1-2 weeks,
+free tier, official)

@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,15 +6,15 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/api/', '/private/', '/_next/', '/test/']
+        disallow: ['/admin/', '/api/', '/private/', '/_next/', '/test/'],
       },
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/admin/', '/api/', '/private/']
-      }
+        disallow: ['/admin/', '/api/', '/private/'],
+      },
     ],
     sitemap: 'https://myhibachichef.com/sitemap.xml',
-    host: 'https://myhibachichef.com'
-  }
+    host: 'https://myhibachichef.com',
+  };
 }

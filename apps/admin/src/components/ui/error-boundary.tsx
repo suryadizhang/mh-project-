@@ -134,7 +134,8 @@ export function PageErrorBoundary({
             <div>
               <h3 className="font-semibold text-red-900">{title}</h3>
               <p className="text-sm text-red-700 mt-1">
-                Please refresh the page or contact support if the problem persists.
+                Please refresh the page or contact support if the problem
+                persists.
               </p>
             </div>
           </div>

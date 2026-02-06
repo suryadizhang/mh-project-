@@ -377,7 +377,6 @@ function LoginContent() {
       >
         <GoogleSignInButton />
       </GoogleOAuthProvider>
-
     </form>
   );
 

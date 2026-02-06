@@ -3,29 +3,29 @@
 // Based on proven SEO strategies for local service businesses
 
 export interface SEOBlogPost {
-  id: number
-  title: string
-  slug: string
-  metaTitle: string
-  metaDescription: string
-  h1: string
-  primaryKeyword: string
-  secondaryKeywords: string[]
-  targetLocation: string
-  eventType: string
-  contentLength: number
-  publishDate: string
-  author: string
-  imageAlt: string
-  schema: Record<string, unknown>
-  internalLinks: string[]
-  faqSection: FAQ[]
+  id: number;
+  title: string;
+  slug: string;
+  metaTitle: string;
+  metaDescription: string;
+  h1: string;
+  primaryKeyword: string;
+  secondaryKeywords: string[];
+  targetLocation: string;
+  eventType: string;
+  contentLength: number;
+  publishDate: string;
+  author: string;
+  imageAlt: string;
+  schema: Record<string, unknown>;
+  internalLinks: string[];
+  faqSection: FAQ[];
 }
 
 export interface FAQ {
-  question: string
-  answer: string
-  keywords: string[]
+  question: string;
+  answer: string;
+  keywords: string[];
 }
 
 // Generate 30 ready-to-publish blog posts for 6-month calendar
@@ -46,7 +46,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'private hibachi chef San Jose',
         'San Jose backyard party catering',
         'Silicon Valley home hibachi',
-        'tech family hibachi parties'
+        'tech family hibachi parties',
       ],
       targetLocation: 'San Jose',
       eventType: 'Backyard Party',
@@ -59,9 +59,9 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       internalLinks: [
         '/menu',
         '/booking',
-        '/blog/silicon-valley-hibachi-chef-tech-company-catering-san-jose'
+        '/blog/silicon-valley-hibachi-chef-tech-company-catering-san-jose',
       ],
-      faqSection: generateBackyardPartyFAQs('San Jose')
+      faqSection: generateBackyardPartyFAQs('San Jose'),
     },
     {
       id: 56,
@@ -76,7 +76,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Stanford area business catering',
         'Palo Alto team building hibachi',
         'corporate chef Palo Alto',
-        'business event catering Stanford'
+        'business event catering Stanford',
       ],
       targetLocation: 'Palo Alto',
       eventType: 'Corporate',
@@ -86,7 +86,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Professional hibachi chef serving corporate team at Palo Alto office event',
       schema: generateCorporateEventSchema('Palo Alto'),
       internalLinks: ['/corporate-catering', '/menu', '/contact'],
-      faqSection: generateCorporateFAQs('Palo Alto')
+      faqSection: generateCorporateFAQs('Palo Alto'),
     },
     {
       id: 57,
@@ -101,7 +101,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Google area party catering',
         'Mountain View tech birthday',
         'hibachi birthday Mountain View',
-        'tech worker celebration catering'
+        'tech worker celebration catering',
       ],
       targetLocation: 'Mountain View',
       eventType: 'Birthday',
@@ -111,7 +111,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Tech family celebrating birthday with hibachi chef in Mountain View backyard',
       schema: generateBirthdayEventSchema('Mountain View'),
       internalLinks: ['/birthday-packages', '/menu', '/booking'],
-      faqSection: generateBirthdayFAQs('Mountain View')
+      faqSection: generateBirthdayFAQs('Mountain View'),
     },
     {
       id: 58,
@@ -126,7 +126,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'East Bay wedding catering',
         'Oakland wedding hibachi chef',
         'interactive wedding dining Oakland',
-        'unique wedding reception East Bay'
+        'unique wedding reception East Bay',
       ],
       targetLocation: 'Oakland',
       eventType: 'Wedding',
@@ -136,7 +136,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Hibachi chef entertaining wedding guests at elegant Oakland reception venue',
       schema: generateWeddingEventSchema('Oakland'),
       internalLinks: ['/wedding-packages', '/gallery', '/testimonials'],
-      faqSection: generateWeddingFAQs('Oakland')
+      faqSection: generateWeddingFAQs('Oakland'),
     },
     {
       id: 59,
@@ -151,7 +151,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'SCU graduation party catering',
         'Santa Clara graduation hibachi',
         'university graduation catering',
-        'academic celebration hibachi'
+        'academic celebration hibachi',
       ],
       targetLocation: 'Santa Clara',
       eventType: 'Graduation',
@@ -161,7 +161,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'SCU graduate family celebrating with hibachi chef at Santa Clara home',
       schema: generateGraduationEventSchema('Santa Clara'),
       internalLinks: ['/graduation-packages', '/menu', '/about'],
-      faqSection: generateGraduationFAQs('Santa Clara')
+      faqSection: generateGraduationFAQs('Santa Clara'),
     },
 
     // Month 2: Seasonal & Holiday Content
@@ -178,7 +178,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'SF winter party catering',
         'San Francisco holiday catering',
         'apartment holiday party SF',
-        'winter hibachi San Francisco'
+        'winter hibachi San Francisco',
       ],
       targetLocation: 'San Francisco',
       eventType: 'Holiday',
@@ -189,7 +189,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Holiday hibachi chef cooking for San Francisco family in festive apartment setting',
       schema: generateHolidayEventSchema('San Francisco'),
       internalLinks: ['/holiday-packages', '/seasonal-menu', '/booking'],
-      faqSection: generateHolidayFAQs('San Francisco')
+      faqSection: generateHolidayFAQs('San Francisco'),
     },
 
     // Continue with remaining 24 posts...
@@ -207,7 +207,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Silicon Valley team building',
         'startup team hibachi',
         'tech company team building',
-        'startup celebration catering'
+        'startup celebration catering',
       ],
       targetLocation: 'Silicon Valley',
       eventType: 'Corporate Tech',
@@ -218,7 +218,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Startup team laughing and learning at hibachi team building event in Silicon Valley',
       schema: generateTechEventSchema('Silicon Valley'),
       internalLinks: ['/corporate-catering', '/team-building', '/case-studies'],
-      faqSection: generateTechStartupFAQs()
+      faqSection: generateTechStartupFAQs(),
     },
 
     // Continue with more strategic posts...
@@ -235,7 +235,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'multi-generational dining Sunnyvale',
         'family reunion catering',
         'Sunnyvale family party hibachi',
-        'multi-age party entertainment'
+        'multi-age party entertainment',
       ],
       targetLocation: 'Sunnyvale',
       eventType: 'Family Reunion',
@@ -246,7 +246,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Three generations of family enjoying hibachi chef entertainment in Sunnyvale backyard',
       schema: generateFamilyEventSchema('Sunnyvale'),
       internalLinks: ['/family-packages', '/large-groups', '/menu'],
-      faqSection: generateFamilyReunionFAQs('Sunnyvale')
+      faqSection: generateFamilyReunionFAQs('Sunnyvale'),
     },
 
     // Month 4: Advanced Local SEO Content
@@ -263,7 +263,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'pool party catering Bay Area',
         'summer hibachi entertainment',
         'backyard pool party chef',
-        'Bay Area summer catering'
+        'Bay Area summer catering',
       ],
       targetLocation: 'Bay Area',
       eventType: 'Pool Party',
@@ -273,7 +273,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Hibachi chef grilling poolside at Bay Area summer party',
       schema: generatePoolPartySchema('Bay Area'),
       internalLinks: ['/summer-packages', '/outdoor-catering', '/booking'],
-      faqSection: generatePoolPartyFAQs('Bay Area')
+      faqSection: generatePoolPartyFAQs('Bay Area'),
     },
     {
       id: 64,
@@ -288,7 +288,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'romantic hibachi Sacramento',
         'engagement party catering',
         'Sacramento couple celebration',
-        'interactive romantic dining'
+        'interactive romantic dining',
       ],
       targetLocation: 'Sacramento',
       eventType: 'Engagement',
@@ -298,7 +298,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Couple celebrating engagement with hibachi chef at romantic Sacramento dinner',
       schema: generateEngagementSchema('Sacramento'),
       internalLinks: ['/romantic-packages', '/engagement-catering', '/testimonials'],
-      faqSection: generateEngagementFAQs('Sacramento')
+      faqSection: generateEngagementFAQs('Sacramento'),
     },
     {
       id: 65,
@@ -313,7 +313,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'anniversary catering Fremont',
         'milestone celebration hibachi',
         'Fremont romantic dining',
-        'anniversary party catering'
+        'anniversary party catering',
       ],
       targetLocation: 'Fremont',
       eventType: 'Anniversary',
@@ -323,7 +323,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Couple celebrating anniversary with hibachi chef at Fremont home celebration',
       schema: generateAnniversarySchema('Fremont'),
       internalLinks: ['/anniversary-packages', '/romantic-catering', '/gallery'],
-      faqSection: generateAnniversaryFAQs('Fremont')
+      faqSection: generateAnniversaryFAQs('Fremont'),
     },
 
     // Month 5: Seasonal & Holiday Expansion
@@ -340,7 +340,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Thanksgiving catering San Jose',
         'holiday hibachi San Jose',
         'modern Thanksgiving dining',
-        'San Jose holiday catering'
+        'San Jose holiday catering',
       ],
       targetLocation: 'San Jose',
       eventType: 'Thanksgiving',
@@ -350,7 +350,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Family enjoying Thanksgiving hibachi feast at San Jose home gathering',
       schema: generateThanksgivingSchema('San Jose'),
       internalLinks: ['/holiday-packages', '/thanksgiving-menu', '/family-catering'],
-      faqSection: generateThanksgivingFAQs('San Jose')
+      faqSection: generateThanksgivingFAQs('San Jose'),
     },
     {
       id: 67,
@@ -365,7 +365,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'NYE party catering Oakland',
         'New Year hibachi Oakland',
         '2026 celebration catering',
-        'Oakland NYE entertainment'
+        'Oakland NYE entertainment',
       ],
       targetLocation: 'Oakland',
       eventType: "New Year's Eve",
@@ -375,7 +375,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Oakland NYE party guests watching hibachi chef countdown to 2026',
       schema: generateNYESchema('Oakland'),
       internalLinks: ['/nye-packages', '/party-catering', '/booking'],
-      faqSection: generateNYEFAQs('Oakland')
+      faqSection: generateNYEFAQs('Oakland'),
     },
     {
       id: 68,
@@ -390,7 +390,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'romantic hibachi Palo Alto',
         "Valentine's catering couples",
         'Palo Alto romantic dining',
-        "Valentine's Day catering"
+        "Valentine's Day catering",
       ],
       targetLocation: 'Palo Alto',
       eventType: "Valentine's Day",
@@ -400,7 +400,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: "Romantic Valentine's hibachi dinner for couple in Palo Alto home",
       schema: generateValentinesSchema('Palo Alto'),
       internalLinks: ['/romantic-packages', '/couples-dining', '/valentines-menu'],
-      faqSection: generateValentinesFAQs('Palo Alto')
+      faqSection: generateValentinesFAQs('Palo Alto'),
     },
 
     // Month 6: Business & Corporate Focus
@@ -417,7 +417,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'business client hibachi',
         'Mountain View corporate dining',
         'client relationship building',
-        'business entertainment catering'
+        'business entertainment catering',
       ],
       targetLocation: 'Mountain View',
       eventType: 'Client Entertainment',
@@ -428,7 +428,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Business professionals enjoying hibachi entertainment with clients in Mountain View',
       schema: generateClientEventSchema('Mountain View'),
       internalLinks: ['/corporate-packages', '/client-entertainment', '/business-catering'],
-      faqSection: generateClientEntertainmentFAQs('Mountain View')
+      faqSection: generateClientEntertainmentFAQs('Mountain View'),
     },
     {
       id: 70,
@@ -443,7 +443,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'corporate event catering Santa Clara',
         'product launch entertainment',
         'Santa Clara business events',
-        'corporate milestone catering'
+        'corporate milestone catering',
       ],
       targetLocation: 'Santa Clara',
       eventType: 'Product Launch',
@@ -453,7 +453,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Corporate team celebrating product launch with hibachi catering in Santa Clara',
       schema: generateProductLaunchSchema('Santa Clara'),
       internalLinks: ['/corporate-packages', '/product-launch-catering', '/business-events'],
-      faqSection: generateProductLaunchFAQs('Santa Clara')
+      faqSection: generateProductLaunchFAQs('Santa Clara'),
     },
 
     // Advanced Premium Content
@@ -470,7 +470,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'luxury hibachi catering SF',
         'high-end private chef San Francisco',
         'premium event catering',
-        'San Francisco elite dining'
+        'San Francisco elite dining',
       ],
       targetLocation: 'San Francisco',
       eventType: 'Luxury Event',
@@ -480,7 +480,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Luxury hibachi chef serving premium cuts at San Francisco high-end event',
       schema: generateLuxuryEventSchema('San Francisco'),
       internalLinks: ['/luxury-packages', '/premium-menu', '/elite-catering'],
-      faqSection: generateLuxuryEventFAQs('San Francisco')
+      faqSection: generateLuxuryEventFAQs('San Francisco'),
     },
     {
       id: 72,
@@ -495,7 +495,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'VIP hibachi entertainment',
         'celebrity chef Bay Area',
         'A-list event catering',
-        'exclusive hibachi experiences'
+        'exclusive hibachi experiences',
       ],
       targetLocation: 'Bay Area',
       eventType: 'VIP Event',
@@ -505,7 +505,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Celebrity hibachi chef performing for VIP guests at exclusive Bay Area event',
       schema: generateVIPEventSchema('Bay Area'),
       internalLinks: ['/vip-packages', '/celebrity-chefs', '/exclusive-events'],
-      faqSection: generateVIPEventFAQs('Bay Area')
+      faqSection: generateVIPEventFAQs('Bay Area'),
     },
     {
       id: 73,
@@ -520,7 +520,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'charity fundraising catering',
         'Sacramento gala hibachi',
         'nonprofit event catering',
-        'charity event entertainment'
+        'charity event entertainment',
       ],
       targetLocation: 'Sacramento',
       eventType: 'Charity Gala',
@@ -531,7 +531,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Charity gala guests enjoying hibachi entertainment at Sacramento fundraising event',
       schema: generateCharityGalaSchema('Sacramento'),
       internalLinks: ['/charity-packages', '/fundraising-catering', '/nonprofit-events'],
-      faqSection: generateCharityGalaFAQs('Sacramento')
+      faqSection: generateCharityGalaFAQs('Sacramento'),
     },
 
     // Elite Final Content
@@ -548,7 +548,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         '30th birthday hibachi Sunnyvale',
         '40th birthday catering',
         '50th birthday celebration',
-        'milestone birthday entertainment'
+        'milestone birthday entertainment',
       ],
       targetLocation: 'Sunnyvale',
       eventType: 'Milestone Birthday',
@@ -558,7 +558,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Milestone birthday celebration with hibachi chef in Sunnyvale backyard',
       schema: generateMilestoneBirthdaySchema('Sunnyvale'),
       internalLinks: ['/milestone-packages', '/birthday-catering', '/adult-birthday-parties'],
-      faqSection: generateMilestoneBirthdayFAQs('Sunnyvale')
+      faqSection: generateMilestoneBirthdayFAQs('Sunnyvale'),
     },
     {
       id: 75,
@@ -573,7 +573,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'BBQ hibachi combination',
         'Fremont backyard catering',
         'East Bay summer parties',
-        'fusion cooking entertainment'
+        'fusion cooking entertainment',
       ],
       targetLocation: 'Fremont',
       eventType: 'BBQ Hibachi Fusion',
@@ -583,7 +583,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Chef combining BBQ and hibachi cooking at Fremont summer backyard party',
       schema: generateFusionEventSchema('Fremont'),
       internalLinks: ['/fusion-packages', '/bbq-hibachi', '/summer-catering'],
-      faqSection: generateFusionEventFAQs('Fremont')
+      faqSection: generateFusionEventFAQs('Fremont'),
     },
 
     // Ultimate Masterpiece Posts
@@ -600,7 +600,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'tech IPO party catering',
         'startup success celebration',
         'Silicon Valley milestone events',
-        'tech entrepreneur catering'
+        'tech entrepreneur catering',
       ],
       targetLocation: 'Silicon Valley',
       eventType: 'IPO Celebration',
@@ -611,7 +611,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Tech entrepreneurs celebrating IPO success with hibachi catering in Silicon Valley',
       schema: generateIPOCelebrationSchema('Silicon Valley'),
       internalLinks: ['/corporate-milestones', '/tech-celebrations', '/startup-packages'],
-      faqSection: generateIPOCelebrationFAQs('Silicon Valley')
+      faqSection: generateIPOCelebrationFAQs('Silicon Valley'),
     },
     {
       id: 77,
@@ -626,7 +626,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'fusion wedding catering',
         'multi-cultural celebration hibachi',
         'diverse wedding traditions',
-        'Bay Area fusion weddings'
+        'Bay Area fusion weddings',
       ],
       targetLocation: 'Bay Area',
       eventType: 'Multi-Cultural Wedding',
@@ -636,7 +636,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Multi-cultural wedding couple celebrating with hibachi chef at Bay Area venue',
       schema: generateMultiCulturalWeddingSchema('Bay Area'),
       internalLinks: ['/multicultural-weddings', '/fusion-catering', '/diverse-celebrations'],
-      faqSection: generateMultiCulturalWeddingFAQs('Bay Area')
+      faqSection: generateMultiCulturalWeddingFAQs('Bay Area'),
     },
     {
       id: 78,
@@ -651,7 +651,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'creative community catering',
         'artist studio events Oakland',
         'gallery opening catering',
-        'creative celebration hibachi'
+        'creative celebration hibachi',
       ],
       targetLocation: 'Oakland',
       eventType: 'Artist Event',
@@ -661,7 +661,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Artists enjoying hibachi catering at Oakland studio gallery opening',
       schema: generateArtistEventSchema('Oakland'),
       internalLinks: ['/creative-events', '/artist-catering', '/gallery-packages'],
-      faqSection: generateArtistEventFAQs('Oakland')
+      faqSection: generateArtistEventFAQs('Oakland'),
     },
 
     // Final Elite Trilogy
@@ -678,7 +678,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'Stanford alumni catering',
         'university reunion hibachi',
         'Palo Alto alumni events',
-        'Stanford network celebrations'
+        'Stanford network celebrations',
       ],
       targetLocation: 'Palo Alto',
       eventType: 'Alumni Reunion',
@@ -688,7 +688,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Stanford alumni enjoying hibachi reunion dinner in Palo Alto venue',
       schema: generateAlumniReunionSchema('Palo Alto'),
       internalLinks: ['/alumni-packages', '/university-catering', '/reunion-events'],
-      faqSection: generateAlumniReunionFAQs('Palo Alto')
+      faqSection: generateAlumniReunionFAQs('Palo Alto'),
     },
     {
       id: 80,
@@ -703,7 +703,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'tech conference catering',
         'San Jose networking events',
         'tech after-party hibachi',
-        'conference networking catering'
+        'conference networking catering',
       ],
       targetLocation: 'San Jose',
       eventType: 'Tech Conference',
@@ -713,7 +713,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Tech professionals networking over hibachi at San Jose conference after-party',
       schema: generateTechConferenceSchema('San Jose'),
       internalLinks: ['/conference-catering', '/networking-events', '/tech-packages'],
-      faqSection: generateTechConferenceFAQs('San Jose')
+      faqSection: generateTechConferenceFAQs('San Jose'),
     },
     {
       id: 81,
@@ -728,7 +728,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'VC dinner catering',
         'investment community events',
         'Mountain View VC gatherings',
-        'venture capital entertainment'
+        'venture capital entertainment',
       ],
       targetLocation: 'Mountain View',
       eventType: 'Venture Capital',
@@ -738,7 +738,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Venture capitalists enjoying hibachi dinner at Mountain View investment gathering',
       schema: generateVCDinnerSchema('Mountain View'),
       internalLinks: ['/vc-packages', '/investment-catering', '/executive-dining'],
-      faqSection: generateVCDinnerFAQs('Mountain View')
+      faqSection: generateVCDinnerFAQs('Mountain View'),
     },
     {
       id: 82,
@@ -753,7 +753,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'sports victory catering',
         'team celebration hibachi',
         'Santa Clara championship parties',
-        'sports team entertainment'
+        'sports team entertainment',
       ],
       targetLocation: 'Santa Clara',
       eventType: 'Sports Victory',
@@ -763,7 +763,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Sports team celebrating championship victory with hibachi catering in Santa Clara',
       schema: generateSportsVictorySchema('Santa Clara'),
       internalLinks: ['/sports-packages', '/team-celebrations', '/victory-catering'],
-      faqSection: generateSportsVictoryFAQs('Santa Clara')
+      faqSection: generateSportsVictoryFAQs('Santa Clara'),
     },
     {
       id: 83,
@@ -778,7 +778,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'international festival catering',
         'global celebration hibachi',
         'Sunnyvale cultural events',
-        'multicultural festival catering'
+        'multicultural festival catering',
       ],
       targetLocation: 'Sunnyvale',
       eventType: 'International Festival',
@@ -789,7 +789,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'International festival guests enjoying hibachi at Sunnyvale multicultural celebration',
       schema: generateInternationalFestivalSchema('Sunnyvale'),
       internalLinks: ['/international-packages', '/cultural-events', '/festival-catering'],
-      faqSection: generateInternationalFestivalFAQs('Sunnyvale')
+      faqSection: generateInternationalFestivalFAQs('Sunnyvale'),
     },
     {
       id: 84,
@@ -805,7 +805,7 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
         'pinnacle hibachi entertainment',
         'ultimate interactive dining',
         'premium Bay Area catering',
-        'elite hibachi experience'
+        'elite hibachi experience',
       ],
       targetLocation: 'Bay Area',
       eventType: 'Ultimate Experience',
@@ -815,13 +815,13 @@ export const generateSEOBlogCalendar = (): SEOBlogPost[] => {
       imageAlt: 'Elite hibachi chef providing ultimate interactive dining experience in Bay Area',
       schema: generateUltimateExperienceSchema('Bay Area'),
       internalLinks: ['/ultimate-packages', '/premium-experiences', '/elite-catering'],
-      faqSection: generateUltimateExperienceFAQs('Bay Area')
-    }
+      faqSection: generateUltimateExperienceFAQs('Bay Area'),
+    },
 
     // Add 22 more posts following the same pattern...
     // Total: 30 posts covering all locations, events, seasons, and niches
-  ]
-}
+  ];
+};
 
 // Generate FAQ sections with schema markup
 function generateBackyardPartyFAQs(location: string): FAQ[] {
@@ -829,19 +829,19 @@ function generateBackyardPartyFAQs(location: string): FAQ[] {
     {
       question: `How much space do I need for hibachi catering in ${location}?`,
       answer: `For ${location.toLowerCase()} hibachi parties, we need a minimum 8x8 foot area for our portable grill setup. Most ${location.toLowerCase()} backyards, patios, or even large indoor spaces work perfectly. We'll assess your space during booking to ensure optimal setup.`,
-      keywords: [`${location.toLowerCase()} hibachi space requirements`, 'backyard hibachi setup']
+      keywords: [`${location.toLowerCase()} hibachi space requirements`, 'backyard hibachi setup'],
     },
     {
       question: `What's included in ${location} backyard hibachi catering?`,
       answer: `Our ${location.toLowerCase()} hibachi catering includes: professional chef, portable hibachi grill, all cooking equipment, fresh ingredients, interactive cooking show, and complete cleanup. You provide tables, chairs, and guests - we handle everything else!`,
-      keywords: [`${location.toLowerCase()} hibachi catering included`, 'hibachi party package']
+      keywords: [`${location.toLowerCase()} hibachi catering included`, 'hibachi party package'],
     },
     {
       question: `How far in advance should I book ${location} hibachi catering?`,
       answer: `For ${location.toLowerCase()} hibachi events, we recommend booking 2-3 weeks in advance, especially for weekends. However, we often accommodate last-minute bookings with 48-72 hours notice based on chef availability.`,
-      keywords: [`${location.toLowerCase()} hibachi booking`, 'hibachi catering advance notice']
-    }
-  ]
+      keywords: [`${location.toLowerCase()} hibachi booking`, 'hibachi catering advance notice'],
+    },
+  ];
 }
 
 function generateCorporateFAQs(location: string): FAQ[] {
@@ -851,15 +851,15 @@ function generateCorporateFAQs(location: string): FAQ[] {
       answer: `Absolutely! Our ${location.toLowerCase()} corporate hibachi catering accommodates all dietary needs including vegetarian, vegan, gluten-free, kosher, and halal options. We work with you to ensure every team member enjoys the experience.`,
       keywords: [
         `${location.toLowerCase()} corporate dietary restrictions`,
-        'business hibachi accommodations'
-      ]
+        'business hibachi accommodations',
+      ],
     },
     {
       question: `What's the minimum group size for ${location} corporate hibachi catering?`,
       answer: `For ${location.toLowerCase()} corporate events, we cater to groups of 10+ people. Our interactive format works best with teams of 15-50, creating perfect engagement for department meetings, client dinners, or team building events.`,
-      keywords: [`${location.toLowerCase()} corporate group size`, 'business hibachi minimum']
-    }
-  ]
+      keywords: [`${location.toLowerCase()} corporate group size`, 'business hibachi minimum'],
+    },
+  ];
 }
 
 // Additional FAQ generators for other event types...
@@ -870,10 +870,10 @@ function generateBirthdayFAQs(location: string): FAQ[] {
       answer: `${location} hibachi birthday parties are perfect for all ages! Kids love the entertainment and tricks, teens enjoy the interactive experience, and adults appreciate the quality food. We adjust our show based on the birthday person's age and preferences.`,
       keywords: [
         `${location.toLowerCase()} birthday hibachi ages`,
-        'hibachi birthday entertainment'
-      ]
-    }
-  ]
+        'hibachi birthday entertainment',
+      ],
+    },
+  ];
 }
 
 function generateWeddingFAQs(location: string): FAQ[] {
@@ -881,9 +881,9 @@ function generateWeddingFAQs(location: string): FAQ[] {
     {
       question: `Is hibachi catering appropriate for ${location} wedding receptions?`,
       answer: `Yes! ${location} couples are choosing hibachi for unique, memorable receptions. It provides entertainment during dinner service, accommodates all dietary needs, and creates an interactive experience guests will never forget.`,
-      keywords: [`${location.toLowerCase()} wedding hibachi`, 'hibachi wedding reception']
-    }
-  ]
+      keywords: [`${location.toLowerCase()} wedding hibachi`, 'hibachi wedding reception'],
+    },
+  ];
 }
 
 function generateGraduationFAQs(location: string): FAQ[] {
@@ -891,9 +891,9 @@ function generateGraduationFAQs(location: string): FAQ[] {
     {
       question: `Can you cater ${location} graduation parties during busy season?`,
       answer: `We specialize in ${location.toLowerCase()} graduation season! We book multiple chefs to handle the high demand during graduation weeks. Early booking ensures your preferred date and time for celebrating academic achievements.`,
-      keywords: [`${location.toLowerCase()} graduation catering`, 'graduation party hibachi']
-    }
-  ]
+      keywords: [`${location.toLowerCase()} graduation catering`, 'graduation party hibachi'],
+    },
+  ];
 }
 
 function generateHolidayFAQs(location: string): FAQ[] {
@@ -901,9 +901,9 @@ function generateHolidayFAQs(location: string): FAQ[] {
     {
       question: `Do you provide holiday-themed menus for ${location} parties?`,
       answer: `Yes! Our ${location.toLowerCase()} holiday hibachi features seasonal ingredients and festive presentations. From Thanksgiving additions to New Year celebrations, we customize menus to match your holiday theme.`,
-      keywords: [`${location.toLowerCase()} holiday hibachi menu`, 'holiday themed catering']
-    }
-  ]
+      keywords: [`${location.toLowerCase()} holiday hibachi menu`, 'holiday themed catering'],
+    },
+  ];
 }
 
 function generateFamilyReunionFAQs(location: string): FAQ[] {
@@ -911,9 +911,9 @@ function generateFamilyReunionFAQs(location: string): FAQ[] {
     {
       question: `How do you handle large family groups in ${location}?`,
       answer: `For ${location.toLowerCase()} family reunions, we bring multiple hibachi stations and chefs for groups over 30. This ensures everyone gets the full interactive experience and hot, fresh food served simultaneously.`,
-      keywords: [`${location.toLowerCase()} large family catering`, 'family reunion hibachi']
-    }
-  ]
+      keywords: [`${location.toLowerCase()} large family catering`, 'family reunion hibachi'],
+    },
+  ];
 }
 
 function generateTechStartupFAQs(): FAQ[] {
@@ -921,9 +921,9 @@ function generateTechStartupFAQs(): FAQ[] {
     {
       question: `Why is hibachi effective for tech team building?`,
       answer: `Hibachi team building works because it removes digital distractions, encourages face-to-face interaction, and creates shared experiences. Tech teams bond over the cooking process and enjoy friendly competition guessing chef tricks.`,
-      keywords: ['tech team building hibachi', 'startup team bonding']
-    }
-  ]
+      keywords: ['tech team building hibachi', 'startup team bonding'],
+    },
+  ];
 }
 
 // Schema Generation Functions
@@ -939,7 +939,7 @@ function generateLocalBusinessSchema(location: string, eventType: string): Recor
       '@type': 'PostalAddress',
       addressLocality: location,
       addressRegion: 'CA',
-      addressCountry: 'US'
+      addressCountry: 'US',
     },
     telephone: '+1-555-HIBACHI',
     url: 'https://myhibachichef.com',
@@ -948,9 +948,9 @@ function generateLocalBusinessSchema(location: string, eventType: string): Recor
     priceRange: '$$-$$$',
     serviceArea: {
       '@type': 'Place',
-      name: `${location} and surrounding areas`
-    }
-  }
+      name: `${location} and surrounding areas`,
+    },
+  };
 }
 
 function generateCorporateEventSchema(location: string): Record<string, unknown> {
@@ -965,12 +965,12 @@ function generateCorporateEventSchema(location: string): Record<string, unknown>
       address: {
         '@type': 'PostalAddress',
         addressLocality: location,
-        addressRegion: 'CA'
-      }
+        addressRegion: 'CA',
+      },
     },
     areaServed: location,
-    serviceType: 'Corporate Event Catering'
-  }
+    serviceType: 'Corporate Event Catering',
+  };
 }
 
 function generateBirthdayEventSchema(location: string): Record<string, unknown> {
@@ -985,14 +985,14 @@ function generateBirthdayEventSchema(location: string): Record<string, unknown> 
       address: {
         '@type': 'PostalAddress',
         addressLocality: location,
-        addressRegion: 'CA'
-      }
+        addressRegion: 'CA',
+      },
     },
     organizer: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
-    }
-  }
+      name: 'MyHibachi',
+    },
+  };
 }
 
 function generateWeddingEventSchema(location: string): Record<string, unknown> {
@@ -1003,11 +1003,11 @@ function generateWeddingEventSchema(location: string): Record<string, unknown> {
     description: `Elegant hibachi catering for weddings in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
     areaServed: location,
-    serviceType: 'Wedding Catering'
-  }
+    serviceType: 'Wedding Catering',
+  };
 }
 
 function generateGraduationEventSchema(location: string): Record<string, unknown> {
@@ -1020,9 +1020,9 @@ function generateGraduationEventSchema(location: string): Record<string, unknown
     eventStatus: 'EventScheduled',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateHolidayEventSchema(location: string): Record<string, unknown> {
@@ -1033,10 +1033,10 @@ function generateHolidayEventSchema(location: string): Record<string, unknown> {
     description: `Festive hibachi catering for holiday celebrations in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    areaServed: location
-  }
+    areaServed: location,
+  };
 }
 
 function generateTechEventSchema(location: string): Record<string, unknown> {
@@ -1047,10 +1047,10 @@ function generateTechEventSchema(location: string): Record<string, unknown> {
     description: `Interactive hibachi team building for tech companies in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    serviceType: 'Corporate Team Building'
-  }
+    serviceType: 'Corporate Team Building',
+  };
 }
 
 function generateFamilyEventSchema(location: string): Record<string, unknown> {
@@ -1061,10 +1061,10 @@ function generateFamilyEventSchema(location: string): Record<string, unknown> {
     description: `Multi-generational hibachi catering for family reunions in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    areaServed: location
-  }
+    areaServed: location,
+  };
 }
 
 function generatePoolPartySchema(location: string): Record<string, unknown> {
@@ -1075,10 +1075,10 @@ function generatePoolPartySchema(location: string): Record<string, unknown> {
     description: `Outdoor hibachi catering for pool parties in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    serviceType: 'Pool Party Catering'
-  }
+    serviceType: 'Pool Party Catering',
+  };
 }
 
 function generateEngagementSchema(location: string): Record<string, unknown> {
@@ -1090,9 +1090,9 @@ function generateEngagementSchema(location: string): Record<string, unknown> {
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateAnniversarySchema(location: string): Record<string, unknown> {
@@ -1104,9 +1104,9 @@ function generateAnniversarySchema(location: string): Record<string, unknown> {
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateThanksgivingSchema(location: string): Record<string, unknown> {
@@ -1117,10 +1117,10 @@ function generateThanksgivingSchema(location: string): Record<string, unknown> {
     description: `Modern Thanksgiving hibachi catering in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    serviceType: 'Holiday Catering'
-  }
+    serviceType: 'Holiday Catering',
+  };
 }
 
 function generateNYESchema(location: string): Record<string, unknown> {
@@ -1132,9 +1132,9 @@ function generateNYESchema(location: string): Record<string, unknown> {
     startDate: '2025-12-31T20:00',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateValentinesSchema(location: string): Record<string, unknown> {
@@ -1145,10 +1145,10 @@ function generateValentinesSchema(location: string): Record<string, unknown> {
     description: `Romantic Valentine's hibachi dining for couples in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    serviceType: 'Romantic Dining'
-  }
+    serviceType: 'Romantic Dining',
+  };
 }
 
 function generateClientEventSchema(location: string): Record<string, unknown> {
@@ -1159,10 +1159,10 @@ function generateClientEventSchema(location: string): Record<string, unknown> {
     description: `Professional client entertainment with hibachi dining in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    serviceType: 'Business Entertainment'
-  }
+    serviceType: 'Business Entertainment',
+  };
 }
 
 function generateProductLaunchSchema(location: string): Record<string, unknown> {
@@ -1174,9 +1174,9 @@ function generateProductLaunchSchema(location: string): Record<string, unknown> 
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateLuxuryEventSchema(location: string): Record<string, unknown> {
@@ -1187,11 +1187,11 @@ function generateLuxuryEventSchema(location: string): Record<string, unknown> {
     description: `Premium luxury hibachi catering for elite events in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
     serviceType: 'Luxury Catering',
-    priceRange: '$$$$'
-  }
+    priceRange: '$$$$',
+  };
 }
 
 function generateVIPEventSchema(location: string): Record<string, unknown> {
@@ -1202,10 +1202,10 @@ function generateVIPEventSchema(location: string): Record<string, unknown> {
     description: `Exclusive VIP hibachi experiences in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    serviceType: 'VIP Entertainment'
-  }
+    serviceType: 'VIP Entertainment',
+  };
 }
 
 function generateCharityGalaSchema(location: string): Record<string, unknown> {
@@ -1217,9 +1217,9 @@ function generateCharityGalaSchema(location: string): Record<string, unknown> {
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateMilestoneBirthdaySchema(location: string): Record<string, unknown> {
@@ -1231,9 +1231,9 @@ function generateMilestoneBirthdaySchema(location: string): Record<string, unkno
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateFusionEventSchema(location: string): Record<string, unknown> {
@@ -1244,10 +1244,10 @@ function generateFusionEventSchema(location: string): Record<string, unknown> {
     description: `Unique BBQ and hibachi fusion catering in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    serviceType: 'Fusion Catering'
-  }
+    serviceType: 'Fusion Catering',
+  };
 }
 
 function generateIPOCelebrationSchema(location: string): Record<string, unknown> {
@@ -1259,9 +1259,9 @@ function generateIPOCelebrationSchema(location: string): Record<string, unknown>
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateMultiCulturalWeddingSchema(location: string): Record<string, unknown> {
@@ -1272,10 +1272,10 @@ function generateMultiCulturalWeddingSchema(location: string): Record<string, un
     description: `Fusion wedding catering honoring diverse traditions in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
-    serviceType: 'Multi-Cultural Wedding Catering'
-  }
+    serviceType: 'Multi-Cultural Wedding Catering',
+  };
 }
 
 function generateArtistEventSchema(location: string): Record<string, unknown> {
@@ -1287,9 +1287,9 @@ function generateArtistEventSchema(location: string): Record<string, unknown> {
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateAlumniReunionSchema(location: string): Record<string, unknown> {
@@ -1301,9 +1301,9 @@ function generateAlumniReunionSchema(location: string): Record<string, unknown> 
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateTechConferenceSchema(location: string): Record<string, unknown> {
@@ -1315,9 +1315,9 @@ function generateTechConferenceSchema(location: string): Record<string, unknown>
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateVCDinnerSchema(location: string): Record<string, unknown> {
@@ -1329,9 +1329,9 @@ function generateVCDinnerSchema(location: string): Record<string, unknown> {
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateSportsVictorySchema(location: string): Record<string, unknown> {
@@ -1343,9 +1343,9 @@ function generateSportsVictorySchema(location: string): Record<string, unknown> 
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateInternationalFestivalSchema(location: string): Record<string, unknown> {
@@ -1357,9 +1357,9 @@ function generateInternationalFestivalSchema(location: string): Record<string, u
     eventAttendanceMode: 'OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: location
-    }
-  }
+      name: location,
+    },
+  };
 }
 
 function generateUltimateExperienceSchema(location: string): Record<string, unknown> {
@@ -1370,11 +1370,11 @@ function generateUltimateExperienceSchema(location: string): Record<string, unkn
     description: `The pinnacle of interactive hibachi dining entertainment in ${location}`,
     provider: {
       '@type': 'LocalBusiness',
-      name: 'MyHibachi'
+      name: 'MyHibachi',
     },
     serviceType: 'Premium Entertainment',
-    priceRange: '$$$$'
-  }
+    priceRange: '$$$$',
+  };
 }
 
 // Additional FAQ Generation Functions
@@ -1387,18 +1387,18 @@ function generatePoolPartyFAQs(location: string): FAQ[] {
       answer: `Yes! Our ${location.toLowerCase()} hibachi chefs are trained in poolside safety protocols. We maintain safe distances from water, use wind screens, and follow all safety guidelines for outdoor cooking near pools.`,
       keywords: [
         `poolside hibachi safety ${location.toLowerCase()}`,
-        'pool party hibachi precautions'
-      ]
+        'pool party hibachi precautions',
+      ],
     },
     {
       question: `What's the best setup for pool party hibachi in ${location}?`,
       answer: `For ${location.toLowerCase()} pool parties, we recommend setting up the hibachi station on a patio or deck area at least 10 feet from the pool edge. This ensures safety while allowing guests to enjoy both swimming and hibachi entertainment.`,
       keywords: [
         `pool party hibachi setup ${location.toLowerCase()}`,
-        'poolside cooking arrangement'
-      ]
-    }
-  ]
+        'poolside cooking arrangement',
+      ],
+    },
+  ];
 }
 
 function generateEngagementFAQs(location: string): FAQ[] {
@@ -1408,18 +1408,18 @@ function generateEngagementFAQs(location: string): FAQ[] {
       answer: `Our ${location.toLowerCase()} engagement hibachi includes romantic touches like heart-shaped onion volcanoes, personalized cooking shows, and special couple's menu items. We can coordinate with your photographer for stunning action shots during the performance.`,
       keywords: [
         `romantic hibachi ${location.toLowerCase()}`,
-        'engagement party hibachi specialties'
-      ]
+        'engagement party hibachi specialties',
+      ],
     },
     {
       question: `Can you accommodate dietary restrictions for ${location} engagement parties?`,
       answer: `Absolutely! For ${location.toLowerCase()} engagement celebrations, we offer pescatarian, vegetarian, and gluten-free options. We'll work with you to ensure all guests, including the happy couple, have perfect meal options.`,
       keywords: [
         `dietary restrictions hibachi ${location.toLowerCase()}`,
-        'inclusive engagement dining'
-      ]
-    }
-  ]
+        'inclusive engagement dining',
+      ],
+    },
+  ];
 }
 
 function generateAnniversaryFAQs(location: string): FAQ[] {
@@ -1427,9 +1427,9 @@ function generateAnniversaryFAQs(location: string): FAQ[] {
     {
       question: `What makes hibachi perfect for ${location} anniversary celebrations?`,
       answer: `${location} anniversary hibachi creates intimate, interactive dining experiences. Our chefs provide personalized entertainment while cooking premium cuts, creating romantic moments through culinary artistry that celebrates your milestone.`,
-      keywords: [`anniversary hibachi ${location.toLowerCase()}`, 'romantic milestone dining']
-    }
-  ]
+      keywords: [`anniversary hibachi ${location.toLowerCase()}`, 'romantic milestone dining'],
+    },
+  ];
 }
 
 function generateThanksgivingFAQs(location: string): FAQ[] {
@@ -1439,10 +1439,10 @@ function generateThanksgivingFAQs(location: string): FAQ[] {
       answer: `Our ${location.toLowerCase()} Thanksgiving hibachi offers a unique alternative featuring premium proteins, seasonal vegetables, and interactive family entertainment. It's perfect for families wanting to break from tradition while maintaining togetherness.`,
       keywords: [
         `Thanksgiving hibachi alternative ${location.toLowerCase()}`,
-        'modern holiday dining'
-      ]
-    }
-  ]
+        'modern holiday dining',
+      ],
+    },
+  ];
 }
 
 function generateNYEFAQs(location: string): FAQ[] {
@@ -1450,9 +1450,9 @@ function generateNYEFAQs(location: string): FAQ[] {
     {
       question: `How do you handle midnight countdown with hibachi in ${location}?`,
       answer: `Our ${location.toLowerCase()} NYE hibachi experiences time the cooking show to culminate at midnight, creating spectacular flame displays for the countdown. It's an unforgettable way to ring in the New Year!`,
-      keywords: [`NYE hibachi countdown ${location.toLowerCase()}`, "New Year's Eve entertainment"]
-    }
-  ]
+      keywords: [`NYE hibachi countdown ${location.toLowerCase()}`, "New Year's Eve entertainment"],
+    },
+  ];
 }
 
 function generateValentinesFAQs(location: string): FAQ[] {
@@ -1462,10 +1462,10 @@ function generateValentinesFAQs(location: string): FAQ[] {
       answer: `Our ${location.toLowerCase()} Valentine's hibachi includes rose-shaped onion displays, heart-shaped rice presentations, romantic lighting coordination, and premium aphrodisiac ingredients like oysters and chocolate desserts.`,
       keywords: [
         `romantic hibachi ${location.toLowerCase()}`,
-        "Valentine's Day hibachi specialties"
-      ]
-    }
-  ]
+        "Valentine's Day hibachi specialties",
+      ],
+    },
+  ];
 }
 
 function generateClientEntertainmentFAQs(location: string): FAQ[] {
@@ -1473,9 +1473,9 @@ function generateClientEntertainmentFAQs(location: string): FAQ[] {
     {
       question: `How does hibachi help with business relationships in ${location}?`,
       answer: `${location} client entertainment hibachi breaks down formal barriers through shared interactive experience. The engaging cooking show creates natural conversation opportunities and memorable impressions that strengthen business relationships.`,
-      keywords: [`business hibachi ${location.toLowerCase()}`, 'client entertainment strategy']
-    }
-  ]
+      keywords: [`business hibachi ${location.toLowerCase()}`, 'client entertainment strategy'],
+    },
+  ];
 }
 
 function generateProductLaunchFAQs(location: string): FAQ[] {
@@ -1483,9 +1483,9 @@ function generateProductLaunchFAQs(location: string): FAQ[] {
     {
       question: `Can you customize hibachi for product launches in ${location}?`,
       answer: `Yes! Our ${location.toLowerCase()} product launch hibachi can incorporate your branding, cook foods that represent your product colors, and create memorable experiences that reinforce your brand message to stakeholders.`,
-      keywords: [`branded hibachi ${location.toLowerCase()}`, 'product launch entertainment']
-    }
-  ]
+      keywords: [`branded hibachi ${location.toLowerCase()}`, 'product launch entertainment'],
+    },
+  ];
 }
 
 function generateLuxuryEventFAQs(location: string): FAQ[] {
@@ -1493,9 +1493,9 @@ function generateLuxuryEventFAQs(location: string): FAQ[] {
     {
       question: `What makes your ${location} luxury hibachi different from standard service?`,
       answer: `Our ${location.toLowerCase()} luxury hibachi features celebrity chefs, premium wagyu beef, truffle preparations, gold leaf garnishes, and white-glove service. Every detail is curated for the most discerning clientele.`,
-      keywords: [`luxury hibachi ${location.toLowerCase()}`, 'premium hibachi experience']
-    }
-  ]
+      keywords: [`luxury hibachi ${location.toLowerCase()}`, 'premium hibachi experience'],
+    },
+  ];
 }
 
 function generateVIPEventFAQs(location: string): FAQ[] {
@@ -1503,9 +1503,9 @@ function generateVIPEventFAQs(location: string): FAQ[] {
     {
       question: `What VIP amenities do you provide for ${location} events?`,
       answer: `${location} VIP hibachi includes personal security coordination, private chef consultations, custom menu development, premium alcohol pairings, and exclusive access to our celebrity chef network.`,
-      keywords: [`VIP hibachi ${location.toLowerCase()}`, 'exclusive hibachi service']
-    }
-  ]
+      keywords: [`VIP hibachi ${location.toLowerCase()}`, 'exclusive hibachi service'],
+    },
+  ];
 }
 
 function generateCharityGalaFAQs(location: string): FAQ[] {
@@ -1513,9 +1513,9 @@ function generateCharityGalaFAQs(location: string): FAQ[] {
     {
       question: `Do you offer special pricing for ${location} charity events?`,
       answer: `Yes! We support ${location.toLowerCase()} nonprofits with special charity pricing and can donate a portion of proceeds. Our hibachi entertainment helps create memorable fundraising experiences that engage donors.`,
-      keywords: [`charity hibachi ${location.toLowerCase()}`, 'nonprofit event catering']
-    }
-  ]
+      keywords: [`charity hibachi ${location.toLowerCase()}`, 'nonprofit event catering'],
+    },
+  ];
 }
 
 function generateMilestoneBirthdayFAQs(location: string): FAQ[] {
@@ -1525,10 +1525,10 @@ function generateMilestoneBirthdayFAQs(location: string): FAQ[] {
       answer: `Our ${location.toLowerCase()} milestone birthday hibachi includes age-appropriate celebrations, nostalgic menu items from the birthday person's era, and special recognition moments during the cooking show.`,
       keywords: [
         `milestone birthday hibachi ${location.toLowerCase()}`,
-        'adult birthday celebration'
-      ]
-    }
-  ]
+        'adult birthday celebration',
+      ],
+    },
+  ];
 }
 
 function generateFusionEventFAQs(location: string): FAQ[] {
@@ -1536,9 +1536,9 @@ function generateFusionEventFAQs(location: string): FAQ[] {
     {
       question: `How does BBQ hibachi fusion work in ${location}?`,
       answer: `Our ${location.toLowerCase()} fusion experience combines American BBQ smoking techniques with Japanese hibachi grilling, creating unique flavors and double the cooking entertainment for your guests.`,
-      keywords: [`BBQ hibachi fusion ${location.toLowerCase()}`, 'fusion cooking entertainment']
-    }
-  ]
+      keywords: [`BBQ hibachi fusion ${location.toLowerCase()}`, 'fusion cooking entertainment'],
+    },
+  ];
 }
 
 function generateIPOCelebrationFAQs(location: string): FAQ[] {
@@ -1546,9 +1546,9 @@ function generateIPOCelebrationFAQs(location: string): FAQ[] {
     {
       question: `What makes hibachi appropriate for ${location} IPO celebrations?`,
       answer: `${location} IPO hibachi symbolizes transformation and success through the cooking process. The interactive entertainment reflects the collaborative spirit that built your company, making it perfect for celebrating milestones.`,
-      keywords: [`IPO celebration hibachi ${location.toLowerCase()}`, 'startup success catering']
-    }
-  ]
+      keywords: [`IPO celebration hibachi ${location.toLowerCase()}`, 'startup success catering'],
+    },
+  ];
 }
 
 function generateMultiCulturalWeddingFAQs(location: string): FAQ[] {
@@ -1558,10 +1558,10 @@ function generateMultiCulturalWeddingFAQs(location: string): FAQ[] {
       answer: `Our ${location.toLowerCase()} multi-cultural wedding hibachi incorporates traditional ingredients and cooking techniques from both families' backgrounds, creating fusion dishes that represent your union.`,
       keywords: [
         `multicultural wedding hibachi ${location.toLowerCase()}`,
-        'fusion wedding catering'
-      ]
-    }
-  ]
+        'fusion wedding catering',
+      ],
+    },
+  ];
 }
 
 function generateArtistEventFAQs(location: string): FAQ[] {
@@ -1569,9 +1569,9 @@ function generateArtistEventFAQs(location: string): FAQ[] {
     {
       question: `Why is hibachi popular with ${location} creative communities?`,
       answer: `${location} artists appreciate hibachi as performance art - the visual spectacle, creative knife work, and artistic food presentation resonate with creative professionals who value artistic expression.`,
-      keywords: [`artist hibachi ${location.toLowerCase()}`, 'creative community catering']
-    }
-  ]
+      keywords: [`artist hibachi ${location.toLowerCase()}`, 'creative community catering'],
+    },
+  ];
 }
 
 function generateAlumniReunionFAQs(location: string): FAQ[] {
@@ -1579,9 +1579,9 @@ function generateAlumniReunionFAQs(location: string): FAQ[] {
     {
       question: `How does hibachi enhance ${location} alumni reunions?`,
       answer: `${location} alumni hibachi creates shared experiences that mirror college bonding. The interactive format encourages conversation and creates new memories while honoring past connections.`,
-      keywords: [`alumni reunion hibachi ${location.toLowerCase()}`, 'university reunion catering']
-    }
-  ]
+      keywords: [`alumni reunion hibachi ${location.toLowerCase()}`, 'university reunion catering'],
+    },
+  ];
 }
 
 function generateTechConferenceFAQs(location: string): FAQ[] {
@@ -1591,10 +1591,10 @@ function generateTechConferenceFAQs(location: string): FAQ[] {
       answer: `${location} tech conference hibachi breaks networking ice through shared interactive experience. The engaging format facilitates natural conversations and creates memorable connections beyond traditional networking.`,
       keywords: [
         `tech conference hibachi ${location.toLowerCase()}`,
-        'conference networking entertainment'
-      ]
-    }
-  ]
+        'conference networking entertainment',
+      ],
+    },
+  ];
 }
 
 function generateVCDinnerFAQs(location: string): FAQ[] {
@@ -1602,9 +1602,9 @@ function generateVCDinnerFAQs(location: string): FAQ[] {
     {
       question: `How does hibachi impress investors at ${location} VC dinners?`,
       answer: `${location} VC hibachi demonstrates attention to unique details and risk-taking innovation - qualities investors value. The memorable experience helps your pitch stand out in their minds.`,
-      keywords: [`VC dinner hibachi ${location.toLowerCase()}`, 'investor entertainment']
-    }
-  ]
+      keywords: [`VC dinner hibachi ${location.toLowerCase()}`, 'investor entertainment'],
+    },
+  ];
 }
 
 function generateSportsVictoryFAQs(location: string): FAQ[] {
@@ -1614,10 +1614,10 @@ function generateSportsVictoryFAQs(location: string): FAQ[] {
       answer: `${location} sports victory hibachi provides high-energy entertainment matching championship excitement. The interactive format brings teams together and creates lasting celebration memories.`,
       keywords: [
         `sports victory hibachi ${location.toLowerCase()}`,
-        'championship celebration catering'
-      ]
-    }
-  ]
+        'championship celebration catering',
+      ],
+    },
+  ];
 }
 
 function generateInternationalFestivalFAQs(location: string): FAQ[] {
@@ -1627,10 +1627,10 @@ function generateInternationalFestivalFAQs(location: string): FAQ[] {
       answer: `${location} international festival hibachi showcases Japanese culture while respecting other traditions. The interactive format brings diverse communities together through shared dining experience.`,
       keywords: [
         `international festival hibachi ${location.toLowerCase()}`,
-        'multicultural celebration catering'
-      ]
-    }
-  ]
+        'multicultural celebration catering',
+      ],
+    },
+  ];
 }
 
 function generateUltimateExperienceFAQs(location: string): FAQ[] {
@@ -1640,10 +1640,10 @@ function generateUltimateExperienceFAQs(location: string): FAQ[] {
       answer: `Our ultimate ${location.toLowerCase()} hibachi combines celebrity chefs, rare ingredients, custom menus, premium service, and exclusive entertainment elements unavailable in standard packages. It's the pinnacle of hibachi dining.`,
       keywords: [
         `ultimate hibachi experience ${location.toLowerCase()}`,
-        'premium hibachi entertainment'
-      ]
-    }
-  ]
+        'premium hibachi entertainment',
+      ],
+    },
+  ];
 }
 
 // Core Web Vitals optimization functions
@@ -1653,7 +1653,7 @@ export const coreWebVitalsOptimizations = {
     format: 'webp',
     sizes: '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
     priority: true, // for above-fold images
-    placeholder: 'blur'
+    placeholder: 'blur',
   }),
 
   // Critical CSS inlining
@@ -1666,12 +1666,12 @@ export const coreWebVitalsOptimizations = {
       href: '/fonts/inter.woff2',
       as: 'font',
       type: 'font/woff2',
-      crossOrigin: 'anonymous'
+      crossOrigin: 'anonymous',
     },
     { rel: 'preload', href: '/images/hibachi-hero.webp', as: 'image' },
-    { rel: 'dns-prefetch', href: 'https://fonts.googleapis.com' }
-  ]
-}
+    { rel: 'dns-prefetch', href: 'https://fonts.googleapis.com' },
+  ],
+};
 
 // Local SEO automation
 export const localSEOAutomation = {
@@ -1680,8 +1680,8 @@ export const localSEOAutomation = {
       title: `${location} Hibachi Catering Special`,
       content: `Transform your ${location.toLowerCase()} celebration with professional hibachi catering! Interactive dining entertainment that brings restaurant quality to your home.`,
       cta: 'Book Now',
-      image: '/images/hibachi-action.jpg'
-    }
+      image: '/images/hibachi-action.jpg',
+    },
   ],
 
   generateDirectorySubmissions: () => [
@@ -1692,7 +1692,7 @@ export const localSEOAutomation = {
     'The Knot',
     'PartySlate',
     'GigSalad',
-    'Thumbtack'
+    'Thumbtack',
   ],
 
   generateLocalKeywords: (location: string) => [
@@ -1700,14 +1700,14 @@ export const localSEOAutomation = {
     `hibachi chef ${location.toLowerCase()}`,
     `${location.toLowerCase()} party catering`,
     `hibachi catering near ${location.toLowerCase()}`,
-    `private chef ${location.toLowerCase()}`
-  ]
-}
+    `private chef ${location.toLowerCase()}`,
+  ],
+};
 
 const worldClassSEO = {
   generateSEOBlogCalendar,
   coreWebVitalsOptimizations,
-  localSEOAutomation
-}
+  localSEOAutomation,
+};
 
-export default worldClassSEO
+export default worldClassSEO;

@@ -435,7 +435,11 @@ export function useStationUsers(
 // SSoT Configuration Variables Hooks
 // ============================================================================
 
-import { configService, ConfigVariable, ConfigAuditEntry } from '@/services/api';
+import {
+  configService,
+  ConfigVariable,
+  ConfigAuditEntry,
+} from '@/services/api';
 
 /**
  * Hook to fetch all SSoT configuration variables

@@ -52,7 +52,7 @@
 }
 
 .sms-priority-section::before {
-  content: "PRIORITY SECTION";
+  content: 'PRIORITY SECTION';
   position: absolute;
   top: -12px;
   left: 50%;

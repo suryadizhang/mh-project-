@@ -1,6 +1,7 @@
 # Local Development Guide - Windows PowerShell
 
-Complete guide for running the MyHibachi system locally on Windows using PowerShell.
+Complete guide for running the MyHibachi system locally on Windows
+using PowerShell.
 
 ## 📋 Table of Contents
 
@@ -19,8 +20,10 @@ Before starting, ensure you have installed:
 
 - **Python 3.11+** ([Download](https://www.python.org/downloads/))
 - **Node.js 20+** ([Download](https://nodejs.org/))
-- **PostgreSQL 15+** ([Download](https://www.postgresql.org/download/windows/))
-- **Redis** ([Download](https://redis.io/docs/getting-started/installation/install-redis-on-windows/))
+- **PostgreSQL 15+**
+  ([Download](https://www.postgresql.org/download/windows/))
+- **Redis**
+  ([Download](https://redis.io/docs/getting-started/installation/install-redis-on-windows/))
 - **Git** ([Download](https://git-scm.com/download/win))
 
 ---
@@ -128,9 +131,12 @@ cd ..\..
 ```
 
 **Environment Variables Explained:**
+
 - `NEXT_PUBLIC_API_URL`: Main backend API endpoint (FastAPI)
-- `NEXT_PUBLIC_WS_URL`: WebSocket endpoint for real-time updates (compliance, escalations)
-- `NEXT_PUBLIC_CHAT_API_URL`: Chat service API endpoint (separate microservice)
+- `NEXT_PUBLIC_WS_URL`: WebSocket endpoint for real-time updates
+  (compliance, escalations)
+- `NEXT_PUBLIC_CHAT_API_URL`: Chat service API endpoint (separate
+  microservice)
 
 Create `.env.local` file in `apps/customer`:
 
@@ -194,15 +200,15 @@ cd ..\..
 
 ### Service Overview
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| Backend API | 8000 | FastAPI backend server |
-| Admin Frontend | 3001 | Next.js admin dashboard |
-| Customer Frontend | 3007 | Next.js customer portal |
-| Redis | 6379 | Cache & message broker |
-| Celery Worker | - | Background job processor |
-| Celery Beat | - | Scheduled task scheduler |
-| Flower | 5555 | Celery monitoring UI |
+| Service           | Port | Purpose                  |
+| ----------------- | ---- | ------------------------ |
+| Backend API       | 8000 | FastAPI backend server   |
+| Admin Frontend    | 3001 | Next.js admin dashboard  |
+| Customer Frontend | 3007 | Next.js customer portal  |
+| Redis             | 6379 | Cache & message broker   |
+| Celery Worker     | -    | Background job processor |
+| Celery Beat       | -    | Scheduled task scheduler |
+| Flower            | 5555 | Celery monitoring UI     |
 
 ### Start All Services (Recommended for Development)
 
@@ -217,6 +223,7 @@ python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 **Test it:**
+
 - Open browser: http://localhost:8000/docs
 - You should see FastAPI Swagger documentation
 
@@ -227,6 +234,7 @@ redis-server
 ```
 
 **Test it:**
+
 ```powershell
 redis-cli ping
 # Should return: PONG
@@ -243,6 +251,7 @@ celery -A workers.celery_config:celery_app worker --loglevel=info -P solo
 **Note:** Use `-P solo` on Windows to avoid multiprocessing issues.
 
 **Test it:**
+
 - Check console output for "celery@<hostname> ready"
 - Should show registered tasks including:
   - `workers.campaign_metrics_tasks.update_active_campaign_metrics`
@@ -258,6 +267,7 @@ celery -A workers.celery_config:celery_app beat --loglevel=info
 ```
 
 **Test it:**
+
 - Check console output for "Scheduler: Starting..."
 - Should show scheduled tasks like:
   - `update-active-campaign-metrics` (every 5 minutes)
@@ -271,6 +281,7 @@ npm run dev
 ```
 
 **Test it:**
+
 - Open browser: http://localhost:3001
 - Should see admin login page
 
@@ -282,6 +293,7 @@ npm run dev
 ```
 
 **Test it:**
+
 - Open browser: http://localhost:3007
 - Should see customer portal
 
@@ -294,6 +306,7 @@ celery -A workers.celery_config:celery_app flower --port=5555
 ```
 
 **Test it:**
+
 - Open browser: http://localhost:5555
 - Username: `admin`
 - Password: `admin123` (from `.env`)
@@ -315,6 +328,7 @@ curl -X POST "http://localhost:8000/api/newsletter/subscribers" `
 ```
 
 **Or use the Admin Dashboard:**
+
 1. Go to http://localhost:3001
 2. Login as admin
 3. Navigate to Newsletter > Subscribers
@@ -324,6 +338,7 @@ curl -X POST "http://localhost:8000/api/newsletter/subscribers" `
 #### 2. Create SMS Campaign
 
 **Via Admin Dashboard:**
+
 1. Navigate to Newsletter > Campaigns
 2. Click "New Campaign"
 3. Select Channel: SMS
@@ -354,6 +369,7 @@ Invoke-RestMethod -Uri "http://localhost:8000/api/newsletter/campaigns/1/send" `
 #### 4. Verify SMS Tracking
 
 **Check Subscriber Metrics:**
+
 ```powershell
 # Get subscriber details
 Invoke-RestMethod -Uri "http://localhost:8000/api/newsletter/subscribers/1" `
@@ -365,6 +381,7 @@ Invoke-RestMethod -Uri "http://localhost:8000/api/newsletter/subscribers/1" `
 ```
 
 **Check Delivery Events:**
+
 ```powershell
 # Get delivery events for campaign
 Invoke-RestMethod -Uri "http://localhost:8000/api/newsletter/campaigns/1/delivery-events" `
@@ -392,6 +409,7 @@ Invoke-RestMethod -Uri "http://localhost:8000/webhooks/ringcentral" `
 ```
 
 **Verify Update:**
+
 ```powershell
 # Check subscriber metrics again
 Invoke-RestMethod -Uri "http://localhost:8000/api/newsletter/subscribers/1" `
@@ -415,11 +433,12 @@ Invoke-RestMethod -Uri "http://localhost:8000/api/newsletter/subscribers/1" `
 #### 7. Check Compliance Widget
 
 1. Add compliance widget to dashboard:
+
    ```tsx
    import { ComplianceWidget } from '@/components/newsletter/ComplianceWidget';
-   
+
    // In your page:
-   <ComplianceWidget />
+   <ComplianceWidget />;
    ```
 
 2. Should display:
@@ -665,9 +684,11 @@ The application includes WebSocket endpoints for real-time updates:
 
 ### Compliance Updates WebSocket
 
-**Endpoint:** `ws://localhost:8000/ws/compliance-updates?token=your_jwt_token`
+**Endpoint:**
+`ws://localhost:8000/ws/compliance-updates?token=your_jwt_token`
 
 **Events:**
+
 - `connection_established`: Initial connection confirmation
 - `compliance_update`: Triggered when:
   - New SMS sent
@@ -676,14 +697,17 @@ The application includes WebSocket endpoints for real-time updates:
   - Campaign metrics updated
 
 **Client Messages:**
+
 - `ping`: Keep connection alive
 
 **Frontend Implementation:**
+
 - `ComplianceWidget.tsx` automatically connects to WebSocket
 - Falls back to manual refresh if WebSocket connection fails
 - Uses `NEXT_PUBLIC_WS_URL` environment variable
 
 **Testing WebSocket:**
+
 ```powershell
 # Install websocat (WebSocket client)
 # https://github.com/vi/websocat
@@ -697,9 +721,11 @@ websocat "ws://localhost:8000/ws/compliance-updates?token=TOKEN"
 
 ### Escalation Updates WebSocket
 
-**Endpoint:** `ws://localhost:8000/api/v1/ws/escalations?token=your_jwt_token`
+**Endpoint:**
+`ws://localhost:8000/api/v1/ws/escalations?token=your_jwt_token`
 
 **Events:**
+
 - `escalation_created`: New escalation
 - `escalation_updated`: Status/assignment changed
 - `escalation_resolved`: Escalation resolved
@@ -741,6 +767,7 @@ Write-Host "WebSocket Escalations: ws://localhost:8000/api/v1/ws/escalations" -F
 ```
 
 **Run it:**
+
 ```powershell
 .\start-dev.ps1
 ```
@@ -749,14 +776,16 @@ Write-Host "WebSocket Escalations: ws://localhost:8000/api/v1/ws/escalations" -F
 
 ## 📝 Notes
 
-- Always activate the Python virtual environment before running backend commands
+- Always activate the Python virtual environment before running
+  backend commands
 - Use separate PowerShell windows for each service to see logs clearly
 - Redis must be running before starting Celery workers
 - Database must be migrated before starting the API server
 - Check firewall settings if services can't connect to each other
 - WebSocket connections require valid JWT authentication tokens
 - All environment variables must be configured in `.env.local` files
-- No secrets or credentials should be hardcoded - always use environment variables
+- No secrets or credentials should be hardcoded - always use
+  environment variables
 
 ---
 

@@ -2,13 +2,22 @@
 
 import React from 'react';
 import { Users, Minus, Plus } from 'lucide-react';
-import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch, Path, FieldValues } from 'react-hook-form';
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+  Path,
+  FieldValues,
+} from 'react-hook-form';
 import type { FormLayout } from '../types';
 
 /**
  * Props for GuestCountField component
  */
-export interface GuestCountFieldProps<TFieldValues extends FieldValues = FieldValues> {
+export interface GuestCountFieldProps<
+  TFieldValues extends FieldValues = FieldValues,
+> {
   /** react-hook-form register function */
   register: UseFormRegister<TFieldValues>;
   /** react-hook-form errors object */
@@ -93,7 +102,9 @@ export interface GuestCountFieldProps<TFieldValues extends FieldValues = FieldVa
  *   splitFieldNames={{ adults: 'adultCount', children: 'childCount' }}
  * />
  */
-export function GuestCountField<TFieldValues extends FieldValues = FieldValues>({
+export function GuestCountField<
+  TFieldValues extends FieldValues = FieldValues,
+>({
   register,
   errors,
   setValue,
@@ -137,9 +148,10 @@ export function GuestCountField<TFieldValues extends FieldValues = FieldValues>(
 
   // Get current value for stepper
   const currentValue = watch ? watch(field) : undefined;
-  const numericValue = typeof currentValue === 'number'
-    ? currentValue
-    : parseInt(String(currentValue ?? '')) || min;
+  const numericValue =
+    typeof currentValue === 'number'
+      ? currentValue
+      : parseInt(String(currentValue ?? '')) || min;
 
   // Handle stepper increment/decrement
   const handleIncrement = () => {
@@ -198,7 +210,9 @@ export function GuestCountField<TFieldValues extends FieldValues = FieldValues>(
                 valueAsNumber: true,
               })}
             />
-            {adultsError && <div className="invalid-feedback">{adultsError}</div>}
+            {adultsError && (
+              <div className="invalid-feedback">{adultsError}</div>
+            )}
           </div>
 
           {/* Children */}
@@ -219,13 +233,13 @@ export function GuestCountField<TFieldValues extends FieldValues = FieldValues>(
                 valueAsNumber: true,
               })}
             />
-            {childrenError && <div className="invalid-feedback">{childrenError}</div>}
+            {childrenError && (
+              <div className="invalid-feedback">{childrenError}</div>
+            )}
           </div>
         </div>
 
-        {helperText && (
-          <p className="text-sm text-gray-500">{helperText}</p>
-        )}
+        {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
       </div>
     );
   }
@@ -265,7 +279,7 @@ export function GuestCountField<TFieldValues extends FieldValues = FieldValues>(
                 min: { value: min, message: `Minimum ${min} guests` },
                 max: { value: max, message: `Maximum ${max} guests` },
                 valueAsNumber: true,
-                onChange: (e) => onChange?.(parseInt(e.target.value) || min),
+                onChange: e => onChange?.(parseInt(e.target.value) || min),
               })}
             />
           </div>
@@ -281,7 +295,9 @@ export function GuestCountField<TFieldValues extends FieldValues = FieldValues>(
           </button>
         </div>
 
-        {fieldError && <div className="invalid-feedback text-center">{fieldError}</div>}
+        {fieldError && (
+          <div className="invalid-feedback text-center">{fieldError}</div>
+        )}
 
         {showTierHints && (
           <p className="text-sm text-center text-gray-500 mt-2">
@@ -320,7 +336,7 @@ export function GuestCountField<TFieldValues extends FieldValues = FieldValues>(
           min: { value: min, message: `Minimum ${min} guests` },
           max: { value: max, message: `Maximum ${max} guests` },
           valueAsNumber: true,
-          onChange: (e) => onChange?.(parseInt(e.target.value) || min),
+          onChange: e => onChange?.(parseInt(e.target.value) || min),
         })}
       />
 
@@ -332,9 +348,7 @@ export function GuestCountField<TFieldValues extends FieldValues = FieldValues>(
         </p>
       )}
 
-      {helperText && (
-        <p className="text-sm text-gray-500">{helperText}</p>
-      )}
+      {helperText && <p className="text-sm text-gray-500">{helperText}</p>}
     </div>
   );
 }

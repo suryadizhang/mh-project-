@@ -9,4 +9,7 @@ export { default as LazyDatePicker } from './LazyDatePicker';
 
 // Re-export types
 export type { PaymentFormProps, BookingData as PaymentBookingData } from './LazyPaymentForm';
-export type { AlternativePaymentOptionsProps, BookingData as AlternativePaymentBookingData } from './LazyAlternativePaymentOptions';
+export type {
+  AlternativePaymentOptionsProps,
+  BookingData as AlternativePaymentBookingData,
+} from './LazyAlternativePaymentOptions';

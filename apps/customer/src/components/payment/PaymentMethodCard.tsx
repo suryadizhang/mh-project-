@@ -61,13 +61,11 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
   return (
     <button
       onClick={onSelect}
-      className={`
-        relative w-full rounded-2xl border-2 p-6 transition-all duration-200
-        ${selected
+      className={`relative w-full rounded-2xl border-2 p-6 transition-all duration-200 ${
+        selected
           ? `${colors.border} ${colors.bg} scale-105 shadow-xl`
           : `border-gray-300 ${colors.hover} hover:scale-102 hover:shadow-lg`
-        }
-      `}
+      } `}
     >
       {/* Selected Checkmark */}
       {selected && (
@@ -86,7 +84,9 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
       )}
 
       {/* Icon */}
-      <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${colors.icon} text-white shadow-lg`}>
+      <div
+        className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${colors.icon} text-white shadow-lg`}
+      >
         <span className="text-2xl font-bold">{method.icon}</span>
       </div>
 
@@ -111,7 +111,11 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
             +${method.processingFee.toFixed(2)} fee
           </span>
           <p className="text-xs text-gray-500">
-            ({((method.processingFee / (method.totalAmount - method.processingFee)) * 100).toFixed(1)}%)
+            (
+            {((method.processingFee / (method.totalAmount - method.processingFee)) * 100).toFixed(
+              1,
+            )}
+            %)
           </p>
         </div>
       )}
@@ -133,20 +137,14 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
 
       {/* Total Amount */}
       <div className="mt-4 border-t border-gray-200 pt-4">
-        <p className="mb-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <p className="mb-1 text-xs font-medium tracking-wide text-gray-500 uppercase">
           Total Amount
         </p>
-        <p className="text-3xl font-bold text-gray-900">
-          ${method.totalAmount.toFixed(2)}
-        </p>
+        <p className="text-3xl font-bold text-gray-900">${method.totalAmount.toFixed(2)}</p>
       </div>
 
       {/* Hover Effect Indicator */}
-      {!selected && (
-        <div className="mt-4 text-xs text-gray-400">
-          Click to select
-        </div>
-      )}
+      {!selected && <div className="mt-4 text-xs text-gray-400">Click to select</div>}
     </button>
   );
 }

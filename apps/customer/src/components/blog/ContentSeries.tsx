@@ -79,15 +79,14 @@ export default function ContentSeries({
     }
 
     // Family Celebrations Series
-    const familyPosts = posts.filter(
-      (post) =>
-        post.keywords?.some(
-          (keyword: string) =>
-            keyword.toLowerCase().includes('family') ||
-            keyword.toLowerCase().includes('birthday') ||
-            keyword.toLowerCase().includes('anniversary') ||
-            keyword.toLowerCase().includes('reunion'),
-        ),
+    const familyPosts = posts.filter((post) =>
+      post.keywords?.some(
+        (keyword: string) =>
+          keyword.toLowerCase().includes('family') ||
+          keyword.toLowerCase().includes('birthday') ||
+          keyword.toLowerCase().includes('anniversary') ||
+          keyword.toLowerCase().includes('reunion'),
+      ),
     );
     if (familyPosts.length >= 3) {
       series.push({

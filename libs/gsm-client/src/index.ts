@@ -7,7 +7,13 @@ import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 
 export interface SecretConfig {
   environment: 'dev' | 'stg' | 'prod';
-  service: 'global' | 'backend-api' | 'backend-ai' | 'backend-crm' | 'frontend-web' | 'frontend-admin';
+  service:
+    | 'global'
+    | 'backend-api'
+    | 'backend-ai'
+    | 'backend-crm'
+    | 'frontend-web'
+    | 'frontend-admin';
   projectId?: string;
   fallbackToEnv?: boolean;
 }
@@ -29,11 +35,11 @@ export class GSMClient {
   constructor(config: SecretConfig) {
     this.config = {
       fallbackToEnv: true,
-      ...config
+      ...config,
     };
-    
+
     this.client = new SecretManagerServiceClient({
-      projectId: config.projectId || process.env.GCP_PROJECT_ID
+      projectId: config.projectId || process.env.GCP_PROJECT_ID,
     });
   }
 
@@ -42,7 +48,7 @@ export class GSMClient {
    */
   async getSecret(key: string): Promise<string> {
     const secretId = this.buildSecretId(key);
-    
+
     try {
       // Try cache first
       if (this.cache.has(secretId)) {
@@ -58,7 +64,7 @@ export class GSMClient {
           value: gsmValue,
           version: 'latest',
           lastModified: new Date(),
-          source: 'gsm'
+          source: 'gsm',
         });
         return gsmValue;
       }
@@ -72,7 +78,7 @@ export class GSMClient {
             value: envValue,
             version: 'env',
             lastModified: new Date(),
-            source: 'env'
+            source: 'env',
           });
           return envValue;
         }
@@ -81,13 +87,13 @@ export class GSMClient {
       throw new Error(`Secret not found: ${secretId}`);
     } catch (error) {
       console.error(`Error getting secret ${secretId}:`, error);
-      
+
       // Last resort: try direct env var
       const envValue = process.env[key];
       if (envValue) {
         return envValue;
       }
-      
+
       throw error;
     }
   }
@@ -97,9 +103,9 @@ export class GSMClient {
    */
   async getSecrets(keys: string[]): Promise<Record<string, string>> {
     const results: Record<string, string> = {};
-    
+
     await Promise.all(
-      keys.map(async (key) => {
+      keys.map(async key => {
         try {
           results[key] = await this.getSecret(key);
         } catch (error) {
@@ -108,7 +114,7 @@ export class GSMClient {
         }
       })
     );
-    
+
     return results;
   }
 
@@ -117,17 +123,17 @@ export class GSMClient {
    */
   async setSecret(key: string, value: string): Promise<void> {
     const secretId = this.buildSecretId(key);
-    
+
     try {
       // Create secret if it doesn't exist
       await this.createSecretIfNotExists(secretId);
-      
+
       // Add new version
       await this.client.addSecretVersion({
         parent: `projects/${this.config.projectId}/secrets/${secretId}`,
         payload: {
-          data: Buffer.from(value, 'utf8')
-        }
+          data: Buffer.from(value, 'utf8'),
+        },
       });
 
       // Update cache
@@ -136,7 +142,7 @@ export class GSMClient {
         value,
         version: 'latest',
         lastModified: new Date(),
-        source: 'gsm'
+        source: 'gsm',
       });
 
       // Secret updated successfully (logging removed for production security)
@@ -152,14 +158,14 @@ export class GSMClient {
   async checkConfigVersion(): Promise<boolean> {
     try {
       const currentVersion = await this.getSecret('CONFIG_VERSION');
-      
+
       if (this.configVersion !== currentVersion) {
         // Config version changed, clearing cache (logging removed for production)
         this.configVersion = currentVersion;
         this.clearCache();
         return true;
       }
-      
+
       return false;
     } catch (error) {
       console.warn('Could not check config version:', error);
@@ -172,17 +178,17 @@ export class GSMClient {
    */
   async getAllServiceSecrets(): Promise<Record<string, Secret>> {
     const secrets: Record<string, Secret> = {};
-    
+
     // Get global secrets
     const globalKeys = [
       'STRIPE_SECRET_KEY',
-      'STRIPE_WEBHOOK_SECRET', 
+      'STRIPE_WEBHOOK_SECRET',
       'OPENAI_API_KEY',
       'GOOGLE_MAPS_SERVER_KEY',
       'SENDGRID_API_KEY',
-      'CONFIG_VERSION'
+      'CONFIG_VERSION',
     ];
-    
+
     // Get service-specific secrets based on config
     let serviceKeys: string[] = [];
     switch (this.config.service) {
@@ -192,28 +198,21 @@ export class GSMClient {
           'JWT_SECRET',
           'JWT_REFRESH_SECRET',
           'REDIS_URL',
-          'ADMIN_PANEL_SECRET'
+          'ADMIN_PANEL_SECRET',
         ];
         break;
       case 'backend-ai':
-        serviceKeys = [
-          'OPENAI_API_KEY',
-          'VECTOR_DB_URL',
-          'RAG_STORAGE_BUCKET'
-        ];
+        serviceKeys = ['OPENAI_API_KEY', 'VECTOR_DB_URL', 'RAG_STORAGE_BUCKET'];
         break;
       case 'frontend-web':
         serviceKeys = [
           'NEXT_PUBLIC_API_URL',
           'NEXT_PUBLIC_AI_API_URL',
-          'NEXT_PUBLIC_STRIPE_PUBLIC_KEY'
+          'NEXT_PUBLIC_STRIPE_PUBLIC_KEY',
         ];
         break;
       case 'frontend-admin':
-        serviceKeys = [
-          'NEXT_PUBLIC_API_URL',
-          'NEXT_PUBLIC_ADMIN_PANEL_SECRET'
-        ];
+        serviceKeys = ['NEXT_PUBLIC_API_URL', 'NEXT_PUBLIC_ADMIN_PANEL_SECRET'];
         break;
     }
 
@@ -227,7 +226,7 @@ export class GSMClient {
           value,
           version: 'latest',
           lastModified: new Date(),
-          source: 'gsm'
+          source: 'gsm',
         };
       } catch (error) {
         console.warn(`Could not load secret ${key}:`, error);
@@ -248,19 +247,23 @@ export class GSMClient {
   /**
    * Get cache statistics
    */
-  getCacheStats(): { size: number; keys: string[]; sources: Record<string, number> } {
+  getCacheStats(): {
+    size: number;
+    keys: string[];
+    sources: Record<string, number>;
+  } {
     const sources: Record<string, number> = {};
     const keys: string[] = [];
-    
+
     for (const secret of this.cache.values()) {
       keys.push(secret.key);
       sources[secret.source] = (sources[secret.source] || 0) + 1;
     }
-    
+
     return {
       size: this.cache.size,
       keys,
-      sources
+      sources,
     };
   }
 
@@ -272,7 +275,7 @@ export class GSMClient {
   private async getFromGSM(secretId: string): Promise<string | null> {
     try {
       const [version] = await this.client.accessSecretVersion({
-        name: `projects/${this.config.projectId}/secrets/${secretId}/versions/latest`
+        name: `projects/${this.config.projectId}/secrets/${secretId}/versions/latest`,
       });
 
       if (!version.payload?.data) {
@@ -281,7 +284,8 @@ export class GSMClient {
 
       return version.payload.data.toString();
     } catch (error: any) {
-      if (error.code === 5) { // NOT_FOUND
+      if (error.code === 5) {
+        // NOT_FOUND
         return null;
       }
       throw error;
@@ -295,13 +299,14 @@ export class GSMClient {
         secretId,
         secret: {
           replication: {
-            automatic: {}
-          }
-        }
+            automatic: {},
+          },
+        },
       });
       // Secret created successfully (logging removed for production security)
     } catch (error: any) {
-      if (error.code !== 6) { // ALREADY_EXISTS
+      if (error.code !== 6) {
+        // ALREADY_EXISTS
         throw error;
       }
     }
@@ -317,28 +322,28 @@ const clients: Map<string, GSMClient> = new Map();
 
 export function getGSMClient(config: SecretConfig): GSMClient {
   const key = `${config.environment}-${config.service}`;
-  
+
   if (!clients.has(key)) {
     clients.set(key, new GSMClient(config));
   }
-  
+
   return clients.get(key)!;
 }
 
 /**
  * Quick access functions for specific services
  */
-export const createBackendAPIClient = (env: 'dev' | 'stg' | 'prod') => 
+export const createBackendAPIClient = (env: 'dev' | 'stg' | 'prod') =>
   getGSMClient({ environment: env, service: 'backend-api' });
 
-export const createBackendAIClient = (env: 'dev' | 'stg' | 'prod') => 
+export const createBackendAIClient = (env: 'dev' | 'stg' | 'prod') =>
   getGSMClient({ environment: env, service: 'backend-ai' });
 
-export const createFrontendWebClient = (env: 'dev' | 'stg' | 'prod') => 
+export const createFrontendWebClient = (env: 'dev' | 'stg' | 'prod') =>
   getGSMClient({ environment: env, service: 'frontend-web' });
 
-export const createFrontendAdminClient = (env: 'dev' | 'stg' | 'prod') => 
+export const createFrontendAdminClient = (env: 'dev' | 'stg' | 'prod') =>
   getGSMClient({ environment: env, service: 'frontend-admin' });
 
-export const createGlobalClient = (env: 'dev' | 'stg' | 'prod') => 
+export const createGlobalClient = (env: 'dev' | 'stg' | 'prod') =>
   getGSMClient({ environment: env, service: 'global' });

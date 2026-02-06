@@ -31,12 +31,16 @@ export function parseApiError(error: unknown): ErrorDetails {
     if (error.message.includes('Failed to fetch')) {
       return {
         title: 'Network Error',
-        message: 'Unable to connect to the server. Please check your internet connection.',
+        message:
+          'Unable to connect to the server. Please check your internet connection.',
       };
     }
 
     // Timeout errors
-    if (error.message.includes('timeout') || error.message.includes('aborted')) {
+    if (
+      error.message.includes('timeout') ||
+      error.message.includes('aborted')
+    ) {
       return {
         title: 'Request Timeout',
         message: 'The request took too long. Please try again.',
@@ -124,12 +128,18 @@ export function isRetryableError(error: unknown): boolean {
   const details = parseApiError(error);
 
   // Network errors are retryable
-  if (details.title === 'Network Error' || details.title === 'Request Timeout') {
+  if (
+    details.title === 'Network Error' ||
+    details.title === 'Request Timeout'
+  ) {
     return true;
   }
 
   // Certain HTTP status codes are retryable
-  if (details.status && DEFAULT_RETRY_CONFIG.retryableStatuses.includes(details.status)) {
+  if (
+    details.status &&
+    DEFAULT_RETRY_CONFIG.retryableStatuses.includes(details.status)
+  ) {
     return true;
   }
 
@@ -175,7 +185,9 @@ export async function retryWithBackoff<T>(
 
       // Calculate delay with exponential backoff
       const delay = delayMs * Math.pow(backoffMultiplier, attempt - 1);
-      console.log(`Retry attempt ${attempt}/${maxAttempts} after ${delay}ms...`);
+      console.log(
+        `Retry attempt ${attempt}/${maxAttempts} after ${delay}ms...`
+      );
       await sleep(delay);
     }
   }

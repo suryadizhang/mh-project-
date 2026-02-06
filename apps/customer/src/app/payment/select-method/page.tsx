@@ -95,7 +95,7 @@ export default function SelectMethodPage() {
       setRecommendation(result.recommendation);
 
       // Auto-select best method (Plaid RTP)
-      const bestMethod = result.methods.find(m => m.is_free && m.is_instant);
+      const bestMethod = result.methods.find((m) => m.is_free && m.is_instant);
       if (bestMethod) {
         setSelectedMethod(bestMethod.method);
       }
@@ -187,17 +187,23 @@ export default function SelectMethodPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Base Amount:</span>
-                <span className="font-medium text-gray-900">${paymentData.baseAmount.toFixed(2)}</span>
+                <span className="font-medium text-gray-900">
+                  ${paymentData.baseAmount.toFixed(2)}
+                </span>
               </div>
               {paymentData.tipAmount > 0 && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tip:</span>
-                  <span className="font-medium text-gray-900">${paymentData.tipAmount.toFixed(2)}</span>
+                  <span className="font-medium text-gray-900">
+                    ${paymentData.tipAmount.toFixed(2)}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between border-t pt-2">
                 <span className="font-semibold text-gray-900">Subtotal:</span>
-                <span className="text-xl font-bold text-gray-900">${paymentData.subtotal.toFixed(2)}</span>
+                <span className="text-xl font-bold text-gray-900">
+                  ${paymentData.subtotal.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
@@ -249,17 +255,16 @@ export default function SelectMethodPage() {
             className="w-full rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-8 py-5 text-lg font-semibold text-white shadow-lg transition-all hover:from-red-700 hover:to-red-800 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:from-red-600 disabled:hover:to-red-700"
           >
             {selectedMethod
-              ? `Continue with ${methods.find(m => m.method === selectedMethod)?.name || 'Selected Method'}`
-              : 'Select a Payment Method'
-            }
+              ? `Continue with ${methods.find((m) => m.method === selectedMethod)?.name || 'Selected Method'}`
+              : 'Select a Payment Method'}
           </button>
         </div>
 
         {/* Info Box */}
         <div className="mx-auto mt-6 max-w-2xl rounded-lg border border-blue-200 bg-blue-50 p-4">
           <p className="text-sm text-blue-800">
-            <strong>💳 All payment methods are secure.</strong> Processing fees are added on top of your subtotal.
-            FREE methods save you money!
+            <strong>💳 All payment methods are secure.</strong> Processing fees are added on top of
+            your subtotal. FREE methods save you money!
           </p>
         </div>
       </div>

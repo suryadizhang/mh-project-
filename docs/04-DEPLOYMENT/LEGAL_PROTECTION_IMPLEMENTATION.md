@@ -1,24 +1,24 @@
 # Legal Protection & Food Safety Implementation Plan
 
-**Created:** December 27, 2025
-**Version:** 1.0.0
-**Purpose:** Comprehensive legal protection for My Hibachi catering operations
-**Record Retention:** 7 YEARS (all signed agreements, documentation, incident records)
+**Created:** December 27, 2025 **Version:** 1.0.0 **Purpose:**
+Comprehensive legal protection for My Hibachi catering operations
+**Record Retention:** 7 YEARS (all signed agreements, documentation,
+incident records)
 
 ---
 
 ## User Decisions (December 27, 2025)
 
-| Item | User Decision | Implementation |
-|------|---------------|----------------|
-| **Digital Signature** | D1) Hybrid SignaturePad + timestamp + email PDF | Batch 1.x |
-| **Allergen System** | D1) Required + SMS confirmation (all channels) | Batch 1.x |
-| **Chef Dashboard** | C1) GCal sync + Web dashboard | Batch 2-3 |
-| **Chef Workflow** | B+C Hybrid (4 taps, 4 photos, weekly health, system does 90%) | Batch 2-3 |
-| **Claim Policy** | E1) Enhanced policy + pre-event health notice | Batch 1.x |
-| **Photo Documentation** | Manual uploads + thermometer photos | Batch 2-3 |
-| **Third-Party Disclaimer** | Include in Terms of Service | Batch 1.x |
-| **Chef Certification** | Database tracking + expiration alerts | Batch 2 |
+| Item                       | User Decision                                                 | Implementation |
+| -------------------------- | ------------------------------------------------------------- | -------------- |
+| **Digital Signature**      | D1) Hybrid SignaturePad + timestamp + email PDF               | Batch 1.x      |
+| **Allergen System**        | D1) Required + SMS confirmation (all channels)                | Batch 1.x      |
+| **Chef Dashboard**         | C1) GCal sync + Web dashboard                                 | Batch 2-3      |
+| **Chef Workflow**          | B+C Hybrid (4 taps, 4 photos, weekly health, system does 90%) | Batch 2-3      |
+| **Claim Policy**           | E1) Enhanced policy + pre-event health notice                 | Batch 1.x      |
+| **Photo Documentation**    | Manual uploads + thermometer photos                           | Batch 2-3      |
+| **Third-Party Disclaimer** | Include in Terms of Service                                   | Batch 1.x      |
+| **Chef Certification**     | Database tracking + expiration alerts                         | Batch 2        |
 
 ---
 
@@ -26,12 +26,12 @@
 
 ### BATCH 1.X: Legal Foundation (CRITICAL)
 
-**Target:** Before any public launch
-**Effort:** 15-20 hours total
+**Target:** Before any public launch **Effort:** 15-20 hours total
 
 #### 1.1 Digital Agreement System (8-10 hours)
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE core.signed_agreements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -78,6 +78,7 @@ COMMENT ON TABLE core.signed_agreements IS 'Immutable record of signed agreement
 ```
 
 **Agreement Versions Table:**
+
 ```sql
 CREATE TABLE core.agreement_templates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -100,6 +101,7 @@ INSERT INTO core.agreement_templates (agreement_type, version, title, content_ma
 ```
 
 **Backend Services:**
+
 ```
 apps/backend/src/services/agreements/
 ├── agreement_service.py      # Create, retrieve agreements
@@ -109,6 +111,7 @@ apps/backend/src/services/agreements/
 ```
 
 **API Endpoints:**
+
 ```
 POST /api/v1/agreements/sign              # Sign agreement (online)
 POST /api/v1/agreements/send-link         # Send SMS/email signing link
@@ -118,6 +121,7 @@ POST /api/v1/agreements/verify            # Verify agreement exists
 ```
 
 **Frontend Components:**
+
 ```
 apps/customer/src/components/agreements/
 ├── AgreementViewer.tsx       # Display agreement text
@@ -129,6 +133,7 @@ apps/customer/src/app/sign/[token]/page.tsx  # SMS link landing page
 ```
 
 **Email/SMS Templates:**
+
 ```
 SMS (for non-online bookings):
 "Hi {{name}}! Your My Hibachi event is booked for {{date}}.
@@ -144,31 +149,26 @@ Subject: "Your My Hibachi Service Agreement - Signed ✓"
 ```
 
 **Tasks:**
+
 ```markdown
-□ Create signed_agreements table migration
-□ Create agreement_templates table migration
-□ Seed liability waiver template (v2025.1)
-□ Seed allergen disclosure template (v2025.1)
-□ Install signature_pad npm package
-□ Create SignaturePad.tsx component
-□ Create SignatureCapture.tsx (full signing UI)
-□ Create agreement_service.py
-□ Create pdf_generator.py (use reportlab or weasyprint)
-□ Create POST /api/v1/agreements/sign endpoint
-□ Create signing link system for phone/text bookings
-□ Create /sign/[token] page for SMS links
-□ Add agreement step to online booking flow
-□ Create email confirmation template
-□ Create SMS signing request template
-□ Test: Online signing flow
-□ Test: SMS link signing flow
-□ Test: PDF generation and storage
+□ Create signed_agreements table migration □ Create
+agreement_templates table migration □ Seed liability waiver template
+(v2025.1) □ Seed allergen disclosure template (v2025.1) □ Install
+signature_pad npm package □ Create SignaturePad.tsx component □ Create
+SignatureCapture.tsx (full signing UI) □ Create agreement_service.py □
+Create pdf_generator.py (use reportlab or weasyprint) □ Create POST
+/api/v1/agreements/sign endpoint □ Create signing link system for
+phone/text bookings □ Create /sign/[token] page for SMS links □ Add
+agreement step to online booking flow □ Create email confirmation
+template □ Create SMS signing request template □ Test: Online signing
+flow □ Test: SMS link signing flow □ Test: PDF generation and storage
 □ Test: 7-year retention verified
 ```
 
 #### 1.2 Allergen Disclosure System (4-6 hours)
 
 **Database Schema:**
+
 ```sql
 -- Add to core.bookings table
 ALTER TABLE core.bookings ADD COLUMN IF NOT EXISTS
@@ -206,12 +206,13 @@ INSERT INTO core.common_allergens (name, display_name, icon, display_order) VALU
 ```
 
 **Booking Form Updates:**
+
 ```typescript
 // Required allergen section in booking form
 interface AllergenDisclosure {
-  commonAllergens: string[];  // ['shellfish', 'soy']
-  otherAllergens: string;     // Free text
-  confirmed: boolean;         // "I have asked all guests"
+  commonAllergens: string[]; // ['shellfish', 'soy']
+  otherAllergens: string; // Free text
+  confirmed: boolean; // "I have asked all guests"
 }
 
 // Validation: Cannot submit without confirmation
@@ -219,12 +220,16 @@ const allergenSchema = z.object({
   commonAllergens: z.array(z.string()),
   otherAllergens: z.string().max(500),
   confirmed: z.literal(true, {
-    errorMap: () => ({ message: 'You must confirm you have asked all guests about allergies' })
-  })
+    errorMap: () => ({
+      message:
+        'You must confirm you have asked all guests about allergies',
+    }),
+  }),
 });
 ```
 
 **24-Hour Reminder:**
+
 ```
 SMS/Email sent 24 hours before event:
 
@@ -244,19 +249,16 @@ See you tomorrow!
 ```
 
 **Tasks:**
+
 ```markdown
-□ Add allergen columns to bookings table
-□ Create common_allergens reference table
-□ Create AllergenSelector component
-□ Add allergen step to booking form (required)
-□ Validation: Block submission without confirmation
-□ Create allergen confirmation SMS for phone bookings
-□ Add allergen section to signed agreement
-□ Create 24-hour allergen reminder job
-□ Include health notice in reminder
-□ Test: Online allergen disclosure
-□ Test: SMS confirmation flow
-□ Test: Reminder sends correctly
+□ Add allergen columns to bookings table □ Create common_allergens
+reference table □ Create AllergenSelector component □ Add allergen
+step to booking form (required) □ Validation: Block submission without
+confirmation □ Create allergen confirmation SMS for phone bookings □
+Add allergen section to signed agreement □ Create 24-hour allergen
+reminder job □ Include health notice in reminder □ Test: Online
+allergen disclosure □ Test: SMS confirmation flow □ Test: Reminder
+sends correctly
 ```
 
 #### 1.3 Terms of Service Updates (2-3 hours)
@@ -267,27 +269,31 @@ See you tomorrow!
 ## LIABILITY LIMITATIONS
 
 ### Food Safety Acknowledgment
+
 Customer acknowledges and agrees that:
 
-1. **Cooking Environment**: Hibachi cooking involves raw proteins being
-   prepared and cooked at Customer's chosen venue. Customer is responsible
-   for providing adequate ventilation, a level cooking surface, and access
-   to running water.
+1. **Cooking Environment**: Hibachi cooking involves raw proteins
+   being prepared and cooked at Customer's chosen venue. Customer is
+   responsible for providing adequate ventilation, a level cooking
+   surface, and access to running water.
 
-2. **Temperature Control**: Our chefs transport ingredients in temperature-
-   controlled coolers and cook all proteins to FDA-recommended internal
-   temperatures. Customer acknowledges that once our chef departs, Customer
-   assumes responsibility for proper storage of any leftover food.
+2. **Temperature Control**: Our chefs transport ingredients in
+   temperature- controlled coolers and cook all proteins to
+   FDA-recommended internal temperatures. Customer acknowledges that
+   once our chef departs, Customer assumes responsibility for proper
+   storage of any leftover food.
 
-3. **Allergen Disclosure**: Customer MUST disclose all known food allergies
-   at time of booking. Customer acknowledges that our equipment is used
-   across multiple events and a completely allergen-free environment cannot
-   be guaranteed. Failure to disclose known allergies releases My Hibachi
-   from liability for allergen-related reactions.
+3. **Allergen Disclosure**: Customer MUST disclose all known food
+   allergies at time of booking. Customer acknowledges that our
+   equipment is used across multiple events and a completely
+   allergen-free environment cannot be guaranteed. Failure to disclose
+   known allergies releases My Hibachi from liability for
+   allergen-related reactions.
 
 4. **Third-Party Food**: My Hibachi is not responsible for any food,
-   beverages, ice, or other consumables not prepared by our chefs, including
-   items provided by Customer, guests, or other vendors at the same event.
+   beverages, ice, or other consumables not prepared by our chefs,
+   including items provided by Customer, guests, or other vendors at
+   the same event.
 
 5. **Post-Service Storage**: Any food not consumed within 2 hours of
    service should be refrigerated to 40°F or below. My Hibachi is not
@@ -297,34 +303,38 @@ Customer acknowledges and agrees that:
 
 Customer acknowledges the following claim requirements:
 
-1. **Reporting Window**: Any suspected foodborne illness must be reported
-   within 72 hours of the event via email to claims@myhibachichef.com.
+1. **Reporting Window**: Any suspected foodborne illness must be
+   reported within 72 hours of the event via email to
+   claims@myhibachichef.com.
 
 2. **Documentation Required**: Claims must include:
    - Description of symptoms and onset time
    - Names and contact information of all affected guests
-   - Medical documentation (doctor visit, diagnosis, lab results if applicable)
+   - Medical documentation (doctor visit, diagnosis, lab results if
+     applicable)
    - Written statement confirming no other restaurant meals consumed
      within 48 hours prior to symptom onset
 
 3. **Multiple Affected Guests**: Due to the statistical nature of
    foodborne illness, claims involving only 1-2 affected individuals
-   cannot be attributed to event food and will not be processed for refund.
+   cannot be attributed to event food and will not be processed for
+   refund.
 
 4. **Timeline Consistency**: Symptom onset must be consistent with
    known incubation periods for foodborne pathogens. Claims with
    inconsistent timelines may be denied.
 
-5. **Norovirus Clarification**: Norovirus (commonly called "stomach flu")
-   spreads person-to-person through direct contact, NOT through properly
-   cooked food. If multiple guests develop symptoms 12-48 hours after an
-   event, it is statistically more likely that an infected guest attended
-   the event and transmitted the virus to others.
+5. **Norovirus Clarification**: Norovirus (commonly called "stomach
+   flu") spreads person-to-person through direct contact, NOT through
+   properly cooked food. If multiple guests develop symptoms 12-48
+   hours after an event, it is statistically more likely that an
+   infected guest attended the event and transmitted the virus to
+   others.
 
 ### Limitation of Liability
 
-IN NO EVENT SHALL MY HIBACHI'S TOTAL LIABILITY EXCEED THE AMOUNT
-PAID FOR THE EVENT IN QUESTION. MY HIBACHI SHALL NOT BE LIABLE FOR:
+IN NO EVENT SHALL MY HIBACHI'S TOTAL LIABILITY EXCEED THE AMOUNT PAID
+FOR THE EVENT IN QUESTION. MY HIBACHI SHALL NOT BE LIABLE FOR:
 
 - Consequential, incidental, or punitive damages
 - Lost wages, business interruption, or economic losses
@@ -338,27 +348,26 @@ PAID FOR THE EVENT IN QUESTION. MY HIBACHI SHALL NOT BE LIABLE FOR:
 ```
 
 **Tasks:**
+
 ```markdown
-□ Draft liability waiver content (legal review recommended)
-□ Draft allergen acknowledgment content
-□ Draft foodborne illness claim policy
-□ Draft third-party food disclaimer
-□ Create terms version 2025.1
-□ Add to agreement_templates table
-□ Update Terms of Service page
-□ Legal review of all language (if available)
+□ Draft liability waiver content (legal review recommended) □ Draft
+allergen acknowledgment content □ Draft foodborne illness claim policy
+□ Draft third-party food disclaimer □ Create terms version 2025.1 □
+Add to agreement_templates table □ Update Terms of Service page □
+Legal review of all language (if available)
 ```
 
 ---
 
 ### BATCH 2: Chef Operations (HIGH PRIORITY)
 
-**Target:** After Stripe integration complete
-**Effort:** 20-25 hours total
+**Target:** After Stripe integration complete **Effort:** 20-25 hours
+total
 
 #### 2.1 Chef Certification Tracking (4-6 hours)
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE IF NOT EXISTS ops.chef_certifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -399,6 +408,7 @@ ORDER BY cert.expiration_date;
 ```
 
 **Certification Requirements:**
+
 ```python
 REQUIRED_CERTIFICATIONS = {
     'food_handler': {
@@ -428,6 +438,7 @@ RECOMMENDED_CERTIFICATIONS = {
 ```
 
 **Expiration Alert System:**
+
 ```
 ALERT SCHEDULE:
 - 30 days before: Email to chef + admin notification
@@ -442,23 +453,23 @@ ADMIN DASHBOARD:
 ```
 
 **Tasks:**
+
 ```markdown
-□ Create chef_certifications table migration
-□ Create certification requirements config
-□ Create expiration alert cron job
-□ Admin UI: Certification management
-□ Admin UI: Expiring certs dashboard
-□ Block chef assignment if required cert expired
-□ Email/SMS templates for expiration alerts
-□ Test: Expiration alerts send correctly
-□ Test: Assignment blocking works
+□ Create chef_certifications table migration □ Create certification
+requirements config □ Create expiration alert cron job □ Admin UI:
+Certification management □ Admin UI: Expiring certs dashboard □ Block
+chef assignment if required cert expired □ Email/SMS templates for
+expiration alerts □ Test: Expiration alerts send correctly □ Test:
+Assignment blocking works
 ```
 
 #### 2.2 Chef Prep Checklist & Event Dashboard (8-10 hours)
 
-**Design Principle:** System does 90% of the work. Chef sees ORDER COUNTS (not calculated quantities - chef knows how much per order).
+**Design Principle:** System does 90% of the work. Chef sees ORDER
+COUNTS (not calculated quantities - chef knows how much per order).
 
 **Chef Prep Checklist UI (Mobile-First):**
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 📦 PREP SUMMARY                          Event: Smith Family    │
@@ -508,6 +519,7 @@ ADMIN DASHBOARD:
 ```
 
 **Allergen Cooking Notes (Auto-Generated):**
+
 ```python
 ALLERGEN_COOKING_RULES = {
     'shellfish': {
@@ -544,6 +556,7 @@ ALLERGEN_COOKING_RULES = {
 ```
 
 **Frontend: Chef Mobile App (Progressive Web App)**
+
 ```
 apps/chef/
 ├── src/
@@ -565,6 +578,7 @@ apps/chef/
 ```
 
 **Order Count Aggregation Service:**
+
 ```python
 # services/chef/prep_summary_service.py
 
@@ -620,6 +634,7 @@ def aggregate_orders_by_category(orders: list, category: str) -> dict:
 ```
 
 **4-Tap Event Checklist Workflow (B+C Hybrid - MINIMAL CHEF INPUT):**
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 📋 EVENT CHECKLIST                        Smith Family Hibachi  │
@@ -657,15 +672,16 @@ def aggregate_orders_by_category(orders: list, category: str) -> dict:
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Simplified 4-Photo Requirements:**
-| Photo | When | Required | What to Capture |
-|-------|------|----------|-----------------|
-| 1. Cooler Temp | Before departure | ✅ YES | Thermometer showing <40°F |
-| 2. Arrival | At venue | ✅ YES | Setup area at venue |
-| 3. Cooking | During cooking | ⬜ Optional | Grill in action (recommended) |
-| 4. Completion | After service | ✅ YES | Finished plates or happy guests |
+**Simplified 4-Photo Requirements:** | Photo | When | Required | What
+to Capture | |-------|------|----------|-----------------| | 1. Cooler
+Temp | Before departure | ✅ YES | Thermometer showing <40°F | | 2.
+Arrival | At venue | ✅ YES | Setup area at venue | | 3. Cooking |
+During cooking | ⬜ Optional | Grill in action (recommended) | | 4.
+Completion | After service | ✅ YES | Finished plates or happy guests
+|
 
 **GPS Capture Strategy (Automatic from Photos):**
+
 ```python
 # Extract GPS from photo EXIF data - no manual tracking needed
 async def extract_photo_location(photo_bytes: bytes) -> dict:
@@ -695,7 +711,8 @@ async def extract_photo_location(photo_bytes: bytes) -> dict:
 
     return None  # Photo location not available
 ```
-```
+
+````
 
 **Event Checklist Database:**
 ```sql
@@ -749,9 +766,10 @@ CREATE TABLE IF NOT EXISTS ops.event_checklists (
 
 CREATE INDEX idx_event_checklists_booking ON ops.event_checklists(booking_id);
 CREATE INDEX idx_event_checklists_chef ON ops.event_checklists(chef_id);
-```
+````
 
 **Google Calendar Integration:**
+
 ```python
 # services/chef/google_calendar_service.py
 
@@ -806,24 +824,23 @@ Special Requests:
 ```
 
 **Tasks:**
+
 ```markdown
-□ Create event_checklists table migration (simplified version)
-□ Design chef PWA (mobile-first)
-□ Create PrepSummary component (ORDER COUNTS, not quantities)
-□ Create AllergenAlert with cooking action tips
-□ Create 4-tap EventChecklist component
-□ Create PhotoUpload with EXIF GPS extraction
-□ Create WeeklyHealthAttestation component
-□ Google Calendar deep link integration
-□ OAuth flow for chef GCal connection (one-time setup)
-□ Test: Full 4-tap event workflow
-□ Test: Photo uploads with GPS extraction
-□ Test: GCal creates events with prep link
+□ Create event_checklists table migration (simplified version) □
+Design chef PWA (mobile-first) □ Create PrepSummary component (ORDER
+COUNTS, not quantities) □ Create AllergenAlert with cooking action
+tips □ Create 4-tap EventChecklist component □ Create PhotoUpload with
+EXIF GPS extraction □ Create WeeklyHealthAttestation component □
+Google Calendar deep link integration □ OAuth flow for chef GCal
+connection (one-time setup) □ Test: Full 4-tap event workflow □ Test:
+Photo uploads with GPS extraction □ Test: GCal creates events with
+prep link
 ```
 
 #### 2.3 Photo Documentation System (4-6 hours)
 
 **Photo Upload Service:**
+
 ```python
 # services/chef/photo_documentation_service.py
 
@@ -881,15 +898,14 @@ async def upload_event_photo(
 ```
 
 **Tasks:**
+
 ```markdown
-□ Create event_photos table
-□ Create photo upload API endpoint
-□ Create PhotoUpload component with camera access
-□ Validate required photos before checklist submission
-□ Photo retention: 7 years (configure storage lifecycle)
-□ Admin view: Photos for any event
-□ Test: Photo upload from mobile
-□ Test: EXIF data preserved (timestamp, location)
+□ Create event_photos table □ Create photo upload API endpoint □
+Create PhotoUpload component with camera access □ Validate required
+photos before checklist submission □ Photo retention: 7 years
+(configure storage lifecycle) □ Admin view: Photos for any event □
+Test: Photo upload from mobile □ Test: EXIF data preserved (timestamp,
+location)
 ```
 
 ---
@@ -899,6 +915,7 @@ async def upload_event_photo(
 #### 3.1 Incident Response System (6-8 hours)
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE IF NOT EXISTS core.incident_reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -950,6 +967,7 @@ CREATE INDEX idx_incidents_status ON core.incident_reports(investigation_status)
 ```
 
 **Incident Workflow:**
+
 ```
 NEW INCIDENT
     │
@@ -999,28 +1017,26 @@ NEW INCIDENT
 ```
 
 **Tasks:**
+
 ```markdown
-□ Create incident_reports table migration
-□ Create incident submission form (public)
-□ Create admin incident dashboard
-□ Create incident workflow UI
-□ Create investigation checklist
-□ Email templates for each stage
-□ Integration with booking/chef data
-□ Resolution tracking
-□ Reporting: Incident trends
-□ Test: Full incident workflow
+□ Create incident_reports table migration □ Create incident submission
+form (public) □ Create admin incident dashboard □ Create incident
+workflow UI □ Create investigation checklist □ Email templates for
+each stage □ Integration with booking/chef data □ Resolution tracking
+□ Reporting: Incident trends □ Test: Full incident workflow
 ```
 
 #### 3.1.1 Chef In-App Incident Reporting (Simpler than Google Docs)
 
 **Design Decision:** In-app form instead of Google Docs
+
 - Pre-filled with event data (no typing for chef)
 - Works offline, syncs when connected
 - Same database as customer incidents
 - Faster for chef, more reliable
 
 **Chef Incident Form UI:**
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 📝 REPORT AN ISSUE                         Smith Family Event   │
@@ -1055,6 +1071,7 @@ NEW INCIDENT
 ```
 
 **Chef Incident Service:**
+
 ```python
 # services/chef/incident_service.py
 
@@ -1102,12 +1119,15 @@ async def create_chef_incident_report(
 
 #### 3.2 Chef Health Attestation - WEEKLY (2-3 hours)
 
-**Design Decision:** Weekly attestation (valid for 7 days), NOT per-event.
+**Design Decision:** Weekly attestation (valid for 7 days), NOT
+per-event.
+
 - Reduces chef friction (1x/week vs every event)
 - Still provides legal protection
 - Alert triggers if symptoms develop mid-week
 
 **Database Schema:**
+
 ```sql
 CREATE TABLE IF NOT EXISTS ops.chef_health_attestations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1153,6 +1173,7 @@ LEFT JOIN ops.chef_health_attestations ha ON c.id = ha.chef_id
 ```
 
 **Weekly Health Attestation UI (Chef App):**
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 🏥 WEEKLY HEALTH ATTESTATION                                    │
@@ -1183,6 +1204,7 @@ LEFT JOIN ops.chef_health_attestations ha ON c.id = ha.chef_id
 ```
 
 **Attestation Check Before Event:**
+
 ```python
 async def check_chef_can_work(chef_id: UUID) -> bool:
     """
@@ -1209,37 +1231,37 @@ async def check_chef_can_work(chef_id: UUID) -> bool:
 ```
 
 **Tasks:**
+
 ```markdown
-□ Create chef_health_attestations table
-□ Create chef_health_status view
-□ Create WeeklyHealthAttestation component
-□ Block event access if attestation expired (>7 days)
-□ Reminder notification when attestation expires
-□ Admin dashboard: Chef attestation status
-□ Report symptoms button (triggers admin alert)
+□ Create chef_health_attestations table □ Create chef_health_status
+view □ Create WeeklyHealthAttestation component □ Block event access
+if attestation expired (>7 days) □ Reminder notification when
+attestation expires □ Admin dashboard: Chef attestation status □
+Report symptoms button (triggers admin alert)
 ```
 
 ---
 
 ## Summary: Updated Batch Implementation
 
-| Phase | Batch | Component | Chef Effort | Status |
-|-------|-------|-----------|-------------|--------|
-| **Legal Foundation** | 1.x | Digital Signature (SignaturePad) | N/A | ⏳ PLANNED |
-| **Legal Foundation** | 1.x | Allergen Disclosure (required + SMS) | N/A | ⏳ PLANNED |
-| **Legal Foundation** | 1.x | Terms of Service Updates | N/A | ⏳ PLANNED |
-| **Chef Ops** | 2 | Chef Certification Tracking | Upload once | ⏳ PLANNED |
-| **Chef Ops** | 2-3 | Chef Prep Checklist (ORDER COUNTS) | View only | ⏳ PLANNED |
-| **Chef Ops** | 2-3 | 4-Tap Event Checklist | 4 taps | ⏳ PLANNED |
-| **Chef Ops** | 2-3 | Photo Documentation | 4 photos | ⏳ PLANNED |
-| **Chef Ops** | 2-3 | Google Calendar Sync | 1-click setup | ⏳ PLANNED |
-| **Advanced** | 3-4 | Weekly Health Attestation | 1x/week | ⏳ PLANNED |
-| **Advanced** | 3-4 | In-App Incident Reporting | Pre-filled form | ⏳ PLANNED |
-| **Advanced** | 3-4 | Incident Investigation (Admin) | N/A | ⏳ PLANNED |
+| Phase                | Batch | Component                            | Chef Effort     | Status     |
+| -------------------- | ----- | ------------------------------------ | --------------- | ---------- |
+| **Legal Foundation** | 1.x   | Digital Signature (SignaturePad)     | N/A             | ⏳ PLANNED |
+| **Legal Foundation** | 1.x   | Allergen Disclosure (required + SMS) | N/A             | ⏳ PLANNED |
+| **Legal Foundation** | 1.x   | Terms of Service Updates             | N/A             | ⏳ PLANNED |
+| **Chef Ops**         | 2     | Chef Certification Tracking          | Upload once     | ⏳ PLANNED |
+| **Chef Ops**         | 2-3   | Chef Prep Checklist (ORDER COUNTS)   | View only       | ⏳ PLANNED |
+| **Chef Ops**         | 2-3   | 4-Tap Event Checklist                | 4 taps          | ⏳ PLANNED |
+| **Chef Ops**         | 2-3   | Photo Documentation                  | 4 photos        | ⏳ PLANNED |
+| **Chef Ops**         | 2-3   | Google Calendar Sync                 | 1-click setup   | ⏳ PLANNED |
+| **Advanced**         | 3-4   | Weekly Health Attestation            | 1x/week         | ⏳ PLANNED |
+| **Advanced**         | 3-4   | In-App Incident Reporting            | Pre-filled form | ⏳ PLANNED |
+| **Advanced**         | 3-4   | Incident Investigation (Admin)       | N/A             | ⏳ PLANNED |
 
 ### Chef Workflow Summary (B+C Hybrid)
 
 **What System Does (90%):**
+
 - Auto-generates prep checklist from customer orders
 - Pre-fills all event data
 - Calculates allergen cooking actions
@@ -1248,21 +1270,24 @@ async def check_chef_can_work(chef_id: UUID) -> bool:
 - Creates incident report pre-filled with event data
 
 **What Chef Does (10%):**
+
 - Weekly health attestation (1x per week)
 - 4 taps: Health OK → Arrived → Allergies Confirmed → Complete
 - 4 photos: Cooler temp, Arrival, Cooking (optional), Completion
 - View prep summary (ORDER COUNTS - chef calculates amounts)
 
-**Allergen Cooking Rules (Auto-Displayed):**
-| Allergen | Chef Action |
-|----------|-------------|
-| 🦐 Shellfish | Cook shrimp/calamari LAST on separate section of grill |
-| 🌾 Soy/Gluten | Use TAMARI or coconut aminos instead of soy sauce |
-| 🥛 Dairy | Already dairy-free by default (we use dairy-free butter) |
-| 🥚 Eggs | Make fried rice WITHOUT egg |
-| 🌱 Sesame | Skip sesame seeds and sesame oil |
+**Allergen Cooking Rules (Auto-Displayed):** | Allergen | Chef Action
+| |----------|-------------| | 🦐 Shellfish | Cook shrimp/calamari
+LAST on separate section of grill | | 🌾 Soy/Gluten | Use TAMARI or
+coconut aminos instead of soy sauce | | 🥛 Dairy | Already dairy-free
+by default (we use dairy-free butter) | | 🥚 Eggs | Make fried rice
+WITHOUT egg | | 🌱 Sesame | Skip sesame seeds and sesame oil |
 
-> ⚠️ **Customer Responsibility Disclaimer:** Chef allergen accommodations require accurate information provided during booking. If customers do not disclose all allergies, the chef may not have proper alternative ingredients available. My Hibachi cannot guarantee allergen-free preparation for undisclosed allergies.
+> ⚠️ **Customer Responsibility Disclaimer:** Chef allergen
+> accommodations require accurate information provided during booking.
+> If customers do not disclose all allergies, the chef may not have
+> proper alternative ingredients available. My Hibachi cannot
+> guarantee allergen-free preparation for undisclosed allergies.
 
 ---
 

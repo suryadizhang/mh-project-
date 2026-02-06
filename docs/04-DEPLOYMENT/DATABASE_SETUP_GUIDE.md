@@ -1,6 +1,7 @@
 # Database Setup Guide - Local Development
 
-**Purpose:** Set up a local PostgreSQL database with realistic test data for development and testing.
+**Purpose:** Set up a local PostgreSQL database with realistic test
+data for development and testing.
 
 **Date:** October 20, 2025  
 **Status:** Ready to Execute
@@ -40,7 +41,8 @@ winget install PostgreSQL.PostgreSQL.14
 
 1. Default port: `5432`
 2. Default user: `postgres`
-3. You'll be prompted to set a password during installation (remember this!)
+3. You'll be prompted to set a password during installation (remember
+   this!)
 4. pgAdmin 4 is included for GUI management
 
 **Option 2: Docker (Alternative)**
@@ -137,7 +139,8 @@ SMTP_PASSWORD=your_mailtrap_password
 "@ | Out-File -FilePath .env -Encoding utf8
 ```
 
-**Important:** Replace `your_secure_password_here` with the actual password you set for `myhibachi_user`.
+**Important:** Replace `your_secure_password_here` with the actual
+password you set for `myhibachi_user`.
 
 ---
 
@@ -229,14 +232,14 @@ python scripts\seed_test_data.py
 
 ### **What Data Gets Seeded?**
 
-| Entity | Count | Details |
-|--------|-------|---------|
-| **Stations** | 10 | Different locations with addresses |
-| **Customers** | 1,000 | Realistic names, emails, phones |
-| **Bookings** | 5,000 | Mix of statuses, dates (last 2 years) |
-| **Payments** | 3,000 | Associated with bookings, various amounts |
-| **Stripe Customers** | 1,000 | One per customer |
-| **Stripe Payment Intents** | 3,000 | One per payment |
+| Entity                     | Count | Details                                   |
+| -------------------------- | ----- | ----------------------------------------- |
+| **Stations**               | 10    | Different locations with addresses        |
+| **Customers**              | 1,000 | Realistic names, emails, phones           |
+| **Bookings**               | 5,000 | Mix of statuses, dates (last 2 years)     |
+| **Payments**               | 3,000 | Associated with bookings, various amounts |
+| **Stripe Customers**       | 1,000 | One per customer                          |
+| **Stripe Payment Intents** | 3,000 | One per payment                           |
 
 ---
 
@@ -318,10 +321,11 @@ curl "http://localhost:8000/api/admin/customer-analytics?customer_id=1"
 **Solution:**
 
 1. Check if PostgreSQL is running:
+
    ```powershell
    # Check service status
    Get-Service postgresql*
-   
+
    # Start service if stopped
    Start-Service postgresql-x64-14
    ```
@@ -347,17 +351,19 @@ curl "http://localhost:8000/api/admin/customer-analytics?customer_id=1"
 **Solution:**
 
 1. Drop all tables and re-run migrations:
+
    ```sql
    -- Connect to database
    \c myhibachi
-   
+
    -- Drop all tables (DESTRUCTIVE!)
    DROP SCHEMA public CASCADE;
    CREATE SCHEMA public;
    GRANT ALL ON SCHEMA public TO myhibachi_user;
    ```
-   
+
 2. Re-run migrations:
+
    ```powershell
    alembic upgrade head
    ```
@@ -438,4 +444,4 @@ Get-Content -Path "C:\Program Files\PostgreSQL\14\data\log\postgresql-*.log" -Ta
 
 ---
 
-*Last Updated: October 20, 2025*
+_Last Updated: October 20, 2025_

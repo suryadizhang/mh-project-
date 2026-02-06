@@ -87,7 +87,7 @@ const QuickNavigation: React.FC<QuickNavigationProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed left-4 bottom-36 z-30 sm:left-6 ${className}`}>
+    <div className={`fixed bottom-36 left-4 z-30 sm:left-6 ${className}`}>
       <div className="flex flex-col items-start space-y-3">
         {/* Table of Contents (if enabled) */}
         {showTableOfContents && headings.length > 0 && (

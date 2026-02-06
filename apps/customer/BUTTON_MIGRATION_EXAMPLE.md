@@ -5,7 +5,7 @@
 ```tsx
 // In src/app/menu/page.tsx line 728
 <a href="/BookUs" className="btn btn-primary me-3">
-  <Calendar className="w-4 h-4 me-2 inline" />
+  <Calendar className="me-2 inline h-4 w-4" />
   Ready to Plan Your Date?
 </a>
 ```
@@ -14,15 +14,15 @@
 
 ```tsx
 // Import the new scoped button component
-import { HibachiButton } from '@/components/ui/button'
+import { HibachiButton } from '@/components/ui/button';
 
 // Replace the legacy button with scoped component
-;<HibachiButton variant="primary" size="md" className="me-3" asChild>
+<HibachiButton variant="primary" size="md" className="me-3" asChild>
   <a href="/BookUs">
-    <Calendar className="w-4 h-4 me-2 inline" />
+    <Calendar className="me-2 inline h-4 w-4" />
     Ready to Plan Your Date?
   </a>
-</HibachiButton>
+</HibachiButton>;
 ```
 
 ## CSS Implementation (Pixel-Perfect Match)

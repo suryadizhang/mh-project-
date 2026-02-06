@@ -1,21 +1,23 @@
 # My Hibachi – Pricing Business Rules
 
-**Last Updated:** 2025-01-26
-**Status:** Active
-**Use Case:** AI System Knowledge Base, Dynamic Variables Integration
+**Last Updated:** 2025-01-26 **Status:** Active **Use Case:** AI
+System Knowledge Base, Dynamic Variables Integration
 
 ---
 
-> ⚠️ **DYNAMIC PRICING NOTICE**
-> All prices in this document are managed by the **Dynamic Variables System** and can be updated at any time via the admin panel. Values shown are defaults as of the last update date. Always verify current pricing via `GET /api/v1/pricing/current` or the `usePricing()` hook.
+> ⚠️ **DYNAMIC PRICING NOTICE** All prices in this document are
+> managed by the **Dynamic Variables System** and can be updated at
+> any time via the admin panel. Values shown are defaults as of the
+> last update date. Always verify current pricing via
+> `GET /api/v1/pricing/current` or the `usePricing()` hook.
 
 ---
 
 ## 📋 Overview
 
-This document defines the pricing business rules for My Hibachi Chef catering services.
-These rules are used across the customer website, quote calculator, booking system,
-and AI chat assistant.
+This document defines the pricing business rules for My Hibachi Chef
+catering services. These rules are used across the customer website,
+quote calculator, booking system, and AI chat assistant.
 
 ---
 
@@ -23,24 +25,24 @@ and AI chat assistant.
 
 ### Per-Person Pricing
 
-| Category | Price | Age Range | Notes |
-|----------|-------|-----------|-------|
-| **Adult** | $55 | Ages 13+ | Full hibachi experience, 2 protein choices |
-| **Child** | $30 | Ages 6-12 | Kid-friendly portions, 1 protein choice |
-| **Toddler** | FREE | Ages 5 & under | With adult purchase, small portions |
+| Category    | Price | Age Range      | Notes                                      |
+| ----------- | ----- | -------------- | ------------------------------------------ |
+| **Adult**   | $55   | Ages 13+       | Full hibachi experience, 2 protein choices |
+| **Child**   | $30   | Ages 6-12      | Kid-friendly portions, 1 protein choice    |
+| **Toddler** | FREE  | Ages 5 & under | With adult purchase, small portions        |
 
 ### Dynamic Variable Keys
 
 ```typescript
 // Frontend: usePricing hook → pricingTemplates.ts
-adultPrice: number          // Default: 55
-childPrice: number          // Default: 30
-childFreeUnderAge: number   // Default: 5 (free for 5 & under)
+adultPrice: number; // Default: 55
+childPrice: number; // Default: 30
+childFreeUnderAge: number; // Default: 5 (free for 5 & under)
 
 // Backend: dynamic_variables_service.py
-ADULT_PRICE = "adult_price"           // cents: 5500
-CHILD_PRICE = "child_price"           // cents: 3000
-CHILD_FREE_UNDER_AGE = "child_free_under_age"  // 5
+ADULT_PRICE = 'adult_price'; // cents: 5500
+CHILD_PRICE = 'child_price'; // cents: 3000
+CHILD_FREE_UNDER_AGE = 'child_free_under_age'; // 5
 ```
 
 ---
@@ -51,8 +53,9 @@ CHILD_FREE_UNDER_AGE = "child_free_under_age"  // 5
 
 **Minimum food order total: $550**
 
-If the calculated food subtotal (adults × $55 + children × $30) is less than $550,
-the system automatically adjusts the total to meet the minimum.
+If the calculated food subtotal (adults × $55 + children × $30) is
+less than $550, the system automatically adjusts the total to meet the
+minimum.
 
 ### Logic (Backend - public_quote.py)
 
@@ -66,18 +69,17 @@ if subtotal < party_minimum:
 
 When minimum is applied, display:
 
-> **Minimum order: $550**
-> (Your selections $440 → adjusted to $550)
+> **Minimum order: $550** (Your selections $440 → adjusted to $550)
 
 ### Dynamic Variable Keys
 
 ```typescript
 // Frontend
-partyMinimum: number        // Default: 550
+partyMinimum: number; // Default: 550
 
 // Backend
-PARTY_MINIMUM = "party_minimum"       // cents: 55000
-party_minimum_cents: int = 55000
+PARTY_MINIMUM = 'party_minimum'; // cents: 55000
+party_minimum_cents: int = 55000;
 ```
 
 ---
@@ -88,27 +90,28 @@ party_minimum_cents: int = 55000
 
 **Fixed deposit: $100** (refundable)
 
-The deposit secures the booking date and is applied toward the final balance.
+The deposit secures the booking date and is applied toward the final
+balance.
 
 ### Refund & Reschedule Policy
 
 - **Full refund**: Cancellation 7+ days before event
-- **Reschedule**: Allowed 1 time, must be at least 24 hours before event
+- **Reschedule**: Allowed 1 time, must be at least 24 hours before
+  event
 - **No refund**: Less than 7 days notice
 
 ### Previous Rule (Changed 2025-01-26)
 
-Previous: 30% of total
-New: Fixed $100 amount
+Previous: 30% of total New: Fixed $100 amount
 
 ### Dynamic Variable Keys
 
 ```typescript
 // Frontend
-depositAmount: number       // Default: 100
+depositAmount: number; // Default: 100
 
 // Backend
-DEPOSIT_AMOUNT = "deposit_amount"     // cents: 10000
+DEPOSIT_AMOUNT = 'deposit_amount'; // cents: 10000
 ```
 
 ---
@@ -117,31 +120,32 @@ DEPOSIT_AMOUNT = "deposit_amount"     // cents: 10000
 
 ### Rule
 
-| Distance | Fee |
-|----------|-----|
-| 0-30 miles | **FREE** |
-| 30+ miles | **$2 per additional mile** |
+| Distance   | Fee                        |
+| ---------- | -------------------------- |
+| 0-30 miles | **FREE**                   |
+| 30+ miles  | **$2 per additional mile** |
 
 ### Example Calculations
 
-| Distance | Calculation | Travel Fee |
-|----------|-------------|------------|
-| 15 miles | Within free zone | $0 |
-| 35 miles | (35 - 30) × $2 | $10 |
-| 50 miles | (50 - 30) × $2 | $40 |
-| 80 miles | (80 - 30) × $2 | $100 |
+| Distance | Calculation      | Travel Fee |
+| -------- | ---------------- | ---------- |
+| 15 miles | Within free zone | $0         |
+| 35 miles | (35 - 30) × $2   | $10        |
+| 50 miles | (50 - 30) × $2   | $40        |
+| 80 miles | (80 - 30) × $2   | $100       |
 
 ### Maximum Service Radius
 
-**200 miles** - Requests beyond this distance require special approval.
+**200 miles** - Requests beyond this distance require special
+approval.
 
 ### Dynamic Variable Keys
 
 ```typescript
 // travel_fee_configurations table
-free_miles: 30
-per_mile_rate: 2.00
-max_service_distance: 200
+free_miles: 30;
+per_mile_rate: 2.0;
+max_service_distance: 200;
 ```
 
 ---
@@ -152,29 +156,31 @@ max_service_distance: 200
 
 ### Premium Protein Upgrades (Per Person)
 
-| Upgrade | Price | Notes |
-|---------|-------|-------|
-| Salmon | +$5 | Upgrades existing protein choice |
-| Scallops | +$5 | Upgrades existing protein choice |
-| Filet Mignon | +$5 | Upgrades existing protein choice |
-| Lobster Tail | +$15 | Premium seafood upgrade |
+| Upgrade      | Price | Notes                            |
+| ------------ | ----- | -------------------------------- |
+| Salmon       | +$5   | Upgrades existing protein choice |
+| Scallops     | +$5   | Upgrades existing protein choice |
+| Filet Mignon | +$5   | Upgrades existing protein choice |
+| Lobster Tail | +$15  | Premium seafood upgrade          |
 
 ### Add-On Options
 
-| Add-On | Price | Description |
-|--------|-------|-------------|
-| Yakisoba Noodles | +$5 | Japanese-style lo mein |
-| Extra Fried Rice | +$5 | Additional rice portion |
-| Extra Vegetables | +$5 | Mixed seasonal vegetables |
-| Edamame | +$5 | Steamed soybeans with sea salt |
-| Gyoza | +$10 | Pan-fried Japanese dumplings |
-| Extra Protein | +$10 | Additional protein (any type) |
+| Add-On           | Price | Description                    |
+| ---------------- | ----- | ------------------------------ |
+| Yakisoba Noodles | +$5   | Japanese-style lo mein         |
+| Extra Fried Rice | +$5   | Additional rice portion        |
+| Extra Vegetables | +$5   | Mixed seasonal vegetables      |
+| Edamame          | +$5   | Steamed soybeans with sea salt |
+| Gyoza            | +$10  | Pan-fried Japanese dumplings   |
+| Extra Protein    | +$10  | Additional protein (any type)  |
 
 ### Upgrade vs Add-On Distinction
 
-- **Upgrade**: Replaces your existing protein choice with premium option
+- **Upgrade**: Replaces your existing protein choice with premium
+  option
 - **Add-On (Extra Protein)**: Adds MORE food (+$10), doesn't replace
-- **Combo Example**: Extra protein (+$10) as Lobster Tail (+$15) = +$25 total
+- **Combo Example**: Extra protein (+$10) as Lobster Tail (+$15) =
+  +$25 total
 
 ---
 
@@ -227,16 +233,31 @@ Balance Due:    $490
 ### Example AI Responses
 
 **Q: "How much for 6 adults?"**
-> For 6 adults, that would be $330 (6 × $55). However, we have a $550 minimum order, so your total would be $550. Would you like to add more guests or upgrades to get full value?
+
+> For 6 adults, that would be $330 (6 × $55). However, we have a $550
+> minimum order, so your total would be $550. Would you like to add
+> more guests or upgrades to get full value?
 
 **Q: "What's included in the price?"**
-> Each adult ($55) includes: 2 protein choices, fried rice, vegetables, salad, signature sauces, live hibachi show, and complimentary sake. Children ($30) get 1 protein and all sides. Kids 5 & under eat free!
+
+> Each adult ($55) includes: 2 protein choices, fried rice,
+> vegetables, salad, signature sauces, live hibachi show, and
+> complimentary sake. Children ($30) get 1 protein and all sides. Kids
+> 5 & under eat free!
 
 **Q: "How much is deposit?"**
-> We require a $100 refundable deposit to secure your date. It's fully refundable if you cancel 7+ days before your event. You can also reschedule one time as long as it's at least 24 hours before the original date.
+
+> We require a $100 refundable deposit to secure your date. It's fully
+> refundable if you cancel 7+ days before your event. You can also
+> reschedule one time as long as it's at least 24 hours before the
+> original date.
 
 **Q: "What upgrades do you have?"**
-> We offer premium protein upgrades: Salmon, Scallops, and Filet Mignon are +$5/person, Lobster Tail is +$15/person. For add-ons: Yakisoba Noodles, Extra Fried Rice, Extra Vegetables, and Edamame are +$5 each. Gyoza and Extra Protein are +$10 each.
+
+> We offer premium protein upgrades: Salmon, Scallops, and Filet
+> Mignon are +$5/person, Lobster Tail is +$15/person. For add-ons:
+> Yakisoba Noodles, Extra Fried Rice, Extra Vegetables, and Edamame
+> are +$5 each. Gyoza and Extra Protein are +$10 each.
 
 ### Escalation Triggers
 
@@ -265,8 +286,8 @@ WHERE key = 'adult_price';
 
 ### Step 2: Frontend Updates Automatically
 
-The `usePricing` hook fetches from `/api/v1/pricing/current` which reads
-from dynamic variables. No code changes needed.
+The `usePricing` hook fetches from `/api/v1/pricing/current` which
+reads from dynamic variables. No code changes needed.
 
 ### Step 3: Verify Across Pages
 
@@ -282,21 +303,21 @@ from dynamic variables. No code changes needed.
 
 ### Frontend
 
-| File | Purpose |
-|------|---------|
-| `hooks/usePricing.ts` | Centralized pricing data access |
-| `lib/data/pricingTemplates.ts` | Default values & fallbacks |
-| `components/quote/QuoteCalculator.tsx` | Quote calculation UI |
-| `components/booking/modules/EventDetailsSection.tsx` | Booking cost display |
+| File                                                 | Purpose                         |
+| ---------------------------------------------------- | ------------------------------- |
+| `hooks/usePricing.ts`                                | Centralized pricing data access |
+| `lib/data/pricingTemplates.ts`                       | Default values & fallbacks      |
+| `components/quote/QuoteCalculator.tsx`               | Quote calculation UI            |
+| `components/booking/modules/EventDetailsSection.tsx` | Booking cost display            |
 
 ### Backend
 
-| File | Purpose |
-|------|---------|
-| `services/dynamic_variables_service.py` | Dynamic variables CRUD |
-| `routers/v1/public_quote.py` | Quote calculation endpoint |
-| `schemas/pricing.py` | Pricing data models |
-| `db/models/dynamic_variables.py` | Database model |
+| File                                    | Purpose                    |
+| --------------------------------------- | -------------------------- |
+| `services/dynamic_variables_service.py` | Dynamic variables CRUD     |
+| `routers/v1/public_quote.py`            | Quote calculation endpoint |
+| `schemas/pricing.py`                    | Pricing data models        |
+| `db/models/dynamic_variables.py`        | Database model             |
 
 ---
 

@@ -20,7 +20,8 @@
 
 ## 🎯 Overview
 
-Comprehensive health check system designed for production Kubernetes deployments with:
+Comprehensive health check system designed for production Kubernetes
+deployments with:
 
 - **Readiness Probe** - Determines if service can accept traffic
 - **Liveness Probe** - Detects if process is alive
@@ -56,15 +57,18 @@ Comprehensive health check system designed for production Kubernetes deployments
 
 ### 1. Readiness Probe (`/api/v1/health/readiness`)
 
-**Purpose:** Kubernetes readiness probe - determines if service is ready to accept traffic.
+**Purpose:** Kubernetes readiness probe - determines if service is
+ready to accept traffic.
 
 **HTTP Method:** `GET`
 
 **Response Codes:**
+
 - `200 OK` - Service is ready
 - `503 Service Unavailable` - Service not ready
 
 **Response Schema:**
+
 ```json
 {
   "status": "ready",
@@ -95,11 +99,13 @@ Comprehensive health check system designed for production Kubernetes deployments
 ```
 
 **Critical Checks:**
+
 - ✅ **Database** - MUST be healthy (returns 503 if unhealthy)
 - ⚠️ **Redis** - Can be degraded (falls back to memory cache)
 - ⚠️ **Stripe** - Can be degraded (non-payment endpoints still work)
 
 **Example Request:**
+
 ```bash
 curl http://localhost:8000/api/v1/health/readiness
 ```
@@ -113,9 +119,11 @@ curl http://localhost:8000/api/v1/health/readiness
 **HTTP Method:** `GET`
 
 **Response Codes:**
+
 - `200 OK` - Always (unless process completely hung)
 
 **Response Schema:**
+
 ```json
 {
   "status": "alive",
@@ -126,11 +134,13 @@ curl http://localhost:8000/api/v1/health/readiness
 ```
 
 **Notes:**
+
 - Should **ALWAYS** return 200 unless process is frozen
 - Does NOT check external dependencies
 - Lightweight and fast (<1ms)
 
 **Example Request:**
+
 ```bash
 curl http://localhost:8000/api/v1/health/liveness
 ```
@@ -144,10 +154,12 @@ curl http://localhost:8000/api/v1/health/liveness
 **HTTP Method:** `GET`
 
 **Response Codes:**
+
 - `200 OK` - System healthy or degraded
 - `500 Internal Server Error` - Critical failure
 
 **Response Schema:**
+
 ```json
 {
   "status": "healthy",
@@ -156,9 +168,21 @@ curl http://localhost:8000/api/v1/health/liveness
   "version": "1.0.0",
   "environment": "production",
   "services": {
-    "database": { "status": "healthy", "response_time_ms": 15.3, "details": "..." },
-    "redis": { "status": "healthy", "response_time_ms": 2.1, "details": "..." },
-    "stripe": { "status": "healthy", "response_time_ms": 1.2, "details": "..." }
+    "database": {
+      "status": "healthy",
+      "response_time_ms": 15.3,
+      "details": "..."
+    },
+    "redis": {
+      "status": "healthy",
+      "response_time_ms": 2.1,
+      "details": "..."
+    },
+    "stripe": {
+      "status": "healthy",
+      "response_time_ms": 1.2,
+      "details": "..."
+    }
   },
   "system": {
     "cpu": {
@@ -200,12 +224,14 @@ curl http://localhost:8000/api/v1/health/liveness
 ```
 
 **Use Cases:**
+
 - Monitoring dashboards (Grafana, Datadog)
 - Performance analysis
 - Debugging production issues
 - **NOT for K8s probes** (too heavy)
 
 **Example Request:**
+
 ```bash
 curl http://localhost:8000/api/v1/health/detailed | jq
 ```
@@ -219,6 +245,7 @@ curl http://localhost:8000/api/v1/health/detailed | jq
 **HTTP Method:** `GET`
 
 **Response Schema:**
+
 ```json
 {
   "status": "healthy",
@@ -245,66 +272,66 @@ spec:
   template:
     spec:
       containers:
-      - name: backend
-        image: myhibachi/backend:latest
-        ports:
-        - containerPort: 8000
-          name: http
-        
-        # === Readiness Probe ===
-        readinessProbe:
-          httpGet:
-            path: /api/v1/health/readiness
-            port: 8000
-            scheme: HTTP
-          initialDelaySeconds: 10    # Wait 10s after container starts
-          periodSeconds: 10           # Check every 10 seconds
-          timeoutSeconds: 5           # Timeout after 5 seconds
-          successThreshold: 1         # 1 success = ready
-          failureThreshold: 3         # 3 failures = not ready
-        
-        # === Liveness Probe ===
-        livenessProbe:
-          httpGet:
-            path: /api/v1/health/liveness
-            port: 8000
-            scheme: HTTP
-          initialDelaySeconds: 30     # Wait 30s for app startup
-          periodSeconds: 30           # Check every 30 seconds
-          timeoutSeconds: 5           # Timeout after 5 seconds
-          successThreshold: 1         # 1 success = alive
-          failureThreshold: 3         # 3 failures = restart pod
-        
-        # === Startup Probe (Optional) ===
-        startupProbe:
-          httpGet:
-            path: /api/v1/health/liveness
-            port: 8000
-          initialDelaySeconds: 0
-          periodSeconds: 5
-          timeoutSeconds: 3
-          successThreshold: 1
-          failureThreshold: 30        # 30 * 5s = 150s max startup time
-        
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: database-url
-        - name: REDIS_URL
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: redis-url
-        
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
+        - name: backend
+          image: myhibachi/backend:latest
+          ports:
+            - containerPort: 8000
+              name: http
+
+          # === Readiness Probe ===
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/readiness
+              port: 8000
+              scheme: HTTP
+            initialDelaySeconds: 10 # Wait 10s after container starts
+            periodSeconds: 10 # Check every 10 seconds
+            timeoutSeconds: 5 # Timeout after 5 seconds
+            successThreshold: 1 # 1 success = ready
+            failureThreshold: 3 # 3 failures = not ready
+
+          # === Liveness Probe ===
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health/liveness
+              port: 8000
+              scheme: HTTP
+            initialDelaySeconds: 30 # Wait 30s for app startup
+            periodSeconds: 30 # Check every 30 seconds
+            timeoutSeconds: 5 # Timeout after 5 seconds
+            successThreshold: 1 # 1 success = alive
+            failureThreshold: 3 # 3 failures = restart pod
+
+          # === Startup Probe (Optional) ===
+          startupProbe:
+            httpGet:
+              path: /api/v1/health/liveness
+              port: 8000
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 30 # 30 * 5s = 150s max startup time
+
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: redis-url
+
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '500m'
+            limits:
+              memory: '1Gi'
+              cpu: '1000m'
 ```
 
 ### Service YAML
@@ -319,19 +346,19 @@ spec:
   selector:
     app: myhibachi-backend
   ports:
-  - name: http
-    port: 80
-    targetPort: 8000
+    - name: http
+      port: 80
+      targetPort: 8000
   type: ClusterIP
 ```
 
 ### Probe Timing Guidelines
 
-| Probe | Initial Delay | Period | Timeout | Failure Threshold | Notes |
-|-------|---------------|--------|---------|-------------------|-------|
-| **Readiness** | 10s | 10s | 5s | 3 | Remove from load balancer after 30s (3 failures) |
-| **Liveness** | 30s | 30s | 5s | 3 | Restart pod after 90s (3 failures) |
-| **Startup** | 0s | 5s | 3s | 30 | Max 150s startup time (30 failures) |
+| Probe         | Initial Delay | Period | Timeout | Failure Threshold | Notes                                            |
+| ------------- | ------------- | ------ | ------- | ----------------- | ------------------------------------------------ |
+| **Readiness** | 10s           | 10s    | 5s      | 3                 | Remove from load balancer after 30s (3 failures) |
+| **Liveness**  | 30s           | 30s    | 5s      | 3                 | Restart pod after 90s (3 failures)               |
+| **Startup**   | 0s            | 5s     | 3s      | 30                | Max 150s startup time (30 failures)              |
 
 ### Best Practices
 
@@ -360,6 +387,7 @@ spec:
 The health check system exports the following Prometheus metrics:
 
 #### 1. Request Counter
+
 ```
 health_check_total{endpoint="readiness",status="ready"} 1500
 health_check_total{endpoint="liveness",status="alive"} 3000
@@ -367,10 +395,12 @@ health_check_total{endpoint="detailed",status="healthy"} 250
 ```
 
 **Labels:**
+
 - `endpoint`: readiness, liveness, detailed
 - `status`: ready/not_ready, alive, healthy/unhealthy/error
 
 #### 2. Response Time Histogram
+
 ```
 health_check_duration_seconds{endpoint="readiness",check_type="all"} 0.025
 health_check_duration_seconds{endpoint="liveness",check_type="simple"} 0.001
@@ -378,12 +408,15 @@ health_check_duration_seconds{endpoint="detailed",check_type="comprehensive"} 0.
 ```
 
 **Labels:**
+
 - `endpoint`: readiness, liveness, detailed
 - `check_type`: all, simple, comprehensive
 
-**Buckets:** 0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10
+**Buckets:** 0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5,
+5, 10
 
 #### 3. Service Health Gauge
+
 ```
 service_health_status{service="database"} 1
 service_health_status{service="redis"} 1
@@ -391,9 +424,11 @@ service_health_status{service="stripe"} 1
 ```
 
 **Labels:**
+
 - `service`: database, redis, stripe
 
 **Values:**
+
 - `1` = healthy
 - `0` = unhealthy
 
@@ -402,25 +437,29 @@ service_health_status{service="stripe"} 1
 Example Prometheus queries for Grafana:
 
 **Health Check Success Rate:**
+
 ```promql
-sum(rate(health_check_total{status="ready"}[5m])) 
-/ 
+sum(rate(health_check_total{status="ready"}[5m]))
+/
 sum(rate(health_check_total[5m]))
 ```
 
 **Health Check P95 Response Time:**
+
 ```promql
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   sum(rate(health_check_duration_seconds_bucket[5m])) by (le, endpoint)
 )
 ```
 
 **Service Availability:**
+
 ```promql
 avg(service_health_status) by (service) * 100
 ```
 
 **Pod Restart Rate:**
+
 ```promql
 rate(kube_pod_container_status_restarts_total{pod=~"myhibachi-backend.*"}[1h])
 ```
@@ -429,52 +468,53 @@ rate(kube_pod_container_status_restarts_total{pod=~"myhibachi-backend.*"}[1h])
 
 ```yaml
 groups:
-- name: health_checks
-  interval: 30s
-  rules:
-  
-  # Database unhealthy
-  - alert: DatabaseUnhealthy
-    expr: service_health_status{service="database"} == 0
-    for: 2m
-    labels:
-      severity: critical
-    annotations:
-      summary: "Database health check failing"
-      description: "Database is unreachable or unhealthy for 2+ minutes"
-  
-  # Redis degraded (warning only)
-  - alert: RedisDegraded
-    expr: service_health_status{service="redis"} == 0
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "Redis health check failing"
-      description: "Redis is unavailable, using memory cache fallback"
-  
-  # Health check timeout
-  - alert: HealthCheckTimeout
-    expr: |
-      histogram_quantile(0.95, 
-        sum(rate(health_check_duration_seconds_bucket{endpoint="readiness"}[5m])) by (le)
-      ) > 3
-    for: 5m
-    labels:
-      severity: warning
-    annotations:
-      summary: "Health checks taking too long"
-      description: "P95 health check duration > 3 seconds"
-  
-  # Pod restart loop
-  - alert: PodRestartLoop
-    expr: |
-      rate(kube_pod_container_status_restarts_total{pod=~"myhibachi-backend.*"}[15m]) > 0.1
-    labels:
-      severity: critical
-    annotations:
-      summary: "Pod restart loop detected"
-      description: "Pod restarting more than 1.5 times per minute"
+  - name: health_checks
+    interval: 30s
+    rules:
+      # Database unhealthy
+      - alert: DatabaseUnhealthy
+        expr: service_health_status{service="database"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Database health check failing'
+          description:
+            'Database is unreachable or unhealthy for 2+ minutes'
+
+      # Redis degraded (warning only)
+      - alert: RedisDegraded
+        expr: service_health_status{service="redis"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Redis health check failing'
+          description:
+            'Redis is unavailable, using memory cache fallback'
+
+      # Health check timeout
+      - alert: HealthCheckTimeout
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(health_check_duration_seconds_bucket{endpoint="readiness"}[5m])) by (le)
+          ) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Health checks taking too long'
+          description: 'P95 health check duration > 3 seconds'
+
+      # Pod restart loop
+      - alert: PodRestartLoop
+        expr: |
+          rate(kube_pod_container_status_restarts_total{pod=~"myhibachi-backend.*"}[15m]) > 0.1
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Pod restart loop detected'
+          description: 'Pod restarting more than 1.5 times per minute'
 ```
 
 ---
@@ -486,18 +526,21 @@ groups:
 **Purpose:** Verify database connectivity and performance.
 
 **Tests:**
+
 - Connection availability
 - Execute `SELECT 1` query
 - Execute `SELECT version()` query
 - Measure response time
 
 **Status Levels:**
+
 - **healthy** - Connection successful, queries execute < 100ms
 - **unhealthy** - Connection failed or exception
 
 **Critical:** YES - Service cannot operate without database
 
 **Example Response:**
+
 ```json
 {
   "status": "healthy",
@@ -514,12 +557,14 @@ groups:
 **Purpose:** Verify Redis cache connectivity and performance.
 
 **Tests:**
+
 - Connection availability
 - PING command
 - Memory usage query
 - Measure response time
 
 **Status Levels:**
+
 - **healthy** - Connected, PING successful, memory info retrieved
 - **degraded** - Connection failed (falls back to memory cache)
 - **unhealthy** - Timeout or critical error
@@ -527,6 +572,7 @@ groups:
 **Critical:** NO - Service has memory cache fallback
 
 **Example Response:**
+
 ```json
 {
   "status": "healthy",
@@ -537,6 +583,7 @@ groups:
 ```
 
 **Degraded Response:**
+
 ```json
 {
   "status": "degraded",
@@ -554,17 +601,20 @@ groups:
 **Purpose:** Verify Stripe API configuration (no actual API call).
 
 **Tests:**
+
 - API key environment variable exists
 - API key format validation (starts with `sk_`)
 - Webhook secret configuration (optional)
 
 **Status Levels:**
+
 - **healthy** - API key configured and valid format
 - **unhealthy** - API key missing or invalid format
 
 **Critical:** NO - Only payment endpoints need Stripe
 
 **Example Response:**
+
 ```json
 {
   "status": "healthy",
@@ -581,6 +631,7 @@ groups:
 **Purpose:** Collect system performance metrics.
 
 **Collected Metrics:**
+
 - **CPU:** Count, usage percentage
 - **Memory:** Total, available, used (GB and %)
 - **Disk:** Total, free, used (GB and %)
@@ -591,6 +642,7 @@ groups:
 **Requires:** `psutil` Python package
 
 **Example Response:**
+
 ```json
 {
   "cpu": {
@@ -626,11 +678,13 @@ groups:
 ### Problem: Readiness probe failing
 
 **Symptoms:**
+
 - Pods showing "0/1 Ready"
 - No traffic reaching pods
 - `kubectl describe pod` shows readiness failures
 
 **Check:**
+
 ```bash
 # Test readiness endpoint directly
 kubectl exec -it <pod-name> -- curl http://localhost:8000/api/v1/health/readiness
@@ -661,11 +715,12 @@ kubectl describe pod <pod-name> | grep -A 10 Events
    - Optimize database indexes
 
 **Fix:**
+
 ```yaml
 # Increase timeout if queries are slow
 readinessProbe:
-  timeoutSeconds: 10        # Increase from 5 to 10
-  failureThreshold: 5       # More tolerance
+  timeoutSeconds: 10 # Increase from 5 to 10
+  failureThreshold: 5 # More tolerance
 ```
 
 ---
@@ -673,11 +728,13 @@ readinessProbe:
 ### Problem: Liveness probe failing (pod restarting)
 
 **Symptoms:**
+
 - Pods constantly restarting
 - High restart count
 - Application logs truncated
 
 **Check:**
+
 ```bash
 # Check restart count
 kubectl get pods | grep myhibachi-backend
@@ -707,18 +764,19 @@ kubectl exec -it <pod-name> -- curl http://localhost:8000/api/v1/health/liveness
    - Data loading
 
 **Fix:**
+
 ```yaml
 # Increase initial delay for slow startup
 livenessProbe:
-  initialDelaySeconds: 60   # Increase from 30 to 60
-  periodSeconds: 60         # Check less frequently
-  
+  initialDelaySeconds: 60 # Increase from 30 to 60
+  periodSeconds: 60 # Check less frequently
+
 # Or use startup probe
 startupProbe:
   httpGet:
     path: /api/v1/health/liveness
     port: 8000
-  failureThreshold: 60      # 60 * 5s = 300s max startup
+  failureThreshold: 60 # 60 * 5s = 300s max startup
   periodSeconds: 5
 ```
 
@@ -727,11 +785,13 @@ startupProbe:
 ### Problem: Health checks timing out
 
 **Symptoms:**
+
 - Health check taking > 5 seconds
 - Timeout errors in logs
 - Intermittent failures
 
 **Check:**
+
 ```bash
 # Test health check response time
 time curl http://localhost:8000/api/v1/health/readiness
@@ -757,16 +817,17 @@ curl http://localhost:8000/api/v1/health/detailed | jq '.services[].response_tim
    - Waiting for available connection
 
 **Fix:**
+
 ```yaml
 # Increase resource limits
 resources:
   limits:
-    memory: "2Gi"           # Increase from 1Gi
-    cpu: "2000m"            # Increase from 1000m
+    memory: '2Gi' # Increase from 1Gi
+    cpu: '2000m' # Increase from 1000m
 
 # Increase timeouts
 readinessProbe:
-  timeoutSeconds: 10        # Increase from 5
+  timeoutSeconds: 10 # Increase from 5
 ```
 
 ---
@@ -774,11 +835,13 @@ readinessProbe:
 ### Problem: Redis check always degraded
 
 **Symptoms:**
+
 - Redis status showing "degraded"
 - Using memory cache fallback
 - No actual Redis connection
 
 **Check:**
+
 ```bash
 # Verify REDIS_URL environment variable
 kubectl exec -it <pod-name> -- env | grep REDIS
@@ -807,6 +870,7 @@ kubectl get svc | grep redis
    - Firewall rules
 
 **Fix:**
+
 ```bash
 # Deploy Redis if missing
 helm install redis bitnami/redis
@@ -823,6 +887,7 @@ kubectl create secret generic backend-secrets \
 ### Local Development
 
 **Start Services:**
+
 ```bash
 # Start PostgreSQL
 docker run -d --name postgres \
@@ -844,12 +909,14 @@ export STRIPE_SECRET_KEY="sk_test_..."
 ```
 
 **Run Backend:**
+
 ```bash
 cd apps/backend
 python -m uvicorn main:app --reload --port 8000
 ```
 
 **Test Endpoints:**
+
 ```bash
 # Readiness
 curl http://localhost:8000/api/v1/health/readiness | jq
@@ -874,27 +941,27 @@ time curl -s http://localhost:8000/api/v1/health/readiness > /dev/null
 async def check_email_service() -> ServiceHealthCheck:
     """Check email service connectivity."""
     start_time = time.time()
-    
+
     try:
         from api.app.config import settings
-        
+
         # Your check logic here
         smtp_configured = bool(getattr(settings, 'SMTP_USER', None))
-        
+
         if not smtp_configured:
             return ServiceHealthCheck(
                 status="unhealthy",
                 details="Email service not configured"
             )
-        
+
         response_time = (time.time() - start_time) * 1000
-        
+
         return ServiceHealthCheck(
             status="healthy",
             response_time_ms=round(response_time, 2),
             details="Email service configured"
         )
-        
+
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
         return ServiceHealthCheck(
@@ -918,10 +985,10 @@ async def readiness_probe(request: Request):
         check_email_service(),  # NEW
         return_exceptions=True
     )
-    
+
     # Parse results
     db_check, redis_check, stripe_check, email_check = checks_results
-    
+
     checks = {
         "database": db_check,
         "redis": redis_check,
@@ -944,6 +1011,7 @@ if PROMETHEUS_AVAILABLE:
 ### Testing Health Checks
 
 **Unit Tests:**
+
 ```python
 import pytest
 from fastapi.testclient import TestClient
@@ -967,6 +1035,7 @@ def test_readiness_probe_db_down(client: TestClient, mock_db_error):
 ```
 
 **Integration Tests:**
+
 ```bash
 # Test with real services
 pytest tests/integration/test_health_checks.py -v

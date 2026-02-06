@@ -5,25 +5,25 @@ export const menuData = {
     valueProposition: [
       { icon: '🚚', text: 'We Come to You' },
       { icon: '👨‍🍳', text: 'Professional Chef' },
-      { icon: '🎭', text: 'Live Entertainment' }
+      { icon: '🎭', text: 'Live Entertainment' },
     ],
     features: [
       {
         icon: '⭐',
         title: 'Premium Quality',
-        subtitle: 'Fresh ingredients'
+        subtitle: 'Fresh ingredients',
       },
       {
         icon: '🔧',
         title: 'Custom Experience',
-        subtitle: 'Tailored to you'
+        subtitle: 'Tailored to you',
       },
       {
         icon: '💎',
         title: 'Luxury Service',
-        subtitle: 'Premium quality'
-      }
-    ]
+        subtitle: 'Premium quality',
+      },
+    ],
   },
 
   pricing: {
@@ -41,8 +41,8 @@ export const menuData = {
           'All cooking equipment provided',
           'Choice of 2 proteins',
           'Fried rice and vegetables',
-          'Entertaining cooking show'
-        ]
+          'Entertaining cooking show',
+        ],
       },
       {
         id: 'premium',
@@ -56,8 +56,8 @@ export const menuData = {
           'Choice of 3 premium proteins',
           'Hibachi noodles included',
           'Appetizer (soup or salad)',
-          'Extended entertainment show'
-        ]
+          'Extended entertainment show',
+        ],
       },
       {
         id: 'luxury',
@@ -70,10 +70,10 @@ export const menuData = {
           'Premium protein selections',
           'Multiple appetizers',
           'Special sauces & seasonings',
-          'Extended performance with tricks'
-        ]
-      }
-    ]
+          'Extended performance with tricks',
+        ],
+      },
+    ],
   },
 
   proteins: {
@@ -84,16 +84,16 @@ export const menuData = {
         name: 'Poultry',
         items: [
           { name: 'Chicken Breast', description: 'Tender, juicy chicken breast' },
-          { name: 'Chicken Thighs', description: 'Flavorful dark meat' }
-        ]
+          { name: 'Chicken Thighs', description: 'Flavorful dark meat' },
+        ],
       },
       {
         name: 'Beef',
         items: [
           { name: 'Sirloin Steak', description: 'Premium cut sirloin' },
           { name: 'Ribeye', description: 'Marbled, tender ribeye' },
-          { name: 'Filet Mignon', description: 'Premium tenderloin' }
-        ]
+          { name: 'Filet Mignon', description: 'Premium tenderloin' },
+        ],
       },
       {
         name: 'Seafood',
@@ -101,17 +101,17 @@ export const menuData = {
           { name: 'Shrimp', description: 'Large, fresh shrimp' },
           { name: 'Scallops', description: 'Sweet sea scallops' },
           { name: 'Salmon', description: 'Fresh Atlantic salmon' },
-          { name: 'Lobster Tail', description: 'Premium lobster tail' }
-        ]
+          { name: 'Lobster Tail', description: 'Premium lobster tail' },
+        ],
       },
       {
         name: 'Specialty',
         items: [
           { name: 'Tofu', description: 'Firm, seasoned tofu' },
-          { name: 'Vegetables', description: 'Mixed seasonal vegetables' }
-        ]
-      }
-    ]
+          { name: 'Vegetables', description: 'Mixed seasonal vegetables' },
+        ],
+      },
+    ],
   },
 
   serviceAreas: {
@@ -129,8 +129,8 @@ export const menuData = {
         'Santa Clara - Tech meets traditional Japanese cuisine',
         'Sunnyvale - Where innovation meets flavor',
         'Mountain View - Bringing mountains of flavor',
-        'Palo Alto - Stanford-level culinary performance'
-      ]
+        'Palo Alto - Stanford-level culinary performance',
+      ],
     },
     extended: {
       title: '🚗 Extended Service Areas',
@@ -141,10 +141,10 @@ export const menuData = {
         'Stockton - Bringing flavor to the Central Valley',
         "Fresno - Central California's hibachi experience",
         'San Mateo - Peninsula dining excellence',
-        'Fremont - South Bay hibachi artistry'
-      ]
-    }
-  }
-}
+        'Fremont - South Bay hibachi artistry',
+      ],
+    },
+  },
+};
 
-export type MenuData = typeof menuData
+export type MenuData = typeof menuData;

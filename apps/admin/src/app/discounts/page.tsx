@@ -180,7 +180,10 @@ export default function AdminDiscountsPage() {
       }
       closeModal();
     } catch (error) {
-      logger.error(error as Error, { context: 'save_discount', discount_id: editingDiscount?.id });
+      logger.error(error as Error, {
+        context: 'save_discount',
+        discount_id: editingDiscount?.id,
+      });
     } finally {
       setLoading(false);
     }

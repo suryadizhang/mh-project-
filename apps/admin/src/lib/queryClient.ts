@@ -34,7 +34,7 @@ export const queryClient = new QueryClient({
 
       // Error Handling
       retry: 3, // Retry failed requests 3 times
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
 
       // Performance
       structuralSharing: true, // Reuse objects to prevent unnecessary re-renders
@@ -104,8 +104,13 @@ export const refreshReviews = async () => {
  * Invalidate and refetch admin pending reviews
  */
 export const refreshPendingReviews = async () => {
-  await queryClient.invalidateQueries({ queryKey: ['admin', 'pending-reviews'] });
-  await queryClient.refetchQueries({ queryKey: ['admin', 'pending-reviews'], type: 'active' });
+  await queryClient.invalidateQueries({
+    queryKey: ['admin', 'pending-reviews'],
+  });
+  await queryClient.refetchQueries({
+    queryKey: ['admin', 'pending-reviews'],
+    type: 'active',
+  });
 };
 
 /**
@@ -125,9 +130,14 @@ export const getCacheStats = () => {
 
   return {
     totalQueries: queries.length,
-    freshQueries: queries.filter(q => q.state.dataUpdatedAt > Date.now() - 5 * 60 * 1000).length,
-    staleQueries: queries.filter(q => q.state.dataUpdatedAt <= Date.now() - 5 * 60 * 1000).length,
-    fetchingQueries: queries.filter(q => q.state.fetchStatus === 'fetching').length,
+    freshQueries: queries.filter(
+      q => q.state.dataUpdatedAt > Date.now() - 5 * 60 * 1000
+    ).length,
+    staleQueries: queries.filter(
+      q => q.state.dataUpdatedAt <= Date.now() - 5 * 60 * 1000
+    ).length,
+    fetchingQueries: queries.filter(q => q.state.fetchStatus === 'fetching')
+      .length,
   };
 };
 

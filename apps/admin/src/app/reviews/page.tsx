@@ -13,13 +13,13 @@ import {
   ThumbsUp,
   User,
 } from 'lucide-react';
-import { useMemo,useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { FilterBar, FilterDefinition } from '@/components/ui/filter-bar';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { ConfirmModal,Modal } from '@/components/ui/modal';
+import { ConfirmModal, Modal } from '@/components/ui/modal';
 import { StatsCard } from '@/components/ui/stats-card';
 import { useToast } from '@/components/ui/Toast';
 import {
@@ -180,7 +180,8 @@ export default function ReviewsPage() {
     try {
       const response = await api.post('/api/v1/reviews/ai/issue-coupon', {
         review_id: selectedReviewForCoupon.review_id,
-        ai_interaction_notes: 'Admin manually issued coupon for negative experience',
+        ai_interaction_notes:
+          'Admin manually issued coupon for negative experience',
         discount_percentage: 10,
       });
 
@@ -188,7 +189,10 @@ export default function ReviewsPage() {
         throw new Error(response.error || 'Failed to issue coupon');
       }
 
-      toast.success('Coupon Issued', 'Discount coupon has been created successfully');
+      toast.success(
+        'Coupon Issued',
+        'Discount coupon has been created successfully'
+      );
 
       // Close modal and refresh
       setIsIssueCouponOpen(false);
@@ -210,16 +214,22 @@ export default function ReviewsPage() {
 
     setIsResolvingReview(true);
     try {
-      const response = await api.post(`/api/v1/reviews/${review.review_id}/resolve`, {
-        resolved_by: '00000000-0000-0000-0000-000000000000', // TODO: Get from auth context
-        resolution_notes: 'Resolved by admin',
-      });
+      const response = await api.post(
+        `/api/v1/reviews/${review.review_id}/resolve`,
+        {
+          resolved_by: '00000000-0000-0000-0000-000000000000', // TODO: Get from auth context
+          resolution_notes: 'Resolved by admin',
+        }
+      );
 
       if (!response.success) {
         throw new Error(response.error || 'Failed to resolve review');
       }
 
-      toast.success('Review Resolved', 'The review has been marked as resolved');
+      toast.success(
+        'Review Resolved',
+        'The review has been marked as resolved'
+      );
 
       // Close modal if open and refresh
       setIsReviewModalOpen(false);

@@ -1,7 +1,9 @@
 # 🧪 Customer Review Privacy & Initials Testing - October 26, 2025
 
 ## 🎯 Testing Objectives
-1. ✅ Verify database migration successful (customer contact fields + show_initials_only)
+
+1. ✅ Verify database migration successful (customer contact fields +
+   show_initials_only)
 2. ⏳ Test backend API endpoints (initials vs full name display)
 3. ⏳ Test frontend form (checkbox works, preview accurate)
 4. ⏳ Test admin panel (always shows full name)
@@ -12,6 +14,7 @@
 ## ✅ Database Migration (PASSED)
 
 ### Migration 008: Customer Contact Fields
+
 ```bash
 ✓ Adding customer_name column...
 ✓ Adding customer_email column...
@@ -33,19 +36,21 @@ Verification:
 ## 🔧 Backend API Testing
 
 ### Test 1: Model Helper Methods
+
 **Testing:** `get_initials()` and `get_display_name()` methods
 
 **Expected Behavior:**
+
 - `get_initials()`:
   - "John Doe" → "JD"
   - "Sarah" → "S"
   - "Mary Jane Watson" → "MJ" (first + last)
-  
 - `get_display_name()`:
   - If `show_initials_only=True` → returns initials
   - If `show_initials_only=False` → returns full name
 
 **Test Commands:**
+
 ```python
 # Will test via API submissions
 ```
@@ -55,9 +60,11 @@ Verification:
 ---
 
 ### Test 2: Submit Review Endpoint - Full Name
+
 **Endpoint:** `POST /api/customer-reviews/submit-review`
 
 **Test Payload:**
+
 ```bash
 curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
   -F "customer_id=1" \
@@ -71,6 +78,7 @@ curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -82,6 +90,7 @@ curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
 ```
 
 **Expected Database State:**
+
 - `customer_name`: "John Doe"
 - `customer_email`: "john@test.com"
 - `customer_phone`: "555-1234"
@@ -93,9 +102,11 @@ curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
 ---
 
 ### Test 3: Submit Review Endpoint - Initials Only
+
 **Endpoint:** `POST /api/customer-reviews/submit-review`
 
 **Test Payload:**
+
 ```bash
 curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
   -F "customer_id=1" \
@@ -109,6 +120,7 @@ curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -120,6 +132,7 @@ curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
 ```
 
 **Expected Database State:**
+
 - `customer_name`: "Sarah Johnson"
 - `customer_email`: "sarah@test.com"
 - `customer_phone`: "555-5678"
@@ -131,9 +144,11 @@ curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
 ---
 
 ### Test 4: Approve Reviews (Admin)
+
 **Endpoint:** `POST /api/admin/review-moderation/approve-review/1`
 
 **Test Commands:**
+
 ```bash
 # Approve review #1 (Full name)
 curl -X POST http://localhost:8000/api/admin/review-moderation/approve-review/1 \
@@ -147,6 +162,7 @@ curl -X POST http://localhost:8000/api/admin/review-moderation/approve-review/2 
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -161,14 +177,17 @@ curl -X POST http://localhost:8000/api/admin/review-moderation/approve-review/2 
 ---
 
 ### Test 5: Get Approved Reviews (Public API)
+
 **Endpoint:** `GET /api/customer-reviews/approved-reviews`
 
 **Test Command:**
+
 ```bash
 curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -178,7 +197,7 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
       "title": "Great Experience",
       "content": "Lorem ipsum...",
       "rating": 5,
-      "customer_name": "John Doe",  // Full name (show_initials_only=false)
+      "customer_name": "John Doe", // Full name (show_initials_only=false)
       "likes_count": 0
     },
     {
@@ -186,7 +205,7 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
       "title": "Amazing Food",
       "content": "The hibachi...",
       "rating": 5,
-      "customer_name": "SJ",  // INITIALS (show_initials_only=true)
+      "customer_name": "SJ", // INITIALS (show_initials_only=true)
       "likes_count": 0
     }
   ]
@@ -194,6 +213,7 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
 ```
 
 **Expected Behavior:**
+
 - Review #1: Shows "John Doe" (full name)
 - Review #2: Shows "SJ" (initials)
 - ❌ email NOT present
@@ -204,18 +224,20 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
 ---
 
 ### Test 6: Admin Pending Reviews API
+
 **Endpoint:** `GET /api/admin/review-moderation/pending-reviews`
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
   "reviews": [
     {
       "id": 1,
-      "customer_name": "John Doe",  // ALWAYS full name in admin
-      "customer_email": "john@test.com",  // SHOWN in admin
-      "customer_phone": "555-1234",  // SHOWN in admin
+      "customer_name": "John Doe", // ALWAYS full name in admin
+      "customer_email": "john@test.com", // SHOWN in admin
+      "customer_phone": "555-1234", // SHOWN in admin
       "show_initials_only": false
     }
   ]
@@ -223,6 +245,7 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
 ```
 
 **Expected Behavior:**
+
 - Admin sees FULL customer details regardless of `show_initials_only`
 - Email and phone visible for admin
 - Full name always shown
@@ -234,9 +257,11 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
 ## 🎨 Frontend Form Testing
 
 ### Test 7: Checkbox Functionality
+
 **Component:** `CustomerReviewForm.tsx`
 
 **Test Steps:**
+
 1. Navigate to form
 2. Fill Step 1 (Rating): 5 stars
 3. Fill Step 2 (Contact):
@@ -249,8 +274,11 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
 6. Verify live preview shows "Michael Jordan"
 
 **Expected Behavior:**
-- Checkbox unchecked: "Instead of showing "Michael Jordan", your review will display "MJ""
-- Preview section: Shows "MJ" when checked, "Michael Jordan" when unchecked
+
+- Checkbox unchecked: "Instead of showing "Michael Jordan", your
+  review will display "MJ""
+- Preview section: Shows "MJ" when checked, "Michael Jordan" when
+  unchecked
 - Privacy message changes based on checkbox state
 
 **Status:** ⏳ PENDING
@@ -258,9 +286,11 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
 ---
 
 ### Test 8: Preview Accuracy
+
 **Component:** `CustomerReviewForm.tsx` - Preview Modal
 
 **Test Steps:**
+
 1. Fill complete review
 2. Check "Show only my initials"
 3. Click "PREVIEW BUTTON"
@@ -270,6 +300,7 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq
    - Email/phone NOT shown
 
 **Expected Preview:**
+
 ```
 ⭐⭐⭐⭐⭐
 Amazing Experience!
@@ -285,13 +316,16 @@ MJ
 ---
 
 ### Test 9: Form Submission - Full Name
+
 **Test Steps:**
+
 1. Fill review form completely
 2. Leave "Show only my initials" UNCHECKED
 3. Click PREVIEW → SUBMIT
 4. Verify success message
 
 **Expected Network Payload:**
+
 ```
 customer_name: "Michael Jordan"
 customer_email: "mj@test.com"
@@ -304,13 +338,16 @@ show_initials_only: "false"
 ---
 
 ### Test 10: Form Submission - Initials Only
+
 **Test Steps:**
+
 1. Fill review form completely
 2. CHECK "Show only my initials publicly"
 3. Click PREVIEW → SUBMIT
 4. Verify success message
 
 **Expected Network Payload:**
+
 ```
 customer_name: "Michael Jordan"
 customer_email: "mj@test.com"
@@ -325,19 +362,23 @@ show_initials_only: "true"
 ## 🔐 Privacy Compliance Testing
 
 ### Test 11: Public API Privacy Check
+
 **What:** Verify email/phone NEVER in public API responses
 
 **Endpoints to Test:**
+
 1. `GET /api/customer-reviews/approved-reviews`
 2. `GET /api/customer-reviews/reviews/1`
 
 **Expected:**
+
 - ✅ `customer_name` present (or initials)
 - ❌ `customer_email` NOT present
 - ❌ `customer_phone` NOT present
 - ✅ `show_initials_only` NOT exposed to public
 
 **Test Command:**
+
 ```bash
 # Check approved reviews
 curl http://localhost:8000/api/customer-reviews/approved-reviews | jq '.reviews[0]'
@@ -352,18 +393,22 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq '.reviews[
 ---
 
 ### Test 12: Admin API Full Access Check
+
 **What:** Verify admin ALWAYS sees full contact info
 
 **Endpoints to Test:**
+
 1. `GET /api/admin/review-moderation/pending-reviews`
 
 **Expected:**
+
 - ✅ `customer_name` (full name)
 - ✅ `customer_email` present
 - ✅ `customer_phone` present
 - ✅ `show_initials_only` field visible
 
 **Test Command:**
+
 ```bash
 curl http://localhost:8000/api/admin/review-moderation/pending-reviews | jq '.reviews[0]'
 ```
@@ -375,9 +420,12 @@ curl http://localhost:8000/api/admin/review-moderation/pending-reviews | jq '.re
 ## 📊 Integration Testing
 
 ### Test 13: End-to-End Flow - Initials Option
-**Scenario:** User wants initials only, submits review, admin approves, public sees initials
+
+**Scenario:** User wants initials only, submits review, admin
+approves, public sees initials
 
 **Steps:**
+
 1. **User submits review:**
    - Name: "Alice Williams"
    - Checkbox: ✅ Checked (show initials)
@@ -393,6 +441,7 @@ curl http://localhost:8000/api/admin/review-moderation/pending-reviews | jq '.re
    - Does NOT see: email, phone
 
 **Test Commands:**
+
 ```bash
 # 1. Submit
 curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
@@ -419,9 +468,12 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq '.reviews[
 ---
 
 ### Test 14: End-to-End Flow - Full Name
-**Scenario:** User wants full name shown, submits review, public sees full name
+
+**Scenario:** User wants full name shown, submits review, public sees
+full name
 
 **Steps:**
+
 1. **User submits review:**
    - Name: "Robert Brown"
    - Checkbox: ❌ Unchecked (show full name)
@@ -434,6 +486,7 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq '.reviews[
    - Sees: "Robert Brown" (full name)
 
 **Test Commands:**
+
 ```bash
 # 1. Submit
 curl -X POST http://localhost:8000/api/customer-reviews/submit-review \
@@ -462,15 +515,18 @@ curl http://localhost:8000/api/customer-reviews/approved-reviews | jq '.reviews[
 ## 🎯 Summary
 
 ### Completed Tests: 0 / 14
+
 - ✅ Database Migration: PASSED
 
 ### Pending Tests: 14
+
 - ⏳ Backend API (6 tests)
 - ⏳ Frontend Form (4 tests)
 - ⏳ Privacy Compliance (2 tests)
 - ⏳ Integration E2E (2 tests)
 
 ### Next Steps:
+
 1. Run backend API tests (submit reviews, approve, verify display)
 2. Test frontend form checkbox and preview
 3. Verify privacy compliance

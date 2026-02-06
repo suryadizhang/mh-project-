@@ -1,11 +1,11 @@
-import React from 'react'
+import React from 'react';
 
-import styles from './Button.module.css'
+import styles from './Button.module.css';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
-  children: React.ReactNode
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  children: React.ReactNode;
 }
 
 export default function Button({
@@ -17,11 +17,11 @@ export default function Button({
 }: ButtonProps) {
   const classes = [styles.button, styles[variant], styles[size], className]
     .filter(Boolean)
-    .join(' ')
+    .join(' ');
 
   return (
     <button className={classes} {...props}>
       {children}
     </button>
-  )
+  );
 }

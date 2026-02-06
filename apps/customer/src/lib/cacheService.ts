@@ -43,10 +43,10 @@ export interface CacheMetadata {
 export type CacheStrategy = 'cache-first' | 'stale-while-revalidate' | 'network-first';
 
 export interface CacheConfig {
-  maxSize?: number;           // Max cache size in bytes (default: 5MB)
-  cleanupInterval?: number;   // Cleanup interval in ms (default: 5 minutes)
+  maxSize?: number; // Max cache size in bytes (default: 5MB)
+  cleanupInterval?: number; // Cleanup interval in ms (default: 5 minutes)
   enableMemoryCache?: boolean; // Enable L1 memory cache (default: true)
-  enablePersistent?: boolean;  // Enable L2 localStorage (default: true)
+  enablePersistent?: boolean; // Enable L2 localStorage (default: true)
 }
 
 // =============================================================================
@@ -152,7 +152,6 @@ export class CacheService {
       // Cache miss
       this.metadata.misses++;
       return null;
-
     } catch (error) {
       logger.error('Cache get error', error as Error, { key });
       this.metadata.misses++;
@@ -163,7 +162,12 @@ export class CacheService {
   /**
    * Set cached data with TTL
    */
-  public set<T>(key: string, data: T, ttl: number, options?: { etag?: string; version?: string }): void {
+  public set<T>(
+    key: string,
+    data: T,
+    ttl: number,
+    options?: { etag?: string; version?: string },
+  ): void {
     try {
       const entry: CacheEntry<T> = {
         data,
@@ -205,7 +209,6 @@ export class CacheService {
       this.saveMetadata();
 
       logger.debug('Cache set', { key, ttl, size: entrySize });
-
     } catch (error) {
       logger.error('Cache set error', error as Error, { key });
     }
@@ -238,7 +241,6 @@ export class CacheService {
 
       this.saveMetadata();
       logger.debug('Cache remove', { key });
-
     } catch (error) {
       logger.error('Cache remove error', error as Error, { key });
     }
@@ -257,7 +259,7 @@ export class CacheService {
       // Clear L2
       if (this.config.enablePersistent) {
         const keys = this.getAllKeys();
-        keys.forEach(key => localStorage.removeItem(key));
+        keys.forEach((key) => localStorage.removeItem(key));
       }
 
       // Reset metadata
@@ -266,7 +268,6 @@ export class CacheService {
       this.saveMetadata();
 
       logger.info('Cache cleared');
-
     } catch (error) {
       logger.error('Cache clear error', error as Error);
     }
@@ -280,11 +281,7 @@ export class CacheService {
    * Cache-First Strategy
    * Use cached data if available and not expired, otherwise fetch fresh
    */
-  public async cacheFirst<T>(
-    key: string,
-    ttl: number,
-    fetcher: () => Promise<T>
-  ): Promise<T> {
+  public async cacheFirst<T>(key: string, ttl: number, fetcher: () => Promise<T>): Promise<T> {
     const cached = this.get<T>(key);
 
     // Check if cached and not expired
@@ -294,7 +291,10 @@ export class CacheService {
     }
 
     // Cache miss or expired - fetch fresh
-    logger.debug('Cache miss (cache-first)', { key, expired: cached ? this.isExpired(cached) : false });
+    logger.debug('Cache miss (cache-first)', {
+      key,
+      expired: cached ? this.isExpired(cached) : false,
+    });
     const fresh = await fetcher();
     this.set(key, fresh, ttl);
     return fresh;
@@ -307,7 +307,7 @@ export class CacheService {
   public async staleWhileRevalidate<T>(
     key: string,
     ttl: number,
-    fetcher: () => Promise<T>
+    fetcher: () => Promise<T>,
   ): Promise<T> {
     const cached = this.get<T>(key);
 
@@ -319,12 +319,15 @@ export class CacheService {
       }
 
       // Expired but return stale, revalidate in background
-      logger.debug('Cache hit (stale-while-revalidate, stale)', { key, age: Date.now() - cached.timestamp });
+      logger.debug('Cache hit (stale-while-revalidate, stale)', {
+        key,
+        age: Date.now() - cached.timestamp,
+      });
 
       // Background revalidation (don't await)
       fetcher()
-        .then(fresh => this.set(key, fresh, ttl))
-        .catch(error => logger.error('Background revalidation failed', error as Error, { key }));
+        .then((fresh) => this.set(key, fresh, ttl))
+        .catch((error) => logger.error('Background revalidation failed', error as Error, { key }));
 
       return cached.data;
     }
@@ -340,18 +343,13 @@ export class CacheService {
    * Network-First Strategy
    * Try network first, fallback to cache on failure
    */
-  public async networkFirst<T>(
-    key: string,
-    ttl: number,
-    fetcher: () => Promise<T>
-  ): Promise<T> {
+  public async networkFirst<T>(key: string, ttl: number, fetcher: () => Promise<T>): Promise<T> {
     try {
       // Try network first
       const fresh = await fetcher();
       this.set(key, fresh, ttl);
       logger.debug('Network success (network-first)', { key });
       return fresh;
-
     } catch (error) {
       // Network failed - try cache as fallback
       const cached = this.get<T>(key);
@@ -389,7 +387,6 @@ export class CacheService {
       }
 
       logger.info('Cache invalidated', { pattern });
-
     } catch (error) {
       logger.error('Cache invalidation error', error as Error, { pattern });
     }
@@ -411,8 +408,8 @@ export class CacheService {
     const fullPrefix = this.STORAGE_PREFIX + prefix;
 
     keys
-      .filter(key => key.startsWith(fullPrefix))
-      .forEach(key => {
+      .filter((key) => key.startsWith(fullPrefix))
+      .forEach((key) => {
         const shortKey = key.replace(this.STORAGE_PREFIX, '');
         this.remove(shortKey);
       });
@@ -484,7 +481,7 @@ export class CacheService {
     const entries: Array<{ key: string; timestamp: number; size: number }> = [];
 
     // Collect all entries with timestamps
-    keys.forEach(key => {
+    keys.forEach((key) => {
       try {
         const stored = localStorage.getItem(key);
         if (stored) {
@@ -531,7 +528,7 @@ export class CacheService {
     const keys = this.getAllKeys();
     let removed = 0;
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       try {
         const stored = localStorage.getItem(key);
         if (stored) {

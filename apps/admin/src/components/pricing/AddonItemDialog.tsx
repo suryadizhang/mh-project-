@@ -24,7 +24,12 @@ export interface AddonItemFormData {
   name: string;
   description: string | null;
   price: number;
-  category: 'protein_upgrades' | 'enhancements' | 'equipment' | 'entertainment' | 'beverages';
+  category:
+    | 'protein_upgrades'
+    | 'enhancements'
+    | 'equipment'
+    | 'entertainment'
+    | 'beverages';
   is_active: boolean;
   display_order: number;
 }
@@ -74,7 +79,9 @@ export function AddonItemDialog({
               <Input
                 id="addon-name"
                 value={formData.name}
-                onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  onFormChange({ ...formData, name: e.target.value })
+                }
                 placeholder="e.g., Premium Salmon"
                 className="bg-white"
               />
@@ -85,7 +92,12 @@ export function AddonItemDialog({
               <Input
                 id="addon-description"
                 value={formData.description || ''}
-                onChange={(e) => onFormChange({ ...formData, description: e.target.value || null })}
+                onChange={e =>
+                  onFormChange({
+                    ...formData,
+                    description: e.target.value || null,
+                  })
+                }
                 placeholder="Optional description"
                 className="bg-white"
               />
@@ -107,7 +119,12 @@ export function AddonItemDialog({
                   type="number"
                   step="0.01"
                   value={formData.price}
-                  onChange={(e) => onFormChange({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                  onChange={e =>
+                    onFormChange({
+                      ...formData,
+                      price: parseFloat(e.target.value) || 0,
+                    })
+                  }
                   className="bg-white"
                 />
               </div>
@@ -116,13 +133,25 @@ export function AddonItemDialog({
                 <Label htmlFor="addon-category">Category *</Label>
                 <Select
                   value={formData.category}
-                  onValueChange={(value: string) => onFormChange({ ...formData, category: value as 'protein_upgrades' | 'enhancements' | 'equipment' | 'entertainment' | 'beverages' })}
+                  onValueChange={(value: string) =>
+                    onFormChange({
+                      ...formData,
+                      category: value as
+                        | 'protein_upgrades'
+                        | 'enhancements'
+                        | 'equipment'
+                        | 'entertainment'
+                        | 'beverages',
+                    })
+                  }
                 >
                   <SelectTrigger id="addon-category" className="bg-white">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="protein_upgrades">Protein Upgrades</SelectItem>
+                    <SelectItem value="protein_upgrades">
+                      Protein Upgrades
+                    </SelectItem>
                     <SelectItem value="enhancements">Enhancements</SelectItem>
                     <SelectItem value="equipment">Equipment</SelectItem>
                     <SelectItem value="entertainment">Entertainment</SelectItem>
@@ -142,14 +171,23 @@ export function AddonItemDialog({
                 <Switch
                   id="addon-active"
                   checked={formData.is_active}
-                  onCheckedChange={(checked) => onFormChange({ ...formData, is_active: checked })}
+                  onCheckedChange={checked =>
+                    onFormChange({ ...formData, is_active: checked })
+                  }
                 />
-                <Label htmlFor="addon-active" className="flex items-center gap-2">
+                <Label
+                  htmlFor="addon-active"
+                  className="flex items-center gap-2"
+                >
                   Active
                   {formData.is_active ? (
-                    <span className="text-xs text-green-600">(Visible to customers)</span>
+                    <span className="text-xs text-green-600">
+                      (Visible to customers)
+                    </span>
                   ) : (
-                    <span className="text-xs text-gray-500">(Hidden from customers)</span>
+                    <span className="text-xs text-gray-500">
+                      (Hidden from customers)
+                    </span>
                   )}
                 </Label>
               </div>
@@ -160,7 +198,12 @@ export function AddonItemDialog({
                   id="addon-order"
                   type="number"
                   value={formData.display_order}
-                  onChange={(e) => onFormChange({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                  onChange={e =>
+                    onFormChange({
+                      ...formData,
+                      display_order: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="bg-white"
                 />
               </div>

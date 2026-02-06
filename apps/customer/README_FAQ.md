@@ -108,7 +108,6 @@ public/
 ### High Priority
 
 1. **Chef Arrival Time** (ID: `chef-arrival`)
-
    - Current: "15-30 minutes before cooking time"
    - Verify: Actual setup time and arrival process
 
@@ -119,7 +118,6 @@ public/
 ### Medium Priority
 
 3. **Corporate Insurance** (ID: `insurance-coi`)
-
    - Current: Recommends third-party event insurance
    - Verify: Company's actual insurance capabilities
 

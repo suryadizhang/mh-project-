@@ -67,7 +67,8 @@
 
 /* Global hero styles that conflict across pages */
 .hero-section {
-  background: linear-gradient(rgb(0 0 0 / 50%), rgb(0 0 0 / 50%)),
+  background:
+    linear-gradient(rgb(0 0 0 / 50%), rgb(0 0 0 / 50%)),
     url('/images/background.jpg');
   background-size: cover;
   background-position: center;

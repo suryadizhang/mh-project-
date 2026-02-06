@@ -29,7 +29,7 @@ const DynamicDatePicker = dynamic<DatePickerProps>(
   {
     loading: () => <DatePickerSkeleton />,
     ssr: false, // DatePicker requires browser APIs (date manipulation, calendar)
-  }
+  },
 );
 
 export default function LazyDatePicker(props: DatePickerProps) {

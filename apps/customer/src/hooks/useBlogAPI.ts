@@ -61,7 +61,7 @@ export function useBlogAPI(options: UseBlogAPIOptions) {
 
       return response.json() as Promise<BlogAPIResponse>;
     },
-    [cacheKey]
+    [cacheKey],
   );
 
   // Use cached fetch hook

@@ -1,32 +1,34 @@
-import './styles/LocationSection.module.css'
+import './styles/LocationSection.module.css';
 
-import React from 'react'
-import { Control, Controller, FieldErrors, UseFormWatch } from 'react-hook-form'
+import React from 'react';
+import { Control, Controller, FieldErrors, UseFormWatch } from 'react-hook-form';
 
-import { BookingFormData, US_STATES } from '../../data/booking/types'
+import { BookingFormData, US_STATES } from '../../data/booking/types';
 
 interface LocationSectionProps {
-  control: Control<BookingFormData>
-  errors: FieldErrors<BookingFormData>
-  watch: UseFormWatch<BookingFormData>
-  className?: string
+  control: Control<BookingFormData>;
+  errors: FieldErrors<BookingFormData>;
+  watch: UseFormWatch<BookingFormData>;
+  className?: string;
 }
 
 const LocationSection: React.FC<LocationSectionProps> = ({
   control,
   errors,
   watch,
-  className = ''
+  className = '',
 }) => {
-  const sameAsVenue = watch('sameAsVenue')
+  const sameAsVenue = watch('sameAsVenue');
 
   return (
     <div className={`location-section ${className}`}>
-      <h3 className="text-xl font-semibold mb-4">Event Location</h3>
+      <h3 className="mb-4 text-xl font-semibold">Event Location</h3>
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="venueStreet" className="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
+          <label htmlFor="venueStreet" className="mb-2 block text-sm font-medium text-gray-700">
+            Street Address *
+          </label>
           <Controller
             name="venueStreet"
             control={control}
@@ -36,19 +38,21 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                 id="venueStreet"
                 type="text"
                 autoComplete="off"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                 placeholder="Enter venue street address"
               />
             )}
           />
           {errors.venueStreet && (
-            <p className="text-red-500 text-sm mt-1">{errors.venueStreet.message}</p>
+            <p className="mt-1 text-sm text-red-500">{errors.venueStreet.message}</p>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
-            <label htmlFor="venueCity" className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+            <label htmlFor="venueCity" className="mb-2 block text-sm font-medium text-gray-700">
+              City *
+            </label>
             <Controller
               name="venueCity"
               control={control}
@@ -58,18 +62,20 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                   id="venueCity"
                   type="text"
                   autoComplete="off"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                   placeholder="City"
                 />
               )}
             />
             {errors.venueCity && (
-              <p className="text-red-500 text-sm mt-1">{errors.venueCity.message}</p>
+              <p className="mt-1 text-sm text-red-500">{errors.venueCity.message}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="venueState" className="block text-sm font-medium text-gray-700 mb-2">State *</label>
+            <label htmlFor="venueState" className="mb-2 block text-sm font-medium text-gray-700">
+              State *
+            </label>
             <Controller
               name="venueState"
               control={control}
@@ -78,10 +84,10 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                   {...field}
                   id="venueState"
                   autoComplete="off"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                 >
                   <option value="">Select State</option>
-                  {US_STATES.map(state => (
+                  {US_STATES.map((state) => (
                     <option key={state} value={state}>
                       {state}
                     </option>
@@ -90,12 +96,14 @@ const LocationSection: React.FC<LocationSectionProps> = ({
               )}
             />
             {errors.venueState && (
-              <p className="text-red-500 text-sm mt-1">{errors.venueState.message}</p>
+              <p className="mt-1 text-sm text-red-500">{errors.venueState.message}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="venueZipcode" className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+            <label htmlFor="venueZipcode" className="mb-2 block text-sm font-medium text-gray-700">
+              Zip Code *
+            </label>
             <Controller
               name="venueZipcode"
               control={control}
@@ -105,19 +113,19 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                   id="venueZipcode"
                   type="text"
                   autoComplete="off"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                   placeholder="Zip Code"
                 />
               )}
             />
             {errors.venueZipcode && (
-              <p className="text-red-500 text-sm mt-1">{errors.venueZipcode.message}</p>
+              <p className="mt-1 text-sm text-red-500">{errors.venueZipcode.message}</p>
             )}
           </div>
         </div>
 
-        <div className="border-t pt-4 mt-6">
-          <div className="flex items-center mb-4">
+        <div className="mt-6 border-t pt-4">
+          <div className="mb-4 flex items-center">
             <Controller
               name="sameAsVenue"
               control={control}
@@ -127,7 +135,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                   type="checkbox"
                   checked={value}
                   onChange={onChange}
-                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                  className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
                 />
               )}
             />
@@ -141,7 +149,10 @@ const LocationSection: React.FC<LocationSectionProps> = ({
               <h4 className="text-lg font-medium text-gray-900">Billing Address</h4>
 
               <div>
-                <label htmlFor="addressStreet" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="addressStreet"
+                  className="mb-2 block text-sm font-medium text-gray-700"
+                >
                   Street Address *
                 </label>
                 <Controller
@@ -153,19 +164,24 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                       id="addressStreet"
                       type="text"
                       autoComplete="billing street-address"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="Enter billing street address"
                     />
                   )}
                 />
                 {errors.addressStreet && (
-                  <p className="text-red-500 text-sm mt-1">{errors.addressStreet.message}</p>
+                  <p className="mt-1 text-sm text-red-500">{errors.addressStreet.message}</p>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
-                  <label htmlFor="addressCity" className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                  <label
+                    htmlFor="addressCity"
+                    className="mb-2 block text-sm font-medium text-gray-700"
+                  >
+                    City *
+                  </label>
                   <Controller
                     name="addressCity"
                     control={control}
@@ -175,18 +191,23 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                         id="addressCity"
                         type="text"
                         autoComplete="billing address-level2"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                         placeholder="City"
                       />
                     )}
                   />
                   {errors.addressCity && (
-                    <p className="text-red-500 text-sm mt-1">{errors.addressCity.message}</p>
+                    <p className="mt-1 text-sm text-red-500">{errors.addressCity.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="addressState" className="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                  <label
+                    htmlFor="addressState"
+                    className="mb-2 block text-sm font-medium text-gray-700"
+                  >
+                    State *
+                  </label>
                   <Controller
                     name="addressState"
                     control={control}
@@ -195,10 +216,10 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                         {...field}
                         id="addressState"
                         autoComplete="billing address-level1"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       >
                         <option value="">Select State</option>
-                        {US_STATES.map(state => (
+                        {US_STATES.map((state) => (
                           <option key={state} value={state}>
                             {state}
                           </option>
@@ -207,12 +228,17 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                     )}
                   />
                   {errors.addressState && (
-                    <p className="text-red-500 text-sm mt-1">{errors.addressState.message}</p>
+                    <p className="mt-1 text-sm text-red-500">{errors.addressState.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="addressZipcode" className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+                  <label
+                    htmlFor="addressZipcode"
+                    className="mb-2 block text-sm font-medium text-gray-700"
+                  >
+                    Zip Code *
+                  </label>
                   <Controller
                     name="addressZipcode"
                     control={control}
@@ -222,13 +248,13 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                         id="addressZipcode"
                         type="text"
                         autoComplete="billing postal-code"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                         placeholder="Zip Code"
                       />
                     )}
                   />
                   {errors.addressZipcode && (
-                    <p className="text-red-500 text-sm mt-1">{errors.addressZipcode.message}</p>
+                    <p className="mt-1 text-sm text-red-500">{errors.addressZipcode.message}</p>
                   )}
                 </div>
               </div>
@@ -237,7 +263,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LocationSection
+export default LocationSection;

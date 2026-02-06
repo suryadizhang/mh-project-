@@ -89,16 +89,10 @@ export default function AlternativePayerField({
           <button
             type="button"
             onClick={() => handleToggle(!hasAlternativePayer)}
-            className={`
-              relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-              ${hasAlternativePayer ? 'bg-blue-600' : 'bg-gray-300'}
-            `}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${hasAlternativePayer ? 'bg-blue-600' : 'bg-gray-300'} `}
           >
             <span
-              className={`
-                inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                ${hasAlternativePayer ? 'translate-x-6' : 'translate-x-1'}
-              `}
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${hasAlternativePayer ? 'translate-x-6' : 'translate-x-1'} `}
             />
           </button>
         </div>
@@ -132,7 +126,10 @@ export default function AlternativePayerField({
 
           {/* Name (Required) */}
           <div>
-            <label htmlFor="alt-payer-name" className="mb-1 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="alt-payer-name"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Full Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -148,7 +145,10 @@ export default function AlternativePayerField({
 
           {/* Relationship */}
           <div>
-            <label htmlFor="alt-payer-relationship" className="mb-1 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="alt-payer-relationship"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Relationship to You
             </label>
             <select
@@ -170,7 +170,10 @@ export default function AlternativePayerField({
 
           {/* Phone (Recommended for matching) */}
           <div>
-            <label htmlFor="alt-payer-phone" className="mb-1 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="alt-payer-phone"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Phone Number <span className="text-blue-600">(Recommended)</span>
             </label>
             <input
@@ -188,7 +191,10 @@ export default function AlternativePayerField({
 
           {/* Email (Optional) */}
           <div>
-            <label htmlFor="alt-payer-email" className="mb-1 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="alt-payer-email"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Email Address <span className="text-gray-500">(Optional)</span>
             </label>
             <input
@@ -203,18 +209,21 @@ export default function AlternativePayerField({
 
           {/* Venmo Username (Optional) */}
           <div>
-            <label htmlFor="alt-payer-venmo" className="mb-1 block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="alt-payer-venmo"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Venmo Username <span className="text-gray-500">(Optional)</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">@</span>
+              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">@</span>
               <input
                 id="alt-payer-venmo"
                 type="text"
                 value={value.venmoUsername || ''}
                 onChange={(e) => handleFieldChange('venmoUsername', e.target.value)}
                 placeholder="johndoe"
-                className="w-full rounded-lg border-2 border-gray-300 py-2 pl-8 pr-4 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border-2 border-gray-300 py-2 pr-4 pl-8 focus:border-blue-500 focus:outline-none"
               />
             </div>
             <p className="mt-1 text-xs text-gray-600">
@@ -225,7 +234,10 @@ export default function AlternativePayerField({
           {/* Zelle Email/Phone */}
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label htmlFor="alt-payer-zelle-email" className="mb-1 block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="alt-payer-zelle-email"
+                className="mb-1 block text-sm font-medium text-gray-700"
+              >
                 Zelle Email <span className="text-gray-500">(Optional)</span>
               </label>
               <input
@@ -239,7 +251,10 @@ export default function AlternativePayerField({
             </div>
 
             <div>
-              <label htmlFor="alt-payer-zelle-phone" className="mb-1 block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="alt-payer-zelle-phone"
+                className="mb-1 block text-sm font-medium text-gray-700"
+              >
                 Zelle Phone <span className="text-gray-500">(Optional)</span>
               </label>
               <input
@@ -256,9 +271,9 @@ export default function AlternativePayerField({
           {/* Helper Text */}
           <div className="rounded-lg bg-blue-100 p-4">
             <p className="text-sm text-blue-900">
-              <strong>Why we ask:</strong> This information helps us automatically match the payment to your
-              booking, even if the {"payer's"} name {"doesn't"} match yours. The more details you provide, the faster
-              we can confirm your payment.
+              <strong>Why we ask:</strong> This information helps us automatically match the payment
+              to your booking, even if the {"payer's"} name {"doesn't"} match yours. The more
+              details you provide, the faster we can confirm your payment.
             </p>
           </div>
         </div>

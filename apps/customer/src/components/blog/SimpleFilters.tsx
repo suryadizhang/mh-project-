@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
 import type { BlogPost } from '@my-hibachi/blog-types';
-import { ChevronDown, MapPin, Search, Users, X } from 'lucide-react'
-import React, { useState } from 'react'
+import { ChevronDown, MapPin, Search, Users, X } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface SimpleFiltersProps {
-  posts: BlogPost[]
-  onFiltersChange: (filters: FilterState) => void
-  activeFilters: FilterState
+  posts: BlogPost[];
+  onFiltersChange: (filters: FilterState) => void;
+  activeFilters: FilterState;
 }
 
 export interface FilterState {
-  locations: string[]
-  eventSizes: string[]
-  searchQuery: string
-  categories: string[]
+  locations: string[];
+  eventSizes: string[];
+  searchQuery: string;
+  categories: string[];
 }
 
 const EVENT_SIZES = [
@@ -22,41 +22,43 @@ const EVENT_SIZES = [
   'Small (10-25 people)',
   'Medium (25-50 people)',
   'Large (50-100 people)',
-  'Extra Large (100+ people)'
-]
+  'Extra Large (100+ people)',
+];
 
 export default function SimpleFilters({
   posts,
   onFiltersChange,
-  activeFilters
+  activeFilters,
 }: SimpleFiltersProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Extract unique values from posts
-  const uniqueLocations = [...new Set(posts.map(post => post.serviceArea))].filter(Boolean).sort()
-  const uniqueCategories = [...new Set(posts.map(post => post.category))].sort()
+  const uniqueLocations = [...new Set(posts.map((post) => post.serviceArea))]
+    .filter(Boolean)
+    .sort();
+  const uniqueCategories = [...new Set(posts.map((post) => post.category))].sort();
 
   const handleFilterChange = (key: keyof FilterState, value: string | string[]) => {
-    const newFilters = { ...activeFilters, [key]: value }
-    onFiltersChange(newFilters)
-  }
+    const newFilters = { ...activeFilters, [key]: value };
+    onFiltersChange(newFilters);
+  };
 
   const handleArrayFilterToggle = (key: keyof FilterState, value: string) => {
-    const currentArray = activeFilters[key] as string[]
+    const currentArray = activeFilters[key] as string[];
     const newArray = currentArray.includes(value)
-      ? currentArray.filter(item => item !== value)
-      : [...currentArray, value]
-    handleFilterChange(key, newArray)
-  }
+      ? currentArray.filter((item) => item !== value)
+      : [...currentArray, value];
+    handleFilterChange(key, newArray);
+  };
 
   const clearAllFilters = () => {
     onFiltersChange({
       locations: [],
       eventSizes: [],
       searchQuery: '',
-      categories: []
-    })
-  }
+      categories: [],
+    });
+  };
 
   const hasActiveFilters = () => {
     return (
@@ -64,18 +66,18 @@ export default function SimpleFilters({
       activeFilters.eventSizes.length > 0 ||
       activeFilters.searchQuery ||
       activeFilters.categories.length > 0
-    )
-  }
+    );
+  };
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 shadow-sm mb-8">
+    <div className="mb-8 rounded-lg border border-slate-200 bg-white shadow-sm">
       {/* Filter Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-200">
+      <div className="flex items-center justify-between border-b border-slate-200 p-4">
         <div className="flex items-center space-x-2">
-          <Search className="w-5 h-5 text-slate-600" />
+          <Search className="h-5 w-5 text-slate-600" />
           <h3 className="text-lg font-semibold text-slate-900">Search & Filter</h3>
           {hasActiveFilters() && (
-            <span className="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-full">
+            <span className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700">
               Active
             </span>
           )}
@@ -84,7 +86,7 @@ export default function SimpleFilters({
           {hasActiveFilters() && (
             <button
               onClick={clearAllFilters}
-              className="text-sm text-slate-600 hover:text-slate-900 font-medium"
+              className="text-sm font-medium text-slate-600 hover:text-slate-900"
             >
               Clear All
             </button>
@@ -95,29 +97,29 @@ export default function SimpleFilters({
           >
             {isExpanded ? 'Hide' : 'Show'} Filters
             <ChevronDown
-              className={`w-4 h-4 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              className={`ml-1 h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
             />
           </button>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="p-4 border-b border-slate-100">
+      <div className="border-b border-slate-100 p-4">
         <div className="relative">
           <input
             type="text"
             placeholder="Search posts by title, content, or keywords..."
             value={activeFilters.searchQuery}
-            onChange={e => handleFilterChange('searchQuery', e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-slate-900 placeholder-slate-500"
+            onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
+            className="w-full rounded-lg border border-slate-300 py-3 pr-4 pl-10 text-slate-900 placeholder-slate-500 focus:border-transparent focus:ring-2 focus:ring-slate-500"
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+          <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-slate-400" />
           {activeFilters.searchQuery && (
             <button
               onClick={() => handleFilterChange('searchQuery', '')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute top-1/2 right-3 -translate-y-1/2 transform text-slate-400 hover:text-slate-600"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -125,16 +127,16 @@ export default function SimpleFilters({
 
       {/* Expandable Filters */}
       {isExpanded && (
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-6 p-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {/* Location Filter */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">
-                <MapPin className="w-4 h-4 inline mr-2" />
+              <label className="mb-3 block text-sm font-medium text-slate-700">
+                <MapPin className="mr-2 inline h-4 w-4" />
                 Locations
               </label>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {uniqueLocations.map(location => (
+              <div className="max-h-40 space-y-2 overflow-y-auto">
+                {uniqueLocations.map((location) => (
                   <label key={location} className="flex items-center">
                     <input
                       type="checkbox"
@@ -150,12 +152,12 @@ export default function SimpleFilters({
 
             {/* Event Size Filter */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">
-                <Users className="w-4 h-4 inline mr-2" />
+              <label className="mb-3 block text-sm font-medium text-slate-700">
+                <Users className="mr-2 inline h-4 w-4" />
                 Event Size
               </label>
               <div className="space-y-2">
-                {EVENT_SIZES.map(size => (
+                {EVENT_SIZES.map((size) => (
                   <label key={size} className="flex items-center">
                     <input
                       type="checkbox"
@@ -171,9 +173,9 @@ export default function SimpleFilters({
 
             {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">Categories</label>
+              <label className="mb-3 block text-sm font-medium text-slate-700">Categories</label>
               <div className="space-y-2">
-                {uniqueCategories.map(category => (
+                {uniqueCategories.map((category) => (
                   <label key={category} className="flex items-center">
                     <input
                       type="checkbox"
@@ -192,7 +194,7 @@ export default function SimpleFilters({
 
       {/* Active Filters Display */}
       {hasActiveFilters() && (
-        <div className="p-4 bg-slate-50 border-t border-slate-200">
+        <div className="border-t border-slate-200 bg-slate-50 p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-slate-700">Active Filters:</span>
             <button
@@ -202,57 +204,57 @@ export default function SimpleFilters({
               Clear All
             </button>
           </div>
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="mt-2 flex flex-wrap gap-2">
             {activeFilters.searchQuery && (
-              <span className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm">
+              <span className="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-sm text-slate-700">
                 Search: &ldquo;{activeFilters.searchQuery}&rdquo;
                 <button
                   onClick={() => handleFilterChange('searchQuery', '')}
                   className="ml-2 text-slate-500 hover:text-slate-700"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="h-3 w-3" />
                 </button>
               </span>
             )}
-            {activeFilters.locations.map(location => (
+            {activeFilters.locations.map((location) => (
               <span
                 key={location}
-                className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm"
+                className="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-sm text-slate-700"
               >
                 📍 {location}
                 <button
                   onClick={() => handleArrayFilterToggle('locations', location)}
                   className="ml-2 text-slate-500 hover:text-slate-700"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="h-3 w-3" />
                 </button>
               </span>
             ))}
-            {activeFilters.eventSizes.map(size => (
+            {activeFilters.eventSizes.map((size) => (
               <span
                 key={size}
-                className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm"
+                className="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-sm text-slate-700"
               >
                 👥 {size}
                 <button
                   onClick={() => handleArrayFilterToggle('eventSizes', size)}
                   className="ml-2 text-slate-500 hover:text-slate-700"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="h-3 w-3" />
                 </button>
               </span>
             ))}
-            {activeFilters.categories.map(category => (
+            {activeFilters.categories.map((category) => (
               <span
                 key={category}
-                className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm"
+                className="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-sm text-slate-700"
               >
                 {category}
                 <button
                   onClick={() => handleArrayFilterToggle('categories', category)}
                   className="ml-2 text-slate-500 hover:text-slate-700"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="h-3 w-3" />
                 </button>
               </span>
             ))}
@@ -260,5 +262,5 @@ export default function SimpleFilters({
         </div>
       )}
     </div>
-  )
+  );
 }

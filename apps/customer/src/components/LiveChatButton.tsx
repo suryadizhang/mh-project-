@@ -19,12 +19,16 @@ export default function LiveChatButton({
     initiateCall(); // Opens phone dialer with MyHibachi business number
   };
 
-  const baseClasses = 'inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-200';
+  const baseClasses =
+    'inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-200';
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:-translate-y-0.5',
-    outline: 'border-2 border-red-600 text-red-600 bg-transparent hover:bg-red-600 hover:text-white',
-    secondary: 'bg-white text-red-600 border-2 border-red-600 hover:bg-red-600 hover:text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5',
+    primary:
+      'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:-translate-y-0.5',
+    outline:
+      'border-2 border-red-600 text-red-600 bg-transparent hover:bg-red-600 hover:text-white',
+    secondary:
+      'bg-white text-red-600 border-2 border-red-600 hover:bg-red-600 hover:text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5',
   };
 
   const sizeClasses = {

@@ -23,7 +23,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     };
   }
 
-  const authorName = typeof post.author === 'string' ? post.author : post.author?.name || 'My Hibachi Team';
+  const authorName =
+    typeof post.author === 'string' ? post.author : post.author?.name || 'My Hibachi Team';
 
   return {
     title: `${post.title} | My Hibachi Blog`,
@@ -84,15 +85,26 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       // Convert italic
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       // Convert links
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:text-blue-800 underline">$1</a>')
+      .replace(
+        /\[([^\]]+)\]\(([^)]+)\)/g,
+        '<a href="$2" class="text-blue-600 hover:text-blue-800 underline">$1</a>',
+      )
       // Convert unordered lists
       .replace(/^\- (.*$)/gim, '<li class="mb-2">$1</li>')
       // Convert blockquotes (testimonials)
-      .replace(/^_"(.*)"_ - (.*)$/gim, '<blockquote class="border-l-4 border-orange-400 pl-4 italic text-gray-700 my-6">"$1" <footer class="mt-2 text-sm text-gray-600">— $2</footer></blockquote>')
+      .replace(
+        /^_"(.*)"_ - (.*)$/gim,
+        '<blockquote class="border-l-4 border-orange-400 pl-4 italic text-gray-700 my-6">"$1" <footer class="mt-2 text-sm text-gray-600">— $2</footer></blockquote>',
+      )
       // Wrap paragraphs
       .split('\n\n')
-      .map(para => {
-        if (para.trim() && !para.startsWith('<h') && !para.startsWith('<li') && !para.startsWith('<blockquote')) {
+      .map((para) => {
+        if (
+          para.trim() &&
+          !para.startsWith('<h') &&
+          !para.startsWith('<li') &&
+          !para.startsWith('<blockquote')
+        ) {
           return `<p class="text-gray-700 mb-6 leading-relaxed">${para}</p>`;
         }
         return para;
@@ -102,9 +114,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     return html;
   };
 
-  const fullContent = post.content && post.content !== 'No content available'
-    ? formatContent(post.content)
-    : `<p class="text-lg text-gray-700 mb-6 leading-relaxed">${post.excerpt}</p><p class="text-gray-700">Full article content coming soon. Please check back later!</p>`;
+  const fullContent =
+    post.content && post.content !== 'No content available'
+      ? formatContent(post.content)
+      : `<p class="text-lg text-gray-700 mb-6 leading-relaxed">${post.excerpt}</p><p class="text-gray-700">Full article content coming soon. Please check back later!</p>`;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -168,7 +181,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
               <div className="flex items-center">
                 <User className="mr-2 h-4 w-4" />
-                <span>{typeof post.author === 'string' ? post.author : post.author?.name || 'My Hibachi Team'}</span>
+                <span>
+                  {typeof post.author === 'string'
+                    ? post.author
+                    : post.author?.name || 'My Hibachi Team'}
+                </span>
               </div>
               <span>{post.readTime}</span>
             </div>

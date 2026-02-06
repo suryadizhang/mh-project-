@@ -10,5 +10,9 @@ export { useAddressAutocomplete } from './useAddressAutocomplete';
 export { useGeocode } from './useGeocode';
 
 // Types
-export type { AddressData, UseAddressAutocompleteOptions, UseAddressAutocompleteReturn } from './useAddressAutocomplete';
+export type {
+  AddressData,
+  UseAddressAutocompleteOptions,
+  UseAddressAutocompleteReturn,
+} from './useAddressAutocomplete';
 export type { GeocodeResult, GeocodeError, UseGeocodeReturn } from './useGeocode';

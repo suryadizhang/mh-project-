@@ -1,10 +1,10 @@
-import { Metadata } from 'next'
-import Link from 'next/link'
+import { Metadata } from 'next';
+import Link from 'next/link';
 
-import { FAQSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO'
-import { generateLocationPage, locationContentBlocks } from '@/lib/locationPageGenerator'
+import { FAQSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO';
+import { generateLocationPage, locationContentBlocks } from '@/lib/locationPageGenerator';
 
-const locationData = generateLocationPage('Palo Alto')
+const locationData = generateLocationPage('Palo Alto');
 
 export const metadata: Metadata = {
   title: locationData.title,
@@ -16,12 +16,12 @@ export const metadata: Metadata = {
     description: locationData.metaDescription,
     type: 'website',
     locale: 'en_US',
-    siteName: 'MyHibachi'
+    siteName: 'MyHibachi',
   },
   alternates: {
-    canonical: '/locations/palo-alto'
-  }
-}
+    canonical: '/locations/palo-alto',
+  },
+};
 
 export default function PaloAltoHibachiPage() {
   return (
@@ -35,20 +35,20 @@ export default function PaloAltoHibachiPage() {
       <FAQSchema faqs={locationData.content.faq} />
 
       {/* Hero Section */}
-      <section className="page-hero-background py-20 text-white text-center">
-        <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl font-bold mb-6">{locationData.h1}</h1>
-          <p className="text-xl mb-8 text-gray-200">{locationData.content.hero}</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <section className="page-hero-background py-20 text-center text-white">
+        <div className="mx-auto max-w-4xl px-4">
+          <h1 className="mb-6 text-5xl font-bold">{locationData.h1}</h1>
+          <p className="mb-8 text-xl text-gray-200">{locationData.content.hero}</p>
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/booking"
-              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors"
+              className="inline-flex items-center rounded-md border border-transparent bg-orange-600 px-8 py-3 text-base font-medium text-white transition-colors hover:bg-orange-700"
             >
               Book Palo Alto Hibachi Catering
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center px-8 py-3 border-2 border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-white hover:text-gray-900 transition-colors"
+              className="inline-flex items-center rounded-md border-2 border-white bg-transparent px-8 py-3 text-base font-medium text-white transition-colors hover:bg-white hover:text-gray-900"
             >
               Get Free Quote
             </Link>
@@ -57,16 +57,16 @@ export default function PaloAltoHibachiPage() {
       </section>
 
       {/* Services Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+      <section className="bg-gray-50 py-16">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900">
             Palo Alto & Stanford Area Hibachi Catering Services
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {locationData.content.services.map((service: string, index: number) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm text-center">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{service}</h3>
-                <p className="text-gray-600 text-sm">
+              <div key={index} className="rounded-lg bg-white p-6 text-center shadow-sm">
+                <h3 className="mb-2 text-lg font-semibold text-gray-900">{service}</h3>
+                <p className="text-sm text-gray-600">
                   Professional hibachi entertainment for your Palo Alto celebration
                 </p>
               </div>
@@ -77,20 +77,20 @@ export default function PaloAltoHibachiPage() {
 
       {/* Stanford Area Special Section */}
       <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+        <div className="mx-auto max-w-4xl px-4">
+          <h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
             Stanford University & Silicon Valley Corporate Events
           </h2>
-          <div className="bg-white p-8 rounded-lg shadow-sm">
-            <p className="text-lg text-gray-600 mb-6">
+          <div className="rounded-lg bg-white p-8 shadow-sm">
+            <p className="mb-6 text-lg text-gray-600">
               Serving the Stanford University community and Silicon Valley tech companies with
               premium hibachi catering. Perfect for graduation celebrations, corporate team
               building, faculty events, and student organization gatherings.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Stanford Events</h3>
-                <ul className="text-gray-600 space-y-2">
+                <h3 className="mb-3 text-xl font-semibold text-gray-900">Stanford Events</h3>
+                <ul className="space-y-2 text-gray-600">
                   <li>• Graduation celebrations</li>
                   <li>• Faculty dinner parties</li>
                   <li>• Student organization events</li>
@@ -98,8 +98,8 @@ export default function PaloAltoHibachiPage() {
                 </ul>
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Corporate Events</h3>
-                <ul className="text-gray-600 space-y-2">
+                <h3 className="mb-3 text-xl font-semibold text-gray-900">Corporate Events</h3>
+                <ul className="space-y-2 text-gray-600">
                   <li>• Tech company team building</li>
                   <li>• Client entertainment</li>
                   <li>• Product launch celebrations</li>
@@ -112,12 +112,12 @@ export default function PaloAltoHibachiPage() {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4">
+      <section className="bg-gray-50 py-16">
+        <div className="mx-auto max-w-4xl px-4">
           <div
             className="prose prose-lg max-w-none"
             dangerouslySetInnerHTML={{
-              __html: locationContentBlocks.whyChooseUs('Palo Alto').replace(/\n/g, '<br />')
+              __html: locationContentBlocks.whyChooseUs('Palo Alto').replace(/\n/g, '<br />'),
             }}
           />
         </div>
@@ -125,17 +125,17 @@ export default function PaloAltoHibachiPage() {
 
       {/* Testimonials */}
       <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900">
             What Palo Alto & Stanford Customers Say
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {locationData.content.testimonials.map((testimonial: string, index: number) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                <p className="text-gray-600 italic mb-4">
+              <div key={index} className="rounded-lg bg-white p-6 shadow-sm">
+                <p className="mb-4 text-gray-600 italic">
                   &ldquo;{testimonial.split('"')[1]}&rdquo;
                 </p>
-                <p className="text-gray-900 font-semibold">- {testimonial.split('- ')[1]}</p>
+                <p className="font-semibold text-gray-900">- {testimonial.split('- ')[1]}</p>
               </div>
             ))}
           </div>
@@ -143,42 +143,44 @@ export default function PaloAltoHibachiPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+      <section className="bg-gray-50 py-16">
+        <div className="mx-auto max-w-4xl px-4">
+          <h2 className="mb-12 text-center text-3xl font-bold text-gray-900">
             Palo Alto Hibachi Catering FAQ
           </h2>
           <div className="space-y-6">
-            {locationData.content.faq.map((faq: { question: string; answer: string }, index: number) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{faq.question}</h3>
-                <p className="text-gray-600">{faq.answer}</p>
-              </div>
-            ))}
+            {locationData.content.faq.map(
+              (faq: { question: string; answer: string }, index: number) => (
+                <div key={index} className="rounded-lg bg-white p-6 shadow-sm">
+                  <h3 className="mb-3 text-xl font-semibold text-gray-900">{faq.question}</h3>
+                  <p className="text-gray-600">{faq.answer}</p>
+                </div>
+              ),
+            )}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-orange-600 text-white text-center">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-6">
+      <section className="bg-orange-600 py-16 text-center text-white">
+        <div className="mx-auto max-w-4xl px-4">
+          <h2 className="mb-6 text-3xl font-bold">
             Ready to Book Your Palo Alto Hibachi Experience?
           </h2>
-          <p className="text-xl mb-8">
+          <p className="mb-8 text-xl">
             Contact us today for a free quote on your Palo Alto or Stanford area hibachi catering
             event!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/booking"
-              className="inline-flex items-center px-8 py-3 border-2 border-white text-base font-medium rounded-md text-orange-600 bg-white hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center rounded-md border-2 border-white bg-white px-8 py-3 text-base font-medium text-orange-600 transition-colors hover:bg-gray-100"
             >
               Book Now
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center px-8 py-3 border-2 border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-white hover:text-orange-600 transition-colors"
+              className="inline-flex items-center rounded-md border-2 border-white bg-transparent px-8 py-3 text-base font-medium text-white transition-colors hover:bg-white hover:text-orange-600"
             >
               Get Quote
             </Link>
@@ -186,5 +188,5 @@ export default function PaloAltoHibachiPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

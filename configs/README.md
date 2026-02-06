@@ -1,6 +1,7 @@
 # MyHibachi Nginx Load Balancer Configuration Files
 
-This directory contains all configuration files needed to deploy the Nginx load balancer on your Plesk VPS.
+This directory contains all configuration files needed to deploy the
+Nginx load balancer on your Plesk VPS.
 
 ## 📁 Directory Structure
 
@@ -299,7 +300,8 @@ CPUQuota=100%  # Full CPU core
 
 ## 📚 Additional Resources
 
-- [MEDIUM_31_LOAD_BALANCER_COMPLETE.md](../MEDIUM_31_LOAD_BALANCER_COMPLETE.md) - Full implementation guide
+- [MEDIUM_31_LOAD_BALANCER_COMPLETE.md](../MEDIUM_31_LOAD_BALANCER_COMPLETE.md) -
+  Full implementation guide
 - [Nginx Documentation](https://nginx.org/en/docs/)
 - [Systemd Service Documentation](https://www.freedesktop.org/software/systemd/man/systemd.service.html)
 - [Plesk Documentation](https://docs.plesk.com/)
@@ -311,8 +313,9 @@ If you encounter issues:
 1. Check logs first (Nginx, systemd journal, health check log)
 2. Verify all configuration files are in correct locations
 3. Test each component individually (backend → Nginx → SSL)
-4. Review `MEDIUM_31_LOAD_BALANCER_COMPLETE.md` for detailed troubleshooting
+4. Review `MEDIUM_31_LOAD_BALANCER_COMPLETE.md` for detailed
+   troubleshooting
 
 ---
 
-*Last Updated: January 15, 2025*
+_Last Updated: January 15, 2025_

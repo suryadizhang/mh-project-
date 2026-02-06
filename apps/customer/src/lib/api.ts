@@ -24,30 +24,30 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Type definitions
 export interface ApiResponse<T = Record<string, unknown>> {
-  data?: T
-  error?: string
-  message?: string
-  success: boolean
+  data?: T;
+  error?: string;
+  message?: string;
+  success: boolean;
 }
 
 export interface ApiRequestOptions extends RequestInit {
-  timeout?: number
-  retry?: boolean
-  maxRetries?: number
-  retryDelay?: number
-  schema?: z.ZodType  // Zod schema for automatic response validation
+  timeout?: number;
+  retry?: boolean;
+  maxRetries?: number;
+  retryDelay?: number;
+  schema?: z.ZodType; // Zod schema for automatic response validation
   cacheStrategy?: {
-    strategy: CacheStrategy     // Cache strategy to use
-    ttl: number                  // Time-to-live in milliseconds
-    key?: string                 // Custom cache key (defaults to method:path)
-  }
+    strategy: CacheStrategy; // Cache strategy to use
+    ttl: number; // Time-to-live in milliseconds
+    key?: string; // Custom cache key (defaults to method:path)
+  };
 }
 
 export interface StripePaymentData {
-  amount: number
-  customer_email: string
-  customer_name: string
-  [key: string]: unknown
+  amount: number;
+  customer_email: string;
+  customer_name: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -56,28 +56,28 @@ export interface StripePaymentData {
  */
 export const TIMEOUT_CONFIG = {
   // Complex operations
-  BOOKING_CREATE: 45000,      // 45s - Complex validation and database operations
-  PAYMENT_PROCESS: 60000,     // 60s - Stripe processing time + webhooks
-  FILE_UPLOAD: 120000,        // 120s - Large image uploads
-  REPORT_GENERATE: 90000,     // 90s - Report generation with data aggregation
+  BOOKING_CREATE: 45000, // 45s - Complex validation and database operations
+  PAYMENT_PROCESS: 60000, // 60s - Stripe processing time + webhooks
+  FILE_UPLOAD: 120000, // 120s - Large image uploads
+  REPORT_GENERATE: 90000, // 90s - Report generation with data aggregation
 
   // Standard operations
-  BOOKING_UPDATE: 30000,      // 30s - Update operations
-  BOOKING_DELETE: 20000,      // 20s - Delete operations
-  CUSTOMER_UPDATE: 30000,     // 30s - Customer profile updates
+  BOOKING_UPDATE: 30000, // 30s - Update operations
+  BOOKING_DELETE: 20000, // 20s - Delete operations
+  CUSTOMER_UPDATE: 30000, // 30s - Customer profile updates
 
   // Quick lookups
-  BOOKING_LIST: 15000,        // 15s - List operations with pagination
-  BOOKING_GET: 10000,         // 10s - Single record retrieval
-  AVAILABILITY_CHECK: 10000,  // 10s - Availability queries (cached)
-  DASHBOARD_DATA: 15000,      // 15s - Dashboard data (may have multiple queries)
+  BOOKING_LIST: 15000, // 15s - List operations with pagination
+  BOOKING_GET: 10000, // 10s - Single record retrieval
+  AVAILABILITY_CHECK: 10000, // 10s - Availability queries (cached)
+  DASHBOARD_DATA: 15000, // 15s - Dashboard data (may have multiple queries)
 
   // Real-time operations
-  CHAT_MESSAGE: 30000,        // 30s - AI chat responses
-  WEBSOCKET: 5000,            // 5s - WebSocket connections
+  CHAT_MESSAGE: 30000, // 30s - AI chat responses
+  WEBSOCKET: 5000, // 5s - WebSocket connections
 
   // Default fallback
-  DEFAULT: 30000              // 30s - Default for unspecified endpoints
+  DEFAULT: 30000, // 30s - Default for unspecified endpoints
 } as const;
 
 /**
@@ -132,7 +132,7 @@ function getTimeoutForEndpoint(path: string, method: string = 'GET'): number {
  * Sleep utility for retry delays
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -153,7 +153,7 @@ function sleep(ms: number): Promise<void> {
  */
 export async function apiFetch<T = Record<string, unknown>>(
   path: string,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<ApiResponse<T>> {
   const {
     timeout,
@@ -192,7 +192,7 @@ export async function apiFetch<T = Record<string, unknown>>(
     logger.debug(`Using cache strategy: ${strategy}`, {
       path,
       cacheKey,
-      ttl
+      ttl,
     });
 
     try {
@@ -211,7 +211,7 @@ export async function apiFetch<T = Record<string, unknown>>(
           schema,
           rateLimiter,
           startTime,
-          requestId  // Pass request ID
+          requestId, // Pass request ID
         );
 
         if (!response.success || !response.data) {
@@ -252,25 +252,25 @@ export async function apiFetch<T = Record<string, unknown>>(
             schema,
             rateLimiter,
             startTime,
-            requestId  // Pass request ID
+            requestId, // Pass request ID
           );
       }
 
       return {
         data,
-        success: true
+        success: true,
       };
     } catch (error) {
       // Cache strategy failed, return error
       logger.error('Cache strategy execution failed', error instanceof Error ? error : undefined, {
         path,
         strategy,
-        cacheKey
+        cacheKey,
       });
 
       return {
         error: error instanceof Error ? error.message : 'Cache operation failed',
-        success: false
+        success: false,
       };
     }
   }
@@ -293,7 +293,7 @@ export async function apiFetch<T = Record<string, unknown>>(
     schema,
     rateLimiter,
     startTime,
-    requestId  // Pass request ID
+    requestId, // Pass request ID
   );
 
   // If mutation was successful, invalidate related cache entries
@@ -320,9 +320,8 @@ async function executeFetch<T>(
   schema: z.ZodType | undefined,
   rateLimiter: ReturnType<typeof getRateLimiter>,
   startTime: number,
-  requestId: string  // Add request ID parameter
+  requestId: string, // Add request ID parameter
 ): Promise<ApiResponse<T>> {
-
   // Check client-side rate limit BEFORE making request
   if (!rateLimiter.checkLimit(path)) {
     const waitTime = rateLimiter.getWaitTime(path);
@@ -332,24 +331,26 @@ async function executeFetch<T>(
       path,
       category: info.category,
       waitTime,
-      remaining: info.remaining
+      remaining: info.remaining,
     });
 
     // Emit rate limit event for UI
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('rate-limit-exceeded', {
-        detail: {
-          endpoint: path,
-          waitTime,
-          category: info.category,
-          remaining: info.remaining
-        }
-      }));
+      window.dispatchEvent(
+        new CustomEvent('rate-limit-exceeded', {
+          detail: {
+            endpoint: path,
+            waitTime,
+            category: info.category,
+            remaining: info.remaining,
+          },
+        }),
+      );
     }
 
     return {
       error: `Rate limit exceeded. Please wait ${waitTime} second${waitTime !== 1 ? 's' : ''} before trying again.`,
-      success: false
+      success: false,
     };
   }
 
@@ -368,7 +369,7 @@ async function executeFetch<T>(
         attempt,
         maxRetries,
         timeout: timeoutMs,
-        requestId  // Log request ID for tracing
+        requestId, // Log request ID for tracing
       });
 
       const response = await fetch(url, {
@@ -376,9 +377,9 @@ async function executeFetch<T>(
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
-          'X-Request-ID': requestId,  // Add request ID for distributed tracing
-          ...fetchOptions.headers
-        }
+          'X-Request-ID': requestId, // Add request ID for distributed tracing
+          ...fetchOptions.headers,
+        },
       });
 
       clearTimeout(timeoutId);
@@ -413,22 +414,24 @@ async function executeFetch<T>(
             waitSeconds,
             retryAfter,
             attempt,
-            maxRetries
+            maxRetries,
           });
 
           // Store rate limit info in sessionStorage for UI
           if (typeof window !== 'undefined') {
             const rateLimitInfo = {
               endpoint: path,
-              until: Date.now() + (waitSeconds * 1000),
-              waitSeconds
+              until: Date.now() + waitSeconds * 1000,
+              waitSeconds,
             };
             sessionStorage.setItem(`rate-limit-429-${path}`, JSON.stringify(rateLimitInfo));
 
             // Emit event for UI components
-            window.dispatchEvent(new CustomEvent('server-rate-limit-exceeded', {
-              detail: rateLimitInfo
-            }));
+            window.dispatchEvent(
+              new CustomEvent('server-rate-limit-exceeded', {
+                detail: rateLimitInfo,
+              }),
+            );
           }
 
           // Retry with exponential backoff if enabled
@@ -439,7 +442,7 @@ async function executeFetch<T>(
               maxRetries,
               path,
               waitSeconds,
-              backoffDelay
+              backoffDelay,
             });
 
             lastError = new Error(`Rate limit exceeded: ${errorText}`);
@@ -449,7 +452,7 @@ async function executeFetch<T>(
 
           return {
             error: `Too many requests. Please wait ${waitSeconds} second${waitSeconds !== 1 ? 's' : ''} before trying again.`,
-            success: false
+            success: false,
           };
         }
 
@@ -459,7 +462,7 @@ async function executeFetch<T>(
             attempt,
             maxRetries,
             path,
-            status: response.status
+            status: response.status,
           });
 
           lastError = new Error(`HTTP ${response.status}: ${errorText}`);
@@ -473,7 +476,7 @@ async function executeFetch<T>(
 
         return {
           error: getUserFriendlyError(response.status, errorText),
-          success: false
+          success: false,
         };
       }
 
@@ -487,55 +490,61 @@ async function executeFetch<T>(
       if (schema) {
         const validationResult = safeValidateResponse(schema, data, {
           endpoint: path,
-          method
+          method,
         });
 
         if (!validationResult.success) {
           // Validation failed - log detailed error
-          logger.error('API Response validation failed', new Error(validationResult.error || 'Unknown validation error'), {
-            path,
-            method,
-            zodError: validationResult.zodError?.errors,
-            receivedData: data
-          });
+          logger.error(
+            'API Response validation failed',
+            new Error(validationResult.error || 'Unknown validation error'),
+            {
+              path,
+              method,
+              zodError: validationResult.zodError?.errors,
+              receivedData: data,
+            },
+          );
 
           // Emit validation error event for UI
           if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('api-validation-error', {
-              detail: {
-                endpoint: path,
-                method,
-                error: validationResult.error,
-                zodError: validationResult.zodError,
-                data
-              }
-            }));
+            window.dispatchEvent(
+              new CustomEvent('api-validation-error', {
+                detail: {
+                  endpoint: path,
+                  method,
+                  error: validationResult.error,
+                  zodError: validationResult.zodError,
+                  data,
+                },
+              }),
+            );
           }
 
           return {
-            error: 'Invalid response from server. Please try again or contact support if the problem persists.',
-            success: false
+            error:
+              'Invalid response from server. Please try again or contact support if the problem persists.',
+            success: false,
           };
         }
 
         // Validation successful - return validated data
         logger.debug('API Response validated successfully', {
           path,
-          method
+          method,
         });
 
         return {
           data: validationResult.data as T,
-          success: true
+          success: true,
         };
       }
 
       // No schema provided - return raw data (backward compatible)
       return {
         data,
-        success: true
+        success: true,
       };
-
     } catch (error) {
       clearTimeout(timeoutId);
 
@@ -554,7 +563,7 @@ async function executeFetch<T>(
             attempt,
             maxRetries,
             path,
-            timeout: timeoutMs
+            timeout: timeoutMs,
           });
 
           lastError = timeoutError;
@@ -564,7 +573,7 @@ async function executeFetch<T>(
 
         return {
           error: `Request timed out after ${timeoutMs / 1000} seconds. Please check your connection and try again.`,
-          success: false
+          success: false,
         };
       }
 
@@ -578,7 +587,7 @@ async function executeFetch<T>(
           logger.warn('Network error, retrying...', {
             attempt,
             maxRetries,
-            path
+            path,
           });
 
           lastError = networkError;
@@ -588,7 +597,7 @@ async function executeFetch<T>(
 
         return {
           error: 'Network error. Please check your internet connection and try again.',
-          success: false
+          success: false,
         };
       }
 
@@ -602,7 +611,7 @@ async function executeFetch<T>(
           attempt,
           maxRetries,
           path,
-          error: lastError.message
+          error: lastError.message,
         });
 
         await sleep(retryDelay * attempt);
@@ -611,7 +620,7 @@ async function executeFetch<T>(
 
       return {
         error: lastError.message || 'An unexpected error occurred. Please try again.',
-        success: false
+        success: false,
       };
     }
   }
@@ -619,12 +628,12 @@ async function executeFetch<T>(
   // All retries exhausted
   logger.error(`API Request failed after ${maxRetries} attempts`, lastError || undefined, {
     path,
-    method
+    method,
   });
 
   return {
     error: lastError?.message || 'Request failed after multiple attempts. Please try again later.',
-    success: false
+    success: false,
   };
 }
 
@@ -638,7 +647,7 @@ function getUserFriendlyError(status: number, errorText: string): string {
     case 401:
       return 'Please log in to continue.';
     case 403:
-      return 'You don\'t have permission to perform this action.';
+      return "You don't have permission to perform this action.";
     case 404:
       return 'The requested resource was not found.';
     case 409:
@@ -724,7 +733,7 @@ function invalidateCacheForMutation(method: string, path: string): void {
     // Don't fail the request if cache invalidation fails
     logger.error('Cache invalidation failed', error instanceof Error ? error : undefined, {
       method,
-      path
+      path,
     });
   }
 }
@@ -739,39 +748,39 @@ export const api = {
   post: <T = Record<string, unknown>>(
     path: string,
     data?: Record<string, unknown>,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ) =>
     apiFetch<T>(path, {
       ...options,
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined
+      body: data ? JSON.stringify(data) : undefined,
     }),
 
   put: <T = Record<string, unknown>>(
     path: string,
     data?: Record<string, unknown>,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ) =>
     apiFetch<T>(path, {
       ...options,
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined
+      body: data ? JSON.stringify(data) : undefined,
     }),
 
   patch: <T = Record<string, unknown>>(
     path: string,
     data?: Record<string, unknown>,
-    options?: ApiRequestOptions
+    options?: ApiRequestOptions,
   ) =>
     apiFetch<T>(path, {
       ...options,
       method: 'PATCH',
-      body: data ? JSON.stringify(data) : undefined
+      body: data ? JSON.stringify(data) : undefined,
     }),
 
   delete: <T = Record<string, unknown>>(path: string, options?: ApiRequestOptions) =>
-    apiFetch<T>(path, { ...options, method: 'DELETE' })
-}
+    apiFetch<T>(path, { ...options, method: 'DELETE' }),
+};
 
 /**
  * Stripe-specific API calls (to be migrated to backend)
@@ -784,8 +793,8 @@ export const stripeApi = {
     api.get(`/api/v1/customers/dashboard?customer_id=${customerId}`),
 
   createPortalSession: async (customerId: string) =>
-    api.post('/api/v1/customers/portal', { customer_id: customerId })
-}
+    api.post('/api/v1/customers/portal', { customer_id: customerId }),
+};
 
 /**
  * Environment validation
@@ -793,8 +802,8 @@ export const stripeApi = {
 if (typeof window !== 'undefined') {
   // Client-side validation
   if (!process.env.NEXT_PUBLIC_API_URL) {
-    console.warn('NEXT_PUBLIC_API_URL not set, using default:', API_BASE_URL)
+    console.warn('NEXT_PUBLIC_API_URL not set, using default:', API_BASE_URL);
   }
 }
 
-export { API_BASE_URL }
+export { API_BASE_URL };

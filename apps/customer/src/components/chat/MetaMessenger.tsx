@@ -1,102 +1,102 @@
-﻿'use client'
+﻿'use client';
 
-import { useEffect, useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
-import { getContactData } from '@/lib/contactData'
+import { getContactData } from '@/lib/contactData';
 
 declare global {
   interface Window {
     FB?: {
-      init: (config: { xfbml: boolean; version: string }) => void
+      init: (config: { xfbml: boolean; version: string }) => void;
       CustomerChat: {
-        show: () => void
-        hide: () => void
-      }
-    }
-    fbAsyncInit?: () => void
+        show: () => void;
+        hide: () => void;
+      };
+    };
+    fbAsyncInit?: () => void;
   }
 }
 
 export default function MetaMessenger() {
-  const pathname = usePathname()
-  const onContact = pathname === '/contact'
-  const [hasConsent, setHasConsent] = useState(false)
-  const [sdkLoaded, setSdkLoaded] = useState(false)
+  const pathname = usePathname();
+  const onContact = pathname === '/contact';
+  const [hasConsent, setHasConsent] = useState(false);
+  const [sdkLoaded, setSdkLoaded] = useState(false);
 
   useEffect(() => {
-    if (!onContact) return
+    if (!onContact) return;
 
     const checkConsent = () => {
-      const consent = localStorage.getItem('mh_consent')
-      setHasConsent(consent === 'true')
-    }
+      const consent = localStorage.getItem('mh_consent');
+      setHasConsent(consent === 'true');
+    };
 
-    checkConsent()
+    checkConsent();
 
     // Listen for consent changes
     const handleConsentGranted = () => {
-      checkConsent()
-    }
+      checkConsent();
+    };
 
-    window.addEventListener('consentGranted', handleConsentGranted)
+    window.addEventListener('consentGranted', handleConsentGranted);
 
     // Also check periodically in case consent changes
-    const interval = setInterval(checkConsent, 1000)
+    const interval = setInterval(checkConsent, 1000);
 
     return () => {
-      window.removeEventListener('consentGranted', handleConsentGranted)
-      clearInterval(interval)
-    }
-  }, [onContact])
+      window.removeEventListener('consentGranted', handleConsentGranted);
+      clearInterval(interval);
+    };
+  }, [onContact]);
 
   useEffect(() => {
-    if (!onContact || !hasConsent || sdkLoaded) return
+    if (!onContact || !hasConsent || sdkLoaded) return;
 
-    const { pageId, appId } = getContactData()
+    const { pageId, appId } = getContactData();
 
     if (!pageId || !appId) {
-      console.warn('Facebook Page ID or App ID not configured')
-      return
+      console.warn('Facebook Page ID or App ID not configured');
+      return;
     }
 
     // Initialize Facebook SDK
-    window.fbAsyncInit = function() {
+    window.fbAsyncInit = function () {
       if (window.FB) {
         window.FB.init({
           xfbml: true,
-          version: 'v18.0'
-        })
+          version: 'v18.0',
+        });
       }
-      setSdkLoaded(true)
-    }
+      setSdkLoaded(true);
+    };
 
     // Load Facebook SDK
-    const script = document.createElement('script')
-    script.async = true
-    script.defer = true
-    script.crossOrigin = 'anonymous'
-    script.src = `https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js#xfbml=1&version=v18.0&autoLogAppEvents=1&appId=${appId}`
-    script.id = 'facebook-jssdk'
+    const script = document.createElement('script');
+    script.async = true;
+    script.defer = true;
+    script.crossOrigin = 'anonymous';
+    script.src = `https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js#xfbml=1&version=v18.0&autoLogAppEvents=1&appId=${appId}`;
+    script.id = 'facebook-jssdk';
 
     if (!document.getElementById('facebook-jssdk')) {
-      document.head.appendChild(script)
+      document.head.appendChild(script);
     }
 
     return () => {
       // Cleanup if needed
-      const existingScript = document.getElementById('facebook-jssdk')
+      const existingScript = document.getElementById('facebook-jssdk');
       if (existingScript) {
-        existingScript.remove()
+        existingScript.remove();
       }
-    }
-  }, [onContact, hasConsent, sdkLoaded])
+    };
+  }, [onContact, hasConsent, sdkLoaded]);
 
-  if (!onContact || !hasConsent) return null
+  if (!onContact || !hasConsent) return null;
 
-  const { pageId, greetings } = getContactData()
+  const { pageId, greetings } = getContactData();
 
-  if (!pageId) return null
+  if (!pageId) return null;
 
   return (
     <div
@@ -109,5 +109,5 @@ export default function MetaMessenger() {
       data-logged-out-greeting={greetings.loggedOut}
       data-theme-color="#DB2B28"
     />
-  )
+  );
 }

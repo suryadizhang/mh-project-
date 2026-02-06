@@ -1,4 +1,5 @@
 # Install Redis on Windows (Development)
+
 **Date:** October 30, 2025  
 **Purpose:** Enable Redis caching and persistent rate limiting  
 **Time Required:** 5 minutes
@@ -33,25 +34,28 @@ Memurai is a Redis-compatible server optimized for Windows.
    - It will install as a Windows Service (auto-starts)
 
 3. **Verify Installation**
+
    ```powershell
    # Check if Memurai service is running
    Get-Service Memurai
-   
+
    # Should show: Status = Running
    ```
 
 4. **Test Connection**
+
    ```powershell
    cd "c:\Users\surya\projects\MH webapps\apps\backend"
    python -c "import redis; r = redis.Redis(host='localhost', port=6379); print(r.ping())"
-   
+
    # Should output: True
    ```
 
 5. **Restart Your Backend**
+
    ```powershell
    python run_backend.py
-   
+
    # You should now see:
    # ✅ Cache service initialized
    # ✅ Rate limiter initialized
@@ -59,6 +63,7 @@ Memurai is a Redis-compatible server optimized for Windows.
    ```
 
 **Advantages:**
+
 - ✅ Optimized for Windows
 - ✅ Installs as Windows Service (auto-starts)
 - ✅ 100% Redis compatible
@@ -89,12 +94,14 @@ docker rm -f redis-dev
 ```
 
 **Advantages:**
+
 - ✅ Official Redis (not Windows port)
 - ✅ Easy to start/stop/remove
 - ✅ No Windows installation needed
 - ✅ Same container for all projects
 
 **Disadvantages:**
+
 - ❌ Requires Docker Desktop (large install if you don't have it)
 - ❌ Doesn't auto-start with Windows
 
@@ -121,11 +128,13 @@ redis-cli ping
 ```
 
 **Advantages:**
+
 - ✅ Native Linux Redis
 - ✅ Best performance
 - ✅ Production-like environment
 
 **Disadvantages:**
+
 - ❌ Requires WSL2 setup
 - ❌ Separate Linux environment
 
@@ -136,6 +145,7 @@ redis-cli ping
 If you want to install via package manager:
 
 ### 1. Install Chocolatey First
+
 ```powershell
 # Run PowerShell AS ADMINISTRATOR
 Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -144,6 +154,7 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
 ```
 
 ### 2. Install Redis via Chocolatey
+
 ```powershell
 # Still as Administrator
 choco install redis-64 -y
@@ -160,6 +171,7 @@ redis-server --service-install
 ## Recommended for You: Option 1 (Memurai) ⭐
 
 **Why:**
+
 - Simplest installation (GUI installer)
 - Runs as Windows Service (auto-starts)
 - No Docker/WSL complexity
@@ -172,7 +184,8 @@ redis-server --service-install
 
 ### 1. Update requirements.txt
 
-Your backend already has `redis` and `schedule` installed. Let's add them to requirements.txt:
+Your backend already has `redis` and `schedule` installed. Let's add
+them to requirements.txt:
 
 ```powershell
 cd "c:\Users\surya\projects\MH webapps\apps\backend"
@@ -208,6 +221,7 @@ INFO:main:Debug mode: True
 ## What Changes After Installing Redis?
 
 ### Before (Current):
+
 ```
 ⚠️ Cache service connection timeout - continuing without cache
 ⚠️ Rate limiter connection timeout - using memory-based fallback
@@ -215,6 +229,7 @@ INFO:main:Debug mode: True
 ```
 
 ### After (With Redis + schedule):
+
 ```
 ✅ Cache service initialized
 ✅ Rate limiter initialized
@@ -223,30 +238,33 @@ INFO:main:Debug mode: True
 
 ### Performance Improvements:
 
-| Feature | Before (Memory) | After (Redis) |
-|---------|----------------|---------------|
-| **Response Time** | ~50ms | ~20ms (-60%) |
-| **Database Load** | 100% | 30% (-70%) |
-| **Rate Limiting** | Per-process | Shared across all processes |
-| **Cache Persistence** | Lost on restart | Persists across restarts |
-| **Concurrent Requests** | 100 RPS | 500+ RPS |
+| Feature                 | Before (Memory) | After (Redis)               |
+| ----------------------- | --------------- | --------------------------- |
+| **Response Time**       | ~50ms           | ~20ms (-60%)                |
+| **Database Load**       | 100%            | 30% (-70%)                  |
+| **Rate Limiting**       | Per-process     | Shared across all processes |
+| **Cache Persistence**   | Lost on restart | Persists across restarts    |
+| **Concurrent Requests** | 100 RPS         | 500+ RPS                    |
 
 ---
 
 ## Testing Redis After Installation
 
 ### Test 1: Basic Connection
+
 ```powershell
 python -c "import redis; r = redis.Redis(); print('CONNECTED!' if r.ping() else 'FAILED')"
 ```
 
 ### Test 2: Cache Service
+
 ```powershell
 cd "c:\Users\surya\projects\MH webapps\apps\backend"
 python -c "import asyncio; from core.cache import CacheService; asyncio.run(CacheService('redis://localhost:6379').connect())"
 ```
 
 ### Test 3: Backend Startup
+
 ```powershell
 python run_backend.py
 # Look for ✅ messages instead of ⚠️ warnings
@@ -259,6 +277,7 @@ python run_backend.py
 ### "Connection refused" Error
 
 **Memurai/Redis service not running:**
+
 ```powershell
 # Check service status
 Get-Service Memurai  # or Get-Service Redis
@@ -270,6 +289,7 @@ Start-Service Memurai  # or Start-Service Redis
 ### "Module not found: redis"
 
 **Python package not in correct environment:**
+
 ```powershell
 pip list | findstr redis
 # Should show: redis 5.0.1
@@ -281,6 +301,7 @@ pip install redis
 ### Port 6379 Already in Use
 
 **Another Redis instance running:**
+
 ```powershell
 # Find what's using port 6379
 netstat -ano | findstr :6379
@@ -297,26 +318,31 @@ Restart-Service Memurai
 ## Benefits of Using Redis in Development
 
 ### 1. **Realistic Testing** ✅
+
 - Test caching behavior before production
 - Verify rate limiting works correctly
 - Test payment email monitoring
 
 ### 2. **Better Performance** ⚡
+
 - Faster API responses (cached queries)
 - Less database load
 - Smoother development experience
 
 ### 3. **Production Parity** 🎯
+
 - Same setup as production
 - Catch Redis-related issues early
 - Easier debugging
 
 ### 4. **Advanced Features** 🚀
+
 - Test background jobs (payment monitoring)
 - Test pub/sub features (if needed)
 - Test session management
 
 ### 5. **No Downsides** 👍
+
 - Redis is lightweight (< 100 MB RAM)
 - Auto-starts with Windows (if configured)
 - Zero maintenance needed
@@ -328,12 +354,14 @@ Restart-Service Memurai
 ### No, but it's HIGHLY RECOMMENDED ✅
 
 **Your backend works perfectly without Redis:**
+
 - ✅ All endpoints functional
 - ✅ Rate limiting works (memory-based)
 - ✅ Authentication works
 - ✅ Database operations work
 
 **But with Redis you get:**
+
 - ✅ More realistic testing
 - ✅ Better performance
 - ✅ Production-like environment
@@ -345,14 +373,18 @@ Restart-Service Memurai
 ## Next Steps
 
 ### Immediate (5 minutes):
+
 1. Download Memurai: https://www.memurai.com/get-memurai
 2. Install (double-click, accept defaults)
 3. Verify running: `Get-Service Memurai`
-4. Test connection: `python -c "import redis; print(redis.Redis().ping())"`
+4. Test connection:
+   `python -c "import redis; print(redis.Redis().ping())"`
 5. Restart backend: `python run_backend.py`
 
 ### Then:
-1. Update requirements.txt: `Add-Content requirements.txt "`nredis==5.0.1`nschedule==1.2.0"`
+
+1. Update requirements.txt:
+   `Add-Content requirements.txt "`nredis==5.0.1`nschedule==1.2.0"`
 2. Run comprehensive tests
 3. Enjoy warning-free startup! 🎉
 
@@ -361,11 +393,13 @@ Restart-Service Memurai
 ## Summary
 
 **What You Installed:**
+
 - ✅ redis (Python library) - DONE
 - ✅ schedule (Python library) - DONE
 - ⏳ Redis Server - INSTALL MEMURAI (5 minutes)
 
 **Result After Installing Memurai:**
+
 - ✅ NO MORE WARNINGS on startup
 - ✅ Better performance (cached queries)
 - ✅ Persistent rate limiting

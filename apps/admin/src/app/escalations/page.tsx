@@ -131,14 +131,20 @@ export default function EscalationsPage() {
     } else if (type === 'escalation_updated' && data) {
       // Show toast for assignment
       if (data.update_type === 'assigned') {
-        toast.success('Escalation Assigned', `Escalation ${data.id.slice(0, 8)}... has been assigned`);
+        toast.success(
+          'Escalation Assigned',
+          `Escalation ${data.id.slice(0, 8)}... has been assigned`
+        );
       }
 
       // Refresh escalations list
       fetchEscalations();
     } else if (type === 'escalation_resolved' && data) {
       // Show toast for resolution
-      toast.success('Escalation Resolved', `Escalation ${data.id.slice(0, 8)}... has been resolved`);
+      toast.success(
+        'Escalation Resolved',
+        `Escalation ${data.id.slice(0, 8)}... has been resolved`
+      );
 
       // Refresh escalations list
       fetchEscalations();
@@ -195,10 +201,16 @@ export default function EscalationsPage() {
   // Stats (use WebSocket stats if available, fallback to local count)
   const stats = {
     total: wsStats.total_active > 0 ? wsStats.total_active : escalations.length,
-    pending: wsStats.pending > 0 ? wsStats.pending : escalations.filter(e => e.status === 'pending').length,
-    in_progress: wsStats.in_progress > 0 ? wsStats.in_progress : escalations.filter(
-      e => e.status === 'in_progress' || e.status === 'assigned'
-    ).length,
+    pending:
+      wsStats.pending > 0
+        ? wsStats.pending
+        : escalations.filter(e => e.status === 'pending').length,
+    in_progress:
+      wsStats.in_progress > 0
+        ? wsStats.in_progress
+        : escalations.filter(
+            e => e.status === 'in_progress' || e.status === 'assigned'
+          ).length,
     resolved: escalations.filter(e => e.status === 'resolved').length,
   };
 
@@ -232,12 +244,16 @@ export default function EscalationsPage() {
               {wsConnected ? (
                 <div className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-green-50 border border-green-200 rounded-lg">
                   <Wifi size={14} className="text-green-600" />
-                  <span className="text-xs font-medium text-green-700">Live</span>
+                  <span className="text-xs font-medium text-green-700">
+                    Live
+                  </span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-1.5 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg">
                   <WifiOff size={14} className="text-gray-500" />
-                  <span className="text-xs font-medium text-gray-600">Offline</span>
+                  <span className="text-xs font-medium text-gray-600">
+                    Offline
+                  </span>
                 </div>
               )}
             </div>
@@ -439,10 +455,7 @@ export default function EscalationsPage() {
       ) : (
         <div className="space-y-3">
           {escalations.map(escalation => (
-            <EscalationCard
-              key={escalation.id}
-              escalation={escalation}
-            />
+            <EscalationCard key={escalation.id} escalation={escalation} />
           ))}
         </div>
       )}

@@ -38,7 +38,11 @@ interface Campaign {
   };
 }
 
-export default function CampaignList({ onCreateNew }: { onCreateNew: () => void }) {
+export default function CampaignList({
+  onCreateNew,
+}: {
+  onCreateNew: () => void;
+}) {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +65,10 @@ export default function CampaignList({ onCreateNew }: { onCreateNew: () => void 
   const getStatusBadge = (status: Campaign['status']) => {
     const variants: Record<
       Campaign['status'],
-      { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }
+      {
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        label: string;
+      }
     > = {
       draft: { variant: 'secondary', label: 'Draft' },
       scheduled: { variant: 'default', label: 'Scheduled' },
@@ -74,7 +81,13 @@ export default function CampaignList({ onCreateNew }: { onCreateNew: () => void 
   };
 
   if (loading) {
-    return <Card><CardContent className="py-8 text-center">Loading campaigns...</CardContent></Card>;
+    return (
+      <Card>
+        <CardContent className="py-8 text-center">
+          Loading campaigns...
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -99,36 +112,41 @@ export default function CampaignList({ onCreateNew }: { onCreateNew: () => void 
           <TableBody>
             {campaigns.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  No campaigns yet. <Button variant="link" onClick={onCreateNew}>Create your first campaign</Button>
+                <TableCell
+                  colSpan={8}
+                  className="text-center py-8 text-muted-foreground"
+                >
+                  No campaigns yet.{' '}
+                  <Button variant="link" onClick={onCreateNew}>
+                    Create your first campaign
+                  </Button>
                 </TableCell>
               </TableRow>
             ) : (
-              campaigns.map((campaign) => (
+              campaigns.map(campaign => (
                 <TableRow key={campaign.id}>
                   <TableCell className="font-medium">{campaign.name}</TableCell>
                   <TableCell>{campaign.subject}</TableCell>
                   <TableCell>{getStatusBadge(campaign.status)}</TableCell>
                   <TableCell>{campaign.recipients.toLocaleString()}</TableCell>
                   <TableCell>
-                    {campaign.stats ?
-                      `${((campaign.stats.opened / campaign.stats.sent) * 100).toFixed(1)}%` :
-                      '-'
-                    }
+                    {campaign.stats
+                      ? `${((campaign.stats.opened / campaign.stats.sent) * 100).toFixed(1)}%`
+                      : '-'}
                   </TableCell>
                   <TableCell>
-                    {campaign.stats ?
-                      `${((campaign.stats.clicked / campaign.stats.sent) * 100).toFixed(1)}%` :
-                      '-'
-                    }
+                    {campaign.stats
+                      ? `${((campaign.stats.clicked / campaign.stats.sent) * 100).toFixed(1)}%`
+                      : '-'}
                   </TableCell>
                   <TableCell>
                     {campaign.sentAt
-                      ? formatDistanceToNow(new Date(campaign.sentAt), { addSuffix: true })
+                      ? formatDistanceToNow(new Date(campaign.sentAt), {
+                          addSuffix: true,
+                        })
                       : campaign.scheduledFor
-                      ? `Scheduled for ${formatDistanceToNow(new Date(campaign.scheduledFor), { addSuffix: true })}`
-                      : 'Draft'
-                    }
+                        ? `Scheduled for ${formatDistanceToNow(new Date(campaign.scheduledFor), { addSuffix: true })}`
+                        : 'Draft'}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

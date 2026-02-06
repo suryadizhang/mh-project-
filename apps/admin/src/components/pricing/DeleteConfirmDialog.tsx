@@ -31,15 +31,19 @@ export function DeleteConfirmDialog({
         <DialogHeader>
           <DialogTitle>Confirm Deletion</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this {itemType}?
-            This action cannot be undone.
+            Are you sure you want to delete this {itemType}? This action cannot
+            be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isDeleting}
+          >
             {isDeleting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

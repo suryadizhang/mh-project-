@@ -11,7 +11,10 @@ interface SwitchProps {
 }
 
 export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
-  ({ id, checked = false, onCheckedChange, disabled = false, className = '' }, ref) => {
+  (
+    { id, checked = false, onCheckedChange, disabled = false, className = '' },
+    ref
+  ) => {
     return (
       <button
         ref={ref}

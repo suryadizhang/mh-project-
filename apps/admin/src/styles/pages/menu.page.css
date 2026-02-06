@@ -15,7 +15,8 @@
    HERO SECTION
    ========================================================================== */
 [data-page='menu'] .hero-section {
-  background: linear-gradient(var(--menu-overlay), var(--menu-overlay)),
+  background:
+    linear-gradient(var(--menu-overlay), var(--menu-overlay)),
     var(--menu-hero-bg);
   background-size: cover;
   background-position: center;

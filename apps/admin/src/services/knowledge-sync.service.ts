@@ -4,7 +4,7 @@
  * Base URL: /api/v1/knowledge/sync
  */
 
-import axios, { AxiosError,AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
 import {
   SyncApiError,
@@ -25,7 +25,8 @@ export class KnowledgeSyncService {
   private baseURL: string;
 
   constructor(baseURL?: string) {
-    this.baseURL = baseURL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    this.baseURL =
+      baseURL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
     this.api = axios.create({
       baseURL: `${this.baseURL}/api/v1/ai/knowledge/sync`,
@@ -36,7 +37,7 @@ export class KnowledgeSyncService {
     });
 
     // Add request interceptor for authentication
-    this.api.interceptors.request.use((config) => {
+    this.api.interceptors.request.use(config => {
       const token = this.getAuthToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -46,7 +47,7 @@ export class KnowledgeSyncService {
 
     // Add response interceptor for error handling
     this.api.interceptors.response.use(
-      (response) => response,
+      response => response,
       (error: AxiosError<SyncApiError>) => {
         return Promise.reject(this.handleError(error));
       }
@@ -58,7 +59,9 @@ export class KnowledgeSyncService {
    */
   private getAuthToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    return (
+      localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')
+    );
   }
 
   /**
@@ -72,7 +75,9 @@ export class KnowledgeSyncService {
       return new Error(`${message}${detail ? `: ${detail}` : ''}`);
     } else if (error.request) {
       // Request made but no response
-      return new Error('No response from server. Please check your connection.');
+      return new Error(
+        'No response from server. Please check your connection.'
+      );
     } else {
       // Something else happened
       return new Error(error.message);
@@ -103,7 +108,10 @@ export class KnowledgeSyncService {
    * POST /auto
    */
   async triggerAutoSync(request?: SyncRequest): Promise<SyncOperationResponse> {
-    const response = await this.api.post<SyncOperationResponse>('/auto', request || {});
+    const response = await this.api.post<SyncOperationResponse>(
+      '/auto',
+      request || {}
+    );
     return response.data;
   }
 
@@ -111,8 +119,13 @@ export class KnowledgeSyncService {
    * Force sync all sources (override manual changes)
    * POST /force
    */
-  async triggerForceSync(request?: SyncRequest): Promise<SyncOperationResponse> {
-    const response = await this.api.post<SyncOperationResponse>('/force', request || {});
+  async triggerForceSync(
+    request?: SyncRequest
+  ): Promise<SyncOperationResponse> {
+    const response = await this.api.post<SyncOperationResponse>(
+      '/force',
+      request || {}
+    );
     return response.data;
   }
 
@@ -126,7 +139,9 @@ export class KnowledgeSyncService {
     source?: SyncSource;
     sync_type?: 'auto' | 'manual';
   }): Promise<SyncHistoryResponse> {
-    const response = await this.api.get<SyncHistoryResponse>('/history', { params });
+    const response = await this.api.get<SyncHistoryResponse>('/history', {
+      params,
+    });
     return response.data;
   }
 

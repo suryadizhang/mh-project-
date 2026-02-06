@@ -1,39 +1,39 @@
-'use client'
+'use client';
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react';
 
-import { homeData } from '@/data/home'
-import styles from '@/styles/home/services.module.css'
-import type { HomeService } from '@/types/data'
+import { homeData } from '@/data/home';
+import styles from '@/styles/home/services.module.css';
+import type { HomeService } from '@/types/data';
 
 export function ServicesSection() {
-  const sectionRef = useRef<HTMLElement>(null)
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
+      (entries) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add(styles.animateIn)
+            entry.target.classList.add(styles.animateIn);
             // Animate individual service cards with stagger
-            const cards = entry.target.querySelectorAll(`.${styles.serviceCard}`)
+            const cards = entry.target.querySelectorAll(`.${styles.serviceCard}`);
             cards.forEach((card, index) => {
               setTimeout(() => {
-                card.classList.add(styles.cardAnimateIn)
-              }, index * 150)
-            })
+                card.classList.add(styles.cardAnimateIn);
+              }, index * 150);
+            });
           }
-        })
+        });
       },
-      { threshold: 0.1 }
-    )
+      { threshold: 0.1 },
+    );
 
     if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+      observer.observe(sectionRef.current);
     }
 
-    return () => observer.disconnect()
-  }, [])
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section className={styles.servicesSection} ref={sectionRef}>
@@ -65,5 +65,5 @@ export function ServicesSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

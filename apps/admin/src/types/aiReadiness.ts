@@ -5,7 +5,14 @@
  * ML confidence prediction, and quality tracking.
  */
 
-export type IntentType = 'faq' | 'quote' | 'booking' | 'menu' | 'complaint' | 'pricing' | 'unknown';
+export type IntentType =
+  | 'faq'
+  | 'quote'
+  | 'booking'
+  | 'menu'
+  | 'complaint'
+  | 'pricing'
+  | 'unknown';
 
 export type ReadinessStatus = 'ready' | 'training' | 'not_ready' | 'error';
 
@@ -108,7 +115,11 @@ export interface ModelComparison {
   response_time_delta_ms: number;
   cost_savings_percent: number;
   quality_acceptable: boolean;
-  recommendation: 'increase_traffic' | 'maintain' | 'decrease_traffic' | 'rollback';
+  recommendation:
+    | 'increase_traffic'
+    | 'maintain'
+    | 'decrease_traffic'
+    | 'rollback';
 }
 
 // ============================================

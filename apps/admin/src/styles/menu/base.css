@@ -90,8 +90,8 @@
 
 /* Emoji visibility utility */
 .emoji-visible {
-  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    sans-serif;
+  font-family:
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
   font-style: normal;
   font-variant: normal;
   text-rendering: auto;

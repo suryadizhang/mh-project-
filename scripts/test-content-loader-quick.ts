@@ -2,7 +2,11 @@
  * Quick test to verify MDX content loader works
  */
 
-import { getBlogPosts, getBlogPost, getAllCategories } from '../apps/customer/src/lib/blog/contentLoader';
+import {
+  getBlogPosts,
+  getBlogPost,
+  getAllCategories,
+} from '../apps/customer/src/lib/blog/contentLoader';
 
 async function testContentLoader() {
   console.log('🧪 Testing Content Loader...\n');
@@ -26,7 +30,6 @@ async function testContentLoader() {
     console.log(`✅ Found ${categories.length} categories\n`);
 
     console.log('✅ All tests passed! Content loader is working correctly.');
-    
   } catch (error) {
     console.error('❌ Test failed:', error);
     process.exit(1);

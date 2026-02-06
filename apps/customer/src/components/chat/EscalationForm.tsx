@@ -265,10 +265,11 @@ export default function EscalationForm({
               onChange={(e) => handlePhoneChange(e.target.value)}
               onBlur={() => validatePhone(phone)}
               placeholder="Enter your phone number"
-              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${phoneError
+              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${
+                phoneError
                   ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
                   : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                }`}
+              }`}
               required
             />
             {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
@@ -286,10 +287,11 @@ export default function EscalationForm({
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => validateEmail(email)}
               placeholder="Enter your email (optional)"
-              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${emailError
+              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${
+                emailError
                   ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
                   : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-                }`}
+              }`}
             />
             {emailError && <p className="mt-1 text-xs text-red-600">{emailError}</p>}
           </div>

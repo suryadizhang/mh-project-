@@ -361,9 +361,11 @@ npm run dev:all
 
 ## 🎯 Minimum Setup (No External Services)
 
-If you just want to run the system locally without any external services:
+If you just want to run the system locally without any external
+services:
 
 ### apps/backend/.env (minimal)
+
 ```bash
 DATABASE_URL=sqlite+aiosqlite:///./test_myhibachi.db
 REDIS_URL=redis://localhost:6379/0
@@ -375,12 +377,14 @@ DEBUG=true
 ```
 
 ### apps/customer/.env.local (minimal)
+
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ### apps/admin/.env.local (minimal)
+
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_AI_API_URL=http://localhost:8002
@@ -395,6 +399,7 @@ NEXT_PUBLIC_AI_API_URL=http://localhost:8002
 For production deployment, update these values:
 
 ### Backend
+
 ```bash
 # Change to production database
 DATABASE_URL=postgresql+asyncpg://user:STRONG_PASSWORD@prod-host:5432/myhibachi
@@ -421,6 +426,7 @@ STRIPE_WEBHOOK_SECRET=whsec_YOUR_LIVE_WEBHOOK_SECRET
 ```
 
 ### Customer Frontend
+
 ```bash
 NEXT_PUBLIC_API_URL=https://mhapi.mysticdatanode.net
 NEXT_PUBLIC_APP_URL=https://myhibachichef.com
@@ -429,6 +435,7 @@ NODE_ENV=production
 ```
 
 ### Admin Frontend
+
 ```bash
 NEXT_PUBLIC_API_URL=https://mhapi.mysticdatanode.net
 NEXT_PUBLIC_AI_API_URL=https://ai.myhibachichef.com
@@ -439,16 +446,21 @@ NODE_ENV=production
 
 ## 📚 Related Documentation
 
-- [COMPLETE_ENVIRONMENT_VARIABLES_GUIDE.md](./COMPLETE_ENVIRONMENT_VARIABLES_GUIDE.md) - Full reference
-- [ENV_VARS_QUICK_REFERENCE.md](./ENV_VARS_QUICK_REFERENCE.md) - Quick commands
-- [ENV_SETUP_CHECKLIST.md](./ENV_SETUP_CHECKLIST.md) - Interactive checklist
-- [LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md) - Setup guide
+- [COMPLETE_ENVIRONMENT_VARIABLES_GUIDE.md](./COMPLETE_ENVIRONMENT_VARIABLES_GUIDE.md) -
+  Full reference
+- [ENV_VARS_QUICK_REFERENCE.md](./ENV_VARS_QUICK_REFERENCE.md) - Quick
+  commands
+- [ENV_SETUP_CHECKLIST.md](./ENV_SETUP_CHECKLIST.md) - Interactive
+  checklist
+- [LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md) - Setup
+  guide
 
 ---
 
 ## 🆘 Troubleshooting
 
 ### "File not found" errors
+
 ```bash
 # Make sure you're in the project root
 cd "c:\Users\surya\projects\MH webapps"
@@ -458,12 +470,17 @@ cd apps/backend    # or apps/customer or apps/admin
 ```
 
 ### "Cannot parse .env file"
-- Check for spaces around `=` (should be `KEY=value`, not `KEY = value`)
-- Check for unquoted values with spaces (use `KEY="value with spaces"`)
+
+- Check for spaces around `=` (should be `KEY=value`, not
+  `KEY = value`)
+- Check for unquoted values with spaces (use
+  `KEY="value with spaces"`)
 - Check for missing closing quotes
 
 ### "Invalid environment configuration"
-- Run validation: `python -c "from core.config import get_settings; get_settings()"`
+
+- Run validation:
+  `python -c "from core.config import get_settings; get_settings()"`
 - Check error message for specific missing/invalid variable
 - Verify key formats (Stripe keys, database URLs, etc.)
 

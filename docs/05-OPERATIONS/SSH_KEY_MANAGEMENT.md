@@ -1,33 +1,34 @@
 # SSH Key Management Guide
 
-**Last Updated:** 2026-01-13
-**Purpose:** Managing SSH access to VPS servers using key-based authentication
+**Last Updated:** 2026-01-13 **Purpose:** Managing SSH access to VPS
+servers using key-based authentication
 
 ---
 
 ## 🔐 Current Setup
 
-| Item | Value |
-|------|-------|
-| **VPS IP** | 108.175.12.154 |
-| **SSH User** | root |
-| **Auth Method** | SSH Key Only (Password disabled) |
-| **Key Type** | RSA 2048-bit |
+| Item                     | Value                                                   |
+| ------------------------ | ------------------------------------------------------- |
+| **VPS IP**               | 108.175.12.154                                          |
+| **SSH User**             | root                                                    |
+| **Auth Method**          | SSH Key Only (Password disabled)                        |
+| **Key Type**             | RSA 2048-bit                                            |
 | **Key Location (Local)** | `~/.ssh/id_rsa` (private), `~/.ssh/id_rsa.pub` (public) |
-| **Cloudflare Tunnel** | `ssh.mhapi.mysticdatanode.net` → port 22 |
+| **Cloudflare Tunnel**    | `ssh.mhapi.mysticdatanode.net` → port 22                |
 
 ---
 
 ## 📁 Your SSH Keys (Already Set Up)
 
-Your SSH keys are **files on your computer**, not something you need to memorize.
+Your SSH keys are **files on your computer**, not something you need
+to memorize.
 
 ### Key Locations:
 
-| File | Purpose | NEVER Share? |
-|------|---------|--------------|
-| `C:\Users\surya\.ssh\id_rsa` | **Private Key** - Your secret identity | ⛔ NEVER share |
-| `C:\Users\surya\.ssh\id_rsa.pub` | **Public Key** - Can be shared freely | ✅ Safe to share |
+| File                             | Purpose                                | NEVER Share?     |
+| -------------------------------- | -------------------------------------- | ---------------- |
+| `C:\Users\surya\.ssh\id_rsa`     | **Private Key** - Your secret identity | ⛔ NEVER share   |
+| `C:\Users\surya\.ssh\id_rsa.pub` | **Public Key** - Can be shared freely  | ✅ Safe to share |
 
 ### View Your Public Key:
 
@@ -40,6 +41,7 @@ Get-Content "C:\Users\surya\.ssh\id_rsa.pub"
 ```
 
 The output looks like:
+
 ```
 ssh-rsa AAAAB3Nza...long string...== surya@ROG
 ```
@@ -70,7 +72,8 @@ ssh-rsa AAAAB3Nza...long string...== surya@ROG
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Key Point:** You never "remember" the key. Your computer uses the key file automatically.
+**Key Point:** You never "remember" the key. Your computer uses the
+key file automatically.
 
 ---
 
@@ -79,6 +82,7 @@ ssh-rsa AAAAB3Nza...long string...== surya@ROG
 ### Option 1: Password Manager (Recommended)
 
 Store your private key in a password manager like:
+
 - **1Password** (supports SSH key storage)
 - **Bitwarden** (as secure note)
 - **KeePassXC** (as file attachment)
@@ -99,10 +103,12 @@ Get-Content ~/.ssh/id_rsa | Set-Clipboard
 ### Option 3: Cloud Storage (Encrypted)
 
 1. ZIP the key files with strong password:
+
 ```powershell
 # Requires 7-Zip
 & "C:\Program Files\7-Zip\7z.exe" a -p"YourStrongPassword123!" ssh-backup.7z ~/.ssh/id_rsa ~/.ssh/id_rsa.pub
 ```
+
 2. Upload `ssh-backup.7z` to Google Drive/Dropbox
 3. Store the password in a different password manager entry
 
@@ -112,11 +118,13 @@ Get-Content ~/.ssh/id_rsa | Set-Clipboard
 
 ### Step 1: Get Your Private Key
 
-Restore from your backup (password manager, USB, or encrypted cloud file).
+Restore from your backup (password manager, USB, or encrypted cloud
+file).
 
 ### Step 2: Place Key on New Device
 
 **Windows (new laptop):**
+
 ```powershell
 # Create .ssh folder
 mkdir ~/.ssh -Force
@@ -134,6 +142,7 @@ icacls "$env:USERPROFILE\.ssh\id_rsa" /inheritance:r /grant:r "$env:USERNAME:R"
 ```
 
 **Mac/Linux (new device):**
+
 ```bash
 # Create .ssh folder
 mkdir -p ~/.ssh
@@ -176,6 +185,7 @@ ssh-keygen -t ed25519 -C "surya@NewLaptop"
 ### Step 2: Add Public Key to VPS
 
 **From current laptop (that already has access):**
+
 ```powershell
 # Get new device's public key content
 # (copy from new device or email to yourself)
@@ -184,7 +194,9 @@ ssh-keygen -t ed25519 -C "surya@NewLaptop"
 ssh root@108.175.12.154 "echo 'NEW_PUBLIC_KEY_CONTENT_HERE' >> ~/.ssh/authorized_keys"
 ```
 
-**Alternative: Copy file directly from new device (if both on same network):**
+**Alternative: Copy file directly from new device (if both on same
+network):**
+
 ```bash
 # From new device (after generating key)
 ssh-copy-id root@108.175.12.154
@@ -192,6 +204,7 @@ ssh-copy-id root@108.175.12.154
 ```
 
 **Since password auth is disabled, you must:**
+
 1. Copy new public key content manually
 2. SSH from old laptop and add it to `/root/.ssh/authorized_keys`
 
@@ -217,13 +230,13 @@ nano ~/.ssh/authorized_keys
 
 ## ⚠️ Security Best Practices
 
-| Practice | Why |
-|----------|-----|
+| Practice                | Why                                    |
+| ----------------------- | -------------------------------------- |
 | Never share private key | Anyone with it can access your servers |
-| Use passphrase on key | Extra protection if laptop stolen |
-| One key per device | Can revoke single device if lost |
-| Regular audit | Check `authorized_keys` quarterly |
-| Backup securely | Lost key = locked out forever |
+| Use passphrase on key   | Extra protection if laptop stolen      |
+| One key per device      | Can revoke single device if lost       |
+| Regular audit           | Check `authorized_keys` quarterly      |
+| Backup securely         | Lost key = locked out forever          |
 
 ---
 
@@ -237,7 +250,8 @@ If you lose access to ALL authorized keys:
 4. Add your new public key
 5. Reboot server
 
-**Prevention:** Always have backup of keys AND hosting account credentials.
+**Prevention:** Always have backup of keys AND hosting account
+credentials.
 
 ---
 
@@ -277,18 +291,20 @@ Get-Content ~/.ssh/id_rsa | Select-Object -First 1
 
 ## 📋 Quick Reference
 
-| Task | Command |
-|------|---------|
-| View public key | `cat ~/.ssh/id_rsa.pub` |
-| Test SSH connection | `ssh root@108.175.12.154` |
-| View VPS authorized keys | `ssh root@108.175.12.154 "cat ~/.ssh/authorized_keys"` |
-| Add new key to VPS | `ssh root@108.175.12.154 "echo 'KEY' >> ~/.ssh/authorized_keys"` |
-| Generate new key | `ssh-keygen -t ed25519 -C "description"` |
-| Backup keys | Copy `~/.ssh/id_rsa` and `~/.ssh/id_rsa.pub` to secure location |
+| Task                     | Command                                                          |
+| ------------------------ | ---------------------------------------------------------------- |
+| View public key          | `cat ~/.ssh/id_rsa.pub`                                          |
+| Test SSH connection      | `ssh root@108.175.12.154`                                        |
+| View VPS authorized keys | `ssh root@108.175.12.154 "cat ~/.ssh/authorized_keys"`           |
+| Add new key to VPS       | `ssh root@108.175.12.154 "echo 'KEY' >> ~/.ssh/authorized_keys"` |
+| Generate new key         | `ssh-keygen -t ed25519 -C "description"`                         |
+| Backup keys              | Copy `~/.ssh/id_rsa` and `~/.ssh/id_rsa.pub` to secure location  |
 
 ---
 
 ## 🔗 Related Documentation
 
-- [16-INFRASTRUCTURE_DEPLOYMENT.instructions.md](../../.github/instructions/16-INFRASTRUCTURE_DEPLOYMENT.instructions.md) - VPS setup
-- [VPS_DEPLOYMENT_GUIDE.md](../../VPS_DEPLOYMENT_GUIDE.md) - Deployment procedures
+- [16-INFRASTRUCTURE_DEPLOYMENT.instructions.md](../../.github/instructions/16-INFRASTRUCTURE_DEPLOYMENT.instructions.md) -
+  VPS setup
+- [VPS_DEPLOYMENT_GUIDE.md](../../VPS_DEPLOYMENT_GUIDE.md) -
+  Deployment procedures

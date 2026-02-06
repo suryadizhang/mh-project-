@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import React from 'react'
+import React from 'react';
 
-import type { BookingFormData } from '../../data/booking/types'
+import type { BookingFormData } from '../../data/booking/types';
 
 interface AddressFormProps {
-  formData: BookingFormData
-  onChange: (field: keyof BookingFormData, value: string | number | Date | boolean) => void
-  errors: Record<string, string>
+  formData: BookingFormData;
+  onChange: (field: keyof BookingFormData, value: string | number | Date | boolean) => void;
+  errors: Record<string, string>;
 }
 
 export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
@@ -31,7 +31,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
               id="addressStreet"
               name="addressStreet"
               value={formData.addressStreet}
-              onChange={e => onChange('addressStreet', e.target.value)}
+              onChange={(e) => onChange('addressStreet', e.target.value)}
               placeholder="Enter street address"
               className={`form-input ${errors.addressStreet ? 'error' : ''}`}
               required
@@ -48,7 +48,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
               id="addressCity"
               name="addressCity"
               value={formData.addressCity}
-              onChange={e => onChange('addressCity', e.target.value)}
+              onChange={(e) => onChange('addressCity', e.target.value)}
               placeholder="Enter city"
               className={`form-input ${errors.addressCity ? 'error' : ''}`}
               required
@@ -65,7 +65,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
               id="addressState"
               name="addressState"
               value={formData.addressState}
-              onChange={e => onChange('addressState', e.target.value)}
+              onChange={(e) => onChange('addressState', e.target.value)}
               placeholder="Enter state"
               className={`form-input ${errors.addressState ? 'error' : ''}`}
               required
@@ -82,7 +82,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
               id="addressZipcode"
               name="addressZipcode"
               value={formData.addressZipcode}
-              onChange={e => onChange('addressZipcode', e.target.value)}
+              onChange={(e) => onChange('addressZipcode', e.target.value)}
               placeholder="Enter ZIP code"
               className={`form-input ${errors.addressZipcode ? 'error' : ''}`}
               required
@@ -100,7 +100,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
             <input
               type="checkbox"
               checked={formData.sameAsVenue}
-              onChange={e => onChange('sameAsVenue', e.target.checked)}
+              onChange={(e) => onChange('sameAsVenue', e.target.checked)}
               className="checkbox-input"
             />
             <span className="checkbox-text">Event venue is the same as service address</span>
@@ -124,7 +124,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
                   id="venueStreet"
                   name="venueStreet"
                   value={formData.venueStreet || ''}
-                  onChange={e => onChange('venueStreet', e.target.value)}
+                  onChange={(e) => onChange('venueStreet', e.target.value)}
                   placeholder="Enter venue street address"
                   className={`form-input ${errors.venueStreet ? 'error' : ''}`}
                 />
@@ -140,7 +140,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
                   id="venueCity"
                   name="venueCity"
                   value={formData.venueCity || ''}
-                  onChange={e => onChange('venueCity', e.target.value)}
+                  onChange={(e) => onChange('venueCity', e.target.value)}
                   placeholder="Enter venue city"
                   className={`form-input ${errors.venueCity ? 'error' : ''}`}
                 />
@@ -156,7 +156,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
                   id="venueState"
                   name="venueState"
                   value={formData.venueState || ''}
-                  onChange={e => onChange('venueState', e.target.value)}
+                  onChange={(e) => onChange('venueState', e.target.value)}
                   placeholder="Enter venue state"
                   className={`form-input ${errors.venueState ? 'error' : ''}`}
                 />
@@ -172,7 +172,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
                   id="venueZipcode"
                   name="venueZipcode"
                   value={formData.venueZipcode || ''}
-                  onChange={e => onChange('venueZipcode', e.target.value)}
+                  onChange={(e) => onChange('venueZipcode', e.target.value)}
                   placeholder="Enter venue ZIP code"
                   className={`form-input ${errors.venueZipcode ? 'error' : ''}`}
                 />
@@ -185,5 +185,5 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
         )}
       </div>
     </div>
-  )
+  );
 }

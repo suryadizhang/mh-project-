@@ -85,7 +85,7 @@ const CTAButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, CTAButtonPro
       type = 'button',
       fullWidth = false,
     },
-    ref
+    ref,
   ) => {
     const baseClasses = `
       group relative inline-flex items-center justify-center
@@ -148,7 +148,7 @@ const CTAButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, CTAButtonPro
         {content}
       </button>
     );
-  }
+  },
 );
 
 CTAButton.displayName = 'CTAButton';
@@ -177,11 +177,7 @@ export function CTAButtonGroup({
 }) {
   return (
     <div
-      className={`
-        flex flex-col gap-4 sm:flex-row
-        ${centered ? 'justify-center' : ''}
-        ${className}
-      `}
+      className={`flex flex-col gap-4 sm:flex-row ${centered ? 'justify-center' : ''} ${className} `}
     >
       {children}
     </div>

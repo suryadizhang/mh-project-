@@ -10,31 +10,31 @@
 > - SSL: Handled by Cloudflare Tunnel (Zero Trust)
 > - CI/CD: GitHub Actions with Cloudflare Access SSH
 >
-> **LEGACY NOTICE**: Sections mentioning systemctl/venv are deprecated.
-> Docker is the current deployment method.
+> **LEGACY NOTICE**: Sections mentioning systemctl/venv are
+> deprecated. Docker is the current deployment method.
 
 ## Quick Reference
 
 ### Domains & Hosting
 
-| Service           | Domain                           | Hosting                | Port |
-| ----------------- | -------------------------------- | ---------------------- | ---- |
-| **Production API**| `mhapi.mysticdatanode.net`       | VPS Docker (8000)      | 8000 |
-| **Staging API**   | `staging-api.mysticdatanode.net` | VPS Docker (8002)      | 8002 |
-| **Admin Panel**   | `admin.mysticdatanode.net`       | Vercel (auto)          | -    |
-| **Customer Site** | `myhibachichef.com`              | Vercel (auto)          | -    |
+| Service            | Domain                           | Hosting           | Port |
+| ------------------ | -------------------------------- | ----------------- | ---- |
+| **Production API** | `mhapi.mysticdatanode.net`       | VPS Docker (8000) | 8000 |
+| **Staging API**    | `staging-api.mysticdatanode.net` | VPS Docker (8002) | 8002 |
+| **Admin Panel**    | `admin.mysticdatanode.net`       | Vercel (auto)     | -    |
+| **Customer Site**  | `myhibachichef.com`              | Vercel (auto)     | -    |
 
 ### Backend VPS Configuration
 
-| Item             | Value                    |
-| ---------------- | ------------------------ |
-| VPS Provider     | IONOS                    |
-| IP Address       | `108.175.12.154`         |
-| SSH Access       | Cloudflare Tunnel (Zero Trust) |
-| Container Runtime| Docker + Compose         |
-| Database         | PostgreSQL 13.22 (native)|
-| Cache            | Redis (Docker container) |
-| Python           | 3.11 (in container)      |
+| Item              | Value                          |
+| ----------------- | ------------------------------ |
+| VPS Provider      | IONOS                          |
+| IP Address        | `108.175.12.154`               |
+| SSH Access        | Cloudflare Tunnel (Zero Trust) |
+| Container Runtime | Docker + Compose               |
+| Database          | PostgreSQL 13.22 (native)      |
+| Cache             | Redis (Docker container)       |
+| Python            | 3.11 (in container)            |
 
 ---
 
@@ -125,24 +125,25 @@ docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | grep -E "stagin
 
 **GitHub Actions automatically deploys on push:**
 
-| Branch | Environment | Workflow File |
-|--------|-------------|---------------|
-| `dev`  | Staging     | `.github/workflows/deploy-backend-staging.yml` |
+| Branch | Environment | Workflow File                                     |
+| ------ | ----------- | ------------------------------------------------- |
+| `dev`  | Staging     | `.github/workflows/deploy-backend-staging.yml`    |
 | `main` | Production  | `.github/workflows/deploy-backend-production.yml` |
 
 ### Required GitHub Secrets
 
-Configure these in **GitHub → Settings → Secrets and variables → Actions**:
+Configure these in **GitHub → Settings → Secrets and variables →
+Actions**:
 
-| Secret                   | Description                              | Example                                                                 |
-| ------------------------ | ---------------------------------------- | ----------------------------------------------------------------------- |
-| `CF_ACCESS_CLIENT_ID`    | Cloudflare Access Service Token ID       | `abc123.access`                                                         |
-| `CF_ACCESS_CLIENT_SECRET`| Cloudflare Access Service Token Secret   | `xxxxxxxxxxxxx`                                                         |
-| `CF_SSH_HOSTNAME`        | SSH hostname via Cloudflare              | `ssh.mhapi.mysticdatanode.net`                                          |
-| `VPS_USER`               | SSH user                                 | `root`                                                                  |
-| `VPS_STAGING_PATH`       | Staging backend path                     | `/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend`    |
-| `VPS_PRODUCTION_PATH`    | Production backend path                  | `/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend`    |
-| `STAGING_API_URL`        | Staging API URL for E2E tests            | `https://staging-api.mysticdatanode.net`                                |
+| Secret                    | Description                            | Example                                                              |
+| ------------------------- | -------------------------------------- | -------------------------------------------------------------------- |
+| `CF_ACCESS_CLIENT_ID`     | Cloudflare Access Service Token ID     | `abc123.access`                                                      |
+| `CF_ACCESS_CLIENT_SECRET` | Cloudflare Access Service Token Secret | `xxxxxxxxxxxxx`                                                      |
+| `CF_SSH_HOSTNAME`         | SSH hostname via Cloudflare            | `ssh.mhapi.mysticdatanode.net`                                       |
+| `VPS_USER`                | SSH user                               | `root`                                                               |
+| `VPS_STAGING_PATH`        | Staging backend path                   | `/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend` |
+| `VPS_PRODUCTION_PATH`     | Production backend path                | `/var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend` |
+| `STAGING_API_URL`         | Staging API URL for E2E tests          | `https://staging-api.mysticdatanode.net`                             |
 
 ### CI/CD Workflow
 
@@ -172,7 +173,8 @@ Configure these in **GitHub → Settings → Secrets and variables → Actions**
 ### Manual Trigger
 
 1. Go to GitHub → Actions
-2. Select "Deploy Backend to Staging" or "Deploy Backend to Production"
+2. Select "Deploy Backend to Staging" or "Deploy Backend to
+   Production"
 3. Click "Run workflow"
 
 ---
@@ -181,9 +183,11 @@ Configure these in **GitHub → Settings → Secrets and variables → Actions**
 
 ### On Your Local Machine
 
-- [ ] All code committed to correct branch (`dev` for staging, `main` for production)
+- [ ] All code committed to correct branch (`dev` for staging, `main`
+      for production)
 - [ ] Tests passing locally: `cd apps/backend && pytest tests/unit -v`
-- [ ] Docker builds locally: `docker build -f Dockerfile.vps -t test-build .`
+- [ ] Docker builds locally:
+      `docker build -f Dockerfile.vps -t test-build .`
 - [ ] GitHub Secrets configured (see table above)
 
 ### On VPS (First-Time Setup Only)
@@ -197,14 +201,18 @@ Configure these in **GitHub → Settings → Secrets and variables → Actions**
 ---
 
 # Login to Google Cloud
+
 gcloud auth login
 
 # Set project
+
 gcloud config set project my-hibachi-crm
 
 # Authenticate application default credentials
+
 gcloud auth application-default login
-```
+
+````
 
 ### Step 4: Create PostgreSQL Database
 
@@ -230,7 +238,7 @@ CREATE SCHEMA IF NOT EXISTS ai;
 GRANT ALL ON SCHEMA core, identity, lead, newsletter, ai TO myhibachi_user;
 
 \q
-```
+````
 
 ### Step 5: Store Database URL in GSM
 
@@ -493,8 +501,9 @@ sudo -u postgres psql -d myhibachi_production
 
 ## 🗃️ LEGACY: Systemd Deployment (Deprecated)
 
-> **⚠️ DEPRECATED**: The following sections describe the old systemd-based
-> deployment. We now use Docker. These are kept for reference only.
+> **⚠️ DEPRECATED**: The following sections describe the old
+> systemd-based deployment. We now use Docker. These are kept for
+> reference only.
 
 <details>
 <summary>Click to expand legacy systemd documentation</summary>

@@ -47,57 +47,51 @@ export function StepIndicator({
                 type="button"
                 onClick={() => isClickable && onStepClick?.(step.step)}
                 disabled={!isClickable}
-                className={`
-                  relative flex flex-col items-center
-                  ${isClickable ? 'cursor-pointer' : 'cursor-default'}
-                `}
+                className={`relative flex flex-col items-center ${isClickable ? 'cursor-pointer' : 'cursor-default'} `}
               >
                 {/* Circle */}
                 <div
-                  className={`
-                    w-12 h-12 rounded-full flex items-center justify-center transition-all
-                    ${isActive
+                  className={`flex h-12 w-12 items-center justify-center rounded-full transition-all ${
+                    isActive
                       ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/25'
                       : isCompleted
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-700 text-gray-400'
-                    }
-                  `}
+                  } `}
                 >
                   {variant === 'icons' ? (
-                    <IconComponent className="w-5 h-5" />
+                    <IconComponent className="h-5 w-5" />
                   ) : variant === 'numbers' ? (
                     <span className="text-sm font-semibold">{step.step}</span>
                   ) : (
                     <div
-                      className={`w-3 h-3 rounded-full ${isActive || isCompleted ? 'bg-white' : 'bg-gray-500'
-                        }`}
+                      className={`h-3 w-3 rounded-full ${
+                        isActive || isCompleted ? 'bg-white' : 'bg-gray-500'
+                      }`}
                     />
                   )}
                 </div>
 
                 {/* Label */}
                 <span
-                  className={`
-                    mt-2 text-xs font-medium
-                    ${isActive ? 'text-amber-500' : isCompleted ? 'text-green-400' : 'text-gray-500'}
-                  `}
+                  className={`mt-2 text-xs font-medium ${isActive ? 'text-amber-500' : isCompleted ? 'text-green-400' : 'text-gray-500'} `}
                 >
                   {step.label}
                 </span>
 
                 {/* Active indicator */}
                 {isActive && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                  <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 animate-pulse rounded-full bg-amber-500" />
                 )}
               </button>
 
               {/* Connector Line */}
               {index < totalSteps - 1 && (
-                <div className="flex-1 mx-2">
+                <div className="mx-2 flex-1">
                   <div
-                    className={`h-0.5 transition-all ${currentStep > step.step ? 'bg-green-500' : 'bg-gray-700'
-                      }`}
+                    className={`h-0.5 transition-all ${
+                      currentStep > step.step ? 'bg-green-500' : 'bg-gray-700'
+                    }`}
                   />
                 </div>
               )}
@@ -107,7 +101,7 @@ export function StepIndicator({
       </div>
 
       {/* Progress bar (alternative visual) */}
-      <div className="mt-4 h-1 bg-gray-700 rounded-full overflow-hidden">
+      <div className="mt-4 h-1 overflow-hidden rounded-full bg-gray-700">
         <div
           className="h-full bg-gradient-to-r from-amber-500 to-orange-600 transition-all duration-500"
           style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}

@@ -42,9 +42,7 @@ export interface StartLiveChatResponse {
 /**
  * Start a live chat session with RingCentral agent
  */
-export async function startLiveChat(
-  request: StartLiveChatRequest
-): Promise<StartLiveChatResponse> {
+export async function startLiveChat(request: StartLiveChatRequest): Promise<StartLiveChatResponse> {
   try {
     const response = await fetch('/api/ringcentral/chat/start', {
       method: 'POST',
@@ -85,7 +83,7 @@ export async function startLiveChat(
  */
 export async function sendLiveChatMessage(
   sessionId: string,
-  message: string
+  message: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch('/api/ringcentral/chat/message', {
@@ -120,7 +118,7 @@ export async function sendLiveChatMessage(
  */
 export async function pollLiveChatMessages(
   sessionId: string,
-  lastMessageId?: string
+  lastMessageId?: string,
 ): Promise<{ success: boolean; messages?: LiveChatMessage[]; error?: string }> {
   try {
     const params = new URLSearchParams({ session_id: sessionId });
@@ -173,7 +171,7 @@ export async function pollLiveChatMessages(
  * End a live chat session
  */
 export async function endLiveChat(
-  sessionId: string
+  sessionId: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const response = await fetch('/api/ringcentral/chat/end', {
@@ -204,8 +202,13 @@ export async function endLiveChat(
  * Check live chat session status
  */
 export async function getLiveChatStatus(
-  sessionId: string
-): Promise<{ success: boolean; status?: LiveChatSession['status']; agentName?: string; error?: string }> {
+  sessionId: string,
+): Promise<{
+  success: boolean;
+  status?: LiveChatSession['status'];
+  agentName?: string;
+  error?: string;
+}> {
   try {
     const response = await fetch(`/api/ringcentral/chat/status?session_id=${sessionId}`);
 

@@ -1,8 +1,7 @@
 # My Hibachi Staging API Documentation
 
-**Last Updated:** February 4, 2026
-**API Base URL:** `https://staging-api.mysticdatanode.net`
-**Environment:** Staging
+**Last Updated:** February 4, 2026 **API Base URL:**
+`https://staging-api.mysticdatanode.net` **Environment:** Staging
 
 ---
 
@@ -23,8 +22,7 @@
 
 ### Login
 
-**Endpoint:** `POST /api/v1/auth/login`
-**Auth Required:** No
+**Endpoint:** `POST /api/v1/auth/login` **Auth Required:** No
 **Description:** Authenticate user and receive JWT tokens
 
 **Request Body:**
@@ -72,9 +70,8 @@
 
 ### Get Current User
 
-**Endpoint:** `GET /api/v1/auth/me`
-**Auth Required:** Yes (Bearer token)
-**Description:** Get currently authenticated user information
+**Endpoint:** `GET /api/v1/auth/me` **Auth Required:** Yes (Bearer
+token) **Description:** Get currently authenticated user information
 
 **Success Response (200 OK):**
 
@@ -92,9 +89,8 @@
 
 ### Logout
 
-**Endpoint:** `POST /api/v1/auth/logout`
-**Auth Required:** Yes (Bearer token)
-**Description:** Invalidate current session
+**Endpoint:** `POST /api/v1/auth/logout` **Auth Required:** Yes
+(Bearer token) **Description:** Invalidate current session
 
 **Success Response (200 OK):**
 
@@ -111,9 +107,9 @@
 
 ### List All Users
 
-**Endpoint:** `GET /api/v1/admin/users`
-**Auth Required:** Yes (SUPER_ADMIN or ADMIN role)
-**Description:** Get paginated list of all users
+**Endpoint:** `GET /api/v1/admin/users` **Auth Required:** Yes
+(SUPER_ADMIN or ADMIN role) **Description:** Get paginated list of all
+users
 
 **Query Parameters:**
 
@@ -156,9 +152,8 @@
 
 ### Create New User
 
-**Endpoint:** `POST /api/v1/admin/users`
-**Auth Required:** Yes (SUPER_ADMIN or ADMIN role)
-**Description:** Create a new admin user
+**Endpoint:** `POST /api/v1/admin/users` **Auth Required:** Yes
+(SUPER_ADMIN or ADMIN role) **Description:** Create a new admin user
 
 **Request Body:**
 
@@ -229,9 +224,9 @@
 
 ### Get User by ID
 
-**Endpoint:** `GET /api/v1/admin/users/{user_id}`
-**Auth Required:** Yes (SUPER_ADMIN or ADMIN role)
-**Description:** Get detailed information about a specific user
+**Endpoint:** `GET /api/v1/admin/users/{user_id}` **Auth Required:**
+Yes (SUPER_ADMIN or ADMIN role) **Description:** Get detailed
+information about a specific user
 
 **Path Parameters:**
 
@@ -263,9 +258,9 @@
 
 ### Update User
 
-**Endpoint:** `PUT /api/v1/admin/users/{user_id}`
-**Auth Required:** Yes (SUPER_ADMIN or ADMIN role)
-**Description:** Update user information
+**Endpoint:** `PUT /api/v1/admin/users/{user_id}` **Auth Required:**
+Yes (SUPER_ADMIN or ADMIN role) **Description:** Update user
+information
 
 **Request Body (all fields optional):**
 
@@ -306,9 +301,9 @@
 
 ### Delete User (Soft Delete)
 
-**Endpoint:** `DELETE /api/v1/admin/users/{user_id}`
-**Auth Required:** Yes (SUPER_ADMIN only)
-**Description:** Soft delete a user (sets status to inactive)
+**Endpoint:** `DELETE /api/v1/admin/users/{user_id}` **Auth
+Required:** Yes (SUPER_ADMIN only) **Description:** Soft delete a user
+(sets status to inactive)
 
 **Success Response (204 No Content)**
 
@@ -318,9 +313,8 @@
 
 ### List All Stations
 
-**Endpoint:** `GET /api/v1/stations`
-**Auth Required:** Yes (⚠️ Currently requires session-based auth - see
-Known Issues)
+**Endpoint:** `GET /api/v1/stations` **Auth Required:** Yes (⚠️
+Currently requires session-based auth - see Known Issues)
 **Description:** Get list of all active stations
 
 **Query Parameters:**
@@ -363,10 +357,10 @@ Known Issues)
 
 ### Get Current Pricing
 
-**Endpoint:** `GET /api/v1/pricing/current`
-**Auth Required:** No (public endpoint)
-**Description:** Get comprehensive pricing information including base
-pricing, travel fees, menu items, and add-ons
+**Endpoint:** `GET /api/v1/pricing/current` **Auth Required:** No
+(public endpoint) **Description:** Get comprehensive pricing
+information including base pricing, travel fees, menu items, and
+add-ons
 
 **Success Response (200 OK):**
 
@@ -461,9 +455,9 @@ pricing, travel fees, menu items, and add-ons
 
 ### Calculate Quote
 
-**Endpoint:** `POST /api/v1/pricing/calculate`
-**Auth Required:** No (public endpoint)
-**Description:** Calculate a party quote with all fees and upgrades
+**Endpoint:** `POST /api/v1/pricing/calculate` **Auth Required:** No
+(public endpoint) **Description:** Calculate a party quote with all
+fees and upgrades
 
 **Request Body:**
 
@@ -574,9 +568,8 @@ pricing, travel fees, menu items, and add-ons
 
 ### API Health
 
-**Endpoint:** `GET /health`
-**Auth Required:** No
-**Description:** Basic health check
+**Endpoint:** `GET /health` **Auth Required:** No **Description:**
+Basic health check
 
 **Success Response (200 OK):**
 
@@ -591,8 +584,7 @@ pricing, travel fees, menu items, and add-ons
 
 ### Detailed Health Check
 
-**Endpoint:** `GET /api/v1/health`
-**Auth Required:** No
+**Endpoint:** `GET /api/v1/health` **Auth Required:** No
 **Description:** Detailed service status including database
 connectivity
 
@@ -728,8 +720,8 @@ calculation)
 
 ### E2E Test Results (Staging)
 
-**Last Run:** February 4, 2026
-**Results:** 63 passing, 15 skipped, 0 failures
+**Last Run:** February 4, 2026 **Results:** 63 passing, 15 skipped, 0
+failures
 
 **Passing Tests:**
 
@@ -751,9 +743,8 @@ calculation)
 
 ### Postman Test Results
 
-**Last Run:** February 4, 2026
-**Results:** 14 requests, 27 assertions, 14 passed (52%), 13 failed
-(48%)
+**Last Run:** February 4, 2026 **Results:** 14 requests, 27
+assertions, 14 passed (52%), 13 failed (48%)
 
 **Passing:**
 
@@ -830,6 +821,5 @@ calculation)
 
 ---
 
-**Document Version:** 1.0
-**Generated:** February 4, 2026
-**Status:** Living document - updated as API evolves
+**Document Version:** 1.0 **Generated:** February 4, 2026 **Status:**
+Living document - updated as API evolves

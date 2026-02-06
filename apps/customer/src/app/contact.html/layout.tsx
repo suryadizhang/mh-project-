@@ -1,14 +1,10 @@
-import { Metadata } from "next";
+import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "Contact - My Hibachi Chef",
-  description: "Contact My Hibachi Chef for your next event",
+  title: 'Contact - My Hibachi Chef',
+  description: 'Contact My Hibachi Chef for your next event',
 };
 
-export default function ContactHtmlLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ContactHtmlLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

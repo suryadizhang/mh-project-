@@ -176,57 +176,44 @@ export default function RateLimitBanner() {
 
   return (
     <div
-      className={`
-        fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl
-        mx-auto px-4 transition-all duration-300 ease-in-out
-        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}
-      `}
+      className={`fixed top-4 left-1/2 z-50 mx-auto w-full max-w-2xl -translate-x-1/2 px-4 transition-all duration-300 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'} `}
       role="alert"
       aria-live="assertive"
     >
-      <div
-        className={`
-          relative rounded-lg border-2 shadow-lg p-4
-          ${getColorClass()}
-        `}
-      >
+      <div className={`relative rounded-lg border-2 p-4 shadow-lg ${getColorClass()} `}>
         {/* Close button */}
         <button
           onClick={handleDismiss}
-          className="absolute top-2 right-2 p-1 rounded-full hover:bg-black/10 transition-colors"
+          className="absolute top-2 right-2 rounded-full p-1 transition-colors hover:bg-black/10"
           aria-label="Dismiss rate limit warning"
         >
-          <X className="w-5 h-5" />
+          <X className="h-5 w-5" />
         </button>
 
         <div className="flex items-start gap-3 pr-8">
           {/* Icon */}
-          <div className="flex-shrink-0 mt-0.5">
-            <AlertTriangle className={`w-6 h-6 ${getIconColorClass()}`} />
+          <div className="mt-0.5 flex-shrink-0">
+            <AlertTriangle className={`h-6 w-6 ${getIconColorClass()}`} />
           </div>
 
           {/* Content */}
           <div className="flex-1">
-            <h3 className="font-semibold text-lg mb-1">
-              Rate Limit Reached
-            </h3>
+            <h3 className="mb-1 text-lg font-semibold">Rate Limit Reached</h3>
 
-            <p className="text-sm mb-3">
-              {"You've reached the limit for"} <strong>{getEndpointDisplay()}</strong>.
-              Please wait before trying again.
+            <p className="mb-3 text-sm">
+              {"You've reached the limit for"} <strong>{getEndpointDisplay()}</strong>. Please wait
+              before trying again.
             </p>
 
             {/* Countdown */}
-            <div className="flex items-center gap-2 mb-3">
-              <Clock className={`w-4 h-4 ${getIconColorClass()}`} />
-              <span className="font-mono font-bold text-lg">
-                {formatTime(remainingSeconds)}
-              </span>
+            <div className="mb-3 flex items-center gap-2">
+              <Clock className={`h-4 w-4 ${getIconColorClass()}`} />
+              <span className="font-mono text-lg font-bold">{formatTime(remainingSeconds)}</span>
               <span className="text-sm opacity-75">remaining</span>
             </div>
 
             {/* Progress bar */}
-            <div className="w-full bg-white/50 rounded-full h-2 overflow-hidden">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-white/50">
               <div
                 className={`h-full transition-all duration-1000 ease-linear ${getProgressColorClass()}`}
                 style={{ width: `${progress}%` }}
@@ -235,7 +222,7 @@ export default function RateLimitBanner() {
 
             {/* Additional info */}
             {rateLimitInfo.remaining !== undefined && (
-              <p className="text-xs mt-2 opacity-75">
+              <p className="mt-2 text-xs opacity-75">
                 Requests remaining: {rateLimitInfo.remaining}
               </p>
             )}

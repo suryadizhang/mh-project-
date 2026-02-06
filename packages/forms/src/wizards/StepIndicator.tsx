@@ -96,7 +96,8 @@ export function StepIndicator({
   className = '',
 }: StepIndicatorProps) {
   // Determine steps array
-  const steps: WizardStep[] = customSteps ??
+  const steps: WizardStep[] =
+    customSteps ??
     Array.from({ length: totalSteps ?? 4 }, (_, i) => ({
       id: i + 1,
       label: `Step ${i + 1}`,
@@ -143,7 +144,9 @@ export function StepIndicator({
   };
 
   // Get step state
-  const getStepState = (stepNum: number): 'completed' | 'current' | 'upcoming' => {
+  const getStepState = (
+    stepNum: number
+  ): 'completed' | 'current' | 'upcoming' => {
     if (stepNum < currentStep) return 'completed';
     if (stepNum === currentStep) return 'current';
     return 'upcoming';
@@ -163,11 +166,14 @@ export function StepIndicator({
         </div>
         {showLabels && (
           <div className="flex justify-between mt-2">
-            {steps.map((step) => (
+            {steps.map(step => (
               <span
                 key={step.id}
-                className={`text-xs ${step.id <= currentStep ? 'text-primary-600 font-medium' : 'text-gray-400'
-                  }`}
+                className={`text-xs ${
+                  step.id <= currentStep
+                    ? 'text-primary-600 font-medium'
+                    : 'text-gray-400'
+                }`}
               >
                 {step.label}
               </span>
@@ -179,9 +185,10 @@ export function StepIndicator({
   }
 
   // Container classes based on orientation
-  const containerClass = orientation === 'horizontal'
-    ? 'flex items-center justify-between'
-    : 'flex flex-col items-start space-y-4';
+  const containerClass =
+    orientation === 'horizontal'
+      ? 'flex items-center justify-between'
+      : 'flex flex-col items-start space-y-4';
 
   return (
     <div className={`${containerClass} ${className}`}>
@@ -193,8 +200,9 @@ export function StepIndicator({
         return (
           <React.Fragment key={step.id}>
             <div
-              className={`flex flex-col items-center ${orientation === 'vertical' ? 'flex-row gap-3' : ''
-                }`}
+              className={`flex flex-col items-center ${
+                orientation === 'vertical' ? 'flex-row gap-3' : ''
+              }`}
             >
               {/* Step indicator */}
               <button
@@ -205,22 +213,21 @@ export function StepIndicator({
                   flex items-center justify-center rounded-full transition-all
                   ${variant === 'dots' ? sizes.dot : sizes.number}
                   ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-default'}
-                  ${state === 'completed'
-                    ? 'bg-primary-600 text-white'
-                    : state === 'current'
-                      ? 'bg-primary-600 text-white ring-4 ring-primary-200'
-                      : 'bg-gray-200 text-gray-500'
+                  ${
+                    state === 'completed'
+                      ? 'bg-primary-600 text-white'
+                      : state === 'current'
+                        ? 'bg-primary-600 text-white ring-4 ring-primary-200'
+                        : 'bg-gray-200 text-gray-500'
                   }
                 `}
                 aria-label={`Step ${step.id}: ${step.label}`}
                 aria-current={state === 'current' ? 'step' : undefined}
               >
-                {variant === 'dots' ? null : (
-                  state === 'completed' ? (
-                    <Check className={sizes.icon} />
-                  ) : (
-                    <span>{step.id}</span>
-                  )
+                {variant === 'dots' ? null : state === 'completed' ? (
+                  <Check className={sizes.icon} />
+                ) : (
+                  <span>{step.id}</span>
                 )}
               </button>
 
@@ -230,11 +237,12 @@ export function StepIndicator({
                   className={`
                     mt-1 text-center
                     ${size === 'sm' ? 'text-xs' : 'text-sm'}
-                    ${state === 'current'
-                      ? 'text-primary-600 font-medium'
-                      : state === 'completed'
-                        ? 'text-gray-700'
-                        : 'text-gray-400'
+                    ${
+                      state === 'current'
+                        ? 'text-primary-600 font-medium'
+                        : state === 'completed'
+                          ? 'text-gray-700'
+                          : 'text-gray-400'
                     }
                     ${orientation === 'vertical' ? 'mt-0' : ''}
                   `}
@@ -249,9 +257,11 @@ export function StepIndicator({
               <div
                 className={`
                   flex-1 mx-2 ${sizes.connector} rounded-full
-                  ${state === 'completed' || (state === 'current' && index < currentStep - 1)
-                    ? 'bg-primary-600'
-                    : 'bg-gray-200'
+                  ${
+                    state === 'completed' ||
+                    (state === 'current' && index < currentStep - 1)
+                      ? 'bg-primary-600'
+                      : 'bg-gray-200'
                   }
                 `}
                 aria-hidden="true"

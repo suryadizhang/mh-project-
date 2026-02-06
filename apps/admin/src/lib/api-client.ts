@@ -4,7 +4,11 @@
  */
 
 import { api, type ApiRequestOptions, type ApiResponse } from './api';
-import { parseApiError, retryWithBackoff, type RetryConfig } from './error-handler';
+import {
+  parseApiError,
+  retryWithBackoff,
+  type RetryConfig,
+} from './error-handler';
 
 export interface EnhancedApiOptions extends ApiRequestOptions {
   retry?: boolean | Partial<RetryConfig>;

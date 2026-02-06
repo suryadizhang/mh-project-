@@ -16,12 +16,12 @@ import { tokenManager } from '@/services/api';
 
 export interface WebSocketMessage {
   type:
-  | 'message'
-  | 'typing'
-  | 'system'
-  | 'error'
-  | 'connection_status'
-  | 'ai_response';
+    | 'message'
+    | 'typing'
+    | 'system'
+    | 'error'
+    | 'connection_status'
+    | 'ai_response';
   conversation_id: string;
   content: string;
   timestamp: string;
@@ -78,17 +78,20 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
   const messageQueue = useRef<string[]>([]);
 
   // Build WebSocket URL with query parameters including auth token
-  const buildWebSocketUrl = useCallback((wsToken: string | null) => {
-    const wsUrl = new URL(url);
-    if (conversationId)
-      wsUrl.searchParams.append('conversation_id', conversationId);
-    if (userId) wsUrl.searchParams.append('user_id', userId);
-    if (channel) wsUrl.searchParams.append('channel', channel);
-    if (userRole) wsUrl.searchParams.append('user_role', userRole);
-    // Add JWT token for authentication
-    if (wsToken) wsUrl.searchParams.append('token', wsToken);
-    return wsUrl.toString();
-  }, [url, conversationId, userId, channel, userRole]);
+  const buildWebSocketUrl = useCallback(
+    (wsToken: string | null) => {
+      const wsUrl = new URL(url);
+      if (conversationId)
+        wsUrl.searchParams.append('conversation_id', conversationId);
+      if (userId) wsUrl.searchParams.append('user_id', userId);
+      if (channel) wsUrl.searchParams.append('channel', channel);
+      if (userRole) wsUrl.searchParams.append('user_role', userRole);
+      // Add JWT token for authentication
+      if (wsToken) wsUrl.searchParams.append('token', wsToken);
+      return wsUrl.toString();
+    },
+    [url, conversationId, userId, channel, userRole]
+  );
 
   // Connect to WebSocket with authentication
   const connect = useCallback(async () => {
@@ -109,19 +112,25 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
             setAuthToken(wsToken);
           }
         } catch (tokenError) {
-          logger.error(tokenError as Error, { context: 'websocket_token_fetch' });
+          logger.error(tokenError as Error, {
+            context: 'websocket_token_fetch',
+          });
         }
       }
 
       if (!wsToken) {
-        logger.websocket('connect', { error: 'No authentication token available' });
+        logger.websocket('connect', {
+          error: 'No authentication token available',
+        });
         setConnectionError('Authentication required for WebSocket connection');
         setIsConnecting(false);
         return;
       }
 
       const wsUrl = buildWebSocketUrl(wsToken);
-      logger.websocket('connect', { url: wsUrl.replace(/token=[^&]+/, 'token=***') });
+      logger.websocket('connect', {
+        url: wsUrl.replace(/token=[^&]+/, 'token=***'),
+      });
 
       ws.current = new WebSocket(wsUrl);
 

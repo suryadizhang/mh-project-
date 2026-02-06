@@ -1,39 +1,39 @@
-'use client'
+'use client';
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react';
 
-import { homeData } from '@/data/home'
-import styles from '@/styles/home/features.module.css'
-import type { HomeFeature } from '@/types/data'
+import { homeData } from '@/data/home';
+import styles from '@/styles/home/features.module.css';
+import type { HomeFeature } from '@/types/data';
 
 export function FeaturesGrid() {
-  const sectionRef = useRef<HTMLElement>(null)
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
+      (entries) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add(styles.animateIn)
+            entry.target.classList.add(styles.animateIn);
             // Animate individual cards with stagger
-            const cards = entry.target.querySelectorAll(`.${styles.featureCard}`)
+            const cards = entry.target.querySelectorAll(`.${styles.featureCard}`);
             cards.forEach((card, index) => {
               setTimeout(() => {
-                card.classList.add(styles.cardAnimateIn)
-              }, index * 100)
-            })
+                card.classList.add(styles.cardAnimateIn);
+              }, index * 100);
+            });
           }
-        })
+        });
       },
-      { threshold: 0.1 }
-    )
+      { threshold: 0.1 },
+    );
 
     if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+      observer.observe(sectionRef.current);
     }
 
-    return () => observer.disconnect()
-  }, [])
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section className={styles.featuresSection} ref={sectionRef}>
@@ -64,5 +64,5 @@ export function FeaturesGrid() {
         </div>
       </div>
     </section>
-  )
+  );
 }

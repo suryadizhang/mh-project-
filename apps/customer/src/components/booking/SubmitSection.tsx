@@ -8,7 +8,7 @@ interface SubmitSectionProps {
 
 const SubmitSection: React.FC<SubmitSectionProps> = ({ isSubmitting, className = '' }) => {
   return (
-    <div className={`text-center py-6 ${className}`}>
+    <div className={`py-6 text-center ${className}`}>
       {/* Newsletter Auto-Subscribe Notice */}
       <div className="mb-6 rounded-xl border border-orange-200 bg-orange-50 p-4">
         <p className="text-sm text-gray-700">
@@ -24,7 +24,7 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({ isSubmitting, className =
 
       <button
         type="submit"
-        className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white text-lg font-bold rounded-xl shadow-lg hover:from-red-700 hover:to-red-800 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="inline-flex w-full transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-10 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-xl disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
@@ -39,8 +39,8 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({ isSubmitting, className =
           </>
         )}
       </button>
-      <p className="text-gray-500 mt-4 text-sm">
-        <Shield className="inline-block mr-1 h-4 w-4" />
+      <p className="mt-4 text-sm text-gray-500">
+        <Shield className="mr-1 inline-block h-4 w-4" />
         Your information is secure and will only be used to process your booking.
       </p>
     </div>

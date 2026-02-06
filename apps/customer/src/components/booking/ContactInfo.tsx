@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import React from 'react'
+import React from 'react';
 
-import type { BookingFormData } from '../../data/booking/types'
+import type { BookingFormData } from '../../data/booking/types';
 
 interface ContactInfoProps {
-  formData: BookingFormData
-  onChange: (field: keyof BookingFormData, value: string | number | Date | boolean) => void
-  errors: Record<string, string>
+  formData: BookingFormData;
+  onChange: (field: keyof BookingFormData, value: string | number | Date | boolean) => void;
+  errors: Record<string, string>;
 }
 
 export function ContactInfo({ formData, onChange, errors }: ContactInfoProps) {
@@ -24,7 +24,7 @@ export function ContactInfo({ formData, onChange, errors }: ContactInfoProps) {
             id="name"
             name="name"
             value={formData.name}
-            onChange={e => onChange('name', e.target.value)}
+            onChange={(e) => onChange('name', e.target.value)}
             placeholder="Enter your full name"
             className={`form-input ${errors.name ? 'error' : ''}`}
             required
@@ -41,7 +41,7 @@ export function ContactInfo({ formData, onChange, errors }: ContactInfoProps) {
             id="email"
             name="email"
             value={formData.email}
-            onChange={e => onChange('email', e.target.value)}
+            onChange={(e) => onChange('email', e.target.value)}
             placeholder="Enter your email address"
             className={`form-input ${errors.email ? 'error' : ''}`}
             required
@@ -58,7 +58,7 @@ export function ContactInfo({ formData, onChange, errors }: ContactInfoProps) {
             id="phone"
             name="phone"
             value={formData.phone}
-            onChange={e => onChange('phone', e.target.value)}
+            onChange={(e) => onChange('phone', e.target.value)}
             placeholder="(555) 123-4567"
             className={`form-input ${errors.phone ? 'error' : ''}`}
             required
@@ -67,5 +67,5 @@ export function ContactInfo({ formData, onChange, errors }: ContactInfoProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

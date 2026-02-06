@@ -5,7 +5,8 @@
 
 import { logger } from '@/lib/logger';
 
-const AI_API_BASE_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:8002';
+const AI_API_BASE_URL =
+  process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:8002';
 
 export interface ChatMessage {
   message_id: string;
@@ -175,8 +176,16 @@ class AIApiService {
   /**
    * Health check for AI API
    */
-  async healthCheck(): Promise<{ status: string; service: string; version: string }> {
-    return this.makeRequest<{ status: string; service: string; version: string }>('/api/health');
+  async healthCheck(): Promise<{
+    status: string;
+    service: string;
+    version: string;
+  }> {
+    return this.makeRequest<{
+      status: string;
+      service: string;
+      version: string;
+    }>('/api/health');
   }
 
   /**
@@ -187,7 +196,9 @@ class AIApiService {
       await this.healthCheck();
       return true;
     } catch (error) {
-      logger.warn('AI API not available', { error: error instanceof Error ? error.message : String(error) });
+      logger.warn('AI API not available', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }

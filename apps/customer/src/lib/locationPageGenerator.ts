@@ -2,18 +2,18 @@
 // ====================================
 
 export interface LocationPage {
-  city: string
-  slug: string
-  title: string
-  metaDescription: string
-  h1: string
+  city: string;
+  slug: string;
+  title: string;
+  metaDescription: string;
+  h1: string;
   content: {
-    hero: string
-    services: string[]
-    testimonials: string[]
-    faq: Array<{ question: string; answer: string }>
-  }
-  schema: Record<string, unknown>
+    hero: string;
+    services: string[];
+    testimonials: string[];
+    faq: Array<{ question: string; answer: string }>;
+  };
+  schema: Record<string, unknown>;
 }
 
 export const targetLocations = [
@@ -25,8 +25,8 @@ export const targetLocations = [
   'Santa Clara',
   'Sunnyvale',
   'Sacramento',
-  'Fremont'
-]
+  'Fremont',
+];
 
 export function generateLocationPage(city: string): LocationPage {
   return {
@@ -45,35 +45,35 @@ export function generateLocationPage(city: string): LocationPage {
         `${city} Holiday Party Catering`,
         `${city} Backyard Party Entertainment`,
         `${city} Family Reunion Hibachi`,
-        `${city} Graduation Celebrations`
+        `${city} Graduation Celebrations`,
       ],
       testimonials: [
         `"MyHibachi made our ${city} wedding reception absolutely magical! The chef was entertaining and the food was restaurant quality. All our guests are still talking about it!" - Sarah & Mike, ${city}`,
         `"For our ${city} corporate event, MyHibachi provided the perfect team building experience. Professional, engaging, and delicious!" - Tech Company, ${city}`,
-        `"Best birthday party ever in ${city}! The hibachi chef made my daughter's 16th birthday unforgettable. Highly recommend!" - Jennifer, ${city} Mom`
+        `"Best birthday party ever in ${city}! The hibachi chef made my daughter's 16th birthday unforgettable. Highly recommend!" - Jennifer, ${city} Mom`,
       ],
       faq: [
         {
           question: `What areas of ${city} do you serve?`,
-          answer: `We provide hibachi catering throughout ${city} and surrounding areas. Our chefs are familiar with ${city.toLowerCase()} venues, homes, and event spaces. We'll travel anywhere in the ${city} area to bring you exceptional hibachi entertainment.`
+          answer: `We provide hibachi catering throughout ${city} and surrounding areas. Our chefs are familiar with ${city.toLowerCase()} venues, homes, and event spaces. We'll travel anywhere in the ${city} area to bring you exceptional hibachi entertainment.`,
         },
         {
           question: `How much space do I need for hibachi catering in ${city}?`,
-          answer: `For ${city} hibachi events, we need a minimum 8x8 foot area for our portable grill setup. Most ${city.toLowerCase()} homes, backyards, patios, or event venues provide adequate space. We'll assess your ${city} location during booking.`
+          answer: `For ${city} hibachi events, we need a minimum 8x8 foot area for our portable grill setup. Most ${city.toLowerCase()} homes, backyards, patios, or event venues provide adequate space. We'll assess your ${city} location during booking.`,
         },
         {
           question: `What's included in ${city} hibachi catering packages?`,
-          answer: `Our ${city} hibachi catering includes: professional chef, portable hibachi grill, all cooking equipment, fresh premium ingredients, interactive cooking show, and complete cleanup. You provide the venue and guests - we handle everything else for your ${city} event!`
+          answer: `Our ${city} hibachi catering includes: professional chef, portable hibachi grill, all cooking equipment, fresh premium ingredients, interactive cooking show, and complete cleanup. You provide the venue and guests - we handle everything else for your ${city} event!`,
         },
         {
           question: `How far in advance should I book ${city} hibachi catering?`,
-          answer: `For ${city} events, we recommend booking 2-4 weeks in advance, especially during peak seasons. However, we can sometimes accommodate last-minute ${city} bookings based on chef availability.`
+          answer: `For ${city} events, we recommend booking 2-4 weeks in advance, especially during peak seasons. However, we can sometimes accommodate last-minute ${city} bookings based on chef availability.`,
         },
         {
           question: `Do you provide hibachi catering for large events in ${city}?`,
-          answer: `Yes! We cater ${city} events from intimate dinners for 8 to large celebrations for 100+ guests. Multiple hibachi stations ensure everyone enjoys the full interactive experience at your ${city} event.`
-        }
-      ]
+          answer: `Yes! We cater ${city} events from intimate dinners for 8 to large celebrations for 100+ guests. Multiple hibachi stations ensure everyone enjoys the full interactive experience at your ${city} event.`,
+        },
+      ],
     },
     schema: {
       '@context': 'https://schema.org',
@@ -85,7 +85,7 @@ export function generateLocationPage(city: string): LocationPage {
         '@type': 'PostalAddress',
         addressLocality: city,
         addressRegion: 'CA',
-        addressCountry: 'US'
+        addressCountry: 'US',
       },
       telephone: '+1-555-HIBACHI',
       url: `https://myhibachichef.com/locations/${city.toLowerCase().replace(/\s+/g, '-')}`,
@@ -93,12 +93,12 @@ export function generateLocationPage(city: string): LocationPage {
       priceRange: '$$-$$$',
       serviceArea: {
         '@type': 'Place',
-        name: `${city} and surrounding areas`
+        name: `${city} and surrounding areas`,
       },
       aggregateRating: {
         '@type': 'AggregateRating',
         ratingValue: '4.9',
-        reviewCount: '150'
+        reviewCount: '150',
       },
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
@@ -108,31 +108,31 @@ export function generateLocationPage(city: string): LocationPage {
             '@type': 'Offer',
             itemOffered: {
               '@type': 'Service',
-              name: `${city} Birthday Party Hibachi`
-            }
+              name: `${city} Birthday Party Hibachi`,
+            },
           },
           {
             '@type': 'Offer',
             itemOffered: {
               '@type': 'Service',
-              name: `${city} Corporate Event Catering`
-            }
+              name: `${city} Corporate Event Catering`,
+            },
           },
           {
             '@type': 'Offer',
             itemOffered: {
               '@type': 'Service',
-              name: `${city} Wedding Reception Hibachi`
-            }
-          }
-        ]
-      }
-    }
-  }
+              name: `${city} Wedding Reception Hibachi`,
+            },
+          },
+        ],
+      },
+    },
+  };
 }
 
 export function generateAllLocationPages(): LocationPage[] {
-  return targetLocations.map(generateLocationPage)
+  return targetLocations.map(generateLocationPage);
 }
 
 // SEO-optimized content blocks for location pages
@@ -184,5 +184,5 @@ export const locationContentBlocks = {
     - Private homes throughout ${city}
 
     No matter where your ${city} event is located, our mobile hibachi service brings the restaurant experience to you!
-  `
-}
+  `,
+};

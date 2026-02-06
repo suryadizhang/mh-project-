@@ -134,10 +134,15 @@ export default function CustomersPage() {
     setLoadingDetail(true);
 
     try {
-      const response = await api.get(`/api/v1/bookings/admin/customer/${customer.email}`);
+      const response = await api.get(
+        `/api/v1/bookings/admin/customer/${customer.email}`
+      );
       if (response.success) {
         setCustomerDetail(response.data);
-        toast.success('Customer Details Loaded', `Showing details for ${customer.name}`);
+        toast.success(
+          'Customer Details Loaded',
+          `Showing details for ${customer.name}`
+        );
       } else {
         throw new Error(response.error || 'Failed to load customer details');
       }
@@ -457,7 +462,12 @@ export default function CustomersPage() {
                           View
                         </button>
                         <button
-                          onClick={() => toast.info('Coming Soon', 'Edit customer functionality will be available in the next update')}
+                          onClick={() =>
+                            toast.info(
+                              'Coming Soon',
+                              'Edit customer functionality will be available in the next update'
+                            )
+                          }
                           className="text-gray-600 hover:text-gray-900"
                         >
                           Edit
@@ -546,7 +556,11 @@ export default function CustomersPage() {
       <Modal
         isOpen={isDetailModalOpen}
         onClose={handleCloseDetail}
-        title={selectedCustomer ? `Customer: ${selectedCustomer.name}` : 'Customer Detail'}
+        title={
+          selectedCustomer
+            ? `Customer: ${selectedCustomer.name}`
+            : 'Customer Detail'
+        }
       >
         {loadingDetail ? (
           <div className="text-center py-8">
@@ -557,15 +571,21 @@ export default function CustomersPage() {
           <div className="space-y-6">
             {/* Contact Information */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Contact Information</h3>
+              <h3 className="text-lg font-semibold mb-3">
+                Contact Information
+              </h3>
               <dl className="grid grid-cols-2 gap-4">
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Email</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{customerDetail.email}</dd>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {customerDetail.email}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Phone</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{customerDetail.phone || 'N/A'}</dd>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {customerDetail.phone || 'N/A'}
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -575,24 +595,41 @@ export default function CustomersPage() {
               <h3 className="text-lg font-semibold mb-3">Booking Statistics</h3>
               <dl className="grid grid-cols-2 gap-4">
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Total Bookings</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{customerDetail.total_bookings || 0}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Total Spent</dt>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Total Bookings
+                  </dt>
                   <dd className="mt-1 text-sm text-gray-900">
-                    {customerDetail.total_spent_cents ? formatCurrency(customerDetail.total_spent_cents) : '$0.00'}
+                    {customerDetail.total_bookings || 0}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-gray-500">Last Booking</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{formatDate(customerDetail.last_booking_date)}</dd>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Total Spent
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {customerDetail.total_spent_cents
+                      ? formatCurrency(customerDetail.total_spent_cents)
+                      : '$0.00'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">
+                    Last Booking
+                  </dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {formatDate(customerDetail.last_booking_date)}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Status</dt>
                   <dd className="mt-1">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(customerDetail.status || 'active')}`}>
-                      {(customerDetail.status || 'Active').charAt(0).toUpperCase() + (customerDetail.status || 'Active').slice(1)}
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(customerDetail.status || 'active')}`}
+                    >
+                      {(customerDetail.status || 'Active')
+                        .charAt(0)
+                        .toUpperCase() +
+                        (customerDetail.status || 'Active').slice(1)}
                     </span>
                   </dd>
                 </div>

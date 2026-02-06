@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import type { FaqItem } from '@/data/faqsData'
+import type { FaqItem } from '@/data/faqsData';
 
-import { FaqList } from './FaqList'
+import { FaqList } from './FaqList';
 
 interface FAQsPageContainerProps {
-  faqs: FaqItem[]
+  faqs: FaqItem[];
 }
 
 export function FAQsPageContainer({ faqs }: FAQsPageContainerProps) {
@@ -43,5 +43,5 @@ export function FAQsPageContainer({ faqs }: FAQsPageContainerProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

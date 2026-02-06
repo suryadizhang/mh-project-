@@ -2,22 +2,22 @@
 // Uses cosine similarity for text matching
 
 interface SearchResult {
-  content: string
-  title: string
-  href: string
-  score: number
-  category: string
+  content: string;
+  title: string;
+  href: string;
+  score: number;
+  category: string;
 }
 
 interface DataEntry {
-  question?: string
-  answer?: string
-  title?: string
-  description?: string
-  content?: string
-  category: string
-  href: string
-  keywords?: string[]
+  question?: string;
+  answer?: string;
+  title?: string;
+  description?: string;
+  content?: string;
+  category: string;
+  href: string;
+  keywords?: string[];
 }
 
 // Simple text preprocessing
@@ -29,19 +29,30 @@ function preprocessText(text: string): string[] {
     .filter(word => word.length > 2)
     .filter(
       word =>
-        !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(
-          word
-        )
-    )
+        ![
+          'the',
+          'and',
+          'or',
+          'but',
+          'in',
+          'on',
+          'at',
+          'to',
+          'for',
+          'of',
+          'with',
+          'by',
+        ].includes(word)
+    );
 }
 
 // Calculate term frequency
 function getTermFrequency(terms: string[]): Map<string, number> {
-  const freq = new Map<string, number>()
+  const freq = new Map<string, number>();
   terms.forEach(term => {
-    freq.set(term, (freq.get(term) || 0) + 1)
-  })
-  return freq
+    freq.set(term, (freq.get(term) || 0) + 1);
+  });
+  return freq;
 }
 
 // Calculate TF-IDF score
@@ -50,53 +61,55 @@ function calculateTFIDF(
   documentTerms: string[],
   allDocuments: string[][]
 ): number {
-  const queryTF = getTermFrequency(queryTerms)
-  const docTF = getTermFrequency(documentTerms)
-  const docCount = allDocuments.length
+  const queryTF = getTermFrequency(queryTerms);
+  const docTF = getTermFrequency(documentTerms);
+  const docCount = allDocuments.length;
 
-  let score = 0
+  let score = 0;
 
   for (const [term, qFreq] of queryTF.entries()) {
-    const docFreq = docTF.get(term) || 0
+    const docFreq = docTF.get(term) || 0;
     if (docFreq > 0) {
       // Calculate IDF
-      const docsWithTerm = allDocuments.filter(doc => doc.includes(term)).length
-      const idf = Math.log(docCount / (docsWithTerm + 1))
+      const docsWithTerm = allDocuments.filter(doc =>
+        doc.includes(term)
+      ).length;
+      const idf = Math.log(docCount / (docsWithTerm + 1));
 
       // TF-IDF score
-      score += qFreq * docFreq * idf
+      score += qFreq * docFreq * idf;
     }
   }
 
   // Normalize by document length
-  const docLength = Math.sqrt(documentTerms.length)
-  const queryLength = Math.sqrt(queryTerms.length)
+  const docLength = Math.sqrt(documentTerms.length);
+  const queryLength = Math.sqrt(queryTerms.length);
 
-  return score / (docLength * queryLength + 1)
+  return score / (docLength * queryLength + 1);
 }
 
 // Load data based on page context
 async function loadData(page: string): Promise<DataEntry[]> {
   try {
-    const dataFiles = []
+    const dataFiles = [];
 
     // Always include FAQ data
-    const faqModule = await import('@/data/faq.json')
-    dataFiles.push(...faqModule.default)
+    const faqModule = await import('@/data/faq.json');
+    dataFiles.push(...faqModule.default);
 
     // Add page-specific data
     if (page === '/menu') {
-      const menuModule = await import('@/data/menu.json')
-      dataFiles.push(...menuModule.default)
+      const menuModule = await import('@/data/menu.json');
+      dataFiles.push(...menuModule.default);
     }
 
     // Always include policies for all pages
-    const policiesModule = await import('@/data/policies.json')
-    dataFiles.push(...policiesModule.default)
+    const policiesModule = await import('@/data/policies.json');
+    dataFiles.push(...policiesModule.default);
 
-    return dataFiles
+    return dataFiles;
   } catch (error) {
-    console.error('Error loading data:', error)
+    console.error('Error loading data:', error);
     // Return fallback data
     return [
       {
@@ -104,19 +117,22 @@ async function loadData(page: string): Promise<DataEntry[]> {
         content:
           'For specific questions about our hibachi catering service, please contact us directly.',
         category: 'general',
-        href: '/contact'
-      }
-    ]
+        href: '/contact',
+      },
+    ];
   }
 }
 
-export async function cosineSearch(query: string, page: string): Promise<SearchResult[]> {
+export async function cosineSearch(
+  query: string,
+  page: string
+): Promise<SearchResult[]> {
   try {
-    const data = await loadData(page)
-    const queryTerms = preprocessText(query)
+    const data = await loadData(page);
+    const queryTerms = preprocessText(query);
 
     if (queryTerms.length === 0) {
-      return []
+      return [];
     }
 
     // Prepare all documents for IDF calculation
@@ -127,11 +143,11 @@ export async function cosineSearch(query: string, page: string): Promise<SearchR
         item.title || '',
         item.description || '',
         item.content || '',
-        ...(item.keywords || [])
-      ].join(' ')
+        ...(item.keywords || []),
+      ].join(' ');
 
-      return preprocessText(searchableText)
-    })
+      return preprocessText(searchableText);
+    });
 
     // Calculate scores for each data entry
     const results: SearchResult[] = data.map(item => {
@@ -141,28 +157,28 @@ export async function cosineSearch(query: string, page: string): Promise<SearchR
         item.title || '',
         item.description || '',
         item.content || '',
-        ...(item.keywords || [])
-      ].join(' ')
+        ...(item.keywords || []),
+      ].join(' ');
 
-      const documentTerms = preprocessText(searchableText)
-      const score = calculateTFIDF(queryTerms, documentTerms, allDocuments)
+      const documentTerms = preprocessText(searchableText);
+      const score = calculateTFIDF(queryTerms, documentTerms, allDocuments);
 
       return {
         content: item.answer || item.content || item.description || '',
         title: item.question || item.title || 'Information',
         href: item.href,
         score,
-        category: item.category
-      }
-    })
+        category: item.category,
+      };
+    });
 
     // Sort by score and return top results
     return results
       .filter(result => result.score > 0.1) // Minimum threshold
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5) // Top 5 results
+      .slice(0, 5); // Top 5 results
   } catch (error) {
-    console.error('Vector search error:', error)
-    return []
+    console.error('Vector search error:', error);
+    return [];
   }
 }

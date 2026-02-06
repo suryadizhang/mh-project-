@@ -1,19 +1,19 @@
 /**
  * API Response Validation Schemas
- * 
+ *
  * This module exports all Zod schemas for validating API responses
  * across the MyHibachi application. These schemas provide runtime
  * validation and TypeScript type safety for all API endpoints.
- * 
+ *
  * @module @myhibachi/types/schemas
- * 
+ *
  * @example
  * // Import specific schemas
  * import { BookedDatesResponseSchema, PaymentIntentResponseSchema } from '@myhibachi/types/schemas';
- * 
+ *
  * // Import grouped schemas
  * import { BookingResponseSchemas, PaymentResponseSchemas } from '@myhibachi/types/schemas';
- * 
+ *
  * // Validate a response
  * const result = BookedDatesResponseSchema.safeParse(apiResponse);
  * if (result.success) {
@@ -125,19 +125,20 @@ export const SCHEMA_REGISTRY = {
   'POST /api/v1/bookings/submit': 'BookingSubmitResponseSchema',
   'GET /api/v1/bookings': 'BookingListResponseSchema',
   'GET /api/v1/bookings/:id': 'BookingDetailResponseSchema',
-  
+
   // Payment endpoints
   'POST /api/v1/payments/create-intent': 'PaymentIntentResponseSchema',
   'POST /create-checkout-session': 'CheckoutSessionResponseSchema',
-  'POST /api/v1/payments/checkout-session': 'CheckoutSessionVerifyResponseSchema',
-  
+  'POST /api/v1/payments/checkout-session':
+    'CheckoutSessionVerifyResponseSchema',
+
   // Customer endpoints
   'GET /api/v1/customers/dashboard': 'CustomerDashboardResponseSchema',
 } as const;
 
 /**
  * Quick reference table for schema usage
- * 
+ *
  * | Endpoint | Schema | Usage |
  * |----------|--------|-------|
  * | GET /api/v1/bookings/booked-dates | BookedDatesResponseSchema | useBooking, BookingFormContainer, BookUs/page |

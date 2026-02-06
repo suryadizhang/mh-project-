@@ -66,19 +66,12 @@ export async function GET(request: NextRequest) {
         break;
 
       default:
-        return NextResponse.json(
-          { error: 'Invalid type parameter' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 });
     }
 
     return NextResponse.json(data);
-
   } catch (error) {
     console.error('Blog API error:', error);
-    return NextResponse.json(
-      { error: 'Failed to load blog posts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to load blog posts' }, { status: 500 });
   }
 }

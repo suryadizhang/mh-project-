@@ -108,16 +108,16 @@ const paymentDetails = {
     phone: 'YOUR_REAL_PHONE',
     name: 'Your Real Business Name',
     color: 'purple',
-    icon: 'Z'
+    icon: 'Z',
   },
   venmo: {
     username: '@YourRealVenmoUsername',
     phone: 'YOUR_REAL_PHONE',
     name: 'Your Real Business Name',
     color: 'blue',
-    icon: 'V'
-  }
-}
+    icon: 'V',
+  },
+};
 ```
 
 ### **File 2: src/app/payment/success/page.tsx**

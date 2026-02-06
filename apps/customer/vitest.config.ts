@@ -56,7 +56,7 @@ export default defineConfig({
       '**/coverage/**',
       '**/*.d.ts',
       '**/tests/**', // Exclude playwright tests
-      '**/e2e/**'    // Exclude e2e tests
+      '**/e2e/**', // Exclude e2e tests
     ],
 
     // Test timeout

@@ -2,7 +2,8 @@
 
 ## Overview
 
-This guide will help you set up your My Hibachi backend on a Plesk-managed VPS for production deployment with CI/CD automation.
+This guide will help you set up your My Hibachi backend on a
+Plesk-managed VPS for production deployment with CI/CD automation.
 
 ---
 
@@ -61,6 +62,7 @@ This guide will help you set up your My Hibachi backend on a Plesk-managed VPS f
 ### Step 5: Install Redis (Optional but Recommended)
 
 **Via SSH**:
+
 ```bash
 # Login to VPS
 ssh user@your-vps-ip
@@ -87,6 +89,7 @@ redis-cli ping
 ### Step 1: Generate SSH Key for Deployment
 
 **On your local machine**:
+
 ```powershell
 # Generate SSH key (if you don't have one)
 ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/myhibachi_deploy
@@ -98,11 +101,13 @@ cat ~/.ssh/myhibachi_deploy.pub
 ### Step 2: Add SSH Key to VPS
 
 **Option A: Via Plesk Panel**
+
 1. Go to `Websites & Domains` → `Web Hosting Access`
 2. Enable SSH access
 3. Add your SSH public key
 
 **Option B: Via SSH**
+
 ```bash
 # Login to VPS
 ssh user@your-vps-ip
@@ -130,6 +135,7 @@ ssh -i ~/.ssh/myhibachi_deploy user@your-vps-ip
 ### Step 1: Create Directory Structure
 
 **On VPS via SSH**:
+
 ```bash
 # Navigate to web root
 cd /var/www/vhosts/myhibachi.com/httpdocs
@@ -221,6 +227,7 @@ chmod 600 .env
 ### Step 4: Upload Backend Code (Manual First Deploy)
 
 **From your local machine**:
+
 ```powershell
 cd "c:\Users\surya\projects\MH webapps\apps\backend"
 
@@ -249,14 +256,17 @@ alembic upgrade head
 
 ### Step 5: Configure Supervisor (Process Manager)
 
-Plesk uses **Passenger** by default, but for better control, use **Supervisor**.
+Plesk uses **Passenger** by default, but for better control, use
+**Supervisor**.
 
 **Create supervisor config**:
+
 ```bash
 sudo nano /etc/supervisor/conf.d/myhibachi-backend.conf
 ```
 
 **Add configuration**:
+
 ```ini
 [program:myhibachi-backend]
 directory=/var/www/vhosts/myhibachi.com/httpdocs/backend
@@ -270,6 +280,7 @@ environment=PATH="/var/www/vhosts/myhibachi.com/httpdocs/backend/venv/bin"
 ```
 
 **Start the service**:
+
 ```bash
 sudo supervisorctl reread
 sudo supervisorctl update
@@ -279,12 +290,15 @@ sudo supervisorctl status myhibachi-backend
 
 ### Step 6: Configure Nginx Reverse Proxy
 
-Plesk uses Nginx by default. Configure it to proxy to your FastAPI app.
+Plesk uses Nginx by default. Configure it to proxy to your FastAPI
+app.
 
 **Via Plesk Panel**:
+
 1. Go to `Websites & Domains` → `mhapi.mysticdatanode.net`
 2. Click `Apache & nginx Settings`
 3. **Add to "Additional nginx directives"**:
+
 ```nginx
 location / {
     proxy_pass http://127.0.0.1:8000;
@@ -292,12 +306,12 @@ location / {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
-    
+
     # WebSocket support (if needed)
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
-    
+
     # Timeouts
     proxy_connect_timeout 60s;
     proxy_send_timeout 60s;
@@ -315,21 +329,25 @@ location /health {
 ### Step 7: Verify Deployment
 
 **Check service status**:
+
 ```bash
 sudo supervisorctl status myhibachi-backend
 ```
 
 **Test locally on VPS**:
+
 ```bash
 curl http://localhost:8000/health
 ```
 
 **Test externally**:
+
 ```bash
 curl https://mhapi.mysticdatanode.net/health
 ```
 
 **Expected response**:
+
 ```json
 {
   "status": "healthy",
@@ -356,6 +374,7 @@ VPS_USER             = your-ssh-username
 ```
 
 **Example**:
+
 ```
 VPS_SSH_KEY:
 -----BEGIN OPENSSH PRIVATE KEY-----
@@ -380,6 +399,7 @@ VPS_USER: myhibachi_deploy
 ### Step 3: Test CI/CD Pipeline
 
 **Trigger deployment**:
+
 ```powershell
 # Make a small change to backend code
 cd "c:\Users\surya\projects\MH webapps\apps\backend"
@@ -394,11 +414,13 @@ git push origin main
 ```
 
 **Monitor deployment**:
+
 1. Go to GitHub → `Actions` tab
 2. Watch the workflow run
 3. Check each step for success ✅
 
 **Expected workflow**:
+
 ```
 🧪 Run Tests          → ✅ Passed (30s)
 🏗️ Build & Validate   → ✅ Passed (20s)
@@ -413,11 +435,13 @@ git push origin main
 ### Database Backups
 
 **Create backup script**:
+
 ```bash
 sudo nano /usr/local/bin/backup-myhibachi.sh
 ```
 
 **Add**:
+
 ```bash
 #!/bin/bash
 BACKUP_DIR="/var/www/vhosts/myhibachi.com/httpdocs/backend/backups"
@@ -436,6 +460,7 @@ echo "Backup completed: db_$DATE.sql.gz"
 ```
 
 **Make executable and schedule**:
+
 ```bash
 sudo chmod +x /usr/local/bin/backup-myhibachi.sh
 
@@ -446,11 +471,13 @@ sudo chmod +x /usr/local/bin/backup-myhibachi.sh
 ### Log Rotation
 
 **Create logrotate config**:
+
 ```bash
 sudo nano /etc/logrotate.d/myhibachi-backend
 ```
 
 **Add**:
+
 ```
 /var/www/vhosts/myhibachi.com/httpdocs/backend/logs/*.log {
     daily
@@ -470,6 +497,7 @@ sudo nano /etc/logrotate.d/myhibachi-backend
 ### Monitoring Health Checks
 
 **Create health check cron**:
+
 ```bash
 # Add to crontab (every 5 minutes)
 */5 * * * * curl -f https://mhapi.mysticdatanode.net/health || echo "Backend health check failed" | mail -s "My Hibachi Backend Alert" your-email@example.com
@@ -481,11 +509,13 @@ sudo nano /etc/logrotate.d/myhibachi-backend
 
 ### Automatic Rollback (Via CI/CD)
 
-If health checks fail after deployment, the CI/CD pipeline will automatically rollback.
+If health checks fail after deployment, the CI/CD pipeline will
+automatically rollback.
 
 ### Manual Rollback
 
 **If you need to manually rollback**:
+
 ```bash
 # SSH into VPS
 ssh user@your-vps-ip
@@ -538,6 +568,7 @@ sudo certbot certonly --standalone -d mhapi.mysticdatanode.net
 ### Issue: Backend not starting
 
 **Check logs**:
+
 ```bash
 sudo supervisorctl tail -f myhibachi-backend
 # Or
@@ -545,11 +576,13 @@ tail -f /var/www/vhosts/myhibachi.com/httpdocs/backend/logs/app.log
 ```
 
 **Check process**:
+
 ```bash
 sudo supervisorctl status myhibachi-backend
 ```
 
 **Restart service**:
+
 ```bash
 sudo supervisorctl restart myhibachi-backend
 ```
@@ -557,11 +590,13 @@ sudo supervisorctl restart myhibachi-backend
 ### Issue: Database connection failed
 
 **Check PostgreSQL**:
+
 ```bash
 sudo systemctl status postgresql
 ```
 
 **Test connection**:
+
 ```bash
 psql -U myhibachi_user -d myhibachi_prod -h localhost
 ```
@@ -571,16 +606,19 @@ psql -U myhibachi_user -d myhibachi_prod -h localhost
 ### Issue: 502 Bad Gateway
 
 **Check if backend is running**:
+
 ```bash
 curl http://localhost:8000/health
 ```
 
 **Check Nginx configuration**:
+
 ```bash
 sudo nginx -t
 ```
 
 **Check Nginx logs**:
+
 ```bash
 sudo tail -f /var/log/nginx/error.log
 ```
@@ -588,16 +626,19 @@ sudo tail -f /var/log/nginx/error.log
 ### Issue: CI/CD deployment fails
 
 **Check SSH connection**:
+
 ```bash
 ssh -i ~/.ssh/myhibachi_deploy user@your-vps-ip
 ```
 
 **Check GitHub Actions logs**:
+
 - Go to GitHub → Actions tab
 - Click on failed workflow
 - Review error messages
 
 **Common issues**:
+
 - SSH key not added correctly
 - Wrong VPS_HOST or VPS_USER
 - Permissions issue on VPS

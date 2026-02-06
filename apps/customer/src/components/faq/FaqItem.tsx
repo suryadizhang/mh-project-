@@ -114,4 +114,3 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
     </div>
   );
 }
-

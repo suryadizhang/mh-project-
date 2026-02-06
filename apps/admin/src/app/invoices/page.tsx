@@ -78,7 +78,9 @@ export default function InvoicesPage() {
           `/api/v1/payments/invoices?${params}`
         );
 
-        const invoiceList = Array.isArray(response) ? response : response.data || [];
+        const invoiceList = Array.isArray(response)
+          ? response
+          : response.data || [];
         setInvoices(invoiceList);
         setTotal(invoiceList.length); // Note: Backend should return total count
       } catch (error) {
@@ -152,7 +154,7 @@ export default function InvoicesPage() {
   };
 
   // Filter invoices by search query
-  const filteredInvoices = invoices.filter((invoice) => {
+  const filteredInvoices = invoices.filter(invoice => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -203,9 +205,7 @@ export default function InvoicesPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Invoices</h1>
-        <p className="text-gray-600">
-          Manage and track all customer invoices
-        </p>
+        <p className="text-gray-600">Manage and track all customer invoices</p>
       </div>
 
       {/* Stats Cards */}
@@ -213,7 +213,9 @@ export default function InvoicesPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Invoices</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Invoices
+              </p>
               <p className="text-2xl font-bold text-gray-900">{total}</p>
             </div>
             <FileText className="w-8 h-8 text-blue-500" />
@@ -225,7 +227,7 @@ export default function InvoicesPage() {
             <div>
               <p className="text-sm font-medium text-gray-600">Paid</p>
               <p className="text-2xl font-bold text-green-600">
-                {invoices.filter((i) => i.status === 'paid').length}
+                {invoices.filter(i => i.status === 'paid').length}
               </p>
             </div>
             <DollarSign className="w-8 h-8 text-green-500" />
@@ -237,7 +239,7 @@ export default function InvoicesPage() {
             <div>
               <p className="text-sm font-medium text-gray-600">Pending</p>
               <p className="text-2xl font-bold text-blue-600">
-                {invoices.filter((i) => i.status === 'sent').length}
+                {invoices.filter(i => i.status === 'sent').length}
               </p>
             </div>
             <Calendar className="w-8 h-8 text-blue-500" />
@@ -249,7 +251,7 @@ export default function InvoicesPage() {
             <div>
               <p className="text-sm font-medium text-gray-600">Overdue</p>
               <p className="text-2xl font-bold text-red-600">
-                {invoices.filter((i) => i.status === 'overdue').length}
+                {invoices.filter(i => i.status === 'overdue').length}
               </p>
             </div>
             <FileText className="w-8 h-8 text-red-500" />
@@ -269,7 +271,7 @@ export default function InvoicesPage() {
                   type="text"
                   placeholder="Search by invoice number, booking ID, or customer..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -280,7 +282,7 @@ export default function InvoicesPage() {
               <Filter className="w-5 h-5 text-gray-400" />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={e => setStatusFilter(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">All Statuses</option>
@@ -399,10 +401,11 @@ export default function InvoicesPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {sortedInvoices.map((invoice) => (
+                {sortedInvoices.map(invoice => (
                   <tr key={invoice.invoice_id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {invoice.invoice_number || `INV-${invoice.invoice_id.slice(0, 8)}`}
+                      {invoice.invoice_number ||
+                        `INV-${invoice.invoice_id.slice(0, 8)}`}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {invoice.booking_id}
@@ -456,7 +459,9 @@ export default function InvoicesPage() {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDownloadInvoice(invoice.invoice_id)}
+                          onClick={() =>
+                            handleDownloadInvoice(invoice.invoice_id)
+                          }
                           className="text-gray-600 hover:text-gray-900 flex items-center"
                           title="Download PDF"
                         >

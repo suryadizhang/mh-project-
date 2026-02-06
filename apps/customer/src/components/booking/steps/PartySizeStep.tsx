@@ -29,17 +29,22 @@ const getStyles = (variant: StepVariant = 'booking') => {
       section: 'mb-6',
       title: 'text-xl font-bold text-gray-900 inline-flex items-center mb-4',
       description: 'text-gray-600 mb-6',
-      input: 'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all',
-      inputError: 'w-full px-4 py-3 bg-white border border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all',
+      input:
+        'w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all',
+      inputError:
+        'w-full px-4 py-3 bg-white border border-red-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all',
       label: 'block text-sm font-semibold text-gray-700 mb-2',
       errorText: 'text-sm text-red-600 mt-1',
       helpText: 'text-sm text-gray-500 mt-2',
       summaryBox: 'mb-4 rounded-xl border border-green-200 bg-green-50 p-4',
       summaryText: 'flex items-center gap-2 text-green-800',
       editButton: 'ml-auto text-sm text-green-600 hover:underline',
-      backButton: 'inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50',
-      continueButton: 'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg',
-      buttonDisabled: 'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white bg-gray-400 cursor-not-allowed',
+      backButton:
+        'inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50',
+      continueButton:
+        'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg',
+      buttonDisabled:
+        'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white bg-gray-400 cursor-not-allowed',
     };
   }
 
@@ -57,9 +62,12 @@ const getStyles = (variant: StepVariant = 'booking') => {
     summaryBox: 'mb-4 rounded-lg border border-green-200 bg-green-50 p-3',
     summaryText: 'flex items-center gap-2 text-green-800',
     editButton: 'ml-auto text-sm text-green-600 hover:underline',
-    backButton: 'inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50',
-    continueButton: 'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg',
-    buttonDisabled: 'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white bg-gray-400 cursor-not-allowed',
+    backButton:
+      'inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50',
+    continueButton:
+      'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg',
+    buttonDisabled:
+      'inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white bg-gray-400 cursor-not-allowed',
   };
 };
 
@@ -95,12 +103,10 @@ export function PartySizeStep({
           <div className={styles.summaryText}>
             <CheckCircle className="h-5 w-5" />
             <span className="font-medium">Contact:</span>
-            <span>{contactName} • {contactEmail}</span>
-            <button
-              type="button"
-              className={styles.editButton}
-              onClick={onEditContact}
-            >
+            <span>
+              {contactName} • {contactEmail}
+            </span>
+            <button type="button" className={styles.editButton} onClick={onEditContact}>
               Edit
             </button>
           </div>
@@ -109,12 +115,10 @@ export function PartySizeStep({
           <div className={styles.summaryText}>
             <CheckCircle className="h-5 w-5" />
             <span className="font-medium">Venue:</span>
-            <span>{venueStreet}, {venueCity}, {venueState} {venueZipcode}</span>
-            <button
-              type="button"
-              className={styles.editButton}
-              onClick={onEditVenue}
-            >
+            <span>
+              {venueStreet}, {venueCity}, {venueState} {venueZipcode}
+            </span>
+            <button type="button" className={styles.editButton} onClick={onEditVenue}>
               Edit
             </button>
           </div>
@@ -126,9 +130,7 @@ export function PartySizeStep({
           <Users className="mr-2 h-5 w-5" />
           Party Size
         </h3>
-        <p className={styles.description}>
-          How many guests will be at your hibachi event?
-        </p>
+        <p className={styles.description}>How many guests will be at your hibachi event?</p>
 
         <div className={variant === 'booking' ? 'form-group' : ''}>
           <label htmlFor="guestCount" className={styles.label}>
@@ -147,9 +149,7 @@ export function PartySizeStep({
             })}
             placeholder="e.g., 10"
           />
-          {errors.guestCount && (
-            <div className={styles.errorText}>{errors.guestCount.message}</div>
-          )}
+          {errors.guestCount && <div className={styles.errorText}>{errors.guestCount.message}</div>}
           <small className={styles.helpText}>
             This helps us assign the right chef and calculate your quote.
           </small>
@@ -158,11 +158,7 @@ export function PartySizeStep({
 
       {/* Step 3 Navigation */}
       <div className="mt-6 flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className={styles.backButton}
-        >
+        <button type="button" onClick={onBack} className={styles.backButton}>
           Back
         </button>
         <button

@@ -12,10 +12,16 @@ export const validateRequired = (value: string): boolean => {
   return value.trim().length > 0;
 };
 
-export const validateMinLength = (value: string, minLength: number): boolean => {
+export const validateMinLength = (
+  value: string,
+  minLength: number
+): boolean => {
   return value.length >= minLength;
 };
 
-export const validateMaxLength = (value: string, maxLength: number): boolean => {
+export const validateMaxLength = (
+  value: string,
+  maxLength: number
+): boolean => {
   return value.length <= maxLength;
 };

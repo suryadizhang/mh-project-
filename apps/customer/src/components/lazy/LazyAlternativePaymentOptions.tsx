@@ -42,13 +42,13 @@ const DynamicAlternativePaymentOptions = dynamic<AlternativePaymentOptionsProps>
       <div className="rounded-xl bg-white p-8 shadow-lg">
         <QRCodeSkeleton />
         <div className="mt-4 text-center">
-          <div className="h-6 w-48 mx-auto bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
-          <div className="h-4 w-64 mx-auto bg-gray-100 dark:bg-gray-600 rounded animate-pulse" />
+          <div className="mx-auto mb-2 h-6 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+          <div className="mx-auto h-4 w-64 animate-pulse rounded bg-gray-100 dark:bg-gray-600" />
         </div>
       </div>
     ),
     ssr: false, // QR code generation requires canvas API
-  }
+  },
 );
 
 export default function LazyAlternativePaymentOptions(props: AlternativePaymentOptionsProps) {

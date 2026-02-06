@@ -36,7 +36,12 @@ export interface MenuItemFormData {
   id?: string;
   name: string;
   description: string;
-  main_category: 'protein' | 'premium_protein' | 'appetizer' | 'addon' | 'sauce';
+  main_category:
+    | 'protein'
+    | 'premium_protein'
+    | 'appetizer'
+    | 'addon'
+    | 'sauce';
   tags: string[];
   base_price: number;
   is_included: boolean;
@@ -49,9 +54,21 @@ export interface MenuItemFormData {
 // ============================================================================
 
 const MAIN_CATEGORIES = [
-  { value: 'protein', label: 'Protein (Base)', color: 'bg-blue-100 text-blue-800' },
-  { value: 'premium_protein', label: 'Premium Protein (Upgrade)', color: 'bg-purple-100 text-purple-800' },
-  { value: 'appetizer', label: 'Appetizer', color: 'bg-green-100 text-green-800' },
+  {
+    value: 'protein',
+    label: 'Protein (Base)',
+    color: 'bg-blue-100 text-blue-800',
+  },
+  {
+    value: 'premium_protein',
+    label: 'Premium Protein (Upgrade)',
+    color: 'bg-purple-100 text-purple-800',
+  },
+  {
+    value: 'appetizer',
+    label: 'Appetizer',
+    color: 'bg-green-100 text-green-800',
+  },
   { value: 'addon', label: 'Add-on', color: 'bg-yellow-100 text-yellow-800' },
   { value: 'sauce', label: 'Sauce', color: 'bg-gray-100 text-gray-800' },
 ] as const;
@@ -185,18 +202,18 @@ export function MenuItemDialogNew({
   // ============================================================================
 
   const toggleTag = (tag: string) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       tags: prev.tags.includes(tag)
-        ? prev.tags.filter((t) => t !== tag)
+        ? prev.tags.filter(t => t !== tag)
         : [...prev.tags, tag],
     }));
   };
 
   const removeTag = (tag: string) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter((t) => t !== tag),
+      tags: prev.tags.filter(t => t !== tag),
     }));
   };
 
@@ -285,7 +302,7 @@ export function MenuItemDialogNew({
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, name: e.target.value })
                 }
                 placeholder="e.g., Hibachi Shrimp"
@@ -305,7 +322,7 @@ export function MenuItemDialogNew({
                 step="0.01"
                 min="0"
                 value={formData.base_price}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     base_price: parseFloat(e.target.value) || 0,
@@ -327,7 +344,7 @@ export function MenuItemDialogNew({
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) =>
+              onChange={e =>
                 setFormData({ ...formData, description: e.target.value })
               }
               placeholder="Detailed description of the menu item..."
@@ -345,15 +362,18 @@ export function MenuItemDialogNew({
             </Label>
             <Select
               value={formData.main_category}
-              onValueChange={(value) =>
-                setFormData({ ...formData, main_category: value as MenuItemFormData['main_category'] })
+              onValueChange={value =>
+                setFormData({
+                  ...formData,
+                  main_category: value as MenuItemFormData['main_category'],
+                })
               }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {MAIN_CATEGORIES.map((cat) => (
+                {MAIN_CATEGORIES.map(cat => (
                   <SelectItem key={cat.value} value={cat.value}>
                     <span className={`px-2 py-1 rounded ${cat.color}`}>
                       {cat.label}
@@ -369,7 +389,7 @@ export function MenuItemDialogNew({
             <div className="space-y-2">
               <Label>Selected Tags ({formData.tags.length})</Label>
               <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border">
-                {formData.tags.map((tag) => (
+                {formData.tags.map(tag => (
                   <span
                     key={tag}
                     className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-200 hover:bg-red-100 cursor-pointer"
@@ -385,9 +405,7 @@ export function MenuItemDialogNew({
 
           {/* Tag Groups */}
           <div className="space-y-4">
-            <Label className="text-lg font-semibold">
-              Tags (Multi-Select)
-            </Label>
+            <Label className="text-lg font-semibold">Tags (Multi-Select)</Label>
 
             {Object.entries(TAG_GROUPS).map(([groupKey, group]) => (
               <div
@@ -396,8 +414,11 @@ export function MenuItemDialogNew({
               >
                 <h4 className="font-semibold mb-3">{group.label}</h4>
                 <div className="grid grid-cols-2 gap-2">
-                  {group.tags.map((tag) => (
-                    <div key={tag.value} className="flex items-center space-x-2">
+                  {group.tags.map(tag => (
+                    <div
+                      key={tag.value}
+                      className="flex items-center space-x-2"
+                    >
                       <input
                         type="checkbox"
                         id={`tag-${tag.value}`}
@@ -425,7 +446,7 @@ export function MenuItemDialogNew({
                 type="checkbox"
                 id="is_included"
                 checked={formData.is_included}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, is_included: e.target.checked })
                 }
                 className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
@@ -440,7 +461,7 @@ export function MenuItemDialogNew({
                 type="checkbox"
                 id="is_active"
                 checked={formData.is_active}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, is_active: e.target.checked })
                 }
                 className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
@@ -457,7 +478,7 @@ export function MenuItemDialogNew({
                 type="number"
                 min="0"
                 value={formData.display_order}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     display_order: parseInt(e.target.value) || 0,

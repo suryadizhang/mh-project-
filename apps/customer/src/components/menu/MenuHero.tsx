@@ -1,9 +1,9 @@
-import { menuData } from '@/data/menu'
-import styles from '@/styles/menu/hero.module.css'
-import type { MenuHeroFeature } from '@/types/data'
+import { menuData } from '@/data/menu';
+import styles from '@/styles/menu/hero.module.css';
+import type { MenuHeroFeature } from '@/types/data';
 
 export default function MenuHero() {
-  const { hero } = menuData
+  const { hero } = menuData;
 
   return (
     <div className={styles.heroSection}>
@@ -79,5 +79,5 @@ export default function MenuHero() {
         </div>
       </div>
     </div>
-  )
+  );
 }

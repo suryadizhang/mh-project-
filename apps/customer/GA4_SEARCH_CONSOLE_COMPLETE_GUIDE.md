@@ -78,8 +78,8 @@ gtag('event', 'purchase', {
   transaction_id: booking_id,
   value: estimated_value || 0,
   currency: 'USD',
-  event_category: 'Booking Confirmation'
-})
+  event_category: 'Booking Confirmation',
+});
 ```
 
 **In GA4 Dashboard:**
@@ -95,8 +95,8 @@ gtag('event', 'purchase', {
 gtag('event', 'generate_lead', {
   event_category: 'Quote Request',
   value: details.estimated_value || 0,
-  currency: 'USD'
-})
+  currency: 'USD',
+});
 ```
 
 **In GA4 Dashboard:**
@@ -111,8 +111,8 @@ gtag('event', 'generate_lead', {
 // Already implemented in your code! ✅
 gtag('event', 'contact', {
   event_category: 'Phone Call',
-  event_label: 'Header Click'
-})
+  event_label: 'Header Click',
+});
 ```
 
 **In GA4 Dashboard:**
@@ -126,8 +126,8 @@ gtag('event', 'contact', {
 ```javascript
 // Already implemented in your code! ✅
 gtag('event', 'social_media_click', {
-  platform: 'instagram' // or 'facebook'
-})
+  platform: 'instagram', // or 'facebook'
+});
 ```
 
 ---
@@ -138,7 +138,6 @@ gtag('event', 'social_media_click', {
 
 1. **GA4 Dashboard** → **Explore** → **Create New**
 2. **Add Metrics:**
-
    - Sessions
    - Users
    - Conversion Rate
@@ -188,9 +187,9 @@ gtag('config', '${measurementId}', {
   custom_map: {
     custom_parameter_1: 'booking_type',
     custom_parameter_2: 'service_area',
-    custom_parameter_3: 'guest_count'
-  }
-})
+    custom_parameter_3: 'guest_count',
+  },
+});
 ```
 
 ### **Audience Segmentation**

@@ -21,7 +21,8 @@
 
 ## Overview
 
-The ML Pipeline enables continuous improvement of the AI concierge through:
+The ML Pipeline enables continuous improvement of the AI concierge
+through:
 
 - **PII Scrubbing**: GDPR/CCPA compliant data cleaning
 - **Training Dataset Building**: OpenAI JSONL generation
@@ -31,6 +32,7 @@ The ML Pipeline enables continuous improvement of the AI concierge through:
 - **Scheduled Jobs**: Automated KB updates and training collection
 
 **Key Benefits:**
+
 - 🔒 **Privacy-First**: All training data PII-scrubbed
 - 🤖 **Fully Automated**: Weekly retraining without manual work
 - 🧪 **Safe Deployments**: A/B testing prevents regressions
@@ -116,9 +118,11 @@ The ML Pipeline enables continuous improvement of the AI concierge through:
 
 ### 1. PII Scrubber (`pii_scrubber.py`)
 
-**Purpose:** Remove personally identifiable information (PII) from training data
+**Purpose:** Remove personally identifiable information (PII) from
+training data
 
 **Detected PII:**
+
 - Emails (95%+ accuracy)
 - Phone numbers (US + international)
 - SSN (XXX-XX-XXXX format)
@@ -129,6 +133,7 @@ The ML Pipeline enables continuous improvement of the AI concierge through:
 - URLs
 
 **Example:**
+
 ```python
 from api.ai.ml import get_pii_scrubber
 
@@ -153,6 +158,7 @@ risk_info = scrubber.analyze_pii(text)
 **Purpose:** Convert conversations to OpenAI fine-tuning JSONL format
 
 **Quality Filters:**
+
 - Confidence score >= 0.8
 - User rating >= 4/5 stars
 - Positive feedback (thumbs up)
@@ -160,15 +166,25 @@ risk_info = scrubber.analyze_pii(text)
 - PII-scrubbed
 
 **Output Format:**
+
 ```json
-{"messages": [
-  {"role": "system", "content": "You are My Hibachi AI concierge..."},
-  {"role": "user", "content": "Quote for 10 adults in 95630"},
-  {"role": "assistant", "content": "For 10 adults in Sacramento... $918 total"}
-]}
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are My Hibachi AI concierge..."
+    },
+    { "role": "user", "content": "Quote for 10 adults in 95630" },
+    {
+      "role": "assistant",
+      "content": "For 10 adults in Sacramento... $918 total"
+    }
+  ]
+}
 ```
 
 **Example:**
+
 ```python
 from api.ai.ml import get_dataset_builder
 
@@ -196,6 +212,7 @@ is_valid, errors = builder.validate_format("training_data.jsonl")
 **Purpose:** Automate OpenAI fine-tuning process
 
 **Features:**
+
 - Upload training files to OpenAI
 - Estimate cost before training (~$8 per 1M tokens)
 - Monitor job progress (poll every 60s)
@@ -203,6 +220,7 @@ is_valid, errors = builder.validate_format("training_data.jsonl")
 - Job history tracking
 
 **Example:**
+
 ```python
 from api.ai.ml import get_fine_tuner
 
@@ -235,6 +253,7 @@ result = await tuner.monitor_fine_tune(job_id)
 **Purpose:** A/B testing and safe model deployment
 
 **Features:**
+
 - Shadow deployments (10% traffic)
 - Performance comparison (containment, conversion, CSAT)
 - Composite scoring (weighted metrics)
@@ -243,6 +262,7 @@ result = await tuner.monitor_fine_tune(job_id)
 - Gradual rollout (10% → 50% → 100%)
 
 **Example:**
+
 ```python
 from api.ai.ml import get_deployment_manager
 
@@ -277,12 +297,14 @@ else:
 **Purpose:** Collect and analyze user feedback
 
 **Feedback Types:**
+
 - Thumbs up/down
 - Star ratings (1-5)
 - Text comments
 - Helpful/accurate booleans
 
 **Quality Scoring:**
+
 - Thumbs up: +0.3
 - 5-star rating: +0.4
 - Helpful: +0.2
@@ -290,6 +312,7 @@ else:
 - Has comment (>20 chars): +0.1
 
 **Example:**
+
 ```python
 from api.ai.ml import get_feedback_processor
 
@@ -337,6 +360,7 @@ All jobs use **APScheduler** for background execution.
 **Purpose:** Update Knowledge Base with approved Q&A pairs
 
 **Process:**
+
 1. Fetch approved training data from past 7 days
 2. Extract Q&A pairs with quality_score >= 0.8
 3. Add to Knowledge Base (FAISS/Supabase)
@@ -351,6 +375,7 @@ All jobs use **APScheduler** for background execution.
 **Purpose:** Collect high-quality conversations for training
 
 **Process:**
+
 1. Scan conversations from past 24 hours
 2. Filter by positive feedback + high confidence
 3. Promote to training_data table
@@ -365,6 +390,7 @@ All jobs use **APScheduler** for background execution.
 **Purpose:** Generate weekly AI performance report
 
 **Metrics:**
+
 - Containment rate (% handled without escalation)
 - Booking conversion rate
 - Average CSAT (customer satisfaction)
@@ -509,7 +535,8 @@ async def shutdown_event():
 
 ### Monitoring
 
-- **APScheduler Dashboard:** http://localhost:8000/scheduler (if enabled)
+- **APScheduler Dashboard:** http://localhost:8000/scheduler (if
+  enabled)
 - **Job Logs:** Check `logs/ml_jobs.log`
 - **Performance Reports:** Email sent every Monday 9 AM
 
@@ -534,7 +561,8 @@ Before moving to Phase 1:
 ## Next Steps (Phase 1+)
 
 1. **Phase 1: Multi-Brain Architecture** (8 hours)
-   - Create specialized agents (Lead Nurturing, Customer Care, Operations, Knowledge)
+   - Create specialized agents (Lead Nurturing, Customer Care,
+     Operations, Knowledge)
    - Implement agent routing logic
 
 2. **Phase 2: Advanced Intelligence** (10 hours)
@@ -558,6 +586,6 @@ Before moving to Phase 1:
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: October 31, 2025*  
-*Owner: MyHibachi Development Team*
+_Document Version: 1.0_  
+_Last Updated: October 31, 2025_  
+_Owner: MyHibachi Development Team_

@@ -35,7 +35,7 @@ import {
   getBlogPosts,
   getAllCategories,
   getAllServiceAreas,
-  getAllEventTypes
+  getAllEventTypes,
 } from './contentLoader';
 
 /**
@@ -115,7 +115,7 @@ export class BlogService implements IBlogService {
     const allAreasPosts = await getBlogPosts({ serviceArea: 'All Areas' });
     // Combine and deduplicate by ID
     const combined = [...posts, ...allAreasPosts];
-    const unique = Array.from(new Map(combined.map(p => [p.id, p])).values());
+    const unique = Array.from(new Map(combined.map((p) => [p.id, p])).values());
     return unique;
   }
 
@@ -130,7 +130,7 @@ export class BlogService implements IBlogService {
     const generalPosts = await getBlogPosts({ eventType: 'General' });
     // Combine and deduplicate by ID
     const combined = [...posts, ...generalPosts];
-    const unique = Array.from(new Map(combined.map(p => [p.id, p])).values());
+    const unique = Array.from(new Map(combined.map((p) => [p.id, p])).values());
     return unique;
   }
 

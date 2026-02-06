@@ -43,8 +43,9 @@ export function CTASection() {
                   <Link
                     key={index}
                     href={button.href}
-                    className={`${styles.ctaButton} ${button.primary ? styles.primaryButton : styles.secondaryButton
-                      }`}
+                    className={`${styles.ctaButton} ${
+                      button.primary ? styles.primaryButton : styles.secondaryButton
+                    }`}
                   >
                     {button.text}
                   </Link>

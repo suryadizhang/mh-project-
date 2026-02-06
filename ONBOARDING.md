@@ -1,6 +1,7 @@
 # My Hibachi - Quick Onboarding Guide
 
-**Welcome to the My Hibachi project!** This guide will get you up and running in 15 minutes.
+**Welcome to the My Hibachi project!** This guide will get you up and
+running in 15 minutes.
 
 ---
 
@@ -21,11 +22,15 @@
 
 My Hibachi is a monorepo containing 3 applications:
 
-- **Customer Site** (`apps/customer`) - Next.js 15 + React 19 (Public booking site)
-- **Admin Panel** (`apps/admin`) - Next.js 15 + React 19 (Internal operations)
-- **Backend API** (`apps/backend`) - FastAPI + Python 3.13 (Business logic)
+- **Customer Site** (`apps/customer`) - Next.js 15 + React 19 (Public
+  booking site)
+- **Admin Panel** (`apps/admin`) - Next.js 15 + React 19 (Internal
+  operations)
+- **Backend API** (`apps/backend`) - FastAPI + Python 3.13 (Business
+  logic)
 
 **Tech Stack:**
+
 - Frontend: Next.js 15, React 19, TypeScript, Tailwind CSS
 - Backend: Python 3.13, FastAPI, SQLAlchemy 2.0, PostgreSQL
 - AI: OpenAI GPT-4, Deepgram, RingCentral
@@ -46,6 +51,7 @@ My Hibachi is a monorepo containing 3 applications:
 ## 🚀 Quick Start
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/suryadizhang/mh-project-.git
 cd mh-project-
@@ -54,18 +60,21 @@ cd mh-project-
 ### 2. Install dependencies
 
 **Customer Site:**
+
 ```bash
 cd apps/customer
 npm install
 ```
 
 **Admin Panel:**
+
 ```bash
 cd apps/admin
 npm install
 ```
 
 **Backend:**
+
 ```bash
 cd apps/backend
 python -m venv .venv
@@ -76,6 +85,7 @@ pip install -r requirements.txt
 ### 3. Set up environment variables
 
 **Customer Site** (`apps/customer/.env.local`):
+
 ```bash
 # Copy from .env.example
 cp .env.example .env.local
@@ -86,6 +96,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 **Backend** (`apps/backend/.env`):
+
 ```bash
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/myhibachi_dev
@@ -127,6 +138,7 @@ python scripts/seed_data.py
 ### Development Mode (All apps)
 
 **Customer Site:**
+
 ```bash
 cd apps/customer
 npm run dev
@@ -134,6 +146,7 @@ npm run dev
 ```
 
 **Admin Panel:**
+
 ```bash
 cd apps/admin
 npm run dev
@@ -141,6 +154,7 @@ npm run dev
 ```
 
 **Backend API:**
+
 ```bash
 cd apps/backend
 uvicorn src.main:app --reload --port 8000
@@ -148,13 +162,15 @@ uvicorn src.main:app --reload --port 8000
 # API docs at http://localhost:8000/docs
 ```
 
-**Tip:** Run all three in separate terminals for full-stack development.
+**Tip:** Run all three in separate terminals for full-stack
+development.
 
 ---
 
 ## 🧪 Testing
 
 ### Frontend Tests
+
 ```bash
 cd apps/customer
 npm run test          # Unit tests
@@ -164,6 +180,7 @@ npm run typecheck     # TypeScript check
 ```
 
 ### Backend Tests
+
 ```bash
 cd apps/backend
 pytest                          # All tests
@@ -179,6 +196,7 @@ pytest --cov=src --cov-report=html  # Coverage report
 ## 🚢 Deployment
 
 ### Staging Deployment
+
 ```bash
 # Push to dev branch
 git checkout dev
@@ -192,6 +210,7 @@ git push origin dev
 ```
 
 ### Production Deployment
+
 ```bash
 # Push to main branch (after staging tests pass)
 git checkout main
@@ -204,34 +223,41 @@ git push origin main
 # - Backend: mhapi.mysticdatanode.net
 ```
 
-**See** `DEPLOYMENT_QUICK_REFERENCE.md` for deployment commands and `PRODUCTION_DEPLOYMENT_GUIDE.md` for production checklist.
+**See** `DEPLOYMENT_QUICK_REFERENCE.md` for deployment commands and
+`PRODUCTION_DEPLOYMENT_GUIDE.md` for production checklist.
 
 ---
 
 ## 📚 Useful Resources
 
 ### Quick References
+
 - `AI_V3_QUICK_REFERENCE.md` - AI system guide
 - `DEPLOYMENT_QUICK_REFERENCE.md` - Deploy commands
 - `E2E_QUICK_REFERENCE.md` - Testing guide
 - `MONITORING_API_QUICK_REFERENCE.md` - Monitoring & alerts
 
 ### Setup Guides
-- `GSM_ENHANCED_VARIABLES_SETUP_GUIDE.md` - Secrets management (Google Secret Manager)
+
+- `GSM_ENHANCED_VARIABLES_SETUP_GUIDE.md` - Secrets management (Google
+  Secret Manager)
 - `VOICE_AI_SETUP_GUIDE.md` - Voice AI configuration
 - `ENVIRONMENT_CONFIGURATION.md` - All environment variables
 
 ### Architecture
+
 - `DATABASE_ARCHITECTURE_BUSINESS_MODEL.md` - Database schema
 - `DATABASE_RELATIONSHIP_MAP.md` - DB relationships
 - `DEEP_PROJECT_ANALYSIS_NOV_2025.md` - Current architecture
 
 ### Strategic Planning
+
 - `IMPLEMENTATION_PLAN_NOV_2025.md` - Roadmap
 - `OPERATIONAL_PRIORITY_LIST.md` - Priorities
 - `ML_SCALABILITY_PREP_GUIDE.md` - Scale-up plan
 
 ### Compliance
+
 - `OPENAI_POLICY_COMPLIANCE_REPORT.md` - AI compliance
 - `LEGAL_PROOF_QUICK_REFERENCE.md` - Legal compliance
 
@@ -240,13 +266,19 @@ git push origin main
 ## 🆘 Common Issues
 
 ### 1. Database connection failed
-**Solution:** Check `DATABASE_URL` in `.env` and ensure PostgreSQL is running.
+
+**Solution:** Check `DATABASE_URL` in `.env` and ensure PostgreSQL is
+running.
 
 ### 2. OpenAI API errors
+
 **Solution:** Verify `OPENAI_API_KEY` is valid and has credits.
 
 ### 3. Next.js build errors
-**Solution:** Delete `.next` folder and `node_modules`, then reinstall:
+
+**Solution:** Delete `.next` folder and `node_modules`, then
+reinstall:
+
 ```bash
 rm -rf .next node_modules
 npm install
@@ -254,7 +286,10 @@ npm run build
 ```
 
 ### 4. Python import errors
-**Solution:** Ensure virtual environment is activated and dependencies installed:
+
+**Solution:** Ensure virtual environment is activated and dependencies
+installed:
+
 ```bash
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -284,5 +319,5 @@ pip install -r requirements.txt
 
 ---
 
-**Last Updated:** November 22, 2025
-**Maintained By:** My Hibachi Development Team
+**Last Updated:** November 22, 2025 **Maintained By:** My Hibachi
+Development Team

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 interface ReviewData {
   id: string;
@@ -17,10 +17,10 @@ interface ReviewData {
 }
 
 const ratings = [
-  { value: "great", label: "Great! 🌟", emoji: "😊", color: "green" },
-  { value: "good", label: "Good 👍", emoji: "🙂", color: "blue" },
-  { value: "okay", label: "Okay 😐", emoji: "😐", color: "yellow" },
-  { value: "could_be_better", label: "Could be better", emoji: "😕", color: "orange" },
+  { value: 'great', label: 'Great! 🌟', emoji: '😊', color: 'green' },
+  { value: 'good', label: 'Good 👍', emoji: '🙂', color: 'blue' },
+  { value: 'okay', label: 'Okay 😐', emoji: '😐', color: 'yellow' },
+  { value: 'could_be_better', label: 'Could be better', emoji: '😕', color: 'orange' },
 ];
 
 export default function ReviewPage() {
@@ -32,8 +32,8 @@ export default function ReviewPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedRating, setSelectedRating] = useState<string | null>(null);
-  const [complaintText, setComplaintText] = useState("");
-  const [improvementSuggestions, setImprovementSuggestions] = useState("");
+  const [complaintText, setComplaintText] = useState('');
+  const [improvementSuggestions, setImprovementSuggestions] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,21 +43,21 @@ export default function ReviewPage() {
   const fetchReview = async () => {
     try {
       const response = await fetch(`/api/reviews/${reviewId}`);
-      if (!response.ok) throw new Error("Review not found");
+      if (!response.ok) throw new Error('Review not found');
 
       const data = await response.json();
       setReview(data);
 
       // If already submitted, redirect appropriately
       if (data.submitted && data.rating) {
-        if (["great", "good"].includes(data.rating)) {
+        if (['great', 'good'].includes(data.rating)) {
           router.push(`/review/${reviewId}/external-reviews`);
         } else {
           router.push(`/review/${reviewId}/thank-you`);
         }
       }
     } catch (err) {
-      setError("Unable to load review. Please check your link.");
+      setError('Unable to load review. Please check your link.');
     } finally {
       setLoading(false);
     }
@@ -65,13 +65,13 @@ export default function ReviewPage() {
 
   const handleSubmit = async () => {
     if (!selectedRating) {
-      setError("Please select a rating");
+      setError('Please select a rating');
       return;
     }
 
     // Validate negative reviews have complaint text
-    if (["okay", "could_be_better"].includes(selectedRating) && !complaintText.trim()) {
-      setError("Please tell us what went wrong");
+    if (['okay', 'could_be_better'].includes(selectedRating) && !complaintText.trim()) {
+      setError('Please tell us what went wrong');
       return;
     }
 
@@ -80,8 +80,8 @@ export default function ReviewPage() {
 
     try {
       const response = await fetch(`/api/reviews/${reviewId}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           rating: selectedRating,
           complaint_text: complaintText || undefined,
@@ -91,7 +91,7 @@ export default function ReviewPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to submit review");
+        throw new Error(errorData.detail || 'Failed to submit review');
       }
 
       const result = await response.json();
@@ -99,15 +99,15 @@ export default function ReviewPage() {
       // Redirect based on rating
       if (result.is_positive) {
         router.push(`/review/${reviewId}/external-reviews`);
-      } else if (selectedRating === "okay") {
+      } else if (selectedRating === 'okay') {
         // "Okay" rating - AI will follow up, show acknowledgment
         router.push(`/review/${reviewId}/acknowledged`);
-      } else if (selectedRating === "could_be_better") {
+      } else if (selectedRating === 'could_be_better') {
         // "Could be better" - Redirect to AI chat for immediate assistance
         router.push(`/review/${reviewId}/ai-assistance`);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to submit review";
+      const errorMessage = err instanceof Error ? err.message : 'Failed to submit review';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -116,9 +116,9 @@ export default function ReviewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-red-600"></div>
           <p className="mt-4 text-gray-600">Loading your review...</p>
         </div>
       </div>
@@ -127,14 +127,14 @@ export default function ReviewPage() {
 
   if (error && !review) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="text-6xl mb-4">😕</div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Oops!</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
+          <div className="mb-4 text-6xl">😕</div>
+          <h1 className="mb-2 text-2xl font-bold text-gray-800">Oops!</h1>
+          <p className="mb-6 text-gray-600">{error}</p>
           <Link
             href="/"
-            className="inline-block bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+            className="inline-block rounded-lg bg-red-600 px-6 py-3 text-white transition hover:bg-red-700"
           >
             Go to Home
           </Link>
@@ -144,16 +144,16 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 px-4 py-12">
+      <div className="mx-auto max-w-3xl">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="mb-8 text-center"
         >
-          <div className="text-6xl mb-4">🍱</div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+          <div className="mb-4 text-6xl">🍱</div>
+          <h1 className="mb-2 text-4xl font-bold text-gray-800">
             How was your hibachi experience?
           </h1>
           <p className="text-gray-600">
@@ -166,72 +166,70 @@ export default function ReviewPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-xl p-8 mb-6"
+          className="mb-6 rounded-2xl bg-white p-8 shadow-xl"
         >
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+          <h2 className="mb-6 text-center text-2xl font-semibold text-gray-800">
             Rate Your Experience
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
             {ratings.map((rating) => (
               <motion.button
                 key={rating.value}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedRating(rating.value)}
-                className={`
-                  p-6 rounded-xl border-2 transition-all
-                  ${selectedRating === rating.value
+                className={`rounded-xl border-2 p-6 transition-all ${
+                  selectedRating === rating.value
                     ? `border-${rating.color}-500 bg-${rating.color}-50 ring-4 ring-${rating.color}-200`
-                    : "border-gray-200 hover:border-gray-300"
-                  }
-                `}
+                    : 'border-gray-200 hover:border-gray-300'
+                } `}
               >
-                <div className="text-5xl mb-2">{rating.emoji}</div>
-                <div className="font-semibold text-lg">{rating.label}</div>
+                <div className="mb-2 text-5xl">{rating.emoji}</div>
+                <div className="text-lg font-semibold">{rating.label}</div>
               </motion.button>
             ))}
           </div>
 
           {/* Complaint Form (for negative reviews) */}
-          {selectedRating && ["okay", "could_be_better"].includes(selectedRating) && (
+          {selectedRating && ['okay', 'could_be_better'].includes(selectedRating) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="space-y-4 mt-6 pt-6 border-t"
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-6 space-y-4 border-t pt-6"
             >
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   What went wrong? <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={complaintText}
                   onChange={(e) => setComplaintText(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-red-500"
                   placeholder="Please tell us about your concerns..."
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   How can we improve?
                 </label>
                 <textarea
                   value={improvementSuggestions}
                   onChange={(e) => setImprovementSuggestions(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-red-500"
                   placeholder="Your suggestions help us do better..."
                 />
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
                 <p className="text-sm text-blue-800">
-                  <strong>We appreciate your feedback!</strong> Our team will review your
-                  concerns and reach out to make things right. Plus, {"you'll"} receive a
-                  special discount coupon for your next booking. 🎁
+                  <strong>We appreciate your feedback!</strong> Our team will review your concerns
+                  and reach out to make things right. Plus, {"you'll"} receive a special discount
+                  coupon for your next booking. 🎁
                 </p>
               </div>
             </motion.div>
@@ -239,7 +237,7 @@ export default function ReviewPage() {
 
           {/* Error Message */}
           {error && (
-            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
               <p className="text-sm text-red-800">{error}</p>
             </div>
           )}
@@ -250,31 +248,45 @@ export default function ReviewPage() {
             whileTap={{ scale: 0.98 }}
             onClick={handleSubmit}
             disabled={!selectedRating || submitting}
-            className={`
-              w-full mt-6 py-4 rounded-xl font-semibold text-lg transition-all
-              ${selectedRating && !submitting
-                ? "bg-red-600 text-white hover:bg-red-700 shadow-lg"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }
-            `}
+            className={`mt-6 w-full rounded-xl py-4 text-lg font-semibold transition-all ${
+              selectedRating && !submitting
+                ? 'bg-red-600 text-white shadow-lg hover:bg-red-700'
+                : 'cursor-not-allowed bg-gray-300 text-gray-500'
+            } `}
           >
             {submitting ? (
               <span className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 Submitting...
               </span>
             ) : (
-              "Submit Feedback"
+              'Submit Feedback'
             )}
           </motion.button>
         </motion.div>
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500">
-          Your privacy is important to us. This feedback is confidential and used only to improve our service.
+          Your privacy is important to us. This feedback is confidential and used only to improve
+          our service.
         </p>
       </div>
     </div>

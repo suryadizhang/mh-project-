@@ -238,7 +238,8 @@ export function parseError(error: unknown): UserFriendlyError {
 
     // Try to get error code from response
     if (data?.code && ERROR_MESSAGES[data.code]) {
-      const detailStr = typeof data.detail === 'string' ? data.detail : data.message;
+      const detailStr =
+        typeof data.detail === 'string' ? data.detail : data.message;
       return {
         ...ERROR_MESSAGES[data.code],
         details: detailStr,
@@ -258,7 +259,8 @@ export function parseError(error: unknown): UserFriendlyError {
 
     // Fallback to status code
     if (STATUS_CODE_ERRORS[status]) {
-      const detailStr = typeof data?.detail === 'string' ? data.detail : data?.message;
+      const detailStr =
+        typeof data?.detail === 'string' ? data.detail : data?.message;
       return {
         ...STATUS_CODE_ERRORS[status],
         details: detailStr,
@@ -340,7 +342,7 @@ function isValidationError(error: unknown): error is ValidationError {
  */
 function formatValidationError(error: ValidationError): UserFriendlyError {
   const fields = error.data.detail
-    .map((err) => {
+    .map(err => {
       const fieldName = err.loc[err.loc.length - 1];
       return `${fieldName}: ${err.msg}`;
     })

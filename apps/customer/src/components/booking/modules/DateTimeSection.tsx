@@ -168,7 +168,7 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
         setIsLoadingSlots(false);
       }
     },
-    [venueCoordinates, onAvailabilityFetched]
+    [venueCoordinates, onAvailabilityFetched],
   );
 
   /**
@@ -176,15 +176,12 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
    */
   const fetchBookedDates = useCallback(async () => {
     try {
-      const response = await apiFetch<{ bookedDates?: string[] }>(
-        '/api/v1/bookings/booked-dates',
-        {
-          cacheStrategy: {
-            strategy: 'cache-first',
-            ttl: 5 * 60 * 1000, // 5 minutes
-          },
-        }
-      );
+      const response = await apiFetch<{ bookedDates?: string[] }>('/api/v1/bookings/booked-dates', {
+        cacheStrategy: {
+          strategy: 'cache-first',
+          ttl: 5 * 60 * 1000, // 5 minutes
+        },
+      });
 
       if (response.success && response.data?.bookedDates) {
         setBookedDates(new Set(response.data.bookedDates));
@@ -221,7 +218,7 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       const dateStr = formatDateForAPI(date);
       return !bookedDates.has(dateStr) && date >= minDate && date <= maxDate;
     },
-    [bookedDates, minDate, maxDate]
+    [bookedDates, minDate, maxDate],
   );
 
   /**
@@ -276,7 +273,10 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Date Picker */}
         <div className="flex flex-col space-y-1.5">
-          <label htmlFor="eventDate" className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="eventDate"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+          >
             <Calendar className="h-4 w-4 text-gray-400" />
             Event Date
             <span className="text-red-500">*</span>
@@ -288,8 +288,10 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
               required: 'Please select an event date',
               validate: (value) => {
                 if (!value) return 'Please select an event date';
-                if (value < minDate) return `Please select a date at least ${minDaysAdvance} days from now`;
-                if (value > maxDate) return `Please select a date within the next ${maxDaysAdvance} days`;
+                if (value < minDate)
+                  return `Please select a date at least ${minDaysAdvance} days from now`;
+                if (value > maxDate)
+                  return `Please select a date within the next ${maxDaysAdvance} days`;
                 return true;
               },
             }}
@@ -304,10 +306,11 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                   const dateValue = e.target.value ? new Date(e.target.value + 'T00:00:00') : null;
                   field.onChange(dateValue);
                 }}
-                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.eventDate
-                  ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                  : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                  }`}
+                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                  errors.eventDate
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                }`}
               />
             )}
           />
@@ -350,9 +353,7 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           {venueCoordinates && !eventDate && (
             <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center">
               <Calendar className="mx-auto h-8 w-8 text-gray-400" />
-              <p className="mt-2 text-sm font-medium text-gray-600">
-                Now select your event date
-              </p>
+              <p className="mt-2 text-sm font-medium text-gray-600">Now select your event date</p>
               <p className="mt-1 text-xs text-gray-500">
                 Available time slots will appear based on chef availability in your area
               </p>
@@ -363,7 +364,9 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
           {venueCoordinates && eventDate && isLoadingSlots && (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-red-500" />
-              <span className="ml-2 text-sm text-gray-500">Checking chef availability in your area...</span>
+              <span className="ml-2 text-sm text-gray-500">
+                Checking chef availability in your area...
+              </span>
             </div>
           )}
 
@@ -406,7 +409,8 @@ export const DateTimeSection: React.FC<DateTimeSectionProps> = ({
                         )}
                         {slot.available && slot.availableChefs !== undefined && (
                           <span className="mt-1 text-xs text-green-600">
-                            {slot.availableChefs} chef{slot.availableChefs !== 1 ? 's' : ''} available
+                            {slot.availableChefs} chef{slot.availableChefs !== 1 ? 's' : ''}{' '}
+                            available
                           </span>
                         )}
                       </button>

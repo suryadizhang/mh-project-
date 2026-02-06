@@ -1,26 +1,27 @@
 # Shared Form Components Refactoring Specification
 
-**Version:** 1.0.0
-**Created:** 2024-12-24
-**Status:** APPROVED FOR IMPLEMENTATION
-**Priority:** HIGH - Reduces code duplication by ~60%
+**Version:** 1.0.0 **Created:** 2024-12-24 **Status:** APPROVED FOR
+IMPLEMENTATION **Priority:** HIGH - Reduces code duplication by ~60%
 
 ---
 
 ## 📋 Executive Summary
 
-This document specifies the refactoring of duplicated form patterns across the My Hibachi monorepo into shared, reusable components. The analysis found **12+ duplicated form patterns** across customer and admin apps.
+This document specifies the refactoring of duplicated form patterns
+across the My Hibachi monorepo into shared, reusable components. The
+analysis found **12+ duplicated form patterns** across customer and
+admin apps.
 
 ### Impact Summary
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Contact form duplications | 12 components | 1 shared | 92% reduction |
-| Address form duplications | 8 components | 1 shared | 88% reduction |
-| Guest count duplications | 5 components | 1 shared | 80% reduction |
-| Step indicator duplications | 3 components | 1 shared | 67% reduction |
-| Type definition duplications | 2 files | 1 shared | 50% reduction |
-| Total lines of duplicated code | ~2,500 lines | ~400 lines | 84% reduction |
+| Metric                         | Before        | After      | Improvement   |
+| ------------------------------ | ------------- | ---------- | ------------- |
+| Contact form duplications      | 12 components | 1 shared   | 92% reduction |
+| Address form duplications      | 8 components  | 1 shared   | 88% reduction |
+| Guest count duplications       | 5 components  | 1 shared   | 80% reduction |
+| Step indicator duplications    | 3 components  | 1 shared   | 67% reduction |
+| Type definition duplications   | 2 files       | 1 shared   | 50% reduction |
+| Total lines of duplicated code | ~2,500 lines  | ~400 lines | 84% reduction |
 
 ---
 
@@ -146,6 +147,7 @@ interface ContactFieldsProps {
 ```
 
 **Used By:**
+
 - `BookUsPageClient.tsx` - Step 1 (Contact)
 - `QuoteCalculator.tsx` - Contact section
 - `ContactPage.tsx` - Contact form
@@ -217,6 +219,7 @@ interface AddressFieldsProps {
 ```
 
 **Used By:**
+
 - `BookUsPageClient.tsx` - Step 2 (Venue), Step 4 (Billing)
 - `QuoteCalculator.tsx` - Venue address
 - `AddressForm.tsx` - Generic address
@@ -278,6 +281,7 @@ interface GuestCountFieldProps {
 ```
 
 **Used By:**
+
 - `BookUsPageClient.tsx` - Step 3 (Party Size)
 - `QuoteCalculator.tsx` - Guest count (adults/children split)
 - `BookingStepTwo.tsx` - Guest count
@@ -304,18 +308,18 @@ interface StepIndicatorProps {
   }>;
 
   // Display options
-  variant?: 'horizontal' | 'vertical';  // Default: 'horizontal'
-  size?: 'sm' | 'md' | 'lg';            // Default: 'md'
-  showLabels?: boolean;                  // Default: true
-  showConnectors?: boolean;              // Default: true
+  variant?: 'horizontal' | 'vertical'; // Default: 'horizontal'
+  size?: 'sm' | 'md' | 'lg'; // Default: 'md'
+  showLabels?: boolean; // Default: true
+  showConnectors?: boolean; // Default: true
 
   // Interaction
-  allowStepClick?: boolean;              // Default: false
+  allowStepClick?: boolean; // Default: false
   onStepClick?: (step: number) => void;
 
   // Styling
-  activeColor?: string;                  // Default: 'red-600'
-  completedColor?: string;               // Default: 'green-600'
+  activeColor?: string; // Default: 'red-600'
+  completedColor?: string; // Default: 'green-600'
 }
 
 // Usage Example:
@@ -331,10 +335,11 @@ interface StepIndicatorProps {
   variant="horizontal"
   allowStepClick={true}
   onStepClick={setCurrentStep}
-/>
+/>;
 ```
 
 **Used By:**
+
 - `BookUsPageClient.tsx` - 4-step booking wizard
 - `ReviewFlow/page.tsx` - 4-step review wizard
 - `QuoteCalculator.tsx` - 3-step funnel (if converted)
@@ -354,13 +359,13 @@ interface DateTimeSectionProps {
   onDateChange: (date: Date | null) => void;
 
   // Time slots
-  timeSlots?: TimeSlot[];         // If not provided, uses default 4 slots
+  timeSlots?: TimeSlot[]; // If not provided, uses default 4 slots
   selectedTime: string | null;
   onTimeChange: (time: string) => void;
 
   // Availability
-  availableDates?: Date[];        // Highlight available dates
-  unavailableDates?: Date[];      // Disable specific dates
+  availableDates?: Date[]; // Highlight available dates
+  unavailableDates?: Date[]; // Disable specific dates
 
   // Smart scheduling integration
   onCheckAvailability?: (date: Date) => Promise<TimeSlot[]>;
@@ -368,12 +373,12 @@ interface DateTimeSectionProps {
   onSuggestionSelect?: (suggestion: AlternativeSuggestion) => void;
 
   // Display options
-  showTimeSlots?: boolean;        // Default: true
+  showTimeSlots?: boolean; // Default: true
   datePickerProps?: DatePickerProps;
 
   // Labels
-  dateLabel?: string;             // Default: "Select Date"
-  timeLabel?: string;             // Default: "Select Time"
+  dateLabel?: string; // Default: "Select Date"
+  timeLabel?: string; // Default: "Select Time"
 }
 
 // Usage Example:
@@ -385,10 +390,11 @@ interface DateTimeSectionProps {
   onCheckAvailability={fetchAvailability}
   suggestions={alternativeSuggestions}
   onSuggestionSelect={handleSuggestionSelect}
-/>
+/>;
 ```
 
 **Used By:**
+
 - `BookUsPageClient.tsx` - Step 4 (Date & Time)
 - `BookingStepTwo.tsx` - Date/time selection
 
@@ -415,14 +421,14 @@ interface PriceSummaryCardProps {
   };
 
   // Display options
-  showBreakdown?: boolean;        // Default: true
-  showDeposit?: boolean;          // Default: true
-  showTax?: boolean;              // Default: false
-  variant?: 'compact' | 'detailed';  // Default: 'detailed'
+  showBreakdown?: boolean; // Default: true
+  showDeposit?: boolean; // Default: true
+  showTax?: boolean; // Default: false
+  variant?: 'compact' | 'detailed'; // Default: 'detailed'
 
   // Labels
-  title?: string;                 // Default: "Price Summary"
-  depositLabel?: string;          // Default: "Deposit Required Today"
+  title?: string; // Default: "Price Summary"
+  depositLabel?: string; // Default: "Deposit Required Today"
 }
 
 // Usage Example:
@@ -437,10 +443,11 @@ interface PriceSummaryCardProps {
   }}
   showDeposit={true}
   variant="detailed"
-/>
+/>;
 ```
 
 **Used By:**
+
 - `BookUsPageClient.tsx` - Order summary sidebar
 - `QuoteCalculator.tsx` - Quote result
 - `StripePaymentForm.tsx` - Payment summary
@@ -455,16 +462,19 @@ interface PriceSummaryCardProps {
 import { z } from 'zod';
 
 export const contactSchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name must be less than 100 characters'),
 
-  email: z.string()
-    .email('Please enter a valid email address'),
+  email: z.string().email('Please enter a valid email address'),
 
-  phone: z.string()
-    .regex(/^\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/,
-      'Please enter a valid phone number'),
+  phone: z
+    .string()
+    .regex(
+      /^\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/,
+      'Please enter a valid phone number'
+    ),
 });
 
 export type ContactFormData = z.infer<typeof contactSchema>;
@@ -476,18 +486,20 @@ export type ContactFormData = z.infer<typeof contactSchema>;
 import { z } from 'zod';
 
 export const addressSchema = z.object({
-  street: z.string()
+  street: z
+    .string()
     .min(5, 'Please enter a valid street address')
     .max(200, 'Address is too long'),
 
-  city: z.string()
+  city: z
+    .string()
     .min(2, 'City is required')
     .max(100, 'City name is too long'),
 
-  state: z.string()
-    .length(2, 'Please select a state'),
+  state: z.string().length(2, 'Please select a state'),
 
-  zipcode: z.string()
+  zipcode: z
+    .string()
     .regex(/^[0-9]{5}(-[0-9]{4})?$/, 'Please enter a valid ZIP code'),
 });
 
@@ -500,25 +512,32 @@ export type AddressFormData = z.infer<typeof addressSchema>;
 import { z } from 'zod';
 
 export const guestCountSchema = z.object({
-  guestCount: z.number()
+  guestCount: z
+    .number()
     .min(1, 'At least 1 guest is required')
     .max(100, 'Maximum 100 guests allowed'),
 });
 
 // With adults/children split
-export const guestCountSplitSchema = z.object({
-  adults: z.number()
-    .min(1, 'At least 1 adult is required')
-    .max(50, 'Maximum 50 adults'),
-  children: z.number()
-    .min(0, 'Cannot be negative')
-    .max(30, 'Maximum 30 children'),
-}).refine(data => data.adults + data.children >= 10, {
-  message: 'Minimum 10 guests required for hibachi service',
-});
+export const guestCountSplitSchema = z
+  .object({
+    adults: z
+      .number()
+      .min(1, 'At least 1 adult is required')
+      .max(50, 'Maximum 50 adults'),
+    children: z
+      .number()
+      .min(0, 'Cannot be negative')
+      .max(30, 'Maximum 30 children'),
+  })
+  .refine(data => data.adults + data.children >= 10, {
+    message: 'Minimum 10 guests required for hibachi service',
+  });
 
 export type GuestCountFormData = z.infer<typeof guestCountSchema>;
-export type GuestCountSplitFormData = z.infer<typeof guestCountSplitSchema>;
+export type GuestCountSplitFormData = z.infer<
+  typeof guestCountSplitSchema
+>;
 ```
 
 ---
@@ -584,7 +603,7 @@ export interface CustomerContact extends ContactInfo {
 // AND apps/admin/src/data/booking/types.ts
 
 export interface TimeSlot {
-  slot_time: string;      // "12PM", "3PM", "6PM", "9PM"
+  slot_time: string; // "12PM", "3PM", "6PM", "9PM"
   is_available: boolean;
   available_chefs?: number;
   estimated_duration?: number;
@@ -639,14 +658,14 @@ export type BookingStatus =
 
 ### Phase 2: Extract Components (Days 2-3)
 
-| Order | Component | Extract From | Complexity |
-|-------|-----------|--------------|------------|
-| 1 | `ContactFields` | `BookUsPageClient.tsx` | Medium |
-| 2 | `AddressFields` | `BookUsPageClient.tsx` | High (Google Places) |
-| 3 | `GuestCountField` | `BookUsPageClient.tsx` | Low |
-| 4 | `StepIndicator` | `BookUsPageClient.tsx` | Low |
-| 5 | `DateTimeSection` | `BookUsPageClient.tsx` | Medium |
-| 6 | `PriceSummaryCard` | `QuoteCalculator.tsx` | Medium |
+| Order | Component          | Extract From           | Complexity           |
+| ----- | ------------------ | ---------------------- | -------------------- |
+| 1     | `ContactFields`    | `BookUsPageClient.tsx` | Medium               |
+| 2     | `AddressFields`    | `BookUsPageClient.tsx` | High (Google Places) |
+| 3     | `GuestCountField`  | `BookUsPageClient.tsx` | Low                  |
+| 4     | `StepIndicator`    | `BookUsPageClient.tsx` | Low                  |
+| 5     | `DateTimeSection`  | `BookUsPageClient.tsx` | Medium               |
+| 6     | `PriceSummaryCard` | `QuoteCalculator.tsx`  | Medium               |
 
 ### Phase 3: Validation & Types (Day 3)
 
@@ -656,14 +675,14 @@ export type BookingStatus =
 
 ### Phase 4: Refactor Consumer Components (Days 4-5)
 
-| Component | App | Lines Before | Lines After | Reduction |
-|-----------|-----|--------------|-------------|-----------|
-| `BookUsPageClient.tsx` | Customer | 1,559 | ~400 | 74% |
-| `QuoteCalculator.tsx` | Customer | ~700 | ~250 | 64% |
-| `ContactPage.tsx` | Customer | ~300 | ~100 | 67% |
-| `StripePaymentForm.tsx` | Customer | ~320 | ~150 | 53% |
-| `StationForm.tsx` | Admin | ~350 | ~150 | 57% |
-| `BookingForm.tsx` | Admin | ~400 | ~200 | 50% |
+| Component               | App      | Lines Before | Lines After | Reduction |
+| ----------------------- | -------- | ------------ | ----------- | --------- |
+| `BookUsPageClient.tsx`  | Customer | 1,559        | ~400        | 74%       |
+| `QuoteCalculator.tsx`   | Customer | ~700         | ~250        | 64%       |
+| `ContactPage.tsx`       | Customer | ~300         | ~100        | 67%       |
+| `StripePaymentForm.tsx` | Customer | ~320         | ~150        | 53%       |
+| `StationForm.tsx`       | Admin    | ~350         | ~150        | 57%       |
+| `BookingForm.tsx`       | Admin    | ~400         | ~200        | 50%       |
 
 ### Phase 5: Testing & Verification (Day 6)
 
@@ -677,6 +696,7 @@ export type BookingStatus =
 ## ✅ Acceptance Criteria
 
 ### Must Have
+
 - [ ] All shared components build successfully
 - [ ] Both apps build successfully after refactor
 - [ ] No regression in form functionality
@@ -685,11 +705,13 @@ export type BookingStatus =
 - [ ] Lead capture still functions
 
 ### Should Have
+
 - [ ] Unit tests for each shared component
 - [ ] Storybook stories for visual testing
 - [ ] TypeScript strict mode passes
 
 ### Nice to Have
+
 - [ ] Component documentation
 - [ ] Usage examples in comments
 - [ ] Performance benchmarks
@@ -699,19 +721,25 @@ export type BookingStatus =
 ## 🚨 Risk Mitigation
 
 ### Risk 1: Breaking Changes
+
 **Mitigation:**
+
 - Create new package alongside existing code
 - Refactor one component at a time
 - Keep old code until new is verified
 
 ### Risk 2: Form State Issues
+
 **Mitigation:**
+
 - Use same react-hook-form patterns
 - Keep register/errors prop interface consistent
 - Test form submission thoroughly
 
 ### Risk 3: Styling Inconsistencies
+
 **Mitigation:**
+
 - Use Tailwind classes only
 - Document styling conventions
 - Visual regression tests
@@ -720,13 +748,13 @@ export type BookingStatus =
 
 ## 📊 Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| Code duplication | < 10% remaining |
-| Bundle size | No increase |
-| Build time | < 10% increase |
-| Test coverage | > 80% for shared components |
-| Developer satisfaction | Easier to maintain |
+| Metric                 | Target                      |
+| ---------------------- | --------------------------- |
+| Code duplication       | < 10% remaining             |
+| Bundle size            | No increase                 |
+| Build time             | < 10% increase              |
+| Test coverage          | > 80% for shared components |
+| Developer satisfaction | Easier to maintain          |
 
 ---
 
@@ -740,6 +768,6 @@ export type BookingStatus =
 
 ## 📝 Change Log
 
-| Date | Version | Changes |
-|------|---------|---------|
-| 2024-12-24 | 1.0.0 | Initial specification created |
+| Date       | Version | Changes                       |
+| ---------- | ------- | ----------------------------- |
+| 2024-12-24 | 1.0.0   | Initial specification created |

@@ -18,20 +18,23 @@ export default function BlogCategories({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Get categories with post counts
-  const categoryData = posts.reduce((acc, post) => {
-    const category = post.category || 'Uncategorized';
-    if (!acc[category]) {
-      acc[category] = {
-        name: category,
-        count: 0,
-        posts: [],
-        description: getCategoryDescription(category),
-      };
-    }
-    acc[category].count++;
-    acc[category].posts.push(post);
-    return acc;
-  }, {} as Record<string, { name: string; count: number; posts: BlogPost[]; description: string }>);
+  const categoryData = posts.reduce(
+    (acc, post) => {
+      const category = post.category || 'Uncategorized';
+      if (!acc[category]) {
+        acc[category] = {
+          name: category,
+          count: 0,
+          posts: [],
+          description: getCategoryDescription(category),
+        };
+      }
+      acc[category].count++;
+      acc[category].posts.push(post);
+      return acc;
+    },
+    {} as Record<string, { name: string; count: number; posts: BlogPost[]; description: string }>,
+  );
 
   const categories = Object.values(categoryData).sort((a, b) => b.count - a.count);
 

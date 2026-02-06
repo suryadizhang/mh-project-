@@ -3,6 +3,7 @@
 ## Step-by-Step Instructions for Payment Email Monitoring
 
 ### Prerequisites
+
 - Gmail account: **myhibachichef@gmail.com**
 - **2-Factor Authentication (2FA) must be enabled**
 
@@ -23,7 +24,8 @@
 
 1. **Go to App Passwords page:**
    - URL: https://myaccount.google.com/apppasswords
-   - Or: Google Account → Security → 2-Step Verification → App passwords
+   - Or: Google Account → Security → 2-Step Verification → App
+     passwords
 
 2. **Sign in** (if prompted)
 
@@ -38,6 +40,7 @@
    ```
    Example: abcd efgh ijkl mnop
    ```
+
    - ⚠️ **Save this password immediately** - you can't view it again!
    - Remove spaces when adding to `.env`: `abcdefghijklmnop`
 
@@ -48,11 +51,12 @@
 1. **Open:** `apps/backend/.env`
 
 2. **Add these lines:**
+
    ```bash
    # Gmail Integration (Payment Notifications)
    GMAIL_USER=myhibachichef@gmail.com
    GMAIL_APP_PASSWORD=abcdefghijklmnop  # Replace with your 16-char password
-   
+
    # Scheduler Settings
    PAYMENT_EMAIL_CHECK_INTERVAL_MINUTES=5
    PAYMENT_EMAIL_LOOKBACK_DAYS=7
@@ -100,6 +104,7 @@ curl http://localhost:8000/api/v1/payments/email-notifications/status
 ```
 
 **Expected Response:**
+
 ```json
 {
   "status": "connected",
@@ -127,19 +132,24 @@ After backend starts, check logs for:
 ## Troubleshooting
 
 ### Error: "Username and password not accepted"
+
 - ❌ **Wrong password** - Regenerate App Password
 - ❌ **Spaces in password** - Remove all spaces from 16-char code
-- ❌ **Using regular password** - Must use App Password, not Gmail password
+- ❌ **Using regular password** - Must use App Password, not Gmail
+  password
 
 ### Error: "2-Step Verification required"
+
 - ❌ **2FA not enabled** - Follow Step 1 to enable 2FA first
 
 ### Error: "IMAP access disabled"
+
 - Go to: https://mail.google.com/mail/u/0/#settings/fwdandpop
 - Enable IMAP access
 - Save changes
 
 ### Error: "Connection timeout"
+
 - Check firewall settings
 - Ensure port 993 is not blocked
 - Try different network (not corporate firewall)
@@ -149,11 +159,13 @@ After backend starts, check logs for:
 ## Security Best Practices
 
 ✅ **DO:**
+
 - Store App Password in `.env` file (never commit to git)
 - Revoke old App Passwords if regenerating new ones
 - Use different App Passwords for different services
 
 ❌ **DON'T:**
+
 - Share App Password with anyone
 - Commit `.env` file to version control
 - Use regular Gmail password instead of App Password
@@ -172,14 +184,17 @@ After backend starts, check logs for:
 
 ## Alternative: OAuth 2.0 (More Secure, More Complex)
 
-If you want even better security, we can implement OAuth 2.0 instead of App Passwords:
+If you want even better security, we can implement OAuth 2.0 instead
+of App Passwords:
 
 **Pros:**
+
 - ✅ More secure (token-based, can be revoked)
 - ✅ No password storage
 - ✅ Fine-grained permissions
 
 **Cons:**
+
 - ❌ More complex setup
 - ❌ Requires Google Cloud Console project
 - ❌ Requires browser authentication flow
@@ -191,10 +206,12 @@ Let me know if you want to implement OAuth 2.0 instead!
 ## Next Steps
 
 After setup:
+
 1. ✅ Start backend server
 2. ✅ Scheduler auto-starts (checks every 5 minutes)
 3. ✅ Make a test payment
 4. ✅ Wait up to 5 minutes
 5. ✅ Payment auto-confirmed!
 
-**Support:** If you encounter issues, check logs in `apps/backend/logs/` or contact your dev team.
+**Support:** If you encounter issues, check logs in
+`apps/backend/logs/` or contact your dev team.

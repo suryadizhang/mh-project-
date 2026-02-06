@@ -119,10 +119,10 @@ const MOCK_AVAILABILITY = {
     '12PM': { booked: 2, maxCapacity: 2 }, // Fully booked
     '3PM': { booked: 1, maxCapacity: 2 }, // 1 slot available
     '6PM': { booked: 0, maxCapacity: 2 }, // 2 slots available
-    '9PM': { booked: 2, maxCapacity: 2 } // Fully booked
-  }
+    '9PM': { booked: 2, maxCapacity: 2 }, // Fully booked
+  },
   // ... more dates
-}
+};
 ```
 
 ## ✨ Frontend Features
@@ -151,19 +151,16 @@ const MOCK_AVAILABILITY = {
 ## 🚀 Next Implementation Steps
 
 1. **Database Integration**:
-
    - Replace mock data with real database queries
    - Implement booking creation and updates
    - Add booking status management
 
 2. **Payment Processing**:
-
    - Integrate payment gateway (Stripe, Square, etc.)
    - Handle deposits and final payments
    - Send confirmation emails
 
 3. **Admin Panel**:
-
    - View and manage bookings
    - Adjust time slot capacity
    - Handle cancellations and rescheduling

@@ -14,7 +14,11 @@ interface ThemeToggleProps {
   showLabel?: boolean;
 }
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', size = 'md', showLabel = false }) => {
+const ThemeToggle: React.FC<ThemeToggleProps> = ({
+  className = '',
+  size = 'md',
+  showLabel = false,
+}) => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [mounted, setMounted] = useState(false);
 

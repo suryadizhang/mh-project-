@@ -33,7 +33,7 @@ interface UseCachedFetchResult<T> {
 export function useCachedFetch<T>(
   key: string | null,
   fetcher: () => Promise<T>,
-  options: UseCachedFetchOptions<T> = {}
+  options: UseCachedFetchOptions<T> = {},
 ): UseCachedFetchResult<T> {
   const {
     ttl = 5 * 60 * 1000, // Default 5 minutes
@@ -123,7 +123,7 @@ export function useCachedFetch<T>(
     // CRITICAL: Intentionally excluding 'data' from deps to prevent infinite loop
     // We use dataRef.current to check for existing data instead
     // cache is from singleton getInstance, so it's stable and doesn't need to be in deps
-    [key, enabled, ttl, fetcher, onSuccess, onError, staleWhileRevalidate]
+    [key, enabled, ttl, fetcher, onSuccess, onError, staleWhileRevalidate],
   );
 
   /**

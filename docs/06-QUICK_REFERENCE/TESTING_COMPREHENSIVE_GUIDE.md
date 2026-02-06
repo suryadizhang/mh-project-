@@ -27,23 +27,25 @@
 ### Testing Philosophy
 
 Our testing strategy follows the **Test Pyramid** approach:
+
 - **70% Unit Tests** - Fast, isolated component tests
 - **20% Integration Tests** - API and database interaction tests
 - **10% E2E Tests** - Full user flow validation
 
 ### Current Coverage
 
-| Component | Unit Tests | Integration Tests | E2E Tests | Coverage % |
-|-----------|-----------|------------------|-----------|------------|
-| **Backend API** | ✅ 50+ tests | ✅ 18 tests | ⏳ Planned | 87% |
-| **Frontend Customer** | ✅ 17 tests | ⏳ In Progress | ⏳ Planned | 68% |
-| **Frontend Admin** | ⏳ Planned | ⏳ Planned | ⏳ Planned | 45% |
-| **Database** | ✅ Via Integration | ✅ Tested | N/A | 92% |
-| **Services** | ✅ 25 tests | ✅ 12 tests | N/A | 85% |
+| Component             | Unit Tests         | Integration Tests | E2E Tests  | Coverage % |
+| --------------------- | ------------------ | ----------------- | ---------- | ---------- |
+| **Backend API**       | ✅ 50+ tests       | ✅ 18 tests       | ⏳ Planned | 87%        |
+| **Frontend Customer** | ✅ 17 tests        | ⏳ In Progress    | ⏳ Planned | 68%        |
+| **Frontend Admin**    | ⏳ Planned         | ⏳ Planned        | ⏳ Planned | 45%        |
+| **Database**          | ✅ Via Integration | ✅ Tested         | N/A        | 92%        |
+| **Services**          | ✅ 25 tests        | ✅ 12 tests       | N/A        | 85%        |
 
 ### Testing Tools
 
 #### Backend (Python/FastAPI)
+
 - **Framework:** Pytest 7.4+
 - **Async Support:** pytest-asyncio
 - **HTTP Client:** httpx
@@ -52,6 +54,7 @@ Our testing strategy follows the **Test Pyramid** approach:
 - **Performance:** pytest-benchmark
 
 #### Frontend (TypeScript/Next.js)
+
 - **Framework:** Vitest with jsdom
 - **Component Testing:** @testing-library/react
 - **User Interaction:** @testing-library/user-event
@@ -59,6 +62,7 @@ Our testing strategy follows the **Test Pyramid** approach:
 - **Mocking:** vi.fn(), vi.mock()
 
 #### API Testing
+
 - **Interactive:** Postman/Bruno
 - **Automated:** Pytest + httpx
 - **Load Testing:** Apache Bench, K6
@@ -106,6 +110,7 @@ tests/
 #### Backend Testing Environment
 
 **Prerequisites:**
+
 ```powershell
 # PostgreSQL 14+
 choco install postgresql14 -y
@@ -115,6 +120,7 @@ python --version  # Should be 3.11 or higher
 ```
 
 **Configuration (apps/backend/.env.test):**
+
 ```env
 DATABASE_URL=postgresql://myhibachi_user:password@localhost:5432/myhibachi_test
 ENVIRONMENT=test
@@ -125,6 +131,7 @@ EMAIL_ENABLED=false
 ```
 
 **Install Dependencies:**
+
 ```powershell
 cd apps/backend
 pip install -r requirements.txt
@@ -134,6 +141,7 @@ pip install pytest pytest-asyncio httpx pytest-benchmark faker pytest-cov pytest
 #### Frontend Testing Environment
 
 **Install Dependencies:**
+
 ```powershell
 cd apps/customer
 npm install --save-dev vitest @vitest/ui @vitest/coverage-v8 jsdom
@@ -212,6 +220,7 @@ npm test -- --run
 **Coverage:** 25 test cases
 
 **Test Classes:**
+
 1. **TestSubscribeMethod** (5 tests)
    - Subscribe with phone only
    - Subscribe with phone + email
@@ -252,6 +261,7 @@ npm test -- --run
    - Migration source
 
 **Run Commands:**
+
 ```powershell
 # Run all unit tests
 pytest tests/test_newsletter_unit.py -v -m unit
@@ -267,6 +277,7 @@ pytest tests/test_newsletter_unit.py --cov=app.services.newsletter_service --cov
 ```
 
 **Expected Output:**
+
 ```
 tests/test_newsletter_unit.py::TestSubscribeMethod::test_subscribe_with_phone_only PASSED
 tests/test_newsletter_unit.py::TestSubscribeMethod::test_subscribe_with_phone_and_email PASSED
@@ -284,6 +295,7 @@ tests/test_newsletter_unit.py::TestSubscribeMethod::test_subscribe_without_phone
 **Coverage:** 18 test cases
 
 **Test Classes:**
+
 1. **TestQuoteFormIntegration** (4 tests)
    - Create lead and auto-subscribe
    - Work without email (phone-only)
@@ -317,6 +329,7 @@ tests/test_newsletter_unit.py::TestSubscribeMethod::test_subscribe_without_phone
    - Health check endpoint
 
 **Run Commands:**
+
 ```powershell
 # Run all integration tests
 pytest tests/test_newsletter_integration.py -v -m integration
@@ -332,6 +345,7 @@ pytest tests/test_newsletter_*.py -v --tb=short
 ```
 
 **Expected Output:**
+
 ```
 tests/test_newsletter_integration.py::TestQuoteFormIntegration::test_create_lead_and_subscribe PASSED [120ms]
 tests/test_newsletter_integration.py::TestBookingFormIntegration::test_create_booking_and_subscribe PASSED [150ms]
@@ -350,15 +364,16 @@ tests/test_newsletter_integration.py::TestPerformanceTargets::test_quote_form_pe
 
 **Performance Targets:**
 
-| Endpoint | Original | Target | Improvement |
-|----------|----------|--------|-------------|
-| Cursor Pagination | 50ms | <20ms | 2.5x faster |
-| Payment Analytics | 200ms | <15ms | 13x faster |
-| Booking KPIs | 300ms | <17ms | 18x faster |
-| Customer Analytics | 250ms | <20ms | 12x faster |
-| **Combined** | **790ms** | **<80ms** | **10x faster** |
+| Endpoint           | Original  | Target    | Improvement    |
+| ------------------ | --------- | --------- | -------------- |
+| Cursor Pagination  | 50ms      | <20ms     | 2.5x faster    |
+| Payment Analytics  | 200ms     | <15ms     | 13x faster     |
+| Booking KPIs       | 300ms     | <17ms     | 18x faster     |
+| Customer Analytics | 250ms     | <20ms     | 12x faster     |
+| **Combined**       | **790ms** | **<80ms** | **10x faster** |
 
 **Test Classes:**
+
 1. **TestCursorPaginationPerformance** (3 tests)
    - First page <20ms
    - Subsequent pages <20ms
@@ -378,6 +393,7 @@ tests/test_newsletter_integration.py::TestPerformanceTargets::test_quote_form_pe
    - Overall 10x improvement maintained
 
 **Run Commands:**
+
 ```powershell
 # Run all performance tests
 pytest tests/test_api_performance.py -v
@@ -390,6 +406,7 @@ pytest tests/test_api_performance.py -v -s --durations=10
 ```
 
 **Expected Output:**
+
 ```
 tests/test_api_performance.py::test_first_page_performance PASSED
 ✅ First page: 12.4ms (target: <20ms, 4.2x improvement)
@@ -418,6 +435,7 @@ Overall improvement: 11.8x faster (790ms → 67ms)
 **Coverage:** 12 test cases
 
 **Load Test Scenarios:**
+
 1. **Concurrent Request Handling**
    - 50 concurrent cursor pagination requests
    - 30 concurrent CTE analytics requests
@@ -437,6 +455,7 @@ Overall improvement: 11.8x faster (790ms → 67ms)
    - Recovery after errors
 
 **Run Commands:**
+
 ```powershell
 # Run load tests (WARNING: Takes 2-3 minutes)
 pytest tests/test_api_load.py -v -m slow
@@ -449,6 +468,7 @@ pytest tests/test_api_load.py -v -s
 ```
 
 **Expected Output:**
+
 ```
 tests/test_api_load.py::test_concurrent_cursor_pagination_requests PASSED
 ✅ Concurrent pagination: 50/50 succeeded (100.0%)
@@ -467,33 +487,36 @@ tests/test_api_load.py::test_cursor_pagination_throughput PASSED
 **Key Fixtures:**
 
 #### Database Fixtures
+
 ```python
 @pytest.fixture
 async def test_db_engine():
     """SQLAlchemy async engine for testing"""
     # In-memory SQLite or PostgreSQL test database
-    
+
 @pytest.fixture
 async def test_db_session(test_db_engine):
     """Async database session with automatic rollback"""
-    
+
 @pytest.fixture
 def override_db_dependency(test_db_session):
     """Override FastAPI DB dependency"""
 ```
 
 #### HTTP Client Fixtures
+
 ```python
 @pytest.fixture
 async def async_client(app, override_db_dependency):
     """Async HTTP client for API testing"""
-    
+
 @pytest.fixture
 async def auth_client(async_client, mock_admin_user):
     """Pre-authenticated admin client"""
 ```
 
 #### Authentication Fixtures
+
 ```python
 @pytest.fixture
 def mock_admin_user():
@@ -507,17 +530,19 @@ def mock_admin_user():
 ```
 
 #### Sample Data Fixtures
+
 ```python
 @pytest.fixture
 async def create_test_bookings(test_db_session):
     """Generate N realistic test bookings"""
-    
+
 @pytest.fixture
 async def create_test_payments(test_db_session):
     """Generate N realistic test payments"""
 ```
 
 #### Performance Fixtures
+
 ```python
 @pytest.fixture
 def performance_tracker():
@@ -535,6 +560,7 @@ def performance_tracker():
 **Coverage:** 17 test cases
 
 **Test Groups:**
+
 1. **Auto-Subscribe Notice Display** (3 tests)
    - Display auto-subscribe notice
    - No consent checkboxes (removed)
@@ -566,6 +592,7 @@ def performance_tracker():
    - Real-time formatting
 
 **Run Commands:**
+
 ```powershell
 cd apps/customer
 
@@ -586,6 +613,7 @@ npm run test:ui
 ```
 
 **Expected Output:**
+
 ```
 ✓ src/test/components/QuoteRequestForm.test.tsx (17)
   ✓ Auto-Subscribe Notice (3)
@@ -679,13 +707,16 @@ global.fetch = vi.fn();
 #### Setup
 
 **Import Collection:**
+
 1. Open Postman Desktop
 2. Click "Import"
-3. Select `tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json`
+3. Select
+   `tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json`
 4. Select environment file: `Development.postman_environment.json`
 5. Click "Import"
 
 **Configure Environment:**
+
 1. Select "Development" environment
 2. Update variables:
    - `base_url`: http://localhost:8000
@@ -693,6 +724,7 @@ global.fetch = vi.fn();
    - `test_customer_email`: test@example.com
 
 **Get Admin Token:**
+
 ```powershell
 curl -X POST http://localhost:8000/api/auth/login `
   -H "Content-Type: application/json" `
@@ -720,12 +752,14 @@ MyHibachi_API_Performance_Tests
 #### Run Collection
 
 **Manual Run:**
+
 1. Right-click collection
 2. Select "Run collection"
 3. Choose environment
 4. Click "Run"
 
 **Newman (CLI):**
+
 ```powershell
 # Install Newman
 npm install -g newman
@@ -738,6 +772,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 ```
 
 **Expected Output:**
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    MyHibachi API Performance Tests                   │
@@ -762,12 +797,14 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 ### Bruno Collection (Alternative)
 
 **Advantages:**
+
 - ✅ Open source, no account required
 - ✅ Git-friendly (stores as text files)
 - ✅ Faster and lighter than Postman
 - ✅ Privacy-focused (no cloud sync)
 
 **Setup:**
+
 1. Install Bruno: https://www.usebruno.com/
 2. Open Bruno
 3. Click "Open Collection"
@@ -781,6 +818,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 ### Pre-Testing Checklist
 
 **Backend:**
+
 - [ ] PostgreSQL running
 - [ ] Database migrations applied
 - [ ] Test data seeded
@@ -788,6 +826,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 - [ ] No console errors in terminal
 
 **Frontend:**
+
 - [ ] Node.js dependencies installed
 - [ ] Dev server running on port 3000
 - [ ] Production build succeeds
@@ -799,6 +838,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 #### Test 1: Client-Side Cache (Blog Page)
 
 **Steps:**
+
 1. Open Chrome DevTools → Console
 2. Navigate to http://localhost:3000/blog
 3. **First load:** Console shows "Cache miss"
@@ -807,6 +847,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 6. Verify: Load time <10ms (instant)
 
 **Expected:**
+
 - ✅ Cache miss on first visit
 - ✅ Cache hit on subsequent visits
 - ✅ 99% faster load time
@@ -817,6 +858,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 #### Test 2: Quote Form Submission
 
 **Steps:**
+
 1. Navigate to http://localhost:3000/BookUs
 2. Fill out quote request form:
    - Name: John Doe
@@ -826,6 +868,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 4. Verify success message
 
 **Expected:**
+
 - ✅ Form submits successfully
 - ✅ Success message displays
 - ✅ User auto-subscribed to newsletter
@@ -836,6 +879,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 #### Test 3: Booking Form Submission
 
 **Steps:**
+
 1. Navigate to http://localhost:3000/BookUs
 2. Fill out booking form:
    - Name: Jane Smith
@@ -846,6 +890,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 4. Verify success message
 
 **Expected:**
+
 - ✅ Form submits successfully
 - ✅ Booking lead created
 - ✅ User auto-subscribed to newsletter
@@ -857,6 +902,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 #### Test 4: Honeypot Spam Protection
 
 **Steps:**
+
 1. Navigate to http://localhost:3000/BookUs
 2. Open DevTools → Elements
 3. Find hidden honeypot field
@@ -864,6 +910,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 5. Submit form
 
 **Expected:**
+
 - ✅ Form submission blocked
 - ✅ No data saved to database
 - ✅ User sees generic error (or success to fool bots)
@@ -873,6 +920,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 #### Test 5: TypeScript Strict Mode
 
 **Steps:**
+
 1. Open DevTools → Console
 2. Navigate through entire app:
    - Homepage
@@ -883,6 +931,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 3. Monitor console for errors
 
 **Expected:**
+
 - ✅ Zero TypeScript errors
 - ✅ No "undefined" errors
 - ✅ No "null" errors
@@ -893,21 +942,22 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 ### Cache Testing (Advanced)
 
 **Browser Console Commands:**
+
 ```javascript
 // Get cache statistics
-window.blogCache.getStats()
+window.blogCache.getStats();
 // Expected: { size: 5, hits: 12, misses: 5, hitRate: 0.71 }
 
 // Check if specific data is cached
-window.blogCache.has('featured-posts-3')
+window.blogCache.has('featured-posts-3');
 // Expected: true
 
 // Get all cache keys
-window.blogCache.keys()
+window.blogCache.keys();
 // Expected: ['featured-posts-3', 'blog-posts-recent', ...]
 
 // Manually clear cache (for testing)
-window.blogCache.clear()
+window.blogCache.clear();
 // Expected: Cache cleared
 ```
 
@@ -918,6 +968,7 @@ window.blogCache.clear()
 ### Lighthouse Audit
 
 **Run Lighthouse:**
+
 1. Open Chrome DevTools
 2. Go to "Lighthouse" tab
 3. Select categories:
@@ -928,6 +979,7 @@ window.blogCache.clear()
 4. Click "Analyze page load"
 
 **Target Scores:**
+
 - **Performance:** >90
 - **Accessibility:** >95
 - **Best Practices:** >95
@@ -938,12 +990,14 @@ window.blogCache.clear()
 ### Load Testing (Apache Bench)
 
 **Install Apache Bench:**
+
 ```powershell
 # Included with Apache or install separately
 choco install apache-httpd -y
 ```
 
 **Run Load Test:**
+
 ```powershell
 # Test cursor pagination endpoint
 ab -n 1000 -c 50 -H "Authorization: Bearer YOUR_TOKEN" `
@@ -960,42 +1014,48 @@ ab -n 1000 -c 50 -H "Authorization: Bearer YOUR_TOKEN" `
 ### K6 Load Testing (Advanced)
 
 **Install K6:**
+
 ```powershell
 choco install k6 -y
 ```
 
 **Create Test Script (k6-load-test.js):**
+
 ```javascript
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 export let options = {
   stages: [
-    { duration: '30s', target: 20 },  // Ramp up to 20 users
-    { duration: '1m', target: 50 },   // Stay at 50 users
-    { duration: '30s', target: 0 },   // Ramp down
+    { duration: '30s', target: 20 }, // Ramp up to 20 users
+    { duration: '1m', target: 50 }, // Stay at 50 users
+    { duration: '30s', target: 0 }, // Ramp down
   ],
   thresholds: {
-    http_req_duration: ['p(95)<500'],  // 95% requests < 500ms
-    http_req_failed: ['rate<0.05'],    // <5% errors
+    http_req_duration: ['p(95)<500'], // 95% requests < 500ms
+    http_req_failed: ['rate<0.05'], // <5% errors
   },
 };
 
 export default function () {
-  let response = http.get('http://localhost:8000/api/bookings?limit=20', {
-    headers: { 'Authorization': 'Bearer YOUR_TOKEN' },
-  });
-  
+  let response = http.get(
+    'http://localhost:8000/api/bookings?limit=20',
+    {
+      headers: { Authorization: 'Bearer YOUR_TOKEN' },
+    }
+  );
+
   check(response, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 20ms': (r) => r.timings.duration < 20,
+    'status is 200': r => r.status === 200,
+    'response time < 20ms': r => r.timings.duration < 20,
   });
-  
+
   sleep(1);
 }
 ```
 
 **Run K6 Test:**
+
 ```powershell
 k6 run k6-load-test.js
 
@@ -1028,6 +1088,7 @@ TOTAL                                     780     86    89%
 ```
 
 **Generate Coverage Report:**
+
 ```powershell
 cd apps/backend
 
@@ -1053,6 +1114,7 @@ All files                           |   68.5  |   62.1   |   72.3  |   67.9
 ```
 
 **Generate Coverage Report:**
+
 ```powershell
 cd apps/customer
 
@@ -1068,6 +1130,7 @@ start coverage/index.html
 ### Coverage Goals
 
 **Critical Components (>95% required):**
+
 - Newsletter subscription flow
 - Lead creation flow
 - Booking creation flow
@@ -1076,12 +1139,14 @@ start coverage/index.html
 - Payment processing
 
 **Standard Components (>85% target):**
+
 - API endpoints
 - Service layer methods
 - Form components
 - Utility functions
 
 **Low Priority (<70% acceptable):**
+
 - UI components (buttons, modals)
 - Static pages
 - Type definitions
@@ -1107,7 +1172,7 @@ jobs:
   backend-tests:
     name: Backend Tests (Python)
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:14
@@ -1116,44 +1181,42 @@ jobs:
           POSTGRES_PASSWORD: test_password
           POSTGRES_DB: myhibachi_test
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd pg_isready --health-interval 10s
+          --health-timeout 5s --health-retries 5
         ports:
           - 5432:5432
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           cd apps/backend
           pip install -r requirements.txt
           pip install pytest pytest-asyncio httpx pytest-cov faker
-      
+
       - name: Run unit tests
         run: |
           cd apps/backend
           pytest tests/ -v -m unit --cov=app --cov-report=xml
-      
+
       - name: Run integration tests
         run: |
           cd apps/backend
           pytest tests/ -v -m integration
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/myhibachi_test
-      
+
       - name: Run smoke tests
         run: |
           cd apps/backend
           pytest tests/ -v -m smoke
-      
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -1163,32 +1226,32 @@ jobs:
   frontend-tests:
     name: Frontend Tests (TypeScript)
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: apps/customer/package-lock.json
-      
+
       - name: Install dependencies
         run: |
           cd apps/customer
           npm ci
-      
+
       - name: Run tests
         run: |
           cd apps/customer
           npm test -- --run
-      
+
       - name: Generate coverage
         run: |
           cd apps/customer
           npm run test:coverage
-      
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -1199,26 +1262,26 @@ jobs:
     name: Performance Tests
     runs-on: ubuntu-latest
     needs: [backend-tests]
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           cd apps/backend
           pip install -r requirements.txt
           pip install pytest pytest-asyncio httpx pytest-benchmark
-      
+
       - name: Run performance tests
         run: |
           cd apps/backend
           pytest tests/test_api_performance.py -v -m performance
-      
+
       - name: Check performance thresholds
         run: |
           cd apps/backend
@@ -1230,29 +1293,33 @@ jobs:
 ### Pre-Commit Hooks
 
 **Install Pre-Commit:**
+
 ```powershell
 pip install pre-commit
 ```
 
 **Create `.pre-commit-config.yaml`:**
+
 ```yaml
 repos:
   - repo: local
     hooks:
       - id: backend-tests
         name: Backend Unit Tests
-        entry: bash -c 'cd apps/backend && pytest tests/ -v -m "unit and not slow"'
+        entry:
+          bash -c 'cd apps/backend && pytest tests/ -v -m "unit and
+          not slow"'
         language: system
         pass_filenames: false
         always_run: true
-      
+
       - id: frontend-tests
         name: Frontend Tests
         entry: bash -c 'cd apps/customer && npm test -- --run'
         language: system
         pass_filenames: false
         always_run: true
-      
+
       - id: typescript-check
         name: TypeScript Type Check
         entry: bash -c 'cd apps/customer && npm run typecheck'
@@ -1262,6 +1329,7 @@ repos:
 ```
 
 **Install Hooks:**
+
 ```powershell
 pre-commit install
 ```
@@ -1275,6 +1343,7 @@ pre-commit install
 #### Issue: "pytest: command not found"
 
 **Solution:**
+
 ```powershell
 cd apps/backend
 pip install pytest pytest-asyncio httpx
@@ -1286,6 +1355,7 @@ pytest --version  # Verify installation
 #### Issue: Database connection errors
 
 **Solution:**
+
 ```powershell
 # Check PostgreSQL status
 Get-Service postgresql*
@@ -1305,6 +1375,7 @@ cat apps/backend/.env | Select-String "DATABASE_URL"
 #### Issue: No test data (empty results)
 
 **Solution:**
+
 ```powershell
 cd apps/backend
 
@@ -1320,6 +1391,7 @@ psql -U myhibachi_user -d myhibachi -c "SELECT COUNT(*) FROM bookings;"
 #### Issue: Frontend tests failing with "Cannot find module"
 
 **Solution:**
+
 ```powershell
 cd apps/customer
 
@@ -1336,10 +1408,11 @@ npx vitest --version
 #### Issue: Performance targets not met
 
 **Solution:**
+
 ```powershell
 # Check database size
 psql -U myhibachi_user -d myhibachi -c "
-SELECT 
+SELECT
     tablename,
     pg_size_pretty(pg_total_relation_size('public.'||tablename)) AS size
 FROM pg_tables
@@ -1360,13 +1433,16 @@ pytest tests/test_api_performance.py -v
 #### Issue: Postman tests failing
 
 **Solution:**
+
 1. Verify server is running: http://localhost:8000/docs
 2. Get fresh admin token:
+
 ```powershell
 curl -X POST http://localhost:8000/api/auth/login `
   -H "Content-Type: application/json" `
   -d '{\"email\": \"admin@myhibachi.com\", \"password\": \"your_password\"}'
 ```
+
 3. Update token in Postman environment
 4. Re-run collection
 
@@ -1375,6 +1451,7 @@ curl -X POST http://localhost:8000/api/auth/login `
 #### Issue: Cache tests not working
 
 **Solution:**
+
 1. Clear browser cache: Ctrl+Shift+Del
 2. Open DevTools → Console
 3. Run: `window.blogCache.clear()`
@@ -1407,21 +1484,22 @@ LOG_LEVEL=DEBUG
 
 ### Test Execution Matrix
 
-| Test Type | Command | Duration | Frequency |
-|-----------|---------|----------|-----------|
-| Backend Unit | `pytest tests/ -m unit` | <5s | Every commit |
-| Backend Integration | `pytest tests/ -m integration` | <30s | Every PR |
-| Frontend Unit | `npm test` | <10s | Every commit |
-| Performance | `pytest tests/test_api_performance.py` | <1min | Weekly |
-| Load Tests | `pytest tests/test_api_load.py` | <3min | Before release |
-| Manual Tests | Interactive | <30min | Before release |
-| Postman Collection | Newman CLI | <2min | Daily |
+| Test Type           | Command                                | Duration | Frequency      |
+| ------------------- | -------------------------------------- | -------- | -------------- |
+| Backend Unit        | `pytest tests/ -m unit`                | <5s      | Every commit   |
+| Backend Integration | `pytest tests/ -m integration`         | <30s     | Every PR       |
+| Frontend Unit       | `npm test`                             | <10s     | Every commit   |
+| Performance         | `pytest tests/test_api_performance.py` | <1min    | Weekly         |
+| Load Tests          | `pytest tests/test_api_load.py`        | <3min    | Before release |
+| Manual Tests        | Interactive                            | <30min   | Before release |
+| Postman Collection  | Newman CLI                             | <2min    | Daily          |
 
 ---
 
 ### Quick Reference
 
 **Run Everything:**
+
 ```powershell
 # Backend (from apps/backend)
 pytest tests/ -v --cov=app --cov-report=html
@@ -1434,6 +1512,7 @@ newman run tests/postman/MyHibachi_API_Performance_Tests.postman_collection.json
 ```
 
 **Smoke Test (30 seconds):**
+
 ```powershell
 # Backend
 cd apps/backend
@@ -1445,6 +1524,7 @@ npm test -- --run
 ```
 
 **Coverage Reports:**
+
 ```powershell
 # Backend
 cd apps/backend
@@ -1462,6 +1542,7 @@ start coverage/index.html
 ## Next Steps
 
 ### Immediate Actions
+
 1. ✅ Install testing dependencies (5 min)
 2. ✅ Run smoke tests to verify setup (30 sec)
 3. ✅ Run full test suite (2 min)
@@ -1469,6 +1550,7 @@ start coverage/index.html
 5. ✅ Review and fix any failing tests
 
 ### Short Term (This Week)
+
 1. ⏳ Set up CI/CD GitHub Actions workflow
 2. ⏳ Add E2E tests with Playwright
 3. ⏳ Increase frontend coverage to 85%
@@ -1476,6 +1558,7 @@ start coverage/index.html
 5. ⏳ Set up pre-commit hooks
 
 ### Long Term (This Month)
+
 1. ⏳ Implement visual regression testing
 2. ⏳ Set up load testing with K6
 3. ⏳ Add security testing with OWASP ZAP
@@ -1493,11 +1576,17 @@ start coverage/index.html
 
 ## Related Documentation
 
-- [AUTOMATED_API_TESTING_GUIDE.md](./AUTOMATED_API_TESTING_GUIDE.md) - Original API testing guide
-- [COMPREHENSIVE_TESTING_STRATEGY.md](./COMPREHENSIVE_TESTING_STRATEGY.md) - Newsletter testing strategy
-- [COMPLETE_TEST_SUITE_DOCUMENTATION.md](./COMPLETE_TEST_SUITE_DOCUMENTATION.md) - Detailed test suite docs
-- [MANUAL_TESTING_GUIDE.md](./MANUAL_TESTING_GUIDE.md) - Manual testing procedures
-- [DATABASE_SETUP_GUIDE.md](./DATABASE_SETUP_GUIDE.md) - Database setup for testing
-- [LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md) - Dev environment setup
+- [AUTOMATED_API_TESTING_GUIDE.md](./AUTOMATED_API_TESTING_GUIDE.md) -
+  Original API testing guide
+- [COMPREHENSIVE_TESTING_STRATEGY.md](./COMPREHENSIVE_TESTING_STRATEGY.md) -
+  Newsletter testing strategy
+- [COMPLETE_TEST_SUITE_DOCUMENTATION.md](./COMPLETE_TEST_SUITE_DOCUMENTATION.md) -
+  Detailed test suite docs
+- [MANUAL_TESTING_GUIDE.md](./MANUAL_TESTING_GUIDE.md) - Manual
+  testing procedures
+- [DATABASE_SETUP_GUIDE.md](./DATABASE_SETUP_GUIDE.md) - Database
+  setup for testing
+- [LOCAL_DEVELOPMENT_SETUP.md](./LOCAL_DEVELOPMENT_SETUP.md) - Dev
+  environment setup
 
 ---

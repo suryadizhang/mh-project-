@@ -17,11 +17,11 @@ export type SyncType = 'auto' | 'manual';
  * Sync status states
  */
 export type SyncStatus =
-  | 'in_sync'           // Database matches TypeScript files
-  | 'out_of_sync'       // Changes detected but not applied
-  | 'syncing'           // Sync operation in progress
-  | 'error'             // Sync failed
-  | 'never_synced';     // No sync performed yet
+  | 'in_sync' // Database matches TypeScript files
+  | 'out_of_sync' // Changes detected but not applied
+  | 'syncing' // Sync operation in progress
+  | 'error' // Sync failed
+  | 'never_synced'; // No sync performed yet
 
 /**
  * Individual file change detected during comparison
@@ -111,8 +111,8 @@ export interface SyncHistoryResponse {
  */
 export interface SyncRequest {
   sources?: SyncSource[]; // Optional: sync specific sources only
-  force?: boolean;        // Force sync even if no changes detected
-  dry_run?: boolean;      // Detect changes but don't apply them
+  force?: boolean; // Force sync even if no changes detected
+  dry_run?: boolean; // Detect changes but don't apply them
 }
 
 /**

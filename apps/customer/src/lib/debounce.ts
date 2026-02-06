@@ -25,7 +25,7 @@
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number = 300
+  wait: number = 300,
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
 
@@ -70,7 +70,7 @@ export function debounce<T extends (...args: any[]) => any>(
  */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
-  wait: number = 100
+  wait: number = 100,
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean = false;
   let lastArgs: Parameters<T> | null = null;

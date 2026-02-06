@@ -2,14 +2,21 @@
 
 import React from 'react';
 import { User, Mail, Phone } from 'lucide-react';
-import type { FieldErrors, UseFormRegister, Path, FieldValues } from 'react-hook-form';
+import type {
+  FieldErrors,
+  UseFormRegister,
+  Path,
+  FieldValues,
+} from 'react-hook-form';
 import { formatPhoneNumber } from '../hooks/usePhoneFormat';
 import type { FormLayout } from '../types';
 
 /**
  * Props for ContactFields component
  */
-export interface ContactFieldsProps<TFieldValues extends FieldValues = FieldValues> {
+export interface ContactFieldsProps<
+  TFieldValues extends FieldValues = FieldValues,
+> {
   /** react-hook-form register function */
   register: UseFormRegister<TFieldValues>;
   /** react-hook-form errors object */
@@ -97,9 +104,15 @@ export function ContactFields<TFieldValues extends FieldValues = FieldValues>({
   disabled = false,
 }: ContactFieldsProps<TFieldValues>) {
   // Build field names with optional prefix
-  const nameField = (fieldPrefix ? `${fieldPrefix}Name` : 'name') as Path<TFieldValues>;
-  const emailField = (fieldPrefix ? `${fieldPrefix}Email` : 'email') as Path<TFieldValues>;
-  const phoneField = (fieldPrefix ? `${fieldPrefix}Phone` : 'phone') as Path<TFieldValues>;
+  const nameField = (
+    fieldPrefix ? `${fieldPrefix}Name` : 'name'
+  ) as Path<TFieldValues>;
+  const emailField = (
+    fieldPrefix ? `${fieldPrefix}Email` : 'email'
+  ) as Path<TFieldValues>;
+  const phoneField = (
+    fieldPrefix ? `${fieldPrefix}Phone` : 'phone'
+  ) as Path<TFieldValues>;
 
   // Get error for a field (handle nested errors)
   const getError = (field: string): string | undefined => {
@@ -120,11 +133,12 @@ export function ContactFields<TFieldValues extends FieldValues = FieldValues>({
   const phoneError = getError(phoneField);
 
   // Layout classes
-  const containerClass = layout === 'grid'
-    ? 'grid grid-cols-1 gap-4 md:grid-cols-2'
-    : layout === 'inline'
-      ? 'flex flex-wrap gap-4'
-      : 'space-y-4';
+  const containerClass =
+    layout === 'grid'
+      ? 'grid grid-cols-1 gap-4 md:grid-cols-2'
+      : layout === 'inline'
+        ? 'flex flex-wrap gap-4'
+        : 'space-y-4';
 
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneNumber(e.target.value);
@@ -154,12 +168,13 @@ export function ContactFields<TFieldValues extends FieldValues = FieldValues>({
             disabled={disabled}
             {...register(nameField, {
               required: required.name ? 'Name is required' : false,
-              minLength: { value: 2, message: 'Name must be at least 2 characters' },
+              minLength: {
+                value: 2,
+                message: 'Name must be at least 2 characters',
+              },
             })}
           />
-          {nameError && (
-            <div className="invalid-feedback">{nameError}</div>
-          )}
+          {nameError && <div className="invalid-feedback">{nameError}</div>}
         </div>
       </div>
 
@@ -186,16 +201,16 @@ export function ContactFields<TFieldValues extends FieldValues = FieldValues>({
                 message: 'Invalid email address',
               },
             })}
-            onBlur={(e) => onEmailBlur?.(e.target.value)}
+            onBlur={e => onEmailBlur?.(e.target.value)}
           />
-          {emailError && (
-            <div className="invalid-feedback">{emailError}</div>
-          )}
+          {emailError && <div className="invalid-feedback">{emailError}</div>}
         </div>
       </div>
 
       {/* Phone Field - Full width in grid layout */}
-      <div className={layout === 'grid' ? 'md:col-span-2' : 'flex-1 min-w-[200px]'}>
+      <div
+        className={layout === 'grid' ? 'md:col-span-2' : 'flex-1 min-w-[200px]'}
+      >
         <div className="form-group">
           {showLabels && (
             <label htmlFor={phoneField} className="form-label">
@@ -212,13 +227,14 @@ export function ContactFields<TFieldValues extends FieldValues = FieldValues>({
             disabled={disabled}
             {...register(phoneField, {
               required: required.phone ? 'Phone number is required' : false,
-              minLength: { value: 14, message: 'Please enter a complete phone number' },
+              minLength: {
+                value: 14,
+                message: 'Please enter a complete phone number',
+              },
             })}
             onInput={handlePhoneInput}
           />
-          {phoneError && (
-            <div className="invalid-feedback">{phoneError}</div>
-          )}
+          {phoneError && <div className="invalid-feedback">{phoneError}</div>}
         </div>
       </div>
     </div>

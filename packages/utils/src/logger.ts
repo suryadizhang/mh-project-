@@ -6,7 +6,9 @@ class Logger {
   private formatMessage(level: LogLevel, message: string, data?: any): string {
     const timestamp = new Date().toISOString();
     const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
-    return data ? `${prefix} ${message} ${JSON.stringify(data)}` : `${prefix} ${message}`;
+    return data
+      ? `${prefix} ${message} ${JSON.stringify(data)}`
+      : `${prefix} ${message}`;
   }
 
   debug(message: string, data?: any): void {
@@ -25,7 +27,7 @@ class Logger {
 
   error(message: string, error?: any): void {
     console.error(this.formatMessage('error', message, error));
-    
+
     // In production, you might want to send to error tracking service
     if (!this.isDevelopment && error) {
       // Example: Sentry.captureException(error);

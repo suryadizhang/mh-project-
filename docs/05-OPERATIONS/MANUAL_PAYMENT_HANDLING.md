@@ -137,13 +137,11 @@ INSERT INTO core.payments (
 ### Daily Reconciliation Steps
 
 1. **Check Venmo Business transactions**
-
    - Open Venmo Business app
    - Note all deposits received
    - Cross-reference with bookings in admin panel
 
 2. **Check Zelle Business transactions**
-
    - Log into business banking
    - Note all Zelle deposits
    - Cross-reference with bookings
