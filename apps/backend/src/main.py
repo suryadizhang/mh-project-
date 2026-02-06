@@ -25,7 +25,7 @@ import logging
 import os
 import time
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, AsyncGenerator
 
 # Import Sentry for error tracking and performance monitoring
 import sentry_sdk
@@ -47,6 +47,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.wsgi import WSGIMiddleware
+from starlette.responses import Response
 
 from core.config import get_settings
 from core.exceptions import (
@@ -94,7 +95,7 @@ def generate_unique_operation_id(route: APIRoute, prefix: str = "") -> str:
     """
     # Clean the prefix for use in operation ID
     clean_prefix = prefix.strip("/").replace("/", "_").replace("-", "_")
-    operation_id = route.name
+    operation_id = route.name or "unnamed"
     if clean_prefix:
         return f"{clean_prefix}_{operation_id}"
     return operation_id
@@ -158,7 +159,7 @@ logger.info(
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan handler with dependency injection setup"""
     # Startup
     logger.info(f"Starting {settings.APP_NAME}")
@@ -342,7 +343,7 @@ async def lifespan(app: FastAPI):
         try:
             from workers.outbox_processors import create_outbox_processor_manager
 
-            worker_configs = getattr(settings, "get_worker_configs", lambda: {})()
+            worker_configs: dict[str, Any] = getattr(settings, "get_worker_configs", lambda: {})()
             worker_manager = create_outbox_processor_manager(worker_configs)
             await worker_manager.start_all()
             app.state.worker_manager = worker_manager
@@ -388,7 +389,7 @@ async def lifespan(app: FastAPI):
             if watchdog_usec:
                 watchdog_interval = int(watchdog_usec) / 1_000_000 / 2  # Half the timeout
 
-                async def watchdog_ping():
+                async def watchdog_ping() -> None:
                     """Send periodic watchdog pings to systemd."""
                     while True:
                         try:
@@ -537,7 +538,7 @@ logger.info("⚠️ ASGI exception logger middleware DISABLED (was causing Runti
 
 # SlowAPI rate limiting integration (secondary layer)
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 logger.info("✅ SlowAPI exception handler registered")
 
 # Prometheus metrics endpoint
@@ -553,8 +554,8 @@ app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 
 
 # Enhanced global exception handler with Sentry integration
-@app.exception_handler(Exception)
-async def enhanced_global_exception_handler(request: Request, exc: Exception):
+@app.exception_handler(Exception)  # type: ignore[misc]
+async def enhanced_global_exception_handler(request: Request, exc: Exception) -> Response:
     """Global exception handler with Sentry integration"""
     request_id = request.headers.get("X-Request-ID", "unknown")
 
@@ -729,7 +730,7 @@ logger.info(
 
 
 # Root endpoints
-@app.get("/")
+@app.get("/")  # type: ignore[misc]
 async def root() -> dict[str, Any]:
     """API root endpoint with basic information"""
     return {
@@ -747,7 +748,7 @@ async def root() -> dict[str, Any]:
     }
 
 
-@app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])  # type: ignore[misc]
 async def health_check(request: Request) -> dict[str, Any]:
     """Health check endpoint for load balancers and uptime monitoring (supports HEAD)"""
     # Check DI container status
@@ -793,7 +794,7 @@ async def health_check(request: Request) -> dict[str, Any]:
     return health_data
 
 
-@app.get("/ready", tags=["Health"])
+@app.get("/ready", tags=["Health"])  # type: ignore[misc]
 async def readiness_check(request: Request) -> dict[str, Any]:
     """Kubernetes readiness probe endpoint"""
     try:
@@ -827,7 +828,7 @@ async def readiness_check(request: Request) -> dict[str, Any]:
     }
 
 
-@app.get("/info", tags=["Health"])
+@app.get("/info", tags=["Health"])  # type: ignore[misc]
 async def app_info() -> dict[str, Any]:
     """Application information endpoint"""
     return {
@@ -1098,11 +1099,11 @@ try:
 
     # Import the actual endpoint functions and re-register them
     # This creates aliases at /api/v1/customers/* that point to /api/stripe/v1/customers/*
-    @customer_compat_router.get("/v1/customers/dashboard")
+    @customer_compat_router.get("/v1/customers/dashboard")  # type: ignore[misc]
     async def customer_dashboard_compat(
         customer_id: str | None = None,
         email: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Compatibility endpoint - uses Stripe customer_id or email"""
         from routers.v1.stripe import get_customer_dashboard_by_stripe_id
 
