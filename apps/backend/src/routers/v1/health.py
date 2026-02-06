@@ -75,7 +75,7 @@ def get_system_info() -> dict[str, Any]:
         return {"error": str(e), "details": "System metrics unavailable"}
 
 
-@router.get("", response_model=HealthResponse)
+@router.api_route("", methods=["GET", "HEAD"], response_model=HealthResponse)
 async def health_check():
     """
     Basic health check endpoint.
