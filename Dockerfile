@@ -69,6 +69,11 @@ FROM python-base AS backend-builder
 COPY apps/backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# CACHE_BUST: Invalidate cache for code changes
+# Usage: docker compose build --build-arg CACHE_BUST=$(date +%s) staging-api
+ARG CACHE_BUST=1
+RUN echo "Cache bust: ${CACHE_BUST}"
+
 # Copy backend source code
 COPY apps/backend/ .
 RUN chown -R appuser:appgroup /app

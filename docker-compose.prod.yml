@@ -9,6 +9,10 @@
 #   docker compose -f docker-compose.prod.yml logs -f
 #   docker compose -f docker-compose.prod.yml down
 #
+# Force rebuild (bypass cache):
+#   CACHE_BUST=$(date +%s) docker compose -f docker-compose.prod.yml build production-api
+#   OR: docker compose -f docker-compose.prod.yml build --no-cache production-api
+#
 # IMPORTANT:
 #   - Uses VPS-native PostgreSQL (NOT containerized) for data safety
 #   - Create .env.production with real production values before running
@@ -25,6 +29,9 @@ services:
       dockerfile: Dockerfile
       args:
         COMPONENT: backend
+        # CACHE_BUST invalidates code layer cache - set via environment
+        # Usage: CACHE_BUST=$(date +%s) docker compose build production-api
+        CACHE_BUST: ${CACHE_BUST:-1}
       target: backend
     image: myhibachi-api:latest
     container_name: myhibachi-production-api
