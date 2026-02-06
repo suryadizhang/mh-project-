@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs';
 import path from 'path';
 
 import type { NextConfig } from 'next';
@@ -6,7 +7,7 @@ import type { NextConfig } from 'next';
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('@next/bundle-analyzer')({ enabled: true })
+      require('@next/bundle-analyzer')({ enabled: true })
     : (config: NextConfig) => config;
 
 const nextConfig: NextConfig = {
@@ -96,11 +97,11 @@ const nextConfig: NextConfig = {
           // Only enable HSTS in production
           ...(isProduction
             ? [
-              {
-                key: 'Strict-Transport-Security',
-                value: 'max-age=31536000; includeSubDomains; preload',
-              },
-            ]
+                {
+                  key: 'Strict-Transport-Security',
+                  value: 'max-age=31536000; includeSubDomains; preload',
+                },
+              ]
             : []),
           {
             key: 'X-DNS-Prefetch-Control',
@@ -226,4 +227,22 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+// Sentry configuration options
+const sentryWebpackPluginOptions = {
+  // Suppresses source map uploading logs during build
+  silent: true,
+  // Organization and project from Sentry
+  org: process.env.SENTRY_ORG || 'myhibachi',
+  project: process.env.SENTRY_PROJECT || 'customer-frontend',
+  // Auth token from environment
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Hide source maps in production
+  hideSourceMaps: true,
+  // Disable Sentry telemetry
+  telemetry: false,
+};
+
+// Apply bundle analyzer, then Sentry
+const configWithPlugins = withBundleAnalyzer(nextConfig);
+
+export default withSentryConfig(configWithPlugins, sentryWebpackPluginOptions);

@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -116,4 +118,19 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+// Sentry configuration options
+const sentryWebpackPluginOptions = {
+  // Suppresses source map uploading logs during build
+  silent: true,
+  // Organization and project from Sentry
+  org: process.env.SENTRY_ORG || 'myhibachi',
+  project: process.env.SENTRY_PROJECT || 'admin-frontend',
+  // Auth token from environment
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Hide source maps in production
+  hideSourceMaps: true,
+  // Disable Sentry telemetry
+  telemetry: false,
+};
+
+module.exports = withSentryConfig(nextConfig, sentryWebpackPluginOptions);
