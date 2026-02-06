@@ -90,7 +90,7 @@ function validateRequest(request: NextRequest): boolean {
   // Block suspicious user agents
   const suspiciousPatterns = [/curl/i, /wget/i, /python-requests/i, /bot/i, /crawler/i, /scanner/i];
 
-  // Allow legitimate bots (Google, Bing, etc.)
+  // Allow legitimate bots (Google, Bing, monitoring services, etc.)
   const allowedBots = [
     /googlebot/i,
     /bingbot/i,
@@ -99,6 +99,9 @@ function validateRequest(request: NextRequest): boolean {
     /facebookexternalhit/i,
     /twitterbot/i,
     /linkedinbot/i,
+    /uptimerobot/i, // Uptime monitoring
+    /pingdom/i, // Uptime monitoring
+    /statuscake/i, // Uptime monitoring
   ];
 
   const isSuspicious = suspiciousPatterns.some((pattern) => pattern.test(userAgent));
