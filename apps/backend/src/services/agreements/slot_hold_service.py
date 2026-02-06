@@ -47,12 +47,36 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
 # Default hold duration
 DEFAULT_HOLD_MINUTES = 120  # 2 hours
+
+
+class SlotHoldError(Exception):
+    """Base exception for slot hold operations."""
+
+    def __init__(self, message: str, error_code: str):
+        self.message = message
+        self.error_code = error_code
+        super().__init__(message)
+
+
+class SlotUnavailableError(SlotHoldError):
+    """Raised when slot is already held or booked."""
+
+    def __init__(self, message: str = "This time slot is no longer available"):
+        super().__init__(message, "SLOT_UNAVAILABLE")
+
+
+class DatabaseError(SlotHoldError):
+    """Raised when database operation fails."""
+
+    def __init__(self, message: str = "Database operation failed"):
+        super().__init__(message, "DATABASE_ERROR")
 
 
 class SlotHoldService:
@@ -99,43 +123,56 @@ class SlotHoldService:
             Hold dict with id, signing_token, expires_at
 
         Raises:
-            ValueError: If slot is already held or booked
+            SlotUnavailableError: If slot is already held or booked
+            DatabaseError: If database operation fails
         """
         # Generate UUID for SMS signing link (must be valid UUID for database)
         signing_token = str(uuid4())
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=hold_minutes)
 
-        # Check if slot is already held or booked
-        if await self._is_slot_held_or_booked(station_id, event_date, slot_time):
-            raise ValueError("This time slot is no longer available")
+        try:
+            # Check if slot is already held or booked
+            if await self._is_slot_held_or_booked(station_id, event_date, slot_time):
+                raise SlotUnavailableError("This time slot is no longer available")
 
-        result = await self.db.execute(
-            text(
+            result = await self.db.execute(
+                text(
+                    """
+                    INSERT INTO core.slot_holds (
+                        station_id, event_date, slot_time, customer_email, customer_name,
+                        guest_count, signing_token, status, expires_at
+                    ) VALUES (
+                        :station_id, :event_date, :slot_time, :customer_email, :customer_name,
+                        :guest_count, :signing_token, 'pending', :expires_at
+                    )
+                    RETURNING id, signing_token, expires_at, created_at
                 """
-                INSERT INTO core.slot_holds (
-                    station_id, event_date, slot_time, customer_email, customer_name,
-                    guest_count, signing_token, status, expires_at
-                ) VALUES (
-                    :station_id, :event_date, :slot_time, :customer_email, :customer_name,
-                    :guest_count, :signing_token, 'pending', :expires_at
-                )
-                RETURNING id, signing_token, expires_at, created_at
-            """
-            ),
-            {
-                "station_id": str(station_id),
-                "event_date": event_date,
-                "slot_time": slot_time,
-                "customer_email": customer_email,
-                "customer_name": customer_name,
-                "guest_count": guest_count,
-                "signing_token": signing_token,
-                "expires_at": expires_at,
-            },
-        )
+                ),
+                {
+                    "station_id": str(station_id),
+                    "event_date": event_date,
+                    "slot_time": slot_time,
+                    "customer_email": customer_email,
+                    "customer_name": customer_name,
+                    "guest_count": guest_count,
+                    "signing_token": signing_token,
+                    "expires_at": expires_at,
+                },
+            )
 
-        row = result.fetchone()
-        await self.db.commit()
+            row = result.fetchone()
+            await self.db.commit()
+
+        except SlotUnavailableError:
+            raise  # Re-raise our custom exception
+        except DBAPIError as e:
+            logger.error(f"Database error creating slot hold: {e}")
+            await self.db.rollback()
+            raise DatabaseError(f"Failed to create slot hold: {e}")
+        except SQLAlchemyError as e:
+            logger.error(f"SQLAlchemy error creating slot hold: {e}")
+            await self.db.rollback()
+            raise DatabaseError(f"Database operation failed: {e}")
 
         logger.info(
             f"Created slot hold: station={station_id}, "
@@ -445,9 +482,7 @@ class SlotHoldService:
             for row in result.fetchall()
         ]
 
-    async def extend_hold(
-        self, hold_id: UUID, additional_minutes: int = 30
-    ) -> datetime | None:
+    async def extend_hold(self, hold_id: UUID, additional_minutes: int = 30) -> datetime | None:
         """
         Extend a hold's expiration time.
 
@@ -491,9 +526,7 @@ class SlotHoldService:
         logger.warning(f"Failed to extend slot hold {hold_id}")
         return None
 
-    async def record_signing_link_sent(
-        self, hold_id: UUID, channel: str
-    ) -> dict[str, Any] | None:
+    async def record_signing_link_sent(self, hold_id: UUID, channel: str) -> dict[str, Any] | None:
         """
         Record that a signing link was sent for this hold.
 
@@ -546,9 +579,7 @@ class SlotHoldService:
             await self.db.rollback()
             error_msg = str(e)
             if "Rate limit exceeded" in error_msg:
-                logger.warning(
-                    f"Rate limit exceeded for signing link on hold {hold_id}"
-                )
+                logger.warning(f"Rate limit exceeded for signing link on hold {hold_id}")
                 raise ValueError("Signing link rate limit exceeded (max 5 sends)")
             logger.exception(f"Failed to record signing link sent: {e}")
             raise

@@ -48,6 +48,11 @@ from services.agreements import (
     get_signing_service,
     get_slot_hold_service,
 )
+from services.agreements.slot_hold_service import (
+    DatabaseError,
+    SlotHoldError,
+    SlotUnavailableError,
+)
 from services.booking_service import BookingService
 
 logger = logging.getLogger(__name__)
@@ -87,9 +92,7 @@ class SignAgreementRequest(BaseModel):
     hold_token: Optional[str] = Field(
         None, description="Slot hold token from hold creation (pre-booking flow)"
     )
-    booking_id: Optional[UUID] = Field(
-        None, description="Existing booking ID (post-booking flow)"
-    )
+    booking_id: Optional[UUID] = Field(None, description="Existing booking ID (post-booking flow)")
 
     agreement_type: str = Field(
         ..., description="Type: 'liability_waiver' or 'allergen_disclosure'"
@@ -139,6 +142,16 @@ class SlotHoldRequest(BaseModel):
     slot_time: time_type = Field(..., description="Slot time (e.g., 18:00)")
     customer_email: EmailStr = Field(..., description="Customer email")
     customer_phone: Optional[str] = Field(None, description="Customer phone (optional)")
+
+    @model_validator(mode="after")
+    def validate_dates(self) -> "SlotHoldRequest":
+        """Ensure event date is in the future."""
+        from datetime import date as date_module
+
+        today = date_module.today()
+        if self.event_date < today:
+            raise ValueError("Event date must be in the future")
+        return self
 
 
 class SlotHoldResponse(BaseModel):
@@ -251,9 +264,7 @@ class ValidateSignatureResponse(BaseModel):
 @router.get("/templates/{agreement_type}", response_model=TemplateResponse)
 async def get_agreement_template(
     agreement_type: str,
-    station_id: Optional[UUID] = Query(
-        None, description="Station for variable interpolation"
-    ),
+    station_id: Optional[UUID] = Query(None, description="Station for variable interpolation"),
     agreement_service: AgreementService = Depends(get_agreement_service),
 ) -> TemplateResponse:
     """
@@ -302,6 +313,17 @@ async def get_agreement_template(
         )
 
 
+class SlotHoldErrorCode:
+    """Error codes for slot hold operations - for debugging and frontend handling."""
+
+    SLOT_UNAVAILABLE = "SLOT_UNAVAILABLE"
+    STATION_NOT_FOUND = "STATION_NOT_FOUND"
+    INVALID_DATE = "INVALID_DATE"
+    INVALID_TIME = "INVALID_TIME"
+    DATABASE_ERROR = "DATABASE_ERROR"
+    INTERNAL_ERROR = "INTERNAL_ERROR"
+
+
 @router.post("/holds", response_model=SlotHoldResponse)
 async def create_slot_hold(
     request: SlotHoldRequest,
@@ -312,8 +334,20 @@ async def create_slot_hold(
 
     Hold expires in 2 hours if not converted to booking.
     This prevents double-booking during the signing process.
+
+    Error Codes:
+    - SLOT_UNAVAILABLE: Slot already booked or held
+    - STATION_NOT_FOUND: Invalid station_id
+    - INVALID_DATE: Event date in past
+    - DATABASE_ERROR: Database operation failed
     """
     try:
+        # Log request for debugging (no PII in production)
+        logger.info(
+            f"Creating slot hold: station={request.station_id}, "
+            f"date={request.event_date}, time={request.slot_time}"
+        )
+
         # Create hold with separate event_date and slot_time
         # Service stores them in slot_holds table columns: event_date (DATE), slot_time (TIME)
         hold_result = await slot_hold_service.create_hold(
@@ -327,6 +361,8 @@ async def create_slot_hold(
         base_url = "https://myhibachichef.com"
         signing_url = f"{base_url}/sign/{hold_result['signing_token']}"
 
+        logger.info(f"Slot hold created: hold_id={hold_result['id']}")
+
         return SlotHoldResponse(
             hold_id=hold_result["id"],
             signing_token=hold_result["signing_token"],
@@ -335,16 +371,57 @@ async def create_slot_hold(
             message="Slot held for 2 hours. Complete agreements to confirm booking.",
         )
 
-    except ValueError as e:
+    except SlotUnavailableError as e:
+        logger.warning(f"Slot unavailable: {e.message}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=str(e),
+            detail={
+                "error_code": e.error_code,
+                "message": e.message,
+            },
         )
-    except Exception as e:
-        logger.exception(f"Failed to create slot hold: {e}")
+    except DatabaseError as e:
+        logger.error(f"Database error: {e.message}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create slot hold",
+            detail={
+                "error_code": e.error_code,
+                "message": "Database error occurred. Please try again.",
+            },
+        )
+    except SlotHoldError as e:
+        # Catch any other slot hold errors
+        logger.error(f"Slot hold error: {e.message}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error_code": e.error_code,
+                "message": e.message,
+            },
+        )
+    except ValueError as e:
+        # Backward compatibility for old ValueError raises
+        error_msg = str(e)
+        logger.warning(f"Slot hold validation error: {error_msg}")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error_code": SlotHoldErrorCode.SLOT_UNAVAILABLE,
+                "message": error_msg,
+            },
+        )
+    except Exception as e:
+        # Log full exception for debugging but return safe message
+        logger.exception(
+            f"Failed to create slot hold: {e}\n"
+            f"Request: station={request.station_id}, date={request.event_date}, time={request.slot_time}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error_code": SlotHoldErrorCode.INTERNAL_ERROR,
+                "message": "Failed to create slot hold. Please try again.",
+            },
         )
 
 
@@ -367,6 +444,18 @@ async def get_hold_status(
     - error_code: optional error code (SLOT_HOLD_EXPIRED, SLOT_HOLD_NOT_FOUND)
     """
     try:
+        # Validate token is a valid UUID format (defense against malformed tokens)
+        try:
+            from uuid import UUID as UUIDType
+
+            UUIDType(token)  # Raises ValueError if invalid
+        except ValueError:
+            logger.warning(f"Invalid token format received: {token[:20]}...")
+            return SigningPageResponse(
+                success=False,
+                error_code="INVALID_TOKEN_FORMAT",
+            )
+
         # Service method: validate_hold(self, signing_token: str) -> dict | None
         # Returns: {id, station_id, slot_datetime, customer_email, customer_id, status, expires_at, created_at}
         hold = await slot_hold_service.validate_hold(signing_token=token)
@@ -410,9 +499,7 @@ async def get_hold_status(
         rendered_markdown = await agreement_service.render_template(template)
 
         # Convert markdown to HTML
-        content_html = markdown.markdown(
-            rendered_markdown, extensions=["tables", "nl2br"]
-        )
+        content_html = markdown.markdown(rendered_markdown, extensions=["tables", "nl2br"])
 
         # Format slot datetime from separate event_date and slot_time fields
         event_date = hold["event_date"]
@@ -489,9 +576,7 @@ async def release_hold(
             )
 
         # Service method: release_hold(hold_id: UUID, reason: str) -> bool
-        released = await slot_hold_service.release_hold(
-            hold_id=hold["id"], reason="released"
-        )
+        released = await slot_hold_service.release_hold(hold_id=hold["id"], reason="released")
 
         if not released:
             raise HTTPException(
@@ -539,9 +624,7 @@ async def validate_signature(
 
         # Service method: validate_signature_image(signature_bytes: bytes) -> dict
         # Returns: {valid: bool, error?: str, format?: str, size?: tuple}
-        result = signing_service.validate_signature_image(
-            signature_bytes=signature_bytes
-        )
+        result = signing_service.validate_signature_image(signature_bytes=signature_bytes)
 
         width, height = None, None
         if result.get("size"):
@@ -647,9 +730,7 @@ async def sign_agreement(
 
         # 4. Render template content with station-specific values
         additional_vars = {"station_id": str(station_id)} if station_id else None
-        rendered_content = await agreement_service.render_template(
-            template, additional_vars
-        )
+        rendered_content = await agreement_service.render_template(template, additional_vars)
 
         # 5. Create signed agreement
         # Build signer_info from request
@@ -728,9 +809,7 @@ async def get_agreement_status(
             agreements = await agreement_service.get_agreements_for_booking(booking_id)
             if agreements:
                 # Extract signed_at - agreements are dicts
-                signed_at = max(
-                    a.get("signed_at") for a in agreements if a.get("signed_at")
-                )
+                signed_at = max(a.get("signed_at") for a in agreements if a.get("signed_at"))
 
         return AgreementStatusResponse(
             booking_id=booking_id,
@@ -783,9 +862,7 @@ async def send_signing_link(
                 )
             # TODO: Integrate with SMS service (RingCentral)
             # await sms_service.send_signing_link(request.phone_number, signing_url)
-            logger.info(
-                f"Would send SMS signing link to {request.phone_number}: {signing_url}"
-            )
+            logger.info(f"Would send SMS signing link to {request.phone_number}: {signing_url}")
 
         elif channel == "email":
             if not request.email:
@@ -795,9 +872,7 @@ async def send_signing_link(
                 )
             # TODO: Integrate with email service (Resend)
             # await email_service.send_signing_link(request.email, signing_url)
-            logger.info(
-                f"Would send email signing link to {request.email}: {signing_url}"
-            )
+            logger.info(f"Would send email signing link to {request.email}: {signing_url}")
 
         else:
             raise HTTPException(
