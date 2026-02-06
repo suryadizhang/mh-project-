@@ -1102,7 +1102,6 @@ try:
     async def customer_dashboard_compat(
         customer_id: str | None = None,
         email: str | None = None,
-        request: Request | None = None,
     ) -> dict:
         """Compatibility endpoint - uses Stripe customer_id or email"""
         from routers.v1.stripe import get_customer_dashboard_by_stripe_id
