@@ -10,9 +10,7 @@ Unified API with operational and AI endpoints, enterprise architecture patterns
 import os as _os_debug
 import time as _time_debug
 
-_startup_debug_file = _os_debug.path.join(
-    _os_debug.path.dirname(__file__), "STARTUP_DEBUG.log"
-)
+_startup_debug_file = _os_debug.path.join(_os_debug.path.dirname(__file__), "STARTUP_DEBUG.log")
 with open(_startup_debug_file, "w") as _f:
     _f.write(f"MAIN.PY LOADED AT: {_time_debug.strftime('%Y-%m-%d %H:%M:%S')}\n")
     _f.write("This file proves the server loaded the latest main.py code\n")
@@ -127,9 +125,7 @@ if settings.sentry_dsn:
         enable_tracing=True,
         # Before send hook to filter sensitive data
         before_send=lambda event, hint: (
-            None
-            if settings.ENVIRONMENT == "development" and not settings.DEBUG
-            else event
+            None if settings.ENVIRONMENT == "development" and not settings.DEBUG else event
         ),
     )
     logger.info(
@@ -146,12 +142,14 @@ if settings.ENVIRONMENT.value == "staging":
 elif settings.ENVIRONMENT.value == "development":
     _rate_multiplier = 50
 
-_default_rate_limit = getattr(settings, 'RATE_LIMIT_REQUESTS', 100) * _rate_multiplier
+_default_rate_limit = getattr(settings, "RATE_LIMIT_REQUESTS", 100) * _rate_multiplier
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=[f"{_default_rate_limit}/minute"],
 )
-logger.info(f"✅ SlowAPI rate limiter configured (env: {settings.ENVIRONMENT.value}, multiplier: {_rate_multiplier}x, limit: {_default_rate_limit}/min)")
+logger.info(
+    f"✅ SlowAPI rate limiter configured (env: {settings.ENVIRONMENT.value}, multiplier: {_rate_multiplier}x, limit: {_default_rate_limit}/min)"
+)
 
 
 @asynccontextmanager
@@ -173,18 +171,14 @@ async def lifespan(app: FastAPI):
                 f"{gsm_status.get('secrets_from_env', 0)} from environment"
             )
         elif gsm_status.get("status") == "env_only":
-            logger.info(
-                "✅ GSM not available - using environment variables only (OK for dev)"
-            )
+            logger.info("✅ GSM not available - using environment variables only (OK for dev)")
         else:
             logger.warning(
                 f"⚠️ GSM initialization failed - using environment variables: "
                 f"{gsm_status.get('error', 'unknown')}"
             )
     except Exception as e:
-        logger.warning(
-            f"⚠️ GSM initialization error: {e} - using environment variables"
-        )
+        logger.warning(f"⚠️ GSM initialization error: {e} - using environment variables")
 
     # ============================================================
     # Email Credential Validation (Batch 1 - Full Redundancy)
@@ -197,9 +191,7 @@ async def lifespan(app: FastAPI):
     gmail_user = os.getenv("GMAIL_USER")
     gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")
     if not gmail_user:
-        email_config_issues.append(
-            "GMAIL_USER is missing - payment email monitor will fail"
-        )
+        email_config_issues.append("GMAIL_USER is missing - payment email monitor will fail")
     if not gmail_app_password:
         email_config_issues.append(
             "GMAIL_APP_PASSWORD is missing - payment email monitor will fail"
@@ -208,9 +200,7 @@ async def lifespan(app: FastAPI):
     # IONOS credentials (customer support email)
     ionos_password = os.getenv("SMTP_PASSWORD")
     if not ionos_password:
-        email_config_issues.append(
-            "SMTP_PASSWORD is missing - IONOS email monitor will fail"
-        )
+        email_config_issues.append("SMTP_PASSWORD is missing - IONOS email monitor will fail")
 
     # Log validation results
     if email_config_issues:
@@ -222,9 +212,7 @@ async def lifespan(app: FastAPI):
             "Check .env file and restart after fixing."
         )
     else:
-        logger.info(
-            "✅ Email credentials validated: Gmail (payment) + IONOS (support) ready"
-        )
+        logger.info("✅ Email credentials validated: Gmail (payment) + IONOS (support) ready")
 
     # Initialize Cache Service with timeout (non-blocking)
     try:
@@ -281,9 +269,7 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Dependency injection container initialized")
 
     except Exception as e:
-        logger.warning(
-            f"⚠️ DI container initialization failed: {e} - continuing without DI"
-        )
+        logger.warning(f"⚠️ DI container initialization failed: {e} - continuing without DI")
         app.state.container = None
 
     # Initialize rate limiter with timeout (non-blocking)
@@ -295,16 +281,12 @@ async def lifespan(app: FastAPI):
         app.state.rate_limiter = rate_limiter
         logger.info("✅ Rate limiter initialized")
     except TimeoutError:
-        logger.warning(
-            "⚠️ Rate limiter connection timeout - using memory-based fallback"
-        )
+        logger.warning("⚠️ Rate limiter connection timeout - using memory-based fallback")
         rate_limiter = RateLimiter()
         rate_limiter.redis_available = False
         app.state.rate_limiter = rate_limiter
     except Exception as e:
-        logger.warning(
-            f"⚠️ Rate limiter Redis unavailable: {e} - using memory-based fallback"
-        )
+        logger.warning(f"⚠️ Rate limiter Redis unavailable: {e} - using memory-based fallback")
         rate_limiter = RateLimiter()
         rate_limiter.redis_available = False
         app.state.rate_limiter = rate_limiter
@@ -317,9 +299,7 @@ async def lifespan(app: FastAPI):
         start_payment_email_scheduler()
         logger.info("✅ Payment email monitoring scheduler started")
     except ImportError as e:
-        logger.warning(
-            f"⚠️ Payment email scheduler not available (missing dependencies): {e}"
-        )
+        logger.warning(f"⚠️ Payment email scheduler not available (missing dependencies): {e}")
     except Exception as e:
         logger.warning(f"⚠️ Payment email scheduler not available: {e}")
 
@@ -331,9 +311,7 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(start_email_notification_task())
         logger.info("✅ Email notification scheduler started (WhatsApp alerts enabled)")
     except ImportError as e:
-        logger.warning(
-            f"⚠️ Email notification scheduler not available (missing dependencies): {e}"
-        )
+        logger.warning(f"⚠️ Email notification scheduler not available (missing dependencies): {e}")
     except Exception as e:
         logger.warning(f"⚠️ Email notification scheduler not available: {e}")
 
@@ -346,9 +324,7 @@ async def lifespan(app: FastAPI):
         orchestrator = container.get_orchestrator()
         await orchestrator.start()
         app.state.orchestrator = orchestrator
-        logger.info(
-            "✅ AI Orchestrator with Follow-Up Scheduler started (via DI Container)"
-        )
+        logger.info("✅ AI Orchestrator with Follow-Up Scheduler started (via DI Container)")
     except ImportError as e:
         logger.warning(f"⚠️ AI Orchestrator not available (missing dependencies): {e}")
         app.state.orchestrator = None
@@ -405,9 +381,7 @@ async def lifespan(app: FastAPI):
             # This keeps the service alive by sending periodic WATCHDOG=1 signals
             watchdog_usec = os.environ.get("WATCHDOG_USEC")
             if watchdog_usec:
-                watchdog_interval = (
-                    int(watchdog_usec) / 1_000_000 / 2
-                )  # Half the timeout
+                watchdog_interval = int(watchdog_usec) / 1_000_000 / 2  # Half the timeout
 
                 async def watchdog_ping():
                     """Send periodic watchdog pings to systemd."""
@@ -446,9 +420,7 @@ async def lifespan(app: FastAPI):
 
         active_sessions = list(call_session_manager.active_sessions.values())
         if active_sessions:
-            logger.info(
-                f"📞 Gracefully closing {len(active_sessions)} active voice calls..."
-            )
+            logger.info(f"📞 Gracefully closing {len(active_sessions)} active voice calls...")
 
             for session in active_sessions:
                 try:
@@ -460,12 +432,8 @@ async def lifespan(app: FastAPI):
                     # Close WebSocket
                     if session.websocket:
                         try:
-                            await session.websocket.close(
-                                code=1001, reason="Server shutdown"
-                            )
-                            logger.info(
-                                f"✅ Closed WebSocket for call {session.call_id}"
-                            )
+                            await session.websocket.close(code=1001, reason="Server shutdown")
+                            logger.info(f"✅ Closed WebSocket for call {session.call_id}")
                         except Exception as ws_error:
                             logger.debug(f"WebSocket already closed: {ws_error}")
 
@@ -479,9 +447,7 @@ async def lifespan(app: FastAPI):
                     )
 
                 except Exception as session_error:
-                    logger.error(
-                        f"Error closing session {session.call_id}: {session_error}"
-                    )
+                    logger.error(f"Error closing session {session.call_id}: {session_error}")
 
             # Final cleanup
             await call_session_manager.cleanup_all_sessions()
@@ -533,10 +499,7 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Cache service closed")
 
     if hasattr(app.state, "rate_limiter"):
-        if (
-            hasattr(app.state.rate_limiter, "redis_client")
-            and app.state.rate_limiter.redis_client
-        ):
+        if hasattr(app.state.rate_limiter, "redis_client") and app.state.rate_limiter.redis_client:
             await app.state.rate_limiter.redis_client.close()
         logger.info("✅ Rate limiter closed")
 
@@ -698,9 +661,7 @@ try:
     from middleware.rate_limit import RateLimitMiddleware
 
     app.add_middleware(RateLimitMiddleware, redis_url=settings.redis_url)
-    logger.info(
-        "✅ Login rate limit middleware registered (3 attempts, 1-hour lockout)"
-    )
+    logger.info("✅ Login rate limit middleware registered (3 attempts, 1-hour lockout)")
 except ImportError as e:
     logger.warning(f"⚠️ Login rate limit middleware not available: {e}")
 except Exception as e:
@@ -712,9 +673,7 @@ try:
     from middleware.audit_middleware import AuditMiddleware
 
     app.add_middleware(AuditMiddleware)
-    logger.info(
-        "✅ Audit middleware registered - logging all admin POST/PUT/PATCH/DELETE actions"
-    )
+    logger.info("✅ Audit middleware registered - logging all admin POST/PUT/PATCH/DELETE actions")
 except ImportError as e:
     logger.warning(f"⚠️ Audit middleware not available: {e}")
 except Exception as e:
@@ -783,9 +742,9 @@ async def root():
     }
 
 
-@app.get("/health", tags=["Health"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])
 async def health_check(request: Request):
-    """Health check endpoint for load balancers"""
+    """Health check endpoint for load balancers and uptime monitoring (supports HEAD)"""
     # Check DI container status
     di_status = (
         "available"
@@ -817,15 +776,11 @@ async def health_check(request: Request):
             db_session_available = container.is_registered("database_session")
 
             health_data["services"] = {
-                "booking_repository": (
-                    "available" if booking_repo_available else "not_registered"
-                ),
+                "booking_repository": ("available" if booking_repo_available else "not_registered"),
                 "customer_repository": (
                     "available" if customer_repo_available else "not_registered"
                 ),
-                "database_session": (
-                    "available" if db_session_available else "not_registered"
-                ),
+                "database_session": ("available" if db_session_available else "not_registered"),
             }
         except Exception as e:
             health_data["services"] = {"error": f"Service resolution failed: {e!s}"}
@@ -885,17 +840,13 @@ async def app_info():
                 else "disabled"
             ),
             "audit_logging": (
-                "Comprehensive"
-                if getattr(settings, "ENABLE_AUDIT_LOGGING", False)
-                else "disabled"
+                "Comprehensive" if getattr(settings, "ENABLE_AUDIT_LOGGING", False) else "disabled"
             ),
         },
         "integrations": {
             "payment": "Stripe",
             "sms": (
-                "RingCentral"
-                if getattr(settings, "RINGCENTRAL_ENABLED", False)
-                else "disabled"
+                "RingCentral" if getattr(settings, "RINGCENTRAL_ENABLED", False) else "disabled"
             ),
             "email": (
                 getattr(settings, "EMAIL_PROVIDER", "disabled")
@@ -1032,9 +983,7 @@ try:
     from routers.v1.public_config import router as public_config_router
 
     app.include_router(public_config_router, prefix="/api/v1", tags=["public-config"])
-    logger.info(
-        "✅ Public config endpoints included (no auth - SSoT for customer website)"
-    )
+    logger.info("✅ Public config endpoints included (no auth - SSoT for customer website)")
 except ImportError as e:
     logger.warning(f"Public config endpoints not available: {e}")
 
@@ -1060,9 +1009,7 @@ except ImportError as e:
 try:
     from routers.v1.booking_reminders import router as booking_reminders_router
 
-    app.include_router(
-        booking_reminders_router, prefix="/api/v1", tags=["booking-reminders"]
-    )
+    app.include_router(booking_reminders_router, prefix="/api/v1", tags=["booking-reminders"])
 except ImportError:
     pass
 
@@ -1071,9 +1018,7 @@ try:
     from routers.v1.scheduling import router as scheduling_router
 
     app.include_router(scheduling_router, prefix="/api/v1", tags=["scheduling"])
-    logger.info(
-        "✅ Smart Scheduling endpoints included (availability, chef assignment)"
-    )
+    logger.info("✅ Smart Scheduling endpoints included (availability, chef assignment)")
 except ImportError as e:
     logger.warning(f"Smart Scheduling endpoints not available: {e}")
 
@@ -1082,9 +1027,7 @@ try:
     from routers.v1.chef_portal import router as chef_portal_router
 
     app.include_router(chef_portal_router, prefix="/api/v1", tags=["chef-portal"])
-    logger.info(
-        "✅ Chef Portal endpoints included (chef availability, time-off requests)"
-    )
+    logger.info("✅ Chef Portal endpoints included (chef availability, time-off requests)")
 except ImportError as e:
     logger.warning(f"Chef Portal endpoints not available: {e}")
 
@@ -1093,9 +1036,7 @@ try:
     from routers.v1.chef_pay import router as chef_pay_router
 
     app.include_router(chef_pay_router, prefix="/api/v1", tags=["chef-pay"])
-    logger.info(
-        "✅ Chef Pay endpoints included (earnings calculation, pay rate management)"
-    )
+    logger.info("✅ Chef Pay endpoints included (earnings calculation, pay rate management)")
 except ImportError as e:
     logger.warning(f"Chef Pay endpoints not available: {e}")
 
@@ -1103,12 +1044,8 @@ except ImportError as e:
 try:
     from routers.v1.customer_preferences import router as customer_preferences_router
 
-    app.include_router(
-        customer_preferences_router, prefix="/api/v1", tags=["customer-preferences"]
-    )
-    logger.info(
-        "✅ Customer Preferences endpoints included (chef request, allergen disclosure)"
-    )
+    app.include_router(customer_preferences_router, prefix="/api/v1", tags=["customer-preferences"])
+    logger.info("✅ Customer Preferences endpoints included (chef request, allergen disclosure)")
 except ImportError as e:
     logger.warning(f"Customer Preferences endpoints not available: {e}")
 
@@ -1169,14 +1106,10 @@ try:
         """Compatibility endpoint - uses Stripe customer_id or email"""
         from routers.v1.stripe import get_customer_dashboard_by_stripe_id
 
-        return await get_customer_dashboard_by_stripe_id(
-            customer_id=customer_id, email=email
-        )
+        return await get_customer_dashboard_by_stripe_id(customer_id=customer_id, email=email)
 
     app.include_router(customer_compat_router, prefix="/api")
-    logger.info(
-        "✅ Stripe router included from NEW location with customer compatibility endpoints"
-    )
+    logger.info("✅ Stripe router included from NEW location with customer compatibility endpoints")
 except ImportError as e_stripe:
     logger.error(f"❌ Stripe router not available: {e_stripe}")
 
@@ -1194,9 +1127,7 @@ try:
     from routers.v1.station_admin import router as station_admin_router
     from routers.v1.station_auth import router as station_auth_router
 
-    app.include_router(
-        station_auth_router, prefix="/api/station", tags=["station-auth"]
-    )
+    app.include_router(station_auth_router, prefix="/api/station", tags=["station-auth"])
     app.include_router(
         station_admin_router,
         prefix="/api/v1/admin/stations",
@@ -1227,9 +1158,7 @@ except ImportError as e:
 try:
     from routers.v1.payments import router as payments_router
 
-    app.include_router(
-        payments_router, prefix="/api/payments", tags=["payment-analytics"]
-    )
+    app.include_router(payments_router, prefix="/api/payments", tags=["payment-analytics"])
     logger.info("✅ Payment Analytics endpoints included from NEW location")
 except ImportError as e:
     logger.error(f"❌ Payment Analytics endpoints not available: {e}")
@@ -1344,9 +1273,7 @@ except ImportError as e:
 try:
     from routers.v1.admin_analytics import router as admin_analytics_router
 
-    app.include_router(
-        admin_analytics_router, prefix="/api", tags=["admin", "analytics"]
-    )
+    app.include_router(admin_analytics_router, prefix="/api", tags=["admin", "analytics"])
     logger.info("✅ Admin Analytics endpoints included from NEW location")
 except ImportError as e:
     logger.error(f"❌ Admin Analytics endpoints not available: {e}")
@@ -1355,9 +1282,7 @@ except ImportError as e:
 try:
     from routers.v1.vps_security import router as vps_security_router
 
-    app.include_router(
-        vps_security_router, prefix="/api/admin", tags=["admin", "vps-security"]
-    )
+    app.include_router(vps_security_router, prefix="/api/admin", tags=["admin", "vps-security"])
     logger.info("✅ VPS Security Monitoring endpoints included (fail2ban/firewalld)")
 except ImportError as e:
     logger.error(f"❌ VPS Security Monitoring endpoints not available: {e}")
@@ -1375,9 +1300,7 @@ except ImportError as e:
 try:
     from routers.v1.reviews import router as reviews_router
 
-    app.include_router(
-        reviews_router, prefix="/api/v1/reviews", tags=["reviews", "feedback"]
-    )
+    app.include_router(reviews_router, prefix="/api/v1/reviews", tags=["reviews", "feedback"])
     logger.info(
         "✅ Customer Review System included from NEW location (legacy comprehensive version)"
     )
@@ -1467,9 +1390,7 @@ except ImportError as e:
 try:
     from api.ai.endpoints.routers.nlp_monitoring import router as nlp_monitoring_router
 
-    app.include_router(
-        nlp_monitoring_router, prefix="/api/v1/ai", tags=["nlp-monitoring"]
-    )
+    app.include_router(nlp_monitoring_router, prefix="/api/v1/ai", tags=["nlp-monitoring"])
     logger.info("✅ NLP Monitoring endpoints included")
 except ImportError as e:
     logger.warning(f"NLP Monitoring endpoints not available: {e}")
@@ -1479,9 +1400,7 @@ except ImportError as e:
 try:
     from api.v1.escalations.endpoints import router as escalations_router
 
-    app.include_router(
-        escalations_router, prefix="/api/v1/escalations", tags=["escalations"]
-    )
+    app.include_router(escalations_router, prefix="/api/v1/escalations", tags=["escalations"])
     logger.info("✅ Escalation endpoints included (AI to human handoff)")
 except ImportError as e:
     logger.warning(f"Escalation endpoints not available: {e}")
@@ -1575,9 +1494,7 @@ try:
     logger.info(f"🔍 DEBUG: Inbox router prefix: {inbox_router.prefix}")
     logger.info(f"🔍 DEBUG: Inbox router routes count: {len(inbox_router.routes)}")
     for route in inbox_router.routes:
-        logger.info(
-            f"🔍 DEBUG: - Route: {route.path} Methods: {getattr(route, 'methods', 'N/A')}"
-        )
+        logger.info(f"🔍 DEBUG: - Route: {route.path} Methods: {getattr(route, 'methods', 'N/A')}")
 
     app.include_router(inbox_router, prefix="/api", tags=["unified-inbox"])
     logger.info("✅ Unified Inbox endpoints included at /api + router.prefix")
@@ -1591,9 +1508,7 @@ except ImportError as e:
 try:
     from api.v1.endpoints.health import router as v1_health_router
 
-    app.include_router(
-        v1_health_router, prefix="/api/v1/health", tags=["Health Checks"]
-    )
+    app.include_router(v1_health_router, prefix="/api/v1/health", tags=["Health Checks"])
     logger.info("✅ Enhanced health check endpoints included (K8s ready)")
 except ImportError as e:
     logger.warning(f"Enhanced health check endpoints not available: {e}")
@@ -1607,9 +1522,7 @@ try:
         prefix="/api/health",
         tags=["Health Monitoring"],
     )
-    logger.info(
-        "✅ Comprehensive health monitoring endpoints included from NEW location"
-    )
+    logger.info("✅ Comprehensive health monitoring endpoints included from NEW location")
 except ImportError as e:
     logger.error(f"❌ Comprehensive health check endpoints not available: {e}")
 
