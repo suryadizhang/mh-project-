@@ -15,10 +15,10 @@ Architecture:
 """
 
 import asyncio
-from datetime import datetime, timezone
 import logging
 import os
 import time
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -480,7 +480,12 @@ def get_configuration_status() -> dict[str, Any]:
 # === Health Check Endpoints ===
 
 
-@router.get("/readiness", response_model=ReadinessResponse, status_code=status.HTTP_200_OK)
+@router.api_route(
+    "/readiness",
+    methods=["GET", "HEAD"],
+    response_model=ReadinessResponse,
+    status_code=status.HTTP_200_OK,
+)
 async def readiness_probe(
     request: Request, db: AsyncSession = Depends(lambda: None)  # Will be injected properly
 ):
@@ -594,7 +599,12 @@ async def readiness_probe(
         )
 
 
-@router.get("/liveness", response_model=LivenessResponse, status_code=status.HTTP_200_OK)
+@router.api_route(
+    "/liveness",
+    methods=["GET", "HEAD"],
+    response_model=LivenessResponse,
+    status_code=status.HTTP_200_OK,
+)
 async def liveness_probe():
     """
     Kubernetes Liveness Probe
@@ -656,8 +666,8 @@ async def detailed_health_check(request: Request):
     start_time = time.time()
 
     try:
-        from core.database import get_db_context
         from core.config import get_settings
+        from core.database import get_db_context
 
         settings = get_settings()
 
@@ -728,7 +738,7 @@ async def detailed_health_check(request: Request):
         )
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.api_route("/", methods=["GET", "HEAD"], status_code=status.HTTP_200_OK)
 async def basic_health_check():
     """
     Basic Health Check (Backward Compatibility)
