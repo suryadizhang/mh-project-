@@ -73,8 +73,8 @@ const nextConfig = {
               // Fonts: self, Google Fonts, CDNs
               "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com data:",
               "img-src 'self' data: https: blob:",
-              // Connect: API, Stripe, Vercel, Google OAuth, Cloudflare, localhost, WebSocket
-              "connect-src 'self' https://mhapi.mysticdatanode.net wss://mhapi.mysticdatanode.net https://api.stripe.com https://vitals.vercel-insights.com https://accounts.google.com https://oauth2.googleapis.com ws://localhost:8002 http://localhost:8002 http://localhost:8000 ws://localhost:8000",
+              // Connect: API (both prod and staging), Stripe, Vercel, Google OAuth, Cloudflare, localhost, WebSocket
+              "connect-src 'self' https://*.mysticdatanode.net wss://*.mysticdatanode.net https://api.stripe.com https://vitals.vercel-insights.com https://accounts.google.com https://oauth2.googleapis.com ws://localhost:8002 http://localhost:8002 http://localhost:8000 ws://localhost:8000",
               // Frames: Stripe, Google OAuth
               "frame-src 'self' https://js.stripe.com https://accounts.google.com",
               "object-src 'none'",
