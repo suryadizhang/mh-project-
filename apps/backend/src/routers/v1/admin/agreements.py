@@ -24,10 +24,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from services.agreements import (
-    SlotHoldService,
-    get_slot_hold_service,
-)
+from services.agreements import SlotHoldService, get_slot_hold_service
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +84,7 @@ class SlotHoldSummary(BaseModel):
 
     id: UUID
     signing_token: str
-    station_id: UUID
+    station_id: Optional[UUID]  # Optional - slot holds may not have station assigned
     station_name: Optional[str]
     event_date: date
     slot_time: time_type
@@ -607,7 +604,9 @@ async def send_signing_link_to_customer(
 
         return SendLinkResponse(
             success=send_success,
-            message=(f"Signing link {'sent' if send_success else 'attempted'} via {channel}"),
+            message=(
+                f"Signing link {'sent' if send_success else 'attempted'} via {channel}"
+            ),
             send_count=send_count,
             channel=channel,
         )

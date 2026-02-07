@@ -846,6 +846,39 @@ export const tokenManager = {
   },
 
   /**
+   * Get the user's role from the JWT token payload
+   * Returns the role string or null if not available
+   */
+  getRoleFromToken(token?: string | null): string | null {
+    const tokenToCheck = token ?? this.getToken();
+    if (!tokenToCheck) return null;
+
+    try {
+      const parts = tokenToCheck.split('.');
+      if (parts.length !== 3) return null;
+
+      const payload = JSON.parse(
+        atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+      );
+      return payload.role || null;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Check if the user's role should skip station selection
+   * SUPER_ADMIN, ADMIN, and CUSTOMER_SUPPORT don't need station selection
+   */
+  shouldSkipStationSelection(token?: string | null): boolean {
+    const role = this.getRoleFromToken(token);
+    if (!role) return false;
+
+    const skipRoles = ['SUPER_ADMIN', 'ADMIN', 'CUSTOMER_SUPPORT'];
+    return skipRoles.includes(role);
+  },
+
+  /**
    * Refresh the access token using the refresh token
    * Returns new access token or null if refresh failed
    */

@@ -46,7 +46,18 @@ function LoginContent() {
       setTempToken(oauthToken);
       setFormData(prev => ({ ...prev, email }));
 
-      // Fetch stations for OAuth user
+      // Check if user role should skip station selection
+      if (tokenManager.shouldSkipStationSelection(oauthToken)) {
+        console.log(
+          '[Login] Role skips station selection, proceeding directly'
+        );
+        tokenManager.setToken(oauthToken);
+        login(oauthToken, undefined);
+        router.push('/');
+        return;
+      }
+
+      // Fetch stations for OAuth user (only for roles that need station selection)
       (async () => {
         setLoading(true);
         try {
@@ -91,7 +102,24 @@ function LoginContent() {
           console.log('[Login] Refresh token stored');
         }
 
-        // Get user's stations (pass email, not token!)
+        // Check if user role should skip station selection
+        // SUPER_ADMIN, ADMIN, and CUSTOMER_SUPPORT have org-wide access
+        if (
+          tokenManager.shouldSkipStationSelection(response.data.access_token)
+        ) {
+          console.log(
+            '[Login] Role skips station selection, proceeding directly'
+          );
+          login(
+            response.data.access_token,
+            undefined,
+            response.data.refresh_token
+          );
+          router.push('/');
+          return;
+        }
+
+        // Get user's stations (pass email, not token!) - only for station-bound roles
         const stationsResponse = await authService.getUserStations(
           formData.email
         );
