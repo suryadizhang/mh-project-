@@ -128,8 +128,8 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
               "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
               "img-src 'self' data: https: blob:",
-              // CRITICAL: API URL, Google Maps Places API, Stripe, Analytics
-              "connect-src 'self' https://mhapi.mysticdatanode.net https://maps.googleapis.com https://www.google-analytics.com https://api.stripe.com https://vitals.vercel-insights.com https://cdn.jsdelivr.net ws://localhost:8002 http://localhost:8002",
+              // CRITICAL: API URL (both prod and staging), Google Maps Places API, Stripe, Analytics
+              "connect-src 'self' https://*.mysticdatanode.net https://maps.googleapis.com https://www.google-analytics.com https://api.stripe.com https://vitals.vercel-insights.com https://cdn.jsdelivr.net ws://localhost:8002 http://localhost:8002",
               "frame-src 'self' https://js.stripe.com https://www.facebook.com",
               "object-src 'none'",
               "base-uri 'self'",
