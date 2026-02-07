@@ -1,14 +1,14 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-import { FlatCompat } from '@eslint/eslintrc'
+import { FlatCompat } from '@eslint/eslintrc';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
-  baseDirectory: __dirname
-})
+  baseDirectory: __dirname,
+});
 
 const eslintConfig = [
   {
@@ -25,8 +25,8 @@ const eslintConfig = [
       '*.config.ts',
       'coverage/**',
       '.turbo/**',
-      'next-env.d.ts' // Next.js auto-generated type definitions
-    ]
+      'next-env.d.ts', // Next.js auto-generated type definitions
+    ],
   },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
@@ -40,9 +40,16 @@ const eslintConfig = [
       'import/order': [
         'error',
         {
-          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always'
-        }
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+          ],
+          'newlines-between': 'always',
+        },
       ],
 
       // Unused code detection
@@ -51,8 +58,8 @@ const eslintConfig = [
         'warn', // Changed to warn to avoid blocking builds
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_'
-        }
+          varsIgnorePattern: '^_',
+        },
       ],
 
       // Import/export consistency
@@ -61,9 +68,9 @@ const eslintConfig = [
       // Disable rules that may cause issues
       '@typescript-eslint/no-explicit-any': 'warn',
       'react-hooks/exhaustive-deps': 'warn',
-      'no-console': 'off'
-    }
-  }
-]
+      'no-console': 'off',
+    },
+  },
+];
 
-export default eslintConfig
+export default eslintConfig;

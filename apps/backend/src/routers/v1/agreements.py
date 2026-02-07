@@ -197,6 +197,7 @@ class HoldInfoResponse(BaseModel):
     status: str  # 'pending' | 'converted' | 'expired' | 'cancelled'
     agreement_signed: bool
     deposit_paid: bool
+    booking_id: Optional[str] = None  # If converted, the booking ID
 
 
 class AgreementContentResponse(BaseModel):
@@ -457,7 +458,7 @@ async def get_hold_status(
             )
 
         # Service method: validate_hold(self, signing_token: str) -> dict | None
-        # Returns: {id, station_id, slot_datetime, customer_email, customer_id, status, expires_at, created_at}
+        # Returns: {id, station_id, slot_datetime, customer_email, customer_id, status, expires_at, validation_status, ...}
         hold = await slot_hold_service.validate_hold(signing_token=token)
 
         if not hold:
@@ -466,16 +467,45 @@ async def get_hold_status(
                 error_code="SLOT_HOLD_NOT_FOUND",
             )
 
-        # Check if hold is expired or invalid
-        if hold["status"] != "pending":
-            error_code = (
-                "SLOT_HOLD_EXPIRED"
-                if hold["status"] == "expired"
-                else f"SLOT_HOLD_{hold['status'].upper()}"
-            )
+        # Check validation_status from the service (distinguishes expired/completed/cancelled)
+        validation_status = hold.get("validation_status", "UNKNOWN")
+
+        if validation_status == "EXPIRED":
             return SigningPageResponse(
                 success=False,
-                error_code=error_code,
+                error_code="SLOT_HOLD_EXPIRED",
+            )
+        elif validation_status == "COMPLETED":
+            # Already signed and converted to booking
+            return SigningPageResponse(
+                success=False,
+                error_code="SLOT_HOLD_COMPLETED",
+                hold=HoldInfoResponse(
+                    id=str(hold["id"]),
+                    station_id=str(hold["station_id"]),
+                    station_name="",
+                    slot_datetime=datetime.combine(
+                        hold["event_date"], hold["slot_time"]
+                    ).isoformat(),
+                    customer_email=hold["customer_email"],
+                    expires_at=hold["expires_at"].isoformat() if hold.get("expires_at") else "",
+                    status=hold["status"],
+                    agreement_signed=hold.get("agreement_signed_at") is not None,
+                    deposit_paid=hold.get("deposit_paid_at") is not None,
+                    booking_id=str(hold["booking_id"]) if hold.get("booking_id") else None,
+                ),
+            )
+        elif validation_status == "CANCELLED":
+            return SigningPageResponse(
+                success=False,
+                error_code="SLOT_HOLD_CANCELLED",
+            )
+        elif validation_status != "VALID":
+            # Unknown status - treat as not found
+            logger.warning(f"Unknown validation status: {validation_status} for token: {token}")
+            return SigningPageResponse(
+                success=False,
+                error_code="SLOT_HOLD_NOT_FOUND",
             )
 
         # Query station name from identity.stations

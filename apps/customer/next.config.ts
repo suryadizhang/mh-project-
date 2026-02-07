@@ -7,7 +7,7 @@ import type { NextConfig } from 'next';
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('@next/bundle-analyzer')({ enabled: true })
+      require('@next/bundle-analyzer')({ enabled: true })
     : (config: NextConfig) => config;
 
 const nextConfig: NextConfig = {
@@ -97,11 +97,11 @@ const nextConfig: NextConfig = {
           // Only enable HSTS in production
           ...(isProduction
             ? [
-              {
-                key: 'Strict-Transport-Security',
-                value: 'max-age=31536000; includeSubDomains; preload',
-              },
-            ]
+                {
+                  key: 'Strict-Transport-Security',
+                  value: 'max-age=31536000; includeSubDomains; preload',
+                },
+              ]
             : []),
           {
             key: 'X-DNS-Prefetch-Control',

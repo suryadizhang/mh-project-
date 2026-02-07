@@ -6,14 +6,14 @@
     "analyze": "cross-env ANALYZE=true npm run build",
     "build": "next build",
     "dev": "next dev -p 3001",
-    "start": "next start -p 3001",
+    "format": "prettier --write . && sort-package-json package.json",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
+    "start": "next start -p 3001",
     "test": "vitest",
-    "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "format": "prettier --write . && sort-package-json package.json"
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

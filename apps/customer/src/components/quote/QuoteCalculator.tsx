@@ -148,10 +148,11 @@ const FormInput = ({
       min={min}
       max={max}
       autoComplete={autoComplete}
-      className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${error
+      className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+        error
           ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
           : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-        }`}
+      }`}
       required={required}
     />
     {error && (
@@ -700,10 +701,11 @@ export function QuoteCalculator() {
                     },
                   })}
                   placeholder="Enter your name"
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.name
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                    errors.name
                       ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
                       : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                    }`}
+                  }`}
                 />
                 {errors.name && (
                   <p className="animate-in slide-in-from-top-1 flex items-center gap-1 text-sm text-red-600">
@@ -740,10 +742,11 @@ export function QuoteCalculator() {
                     },
                   })}
                   placeholder="(916) 740-8768"
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.phone
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                    errors.phone
                       ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
                       : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                    }`}
+                  }`}
                 />
                 {errors.phone ? (
                   <p className="flex items-center gap-1 text-sm text-red-600">
@@ -779,10 +782,11 @@ export function QuoteCalculator() {
                     },
                   })}
                   placeholder="your@email.com"
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.email
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                    errors.email
                       ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
                       : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                    }`}
+                  }`}
                 />
                 {errors.email ? (
                   <p className="flex items-center gap-1 text-sm text-red-600">
@@ -864,8 +868,9 @@ export function QuoteCalculator() {
                       setCalculationError('');
                     },
                   })}
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${errors.adults ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                    }`}
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${
+                    errors.adults ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                  }`}
                 />
                 {errors.adults ? (
                   <p className="flex items-center gap-1 text-sm text-red-600">
@@ -1023,8 +1028,9 @@ export function QuoteCalculator() {
                   venueAddressInputRef.current = e;
                 }}
                 placeholder="Start typing your address... (e.g., 123 Main Street)"
-                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${errors.venueAddress ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                  }`}
+                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${
+                  errors.venueAddress ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                }`}
                 autoComplete="off"
               />
               {errors.venueAddress ? (
@@ -1167,10 +1173,11 @@ export function QuoteCalculator() {
 
           {/* Calculate Button */}
           <button
-            className={`w-full transform rounded-xl px-8 py-4 text-lg font-bold transition-all duration-300 ${isCalculating
+            className={`w-full transform rounded-xl px-8 py-4 text-lg font-bold transition-all duration-300 ${
+              isCalculating
                 ? 'cursor-not-allowed bg-gray-400'
                 : 'bg-gradient-to-r from-red-600 to-red-700 hover:scale-[1.02] hover:from-red-700 hover:to-red-800 hover:shadow-xl active:scale-[0.98]'
-              } text-white shadow-lg`}
+            } text-white shadow-lg`}
             onClick={calculateQuote}
             disabled={isCalculating || quoteData.adults === 0}
           >
@@ -1502,12 +1509,13 @@ export function QuoteCalculator() {
                                 type="button"
                                 onClick={() => slot.isAvailable && setSelectedTime(slot.time)}
                                 disabled={!slot.isAvailable}
-                                className={`rounded-lg px-4 py-3 text-center transition-all duration-200 ${selectedTime === slot.time
+                                className={`rounded-lg px-4 py-3 text-center transition-all duration-200 ${
+                                  selectedTime === slot.time
                                     ? 'scale-105 bg-blue-600 text-white shadow-lg'
                                     : slot.isAvailable
                                       ? 'border-2 border-gray-200 bg-white hover:border-blue-400 hover:bg-blue-50'
                                       : 'cursor-not-allowed bg-gray-100 text-gray-400 line-through'
-                                  }`}
+                                }`}
                               >
                                 <div className="font-bold">{slot.label || slot.time}</div>
                                 <div className="mt-1 text-xs">

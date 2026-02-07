@@ -48,7 +48,11 @@ export default function AgreementsPage() {
   const { page, limit, setPage, nextPage, prevPage } = usePagination(1, 20);
 
   // Search state
-  const { query: searchQuery, debouncedQuery, setQuery: setSearchQuery } = useSearch();
+  const {
+    query: searchQuery,
+    debouncedQuery,
+    setQuery: setSearchQuery,
+  } = useSearch();
 
   // Modal state
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -194,7 +198,10 @@ export default function AgreementsPage() {
   };
 
   // Send link via SMS/email
-  const handleSendLink = async (holdId: string, channel: 'sms' | 'email' | 'both') => {
+  const handleSendLink = async (
+    holdId: string,
+    channel: 'sms' | 'email' | 'both'
+  ) => {
     setIsSendingLink(true);
     try {
       const response = await agreementService.sendLink({
@@ -301,7 +308,7 @@ export default function AgreementsPage() {
                     type="text"
                     placeholder="Search by customer name, email, or phone..."
                     value={searchQuery}
-                    onChange={(e) => {
+                    onChange={e => {
                       setSearchQuery(e.target.value);
                       setPage(1);
                     }}
@@ -355,11 +362,8 @@ export default function AgreementsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {agreements.map((agreement) => (
-                      <tr
-                        key={agreement.id}
-                        className="hover:bg-gray-50"
-                      >
+                    {agreements.map(agreement => (
+                      <tr key={agreement.id} className="hover:bg-gray-50">
                         <td className="whitespace-nowrap px-4 py-4">
                           <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
@@ -472,11 +476,8 @@ export default function AgreementsPage() {
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
-                {holds.map((hold) => (
-                  <div
-                    key={hold.id}
-                    className="p-4 hover:bg-gray-50"
-                  >
+                {holds.map(hold => (
+                  <div key={hold.id} className="p-4 hover:bg-gray-50">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
@@ -591,7 +592,7 @@ export default function AgreementsPage() {
                     <input
                       type="text"
                       value={generateForm.customer_name}
-                      onChange={(e) =>
+                      onChange={e =>
                         setGenerateForm({
                           ...generateForm,
                           customer_name: e.target.value,
@@ -612,7 +613,7 @@ export default function AgreementsPage() {
                     <input
                       type="email"
                       value={generateForm.customer_email}
-                      onChange={(e) =>
+                      onChange={e =>
                         setGenerateForm({
                           ...generateForm,
                           customer_email: e.target.value,
@@ -633,7 +634,7 @@ export default function AgreementsPage() {
                     <input
                       type="tel"
                       value={generateForm.customer_phone}
-                      onChange={(e) =>
+                      onChange={e =>
                         setGenerateForm({
                           ...generateForm,
                           customer_phone: e.target.value,
@@ -655,7 +656,7 @@ export default function AgreementsPage() {
                       <input
                         type="date"
                         value={generateForm.event_date}
-                        onChange={(e) =>
+                        onChange={e =>
                           setGenerateForm({
                             ...generateForm,
                             event_date: e.target.value,
@@ -672,7 +673,7 @@ export default function AgreementsPage() {
                     </label>
                     <select
                       value={generateForm.time_slot}
-                      onChange={(e) =>
+                      onChange={e =>
                         setGenerateForm({
                           ...generateForm,
                           time_slot: e.target.value,
@@ -758,7 +759,9 @@ export default function AgreementsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleSendLink(generatedLink.holdId, 'sms')}
+                      onClick={() =>
+                        handleSendLink(generatedLink.holdId, 'sms')
+                      }
                       disabled={isSendingLink}
                       className="gap-1"
                     >
@@ -768,7 +771,9 @@ export default function AgreementsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleSendLink(generatedLink.holdId, 'email')}
+                      onClick={() =>
+                        handleSendLink(generatedLink.holdId, 'email')
+                      }
                       disabled={isSendingLink}
                       className="gap-1"
                     >
@@ -778,7 +783,9 @@ export default function AgreementsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleSendLink(generatedLink.holdId, 'both')}
+                      onClick={() =>
+                        handleSendLink(generatedLink.holdId, 'both')
+                      }
                       disabled={isSendingLink}
                       className="gap-1"
                     >

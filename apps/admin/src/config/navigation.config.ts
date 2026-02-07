@@ -128,11 +128,7 @@ const DAILY_OPERATIONS: NavSection = {
       name: 'Agreements',
       href: '/agreements',
       icon: '📝',
-      roles: [
-        UserRole.SUPER_ADMIN,
-        UserRole.ADMIN,
-        UserRole.CUSTOMER_SUPPORT,
-      ],
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT],
       tier: 'daily',
       description: 'Customer agreements and signing links',
       showInQuickBar: false,

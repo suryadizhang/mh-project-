@@ -31,6 +31,8 @@ import { usePricing } from '@/hooks/usePricing';
 const SIGNING_ERROR_CODES = {
   SLOT_HOLD_EXPIRED: 'SLOT_HOLD_EXPIRED',
   SLOT_HOLD_NOT_FOUND: 'SLOT_HOLD_NOT_FOUND',
+  SLOT_HOLD_COMPLETED: 'SLOT_HOLD_COMPLETED',
+  SLOT_HOLD_CANCELLED: 'SLOT_HOLD_CANCELLED',
   AGREEMENT_ALREADY_SIGNED: 'AGREEMENT_ALREADY_SIGNED',
   SLOT_ALREADY_BOOKED: 'SLOT_ALREADY_BOOKED',
   INVALID_TOKEN: 'INVALID_TOKEN',
@@ -50,6 +52,7 @@ interface HoldInfo {
   status: 'pending' | 'converted' | 'expired' | 'cancelled';
   agreement_signed: boolean;
   deposit_paid: boolean;
+  booking_id?: string | null;
 }
 
 interface AgreementContent {
@@ -237,17 +240,25 @@ export default function SigningPage() {
           <h1 className="mb-2 text-2xl font-bold text-gray-800">
             {errorCode === 'SLOT_HOLD_EXPIRED'
               ? 'Signing Link Expired'
-              : errorCode === 'SLOT_HOLD_NOT_FOUND'
-                ? 'Link Not Found'
-                : 'Unable to Load'}
+              : errorCode === 'SLOT_HOLD_COMPLETED'
+                ? 'Already Completed!'
+                : errorCode === 'SLOT_HOLD_CANCELLED'
+                  ? 'Booking Cancelled'
+                  : errorCode === 'SLOT_HOLD_NOT_FOUND'
+                    ? 'Link Not Found'
+                    : 'Unable to Load'}
           </h1>
 
           <p className="mb-6 text-gray-600">
             {errorCode === 'SLOT_HOLD_EXPIRED'
               ? 'This signing link has expired. The time slot may no longer be available. Please start a new booking.'
-              : errorCode === 'SLOT_HOLD_NOT_FOUND'
-                ? 'This signing link is invalid or has already been used.'
-                : 'Something went wrong. Please try again or contact support.'}
+              : errorCode === 'SLOT_HOLD_COMPLETED'
+                ? 'Great news! This booking has already been completed. Check your email for confirmation details.'
+                : errorCode === 'SLOT_HOLD_CANCELLED'
+                  ? 'This booking was cancelled. If you still want to book, please start a new reservation.'
+                  : errorCode === 'SLOT_HOLD_NOT_FOUND'
+                    ? 'This signing link is invalid or has already been used.'
+                    : 'Something went wrong. Please try again or contact support.'}
           </p>
 
           <div className="space-y-3">

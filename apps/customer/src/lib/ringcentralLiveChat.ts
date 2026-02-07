@@ -201,9 +201,7 @@ export async function endLiveChat(
 /**
  * Check live chat session status
  */
-export async function getLiveChatStatus(
-  sessionId: string,
-): Promise<{
+export async function getLiveChatStatus(sessionId: string): Promise<{
   success: boolean;
   status?: LiveChatSession['status'];
   agentName?: string;

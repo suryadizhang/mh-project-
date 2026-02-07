@@ -53,7 +53,48 @@ from sqlalchemy.ext.asyncio import AsyncSession
 logger = logging.getLogger(__name__)
 
 # Default hold duration
-DEFAULT_HOLD_MINUTES = 120  # 2 hours
+DEFAULT_HOLD_MINUTES = 480  # 8 hours (user confirmed preference)
+
+# Smart expiration settings
+EVENING_CUTOFF_HOUR = 22  # 10 PM
+EVENING_HOLD_MINUTES = 960  # 16 hours (covers overnight until next business hours)
+URGENT_EVENT_DAYS = 6  # Events within this many days get max 8h hold
+MAX_HOLD_MINUTES = 480  # 8 hours maximum for urgent events
+
+
+def calculate_smart_expiration(event_date: date, now: datetime | None = None) -> int:
+    """
+    Calculate smart hold duration based on booking time and event proximity.
+
+    Logic:
+    - If booking is made after 10 PM: 16 hours (covers overnight)
+    - If event is within 6 days: max 8 hours
+    - Default: 8 hours
+
+    Args:
+        event_date: Date of the event
+        now: Current datetime (for testing), defaults to UTC now
+
+    Returns:
+        Hold duration in minutes
+    """
+    if now is None:
+        now = datetime.now(timezone.utc)
+
+    # Calculate days until event
+    today = now.date()
+    days_until_event = (event_date - today).days
+
+    # If event is very soon, cap at 8 hours regardless of time
+    if days_until_event <= URGENT_EVENT_DAYS:
+        return MAX_HOLD_MINUTES
+
+    # If booking after 10 PM, give 16 hours to cover overnight
+    if now.hour >= EVENING_CUTOFF_HOUR:
+        return EVENING_HOLD_MINUTES
+
+    # Default: 8 hours
+    return DEFAULT_HOLD_MINUTES
 
 
 class SlotHoldError(Exception):
@@ -128,7 +169,17 @@ class SlotHoldService:
         """
         # Generate UUID for SMS signing link (must be valid UUID for database)
         signing_token = str(uuid4())
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=hold_minutes)
+
+        # Use smart expiration if default value, otherwise use specified duration
+        if hold_minutes == DEFAULT_HOLD_MINUTES:
+            actual_hold_minutes = calculate_smart_expiration(event_date)
+            logger.debug(
+                f"Smart expiration: {actual_hold_minutes} minutes for event on {event_date}"
+            )
+        else:
+            actual_hold_minutes = hold_minutes
+
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=actual_hold_minutes)
 
         try:
             # Check if slot is already held or booked
@@ -253,22 +304,28 @@ class SlotHoldService:
         Validate a slot hold by its signing token.
 
         Used when customer clicks SMS signing link.
+        Returns hold info with validation_status to distinguish between:
+        - VALID: Active hold that can be signed
+        - EXPIRED: Hold has passed expires_at time
+        - COMPLETED: Hold was converted to booking (deposit paid)
+        - CANCELLED: Hold was manually cancelled
+        - NOT_FOUND: Token doesn't exist
 
         Args:
             signing_token: Token from create_hold()
 
         Returns:
-            Hold dict if valid and not expired, None otherwise
+            Hold dict with validation_status field, or None if token doesn't exist
         """
+        # Query hold WITHOUT time/status filters to get full status info
         result = await self.db.execute(
             text(
                 """
                 SELECT id, station_id, event_date, slot_time, customer_email,
-                       customer_name, guest_count, status, expires_at, created_at
+                       customer_name, guest_count, status, expires_at, created_at,
+                       agreement_signed_at, deposit_paid_at, converted_to_booking_id
                 FROM core.slot_holds
                 WHERE signing_token = :signing_token
-                AND status IN ('pending', 'signed')
-                AND expires_at > NOW()
             """
             ),
             {"signing_token": signing_token},
@@ -276,7 +333,24 @@ class SlotHoldService:
 
         row = result.fetchone()
         if not row:
-            return None
+            return None  # Token doesn't exist at all
+
+        # Determine validation status
+        now = datetime.now(timezone.utc)
+        expires_at = row.expires_at
+        if expires_at and expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+        if row.status == "converted" or row.converted_to_booking_id:
+            validation_status = "COMPLETED"
+        elif row.status == "cancelled":
+            validation_status = "CANCELLED"
+        elif row.status == "expired" or (expires_at and now > expires_at):
+            validation_status = "EXPIRED"
+        elif row.status in ("pending", "signed"):
+            validation_status = "VALID"
+        else:
+            validation_status = "UNKNOWN"
 
         return {
             "id": row.id,
@@ -289,6 +363,10 @@ class SlotHoldService:
             "status": row.status,
             "expires_at": row.expires_at,
             "created_at": row.created_at,
+            "validation_status": validation_status,
+            "agreement_signed_at": row.agreement_signed_at,
+            "deposit_paid_at": row.deposit_paid_at,
+            "booking_id": row.converted_to_booking_id,
         }
 
     async def get_hold_by_id(self, hold_id: UUID) -> dict[str, Any] | None:
@@ -558,10 +636,7 @@ class SlotHoldService:
             await self.db.commit()
 
             if row:
-                logger.info(
-                    f"Recorded signing link sent for hold {hold_id} "
-                    f"via {channel}"
-                )
+                logger.info(f"Recorded signing link sent for hold {hold_id} " f"via {channel}")
                 return {
                     "send_count": 1,
                     "first_sent_at": row.signing_link_sent_at,

@@ -12,10 +12,10 @@
         const questions = [
           "What's included in the hibachi service?",
           'Do you serve Sacramento?',
-          'How much is the deposit?'
-        ]
+          'How much is the deposit?',
+        ];
 
-        const results = document.getElementById('results')
+        const results = document.getElementById('results');
 
         for (const question of questions) {
           try {
@@ -25,11 +25,11 @@
               body: JSON.stringify({
                 message: question,
                 page: '/test',
-                consent_to_save: true
-              })
-            })
+                consent_to_save: true,
+              }),
+            });
 
-            const data = await response.json()
+            const data = await response.json();
 
             results.innerHTML += `
                         <div style="margin: 20px; padding: 10px; border: 1px solid #ccc;">
@@ -38,20 +38,20 @@
                             <p><strong>Confidence:</strong> ${Math.round(data.confidence * 100)}%</p>
                             <p><strong>Route:</strong> ${data.route}</p>
                         </div>
-                    `
+                    `;
           } catch (error) {
             results.innerHTML += `
                         <div style="margin: 20px; padding: 10px; border: 1px solid red;">
                             <h3>Q: ${question}</h3>
                             <p style="color: red;">Error: ${error.message}</p>
                         </div>
-                    `
+                    `;
           }
         }
       }
 
       // Auto-test when page loads
-      window.onload = testQuestions
+      window.onload = testQuestions;
     </script>
   </body>
 </html>
