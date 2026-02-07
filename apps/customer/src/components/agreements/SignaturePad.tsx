@@ -44,6 +44,8 @@ export default function SignaturePad({
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+  // Use ref for immediate access in stopDrawing (avoids async state timing issues)
+  const hasSignatureRef = useRef(false);
 
   // Initialize canvas with proper dimensions
   const initCanvas = useCallback(() => {
@@ -150,6 +152,7 @@ export default function SignaturePad({
       ctx.stroke();
 
       lastPointRef.current = coords;
+      hasSignatureRef.current = true; // Immediate update for stopDrawing
       setHasSignature(true);
     },
     [isDrawing, disabled, getCoordinates],
@@ -162,13 +165,13 @@ export default function SignaturePad({
     setIsDrawing(false);
     lastPointRef.current = null;
 
-    // Export signature as base64 PNG
+    // Export signature as base64 PNG - use ref for immediate check
     const canvas = canvasRef.current;
-    if (canvas && hasSignature) {
+    if (canvas && hasSignatureRef.current) {
       const dataUrl = canvas.toDataURL('image/png');
       onSignatureChange(dataUrl);
     }
-  }, [isDrawing, hasSignature, onSignatureChange]);
+  }, [isDrawing, onSignatureChange]);
 
   // Clear signature
   const clearSignature = useCallback(() => {
@@ -183,6 +186,7 @@ export default function SignaturePad({
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, rect.width, height);
 
+    hasSignatureRef.current = false;
     setHasSignature(false);
     onSignatureChange(null);
   }, [backgroundColor, height, onSignatureChange]);
