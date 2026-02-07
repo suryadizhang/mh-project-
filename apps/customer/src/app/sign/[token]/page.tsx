@@ -81,14 +81,27 @@ export default function SigningPage() {
   // Validate token and load hold info
   const validateToken = useCallback(async () => {
     try {
+      // Backend response structure:
+      // Success: {success: true, hold: {...}, agreement: {...}}
+      // Error: {success: false, hold: null, agreement: null, error_code: "SLOT_HOLD_EXPIRED"}
       const response = await apiFetch<{
-        hold: HoldInfo;
-        agreement: AgreementContent;
+        success: boolean;
+        hold: HoldInfo | null;
+        agreement: AgreementContent | null;
         error_code?: SigningErrorCode;
       }>(`/api/v1/agreements/holds/${token}`);
 
+      // Check apiFetch wrapper success (network/HTTP errors)
       if (!response.success || !response.data) {
         const errorCode = (response.data?.error_code || 'SYSTEM_ERROR') as SigningErrorCode;
+        setErrorCode(errorCode);
+        setPageState('error');
+        return;
+      }
+
+      // Check backend API success (business logic errors)
+      if (!response.data.success || !response.data.hold) {
+        const errorCode = (response.data.error_code || 'SYSTEM_ERROR') as SigningErrorCode;
         setErrorCode(errorCode);
         setPageState('error');
         return;
