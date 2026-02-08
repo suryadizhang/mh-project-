@@ -61,6 +61,20 @@ interface UsePricingResult {
   businessPhone: string | undefined;
   businessEmail: string | undefined;
 
+  // Premium Protein Upgrades (dollars per person) - SSoT from dynamic_variables
+  salmonUpgradePrice: number | undefined;
+  scallopsUpgradePrice: number | undefined;
+  filetMignonUpgradePrice: number | undefined;
+  lobsterTailUpgradePrice: number | undefined;
+  extraProteinPrice: number | undefined;
+
+  // Addon Items (dollars per person) - SSoT from dynamic_variables
+  yakisobaNoodlesPrice: number | undefined;
+  extraFriedRicePrice: number | undefined;
+  extraVegetablesPrice: number | undefined;
+  edamamePrice: number | undefined;
+  gyozaPrice: number | undefined;
+
   // Helper functions
   hasData: boolean;
   refetch: () => Promise<void>;
@@ -102,6 +116,22 @@ interface BusinessConfig {
   contact?: {
     business_phone: string;
     business_email: string;
+  };
+  menu?: {
+    upgrades: {
+      salmon_cents: number;
+      scallops_cents: number;
+      filet_mignon_cents: number;
+      lobster_tail_cents: number;
+      extra_protein_cents: number;
+    };
+    addons: {
+      yakisoba_noodles_cents: number;
+      extra_fried_rice_cents: number;
+      extra_vegetables_cents: number;
+      edamame_cents: number;
+      gyoza_cents: number;
+    };
   };
   source: string;
 }
@@ -225,6 +255,40 @@ export function usePricing(): UsePricingResult {
   const businessPhone = businessConfig?.contact?.business_phone;
   const businessEmail = businessConfig?.contact?.business_email;
 
+  // Premium Protein Upgrades (cents -> dollars) - SSoT
+  const salmonUpgradePrice = businessConfig?.menu?.upgrades?.salmon_cents
+    ? businessConfig.menu.upgrades.salmon_cents / 100
+    : undefined;
+  const scallopsUpgradePrice = businessConfig?.menu?.upgrades?.scallops_cents
+    ? businessConfig.menu.upgrades.scallops_cents / 100
+    : undefined;
+  const filetMignonUpgradePrice = businessConfig?.menu?.upgrades?.filet_mignon_cents
+    ? businessConfig.menu.upgrades.filet_mignon_cents / 100
+    : undefined;
+  const lobsterTailUpgradePrice = businessConfig?.menu?.upgrades?.lobster_tail_cents
+    ? businessConfig.menu.upgrades.lobster_tail_cents / 100
+    : undefined;
+  const extraProteinPrice = businessConfig?.menu?.upgrades?.extra_protein_cents
+    ? businessConfig.menu.upgrades.extra_protein_cents / 100
+    : undefined;
+
+  // Addon Items (cents -> dollars) - SSoT
+  const yakisobaNoodlesPrice = businessConfig?.menu?.addons?.yakisoba_noodles_cents
+    ? businessConfig.menu.addons.yakisoba_noodles_cents / 100
+    : undefined;
+  const extraFriedRicePrice = businessConfig?.menu?.addons?.extra_fried_rice_cents
+    ? businessConfig.menu.addons.extra_fried_rice_cents / 100
+    : undefined;
+  const extraVegetablesPrice = businessConfig?.menu?.addons?.extra_vegetables_cents
+    ? businessConfig.menu.addons.extra_vegetables_cents / 100
+    : undefined;
+  const edamamePrice = businessConfig?.menu?.addons?.edamame_cents
+    ? businessConfig.menu.addons.edamame_cents / 100
+    : undefined;
+  const gyozaPrice = businessConfig?.menu?.addons?.gyoza_cents
+    ? businessConfig.menu.addons.gyoza_cents / 100
+    : undefined;
+
   // Debug logging for pricing extraction
   console.log('[usePricing] Extracted values:', {
     businessConfig: businessConfig !== null,
@@ -271,6 +335,16 @@ export function usePricing(): UsePricingResult {
     freeRescheduleCount,
     businessPhone,
     businessEmail,
+    salmonUpgradePrice,
+    scallopsUpgradePrice,
+    filetMignonUpgradePrice,
+    lobsterTailUpgradePrice,
+    extraProteinPrice,
+    yakisobaNoodlesPrice,
+    extraFriedRicePrice,
+    extraVegetablesPrice,
+    edamamePrice,
+    gyozaPrice,
     hasData,
     refetch: fetchPricing,
   };

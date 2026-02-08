@@ -74,6 +74,7 @@ CATEGORY_POLICY = "policy"
 CATEGORY_CONTACT = "contact"
 CATEGORY_CHEF_PAY = "chef_pay"
 CATEGORY_ALERTS = "alerts"
+CATEGORY_MENU = "menu"  # Premium protein upgrades and addon items
 
 
 @dataclass
@@ -134,6 +135,20 @@ class BusinessConfig:
     # Contact (business info)
     business_phone: str = "(916) 740-8768"
     business_email: str = "cs@myhibachichef.com"
+
+    # Premium Protein Upgrades (cents per person)
+    salmon_upgrade_cents: int = 500  # $5.00 per person
+    scallops_upgrade_cents: int = 500  # $5.00 per person
+    filet_mignon_upgrade_cents: int = 500  # $5.00 per person
+    lobster_tail_upgrade_cents: int = 1500  # $15.00 per person
+    extra_protein_cents: int = 1000  # $10.00 per person (3rd+ protein)
+
+    # Addon Items (cents per person)
+    yakisoba_noodles_cents: int = 500  # $5.00 per person
+    extra_fried_rice_cents: int = 500  # $5.00 per person
+    extra_vegetables_cents: int = 500  # $5.00 per person
+    edamame_cents: int = 500  # $5.00 per person
+    gyoza_cents: int = 1000  # $10.00 per person
 
     # Chef Pay - Per-Tier Fixed Rates (all amounts in cents)
     # Junior Chef (new_chef) rates
@@ -383,6 +398,30 @@ def _map_dynamic_variables_to_config(variables: list, config: BusinessConfig) ->
             # Travel fee distribution
             elif key == "chef_pay_travel_pct":
                 config.chef_pay_travel_pct = int(parsed_value)
+
+        elif category == CATEGORY_MENU:
+            # Premium Protein Upgrades
+            if key == "salmon_upgrade_cents":
+                config.salmon_upgrade_cents = int(parsed_value)
+            elif key == "scallops_upgrade_cents":
+                config.scallops_upgrade_cents = int(parsed_value)
+            elif key == "filet_mignon_upgrade_cents":
+                config.filet_mignon_upgrade_cents = int(parsed_value)
+            elif key == "lobster_tail_upgrade_cents":
+                config.lobster_tail_upgrade_cents = int(parsed_value)
+            elif key == "extra_protein_cents":
+                config.extra_protein_cents = int(parsed_value)
+            # Addon Items
+            elif key == "yakisoba_noodles_cents":
+                config.yakisoba_noodles_cents = int(parsed_value)
+            elif key == "extra_fried_rice_cents":
+                config.extra_fried_rice_cents = int(parsed_value)
+            elif key == "extra_vegetables_cents":
+                config.extra_vegetables_cents = int(parsed_value)
+            elif key == "edamame_cents":
+                config.edamame_cents = int(parsed_value)
+            elif key == "gyoza_cents":
+                config.gyoza_cents = int(parsed_value)
 
     return config
 

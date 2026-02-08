@@ -48,12 +48,28 @@ interface HoldInfo {
   station_name: string;
   slot_datetime: string;
   customer_email: string;
+  customer_name?: string;
+  venue_address?: string;
+  guest_count?: number;
   expires_at: string;
   status: 'pending' | 'converted' | 'expired' | 'cancelled';
   agreement_signed: boolean;
   deposit_paid: boolean;
   booking_id?: string | null;
 }
+
+// 9 acknowledgment checkboxes that must be checked before signing
+const ACKNOWLEDGMENT_ITEMS = [
+  { id: 'read_agreement', label: 'I have read and understand this complete Service Agreement & Liability Waiver' },
+  { id: 'food_allergies', label: 'I have disclosed all known food allergies for all guests attending' },
+  { id: 'liability', label: 'I accept all liability limitations, including property damage acknowledgment' },
+  { id: 'weather_policy', label: 'I understand the weather policy and have a covered backup location' },
+  { id: 'guest_menu', label: 'I understand the guest count and menu change deadlines' },
+  { id: 'equipment', label: 'I understand that My Hibachi Chef does NOT provide tables, chairs, or tableware' },
+  { id: 'media_release', label: 'I grant permission for photography/video (unless I opt-out in writing)' },
+  { id: 'authorized', label: 'I am authorized to agree on behalf of all guests attending this event' },
+  { id: 'health_requirements', label: 'I agree to inform guests about the pre-event health requirements' },
+];
 
 interface AgreementContent {
   title: string;
@@ -75,8 +91,28 @@ export default function SigningPage() {
   const [holdInfo, setHoldInfo] = useState<HoldInfo | null>(null);
   const [agreement, setAgreement] = useState<AgreementContent | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
+  const [printedName, setPrintedName] = useState('');
+  const [acknowledgments, setAcknowledgments] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(ACKNOWLEDGMENT_ITEMS.map(item => [item.id, false]))
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+
+  // Check if all acknowledgments are checked
+  const allAcknowledged = Object.values(acknowledgments).every(Boolean);
+  const canSign = allAcknowledged && printedName.trim().length >= 2 && signature;
+
+  // Toggle acknowledgment checkbox
+  const toggleAcknowledgment = (id: string) => {
+    setAcknowledgments(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // Auto-fill printed name from booking data (but keep editable)
+  useEffect(() => {
+    if (holdInfo?.customer_name && !printedName) {
+      setPrintedName(holdInfo.customer_name);
+    }
+  }, [holdInfo?.customer_name, printedName]);
 
   // Validate token and load hold info
   const validateToken = useCallback(async () => {
@@ -168,6 +204,14 @@ export default function SigningPage() {
 
   // Handle signature submission
   const handleSign = async () => {
+    if (!allAcknowledged) {
+      setErrorCode('SIGNATURE_REQUIRED');
+      return;
+    }
+    if (!printedName.trim()) {
+      setErrorCode('SIGNATURE_REQUIRED');
+      return;
+    }
     if (!signature) {
       setErrorCode('SIGNATURE_REQUIRED');
       return;
@@ -184,6 +228,8 @@ export default function SigningPage() {
         body: JSON.stringify({
           hold_token: token,
           signature_image: signature,
+          printed_name: printedName.trim(),
+          acknowledgments: acknowledgments,
           signing_method: 'sms_link',
         }),
       });
@@ -351,12 +397,30 @@ export default function SigningPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 px-4 py-8">
       <div className="mx-auto max-w-3xl">
+        {/* Progress Indicator */}
+        <div className="mb-6 flex items-center justify-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white">1</div>
+            <span className="text-sm font-medium text-amber-700">Review</span>
+          </div>
+          <div className="h-0.5 w-8 bg-amber-300" />
+          <div className="flex items-center gap-1">
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${allAcknowledged ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-500'}`}>2</div>
+            <span className={`text-sm font-medium ${allAcknowledged ? 'text-amber-700' : 'text-gray-500'}`}>Acknowledge</span>
+          </div>
+          <div className="h-0.5 w-8 bg-amber-300" />
+          <div className="flex items-center gap-1">
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${canSign ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-500'}`}>3</div>
+            <span className={`text-sm font-medium ${canSign ? 'text-amber-700' : 'text-gray-500'}`}>Sign</span>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="rounded-t-2xl border-b bg-white p-6 shadow-lg">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">My Hibachi Service Agreement</h1>
-              <p className="text-gray-600">Please review and sign to confirm your booking</p>
+              <p className="text-gray-600">Please review, acknowledge, and sign to confirm your booking</p>
             </div>
 
             {/* Countdown Timer */}
@@ -370,17 +434,24 @@ export default function SigningPage() {
         {/* Event Details */}
         {holdInfo && (
           <div className="border-x border-amber-100 bg-amber-50 p-4">
-            <h2 className="mb-2 font-semibold text-amber-900">🎉 Your Event Details</h2>
-            <div className="grid gap-2 text-sm text-amber-800 sm:grid-cols-2">
-              <p>
-                <strong>Date:</strong> {formatEventDate(holdInfo.slot_datetime)}
-              </p>
-              <p>
-                <strong>Location:</strong> {holdInfo.station_name}
-              </p>
-              <p>
-                <strong>Email:</strong> {holdInfo.customer_email}
-              </p>
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-amber-900">🎉 Your Event Details</h2>
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-1 rounded-lg border border-amber-300 bg-white px-3 py-1 text-sm text-amber-700 hover:bg-amber-100"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print
+              </button>
+            </div>
+            <div className="mt-2 grid gap-2 text-sm text-amber-800 sm:grid-cols-2">
+              <p><strong>📅 Date:</strong> {formatEventDate(holdInfo.slot_datetime)}</p>
+              <p><strong>📍 Location:</strong> {holdInfo.venue_address || holdInfo.station_name}</p>
+              <p><strong>📧 Email:</strong> {holdInfo.customer_email}</p>
+              {holdInfo.customer_name && <p><strong>👤 Name:</strong> {holdInfo.customer_name}</p>}
+              {holdInfo.guest_count && <p><strong>👥 Guests:</strong> {holdInfo.guest_count}</p>}
             </div>
           </div>
         )}
@@ -401,6 +472,64 @@ export default function SigningPage() {
 
         {/* Signature Section */}
         <div className="rounded-b-2xl border-t bg-white p-6 shadow-lg">
+          {/* Interactive Acknowledgment Checkboxes */}
+          <div className="mb-6">
+            <h2 className="mb-3 font-semibold text-gray-800">☑️ Acknowledgment Checklist</h2>
+            <p className="mb-4 text-sm text-gray-600">Please check each item to confirm you understand and agree:</p>
+            <div className="space-y-3">
+              {ACKNOWLEDGMENT_ITEMS.map((item) => (
+                <label
+                  key={item.id}
+                  className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${acknowledgments[item.id]
+                      ? 'border-green-300 bg-green-50'
+                      : 'border-gray-200 bg-gray-50 hover:border-amber-300 hover:bg-amber-50'
+                    }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={acknowledgments[item.id]}
+                    onChange={() => toggleAcknowledgment(item.id)}
+                    disabled={isSubmitting}
+                    className="mt-0.5 h-5 w-5 rounded border-gray-300 text-amber-500 focus:ring-amber-500"
+                  />
+                  <span className={`text-sm ${acknowledgments[item.id] ? 'text-green-800' : 'text-gray-700'}`}>
+                    {item.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+            {!allAcknowledged && (
+              <p className="mt-3 text-sm text-amber-600">
+                ⚠️ Please check all {ACKNOWLEDGMENT_ITEMS.length} items above to continue
+              </p>
+            )}
+          </div>
+
+          {/* Printed Name Input */}
+          <div className="mb-6">
+            <label htmlFor="printed-name" className="mb-2 block font-semibold text-gray-800">
+              📝 Your Full Legal Name
+              {holdInfo?.customer_name && (
+                <span className="ml-2 text-xs font-normal text-gray-500">(pre-filled from booking, edit if needed)</span>
+              )}
+            </label>
+            <input
+              type="text"
+              id="printed-name"
+              value={printedName}
+              onChange={(e) => setPrintedName(e.target.value)}
+              disabled={isSubmitting}
+              placeholder={holdInfo?.customer_name ? "Edit name if different" : "Enter your full name as it should appear on the agreement"}
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder-gray-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+              required
+              minLength={2}
+            />
+            {printedName.trim().length > 0 && printedName.trim().length < 2 && (
+              <p className="mt-1 text-sm text-red-500">Please enter at least 2 characters</p>
+            )}
+          </div>
+
+          {/* Signature Pad */}
           <h2 className="mb-4 font-semibold text-gray-800">✍️ Your Signature</h2>
 
           <SignaturePad onSignatureChange={setSignature} disabled={isSubmitting} />
@@ -412,18 +541,23 @@ export default function SigningPage() {
 
           {/* Error message */}
           {errorCode === 'SIGNATURE_REQUIRED' && (
-            <p className="mt-2 text-sm text-red-500">Please provide your signature to continue.</p>
+            <p className="mt-2 text-sm text-red-500">
+              {!allAcknowledged
+                ? 'Please check all acknowledgment items above.'
+                : !printedName.trim()
+                  ? 'Please enter your full legal name.'
+                  : 'Please provide your signature to continue.'}
+            </p>
           )}
 
           {/* Submit Button */}
           <button
             onClick={handleSign}
-            disabled={isSubmitting || !signature}
-            className={`mt-6 w-full rounded-xl px-6 py-4 text-lg font-semibold transition-all ${
-              isSubmitting || !signature
+            disabled={isSubmitting || !canSign}
+            className={`mt-6 w-full rounded-xl px-6 py-4 text-lg font-semibold transition-all ${isSubmitting || !canSign
                 ? 'cursor-not-allowed bg-gray-300 text-gray-500'
                 : 'bg-amber-500 text-white shadow-lg hover:bg-amber-600 hover:shadow-xl'
-            }`}
+              }`}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">

@@ -27,6 +27,18 @@ export default function MenuPage() {
     childFreeUnderAge,
     freeMiles,
     perMileRate,
+    // Premium protein upgrades (SSoT)
+    salmonUpgradePrice,
+    scallopsUpgradePrice,
+    filetMignonUpgradePrice,
+    lobsterTailUpgradePrice,
+    extraProteinPrice,
+    // Addon items (SSoT)
+    yakisobaNoodlesPrice,
+    extraFriedRicePrice,
+    extraVegetablesPrice,
+    edamamePrice,
+    gyozaPrice,
     isLoading: pricingLoading,
   } = usePricing();
 
@@ -38,6 +50,20 @@ export default function MenuPage() {
     pricingLoading || childFreeUnderAge === undefined ? 5 : childFreeUnderAge;
   const displayFreeMiles = pricingLoading || freeMiles === undefined ? '...' : freeMiles;
   const displayPerMileRate = pricingLoading || perMileRate === undefined ? '...' : perMileRate;
+
+  // Upgrade prices (SSoT) - show '...' during loading, default to $5/$10/$15 if undefined
+  const displaySalmonPrice = pricingLoading ? '...' : (salmonUpgradePrice ?? 5);
+  const displayScallopsPrice = pricingLoading ? '...' : (scallopsUpgradePrice ?? 5);
+  const displayFiletPrice = pricingLoading ? '...' : (filetMignonUpgradePrice ?? 5);
+  const displayLobsterPrice = pricingLoading ? '...' : (lobsterTailUpgradePrice ?? 15);
+  const displayExtraProteinPrice = pricingLoading ? '...' : (extraProteinPrice ?? 10);
+
+  // Addon prices (SSoT) - show '...' during loading, default to $5/$10 if undefined
+  const displayYakisobaPrice = pricingLoading ? '...' : (yakisobaNoodlesPrice ?? 5);
+  const displayExtraRicePrice = pricingLoading ? '...' : (extraFriedRicePrice ?? 5);
+  const displayExtraVeggiesPrice = pricingLoading ? '...' : (extraVegetablesPrice ?? 5);
+  const displayEdamamePrice = pricingLoading ? '...' : (edamamePrice ?? 5);
+  const displayGyozaPrice = pricingLoading ? '...' : (gyozaPrice ?? 10);
 
   return (
     <main>
@@ -582,7 +608,7 @@ export default function MenuPage() {
                           </div>
                           <div className="upgrade-price">
                             <div className="price-circle enhanced-price-circle">
-                              <span className="price-tag">+$5</span>
+                              <span className="price-tag">+${displaySalmonPrice}</span>
                               <span className="price-label">per person</span>
                             </div>
                           </div>
@@ -605,7 +631,7 @@ export default function MenuPage() {
                           </div>
                           <div className="upgrade-price">
                             <div className="price-circle enhanced-price-circle">
-                              <span className="price-tag">+$5</span>
+                              <span className="price-tag">+${displayScallopsPrice}</span>
                               <span className="price-label">per person</span>
                             </div>
                           </div>
@@ -628,7 +654,7 @@ export default function MenuPage() {
                           </div>
                           <div className="upgrade-price">
                             <div className="price-circle enhanced-price-circle">
-                              <span className="price-tag">+$5</span>
+                              <span className="price-tag">+${displayFiletPrice}</span>
                               <span className="price-label">per person</span>
                             </div>
                           </div>
@@ -651,7 +677,7 @@ export default function MenuPage() {
                           </div>
                           <div className="upgrade-price">
                             <div className="price-circle enhanced-price-circle">
-                              <span className="price-tag">+$15</span>
+                              <span className="price-tag">+${displayLobsterPrice}</span>
                               <span className="price-label">per person</span>
                             </div>
                           </div>
@@ -708,7 +734,7 @@ export default function MenuPage() {
                     </div>
                     <div className="additional-price">
                       <div className="add-price-circle">
-                        <span className="add-price-tag">+$5</span>
+                        <span className="add-price-tag">+${displayYakisobaPrice}</span>
                       </div>
                     </div>
                   </div>
@@ -723,7 +749,7 @@ export default function MenuPage() {
                     </div>
                     <div className="additional-price">
                       <div className="add-price-circle">
-                        <span className="add-price-tag">+$5</span>
+                        <span className="add-price-tag">+${displayExtraRicePrice}</span>
                       </div>
                     </div>
                   </div>
@@ -740,7 +766,7 @@ export default function MenuPage() {
                     </div>
                     <div className="additional-price">
                       <div className="add-price-circle">
-                        <span className="add-price-tag">+$5</span>
+                        <span className="add-price-tag">+${displayExtraVeggiesPrice}</span>
                       </div>
                     </div>
                   </div>
@@ -755,7 +781,7 @@ export default function MenuPage() {
                     </div>
                     <div className="additional-price">
                       <div className="add-price-circle">
-                        <span className="add-price-tag">+$5</span>
+                        <span className="add-price-tag">+${displayEdamamePrice}</span>
                       </div>
                     </div>
                   </div>
@@ -770,7 +796,7 @@ export default function MenuPage() {
                     </div>
                     <div className="additional-price">
                       <div className="add-price-circle">
-                        <span className="add-price-tag">+$10</span>
+                        <span className="add-price-tag">+${displayGyozaPrice}</span>
                       </div>
                     </div>
                   </div>
@@ -785,7 +811,7 @@ export default function MenuPage() {
                     </div>
                     <div className="additional-price">
                       <div className="add-price-circle">
-                        <span className="add-price-tag">+$10</span>
+                        <span className="add-price-tag">+${displayExtraProteinPrice}</span>
                       </div>
                     </div>
                   </div>

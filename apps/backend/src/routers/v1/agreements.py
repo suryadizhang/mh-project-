@@ -193,6 +193,9 @@ class HoldInfoResponse(BaseModel):
     station_name: str
     slot_datetime: str  # ISO format datetime string
     customer_email: str
+    customer_name: Optional[str] = None  # Customer full name
+    venue_address: Optional[str] = None  # Event venue address
+    guest_count: Optional[int] = None  # Number of guests
     expires_at: str  # ISO format datetime string
     status: str  # 'pending' | 'converted' | 'expired' | 'cancelled'
     agreement_signed: bool
@@ -551,6 +554,9 @@ async def get_hold_status(
             station_name=station_name,
             slot_datetime=slot_datetime_str,
             customer_email=hold["customer_email"],
+            customer_name=hold.get("customer_name"),
+            venue_address=hold.get("venue_address"),  # May not exist in slot_holds
+            guest_count=hold.get("guest_count"),
             expires_at=expires_at_str,
             status=hold["status"],
             agreement_signed=False,  # Not signed yet if they're on this page

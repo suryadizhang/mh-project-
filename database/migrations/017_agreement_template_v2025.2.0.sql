@@ -3,7 +3,7 @@
 -- Description: Add enhanced agreement template with new policy sections
 -- Author: My Hibachi Dev Agent
 -- Date: 2025-02-06
--- 
+--
 -- New Sections Added:
 --   - Weather Policy (Section 5)
 --   - Guest Count Changes (Section 6)
@@ -15,8 +15,8 @@
 -- =====================================================
 
 -- Deactivate old template version
-UPDATE core.agreement_templates 
-SET is_active = FALSE 
+UPDATE core.agreement_templates
+SET is_active = FALSE
 WHERE agreement_type = 'liability_waiver' AND version = '2025.1.0';
 
 -- Insert new template version v2025.2.0
@@ -314,11 +314,7 @@ By signing below, I confirm that:
 
 ---
 
-**Customer Signature:** ___________________________
-
-**Printed Name:** ___________________________
-
-**Date:** {{SIGNATURE_DATE}}
+**Date Signed:** {{SIGNATURE_DATE}}
 
 ---
 

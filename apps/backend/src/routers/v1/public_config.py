@@ -119,6 +119,33 @@ class ContactConfig(BaseModel):
     business_email: str = Field(..., description="Business email address")
 
 
+class UpgradesConfig(BaseModel):
+    """Premium protein upgrade prices (all amounts in cents per person)."""
+
+    salmon_cents: int = Field(..., description="Salmon upgrade price in cents")
+    scallops_cents: int = Field(..., description="Scallops upgrade price in cents")
+    filet_mignon_cents: int = Field(..., description="Filet Mignon upgrade price in cents")
+    lobster_tail_cents: int = Field(..., description="Lobster Tail upgrade price in cents")
+    extra_protein_cents: int = Field(..., description="Extra protein (3rd+) price in cents")
+
+
+class AddonsConfig(BaseModel):
+    """Addon item prices (all amounts in cents per person)."""
+
+    yakisoba_noodles_cents: int = Field(..., description="Yakisoba noodles price in cents")
+    extra_fried_rice_cents: int = Field(..., description="Extra fried rice price in cents")
+    extra_vegetables_cents: int = Field(..., description="Extra vegetables price in cents")
+    edamame_cents: int = Field(..., description="Edamame price in cents")
+    gyoza_cents: int = Field(..., description="Gyoza price in cents")
+
+
+class MenuConfig(BaseModel):
+    """Menu pricing including upgrades and addons."""
+
+    upgrades: UpgradesConfig
+    addons: AddonsConfig
+
+
 class BusinessConfigResponse(BaseModel):
     """
     Complete business configuration response.
@@ -135,6 +162,7 @@ class BusinessConfigResponse(BaseModel):
     service: ServiceConfig
     policy: PolicyConfig
     contact: ContactConfig
+    menu: Optional[MenuConfig] = None
     guest_limits: Optional[GuestLimitsConfig] = None
     source: str = Field(default="api", description="Data source for debugging")
 
@@ -254,6 +282,22 @@ async def get_all_config(
             contact=ContactConfig(
                 business_phone=config.business_phone,
                 business_email=config.business_email,
+            ),
+            menu=MenuConfig(
+                upgrades=UpgradesConfig(
+                    salmon_cents=config.salmon_upgrade_cents,
+                    scallops_cents=config.scallops_upgrade_cents,
+                    filet_mignon_cents=config.filet_mignon_upgrade_cents,
+                    lobster_tail_cents=config.lobster_tail_upgrade_cents,
+                    extra_protein_cents=config.extra_protein_cents,
+                ),
+                addons=AddonsConfig(
+                    yakisoba_noodles_cents=config.yakisoba_noodles_cents,
+                    extra_fried_rice_cents=config.extra_fried_rice_cents,
+                    extra_vegetables_cents=config.extra_vegetables_cents,
+                    edamame_cents=config.edamame_cents,
+                    gyoza_cents=config.gyoza_cents,
+                ),
             ),
             guest_limits=GuestLimitsConfig(
                 minimum=1,

@@ -136,6 +136,12 @@ class AgreementService:
             "CHILD_FREE_AGE": str(config.child_free_under_age),
             "PARTY_MINIMUM": str(config.party_minimum_cents // 100),
             "DEPOSIT_AMOUNT": str(config.deposit_amount_cents // 100),
+            # Policy deadlines
+            "DEPOSIT_REFUNDABLE_DAYS": str(config.deposit_refundable_days),
+            "FREE_RESCHEDULE_HOURS": str(config.free_reschedule_hours),
+            "GUEST_COUNT_FINALIZE_HOURS": str(config.guest_count_finalize_hours),
+            "MENU_CHANGE_CUTOFF_HOURS": str(config.menu_change_cutoff_hours),
+            "RESCHEDULE_FEE": str(config.reschedule_fee_cents // 100),
             # Dates
             "EFFECTIVE_DATE": datetime.now().strftime("%B %d, %Y"),
             "SIGNATURE_DATE": datetime.now().strftime("%B %d, %Y"),

@@ -132,20 +132,23 @@ class QuoteResponse(BaseModel):
 
 
 # ============================================================================
-# UPGRADE AND ADDON PRICING (from menu)
+# UPGRADE AND ADDON PRICING (SSoT)
 # ============================================================================
+# NOTE: These are now fetched from BusinessConfig (dynamic_variables table)
+# The dict structures below are just defaults - actual values come from SSoT
+# See: database/migrations/030_upgrade_addon_prices_ssot.sql
 
-# Upgrade prices (per serving)
-UPGRADE_PRICES = {
-    "salmon": 7.00,  # Premium seafood upgrade
-    "scallops": 9.00,  # Premium seafood upgrade
-    "filet_mignon": 10.00,  # Premium beef upgrade
-    "lobster_tail": 20.00,  # Luxury upgrade
-    "extra_protein": 10.00,  # Add an extra protein (+$10, premium adds upgrade price)
+# Default upgrade prices (per serving) - OVERRIDDEN BY SSOT
+DEFAULT_UPGRADE_PRICES = {
+    "salmon": 5.00,  # $5 premium seafood upgrade
+    "scallops": 5.00,  # $5 premium seafood upgrade
+    "filet_mignon": 5.00,  # $5 premium beef upgrade
+    "lobster_tail": 15.00,  # $15 luxury upgrade
+    "extra_protein": 10.00,  # $10 for additional protein
 }
 
-# Addon prices (per serving)
-ADDON_PRICES = {
+# Default addon prices (per serving) - OVERRIDDEN BY SSOT
+DEFAULT_ADDON_PRICES = {
     "yakisoba_noodles": 5.00,
     "extra_fried_rice": 5.00,
     "extra_vegetables": 5.00,
@@ -167,20 +170,20 @@ ADDON_PRICES = {
     Calculate a hibachi party quote with dynamic pricing from BusinessConfig.
     No authentication required - used by customer website.
 
-    ## Pricing (from BusinessConfig):
+    ## Pricing (from BusinessConfig SSoT):
     - Adult price: $55/person (13+)
     - Child price: $30/person (6-12)
     - Children under 5: FREE
     - Party minimum: $550
 
-    ## Upgrades (per serving):
-    - Salmon: +$7
-    - Scallops: +$9
-    - Filet Mignon: +$10
-    - Lobster Tail: +$20
-    - Extra Protein: +$10 (premium adds upgrade price)
+    ## Upgrades (from BusinessConfig SSoT):
+    - Salmon: +$5
+    - Scallops: +$5
+    - Filet Mignon: +$5
+    - Lobster Tail: +$15
+    - Extra Protein: +$10
 
-    ## Add-ons (per serving):
+    ## Add-ons (from BusinessConfig SSoT):
     - Yakisoba Noodles: +$5
     - Extra Fried Rice: +$5
     - Extra Vegetables: +$5
@@ -229,24 +232,38 @@ async def calculate_quote(
             f"📊 Quote calculation using {config.source} config: adult=${adult_price}, child=${child_price}"
         )
 
+        # Get upgrade prices from SSoT (cents → dollars)
+        salmon_price = config.salmon_upgrade_cents / 100
+        scallops_price = config.scallops_upgrade_cents / 100
+        filet_mignon_price = config.filet_mignon_upgrade_cents / 100
+        lobster_tail_price = config.lobster_tail_upgrade_cents / 100
+        extra_protein_price = config.extra_protein_cents / 100
+
+        # Get addon prices from SSoT (cents → dollars)
+        yakisoba_price = config.yakisoba_noodles_cents / 100
+        extra_rice_price = config.extra_fried_rice_cents / 100
+        extra_veggies_price = config.extra_vegetables_cents / 100
+        edamame_price = config.edamame_cents / 100
+        gyoza_price = config.gyoza_cents / 100
+
         # Calculate base total
         base_total = (request.adults * adult_price) + (request.children * child_price)
 
-        # Calculate upgrade total
+        # Calculate upgrade total (using SSoT prices)
         upgrade_total = 0.0
-        upgrade_total += request.salmon * UPGRADE_PRICES["salmon"]
-        upgrade_total += request.scallops * UPGRADE_PRICES["scallops"]
-        upgrade_total += request.filet_mignon * UPGRADE_PRICES["filet_mignon"]
-        upgrade_total += request.lobster_tail * UPGRADE_PRICES["lobster_tail"]
-        upgrade_total += request.extra_proteins * UPGRADE_PRICES["extra_protein"]
+        upgrade_total += request.salmon * salmon_price
+        upgrade_total += request.scallops * scallops_price
+        upgrade_total += request.filet_mignon * filet_mignon_price
+        upgrade_total += request.lobster_tail * lobster_tail_price
+        upgrade_total += request.extra_proteins * extra_protein_price
 
-        # Calculate addon total
+        # Calculate addon total (using SSoT prices)
         addon_total = 0.0
-        addon_total += request.yakisoba_noodles * ADDON_PRICES["yakisoba_noodles"]
-        addon_total += request.extra_fried_rice * ADDON_PRICES["extra_fried_rice"]
-        addon_total += request.extra_vegetables * ADDON_PRICES["extra_vegetables"]
-        addon_total += request.edamame * ADDON_PRICES["edamame"]
-        addon_total += request.gyoza * ADDON_PRICES["gyoza"]
+        addon_total += request.yakisoba_noodles * yakisoba_price
+        addon_total += request.extra_fried_rice * extra_rice_price
+        addon_total += request.extra_vegetables * extra_veggies_price
+        addon_total += request.edamame * edamame_price
+        addon_total += request.gyoza * gyoza_price
 
         # Calculate subtotal (before minimum and travel)
         subtotal = base_total + upgrade_total + addon_total

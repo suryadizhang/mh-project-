@@ -27,7 +27,8 @@ async function fetchPricingServer(): Promise<PricingValues> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
 
-    const response = await fetch(`${apiUrl}/api/v1/pricing/current`, {
+    // Fetch from config/all to get all pricing including menu upgrades/addons
+    const response = await fetch(`${apiUrl}/api/v1/config/all`, {
       next: { revalidate: 300 }, // Cache for 5 minutes
       signal: controller.signal,
       cache: 'force-cache', // Prefer cached response
@@ -42,18 +43,59 @@ async function fetchPricingServer(): Promise<PricingValues> {
     const data = await response.json();
 
     return {
-      adultPrice: data.base_pricing?.adult_price ?? DEFAULT_PRICING.adultPrice,
-      childPrice: data.base_pricing?.child_price ?? DEFAULT_PRICING.childPrice,
+      adultPrice: data.pricing?.adult_price_cents
+        ? data.pricing.adult_price_cents / 100
+        : DEFAULT_PRICING.adultPrice,
+      childPrice: data.pricing?.child_price_cents
+        ? data.pricing.child_price_cents / 100
+        : DEFAULT_PRICING.childPrice,
       childFreeUnderAge:
-        data.base_pricing?.child_free_under_age ?? DEFAULT_PRICING.childFreeUnderAge,
-      partyMinimum: DEFAULT_PRICING.partyMinimum, // Not in current API
+        data.pricing?.child_free_under_age ?? DEFAULT_PRICING.childFreeUnderAge,
+      partyMinimum: data.pricing?.party_minimum_cents
+        ? data.pricing.party_minimum_cents / 100
+        : DEFAULT_PRICING.partyMinimum,
       freeTravelMiles:
-        data.travel_policy?.free_travel_radius_miles ?? DEFAULT_PRICING.freeTravelMiles,
-      costPerMileAfter: data.travel_policy?.cost_per_mile_after ?? DEFAULT_PRICING.costPerMileAfter,
-      // Deposit & Policy values - using defaults until API extended
-      // TODO: Update when /api/v1/pricing/current includes deposit_amount and deposit_refundable_days
-      depositAmount: DEFAULT_PRICING.depositAmount,
-      depositRefundableDays: DEFAULT_PRICING.depositRefundableDays,
+        data.travel?.free_miles ?? DEFAULT_PRICING.freeTravelMiles,
+      costPerMileAfter: data.travel?.per_mile_cents
+        ? data.travel.per_mile_cents / 100
+        : DEFAULT_PRICING.costPerMileAfter,
+      // Deposit & Policy values
+      depositAmount: data.deposit?.amount_cents
+        ? data.deposit.amount_cents / 100
+        : DEFAULT_PRICING.depositAmount,
+      depositRefundableDays: data.deposit?.refundable_days ?? DEFAULT_PRICING.depositRefundableDays,
+      // Menu upgrade values (SSoT extension)
+      salmonUpgrade: data.menu?.upgrades?.salmon_cents
+        ? data.menu.upgrades.salmon_cents / 100
+        : DEFAULT_PRICING.salmonUpgrade,
+      scallopsUpgrade: data.menu?.upgrades?.scallops_cents
+        ? data.menu.upgrades.scallops_cents / 100
+        : DEFAULT_PRICING.scallopsUpgrade,
+      filetUpgrade: data.menu?.upgrades?.filet_mignon_cents
+        ? data.menu.upgrades.filet_mignon_cents / 100
+        : DEFAULT_PRICING.filetUpgrade,
+      lobsterUpgrade: data.menu?.upgrades?.lobster_tail_cents
+        ? data.menu.upgrades.lobster_tail_cents / 100
+        : DEFAULT_PRICING.lobsterUpgrade,
+      extraProtein: data.menu?.upgrades?.extra_protein_cents
+        ? data.menu.upgrades.extra_protein_cents / 100
+        : DEFAULT_PRICING.extraProtein,
+      // Menu addon values (SSoT extension)
+      yakisobaNoodles: data.menu?.addons?.yakisoba_noodles_cents
+        ? data.menu.addons.yakisoba_noodles_cents / 100
+        : DEFAULT_PRICING.yakisobaNoodles,
+      extraFriedRice: data.menu?.addons?.extra_fried_rice_cents
+        ? data.menu.addons.extra_fried_rice_cents / 100
+        : DEFAULT_PRICING.extraFriedRice,
+      extraVegetables: data.menu?.addons?.extra_vegetables_cents
+        ? data.menu.addons.extra_vegetables_cents / 100
+        : DEFAULT_PRICING.extraVegetables,
+      edamame: data.menu?.addons?.edamame_cents
+        ? data.menu.addons.edamame_cents / 100
+        : DEFAULT_PRICING.edamame,
+      gyoza: data.menu?.addons?.gyoza_cents
+        ? data.menu.addons.gyoza_cents / 100
+        : DEFAULT_PRICING.gyoza,
     };
   } catch {
     // Silently fall back to defaults - this is expected when backend is not running

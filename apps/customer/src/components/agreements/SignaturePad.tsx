@@ -200,9 +200,8 @@ export default function SignaturePad({
       >
         <canvas
           ref={canvasRef}
-          className={`touch-none ${
-            disabled ? 'cursor-not-allowed opacity-50' : 'cursor-crosshair'
-          }`}
+          className={`touch-none ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-crosshair'
+            }`}
           style={{
             width: '100%',
             height: '100%',
@@ -241,11 +240,10 @@ export default function SignaturePad({
           type="button"
           onClick={clearSignature}
           disabled={disabled || !hasSignature}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            disabled || !hasSignature
+          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${disabled || !hasSignature
               ? 'cursor-not-allowed text-gray-400'
               : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-          }`}
+            }`}
         >
           Clear
         </button>
